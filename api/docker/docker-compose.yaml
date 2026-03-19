@@ -1,0 +1,19 @@
+services:
+  static-web-server:
+    image: joseluisq/static-web-server:2-debian
+    container_name: sws
+    restart: unless-stopped
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: npm
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
+volumes:
+  npm_data:
+  npm_letsencrypt:

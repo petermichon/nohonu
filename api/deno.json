@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "strict": true
+  },
+  "imports": {},
+  "lint": {
+    "rules": {
+      "include": [],
+      "exclude": ["no-unused-vars", "no-empty"]
+    }
+  },
+  "permissions": {
+    "default": {
+      "net": true,
+      "read": ["./database/"],
+      "write": ["./database/"]
+    }
+  },
+  "tasks": {
+    "dev": "deno run --unstable-kv -P --no-prompt --watch main.ts",
+    "test": "deno test -P --watch"
+  }
+}
