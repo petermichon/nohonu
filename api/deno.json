@@ -12,13 +12,15 @@
   },
   "permissions": {
     "default": {
+      "env": true,
       "net": true,
-      "read": ["./database/"],
-      "write": ["./database/"]
+      "read": ["./database"],
+      "write": ["./database"],
+      "import": true
     }
   },
   "tasks": {
-    "dev": "deno run --unstable-kv -P --no-prompt --watch main.ts",
+    "dev": "deno run --env-file -P --no-prompt --watch main.ts",
     "test": "deno test -P --watch"
   }
 }

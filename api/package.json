@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "mime": "^4.1.0",
+    "octokit": "^5.0.5",
+    "tldts": "^7.0.27"
+  }
+}
