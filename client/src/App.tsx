@@ -1,22 +1,55 @@
-import { useState } from "react";
-import "./App.css";
+import { useState } from 'react'
+
+// import './App.css'
+
+export function _() {
+  return <></>
+}
 
 export function App() {
-  const [count, setCount] = useState(0);
+  return (
+    <>
+      <div className="w-screen h-screen m-0 overflow-hidden">
+        <Idk test={''}></Idk>
+      </div>
+    </>
+  )
+}
+
+// ---
+
+type Test = { test: string }
+
+export function Idk({ test }: Test) {
+  const [count, setCount] = useState(0)
 
   return (
     <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+      <div className="w-screen h-screen m-0 overflow-hidden">
+        <p className="m-0 p-2 text-center bg-neutral-800">Vite + React</p>
+        <div>
+          <button
+            onClick={() =>
+              setCount((count) => {
+                return count + 1
+              })
+            }
+          >
+            count is {count} {test}
+          </button>
+        </div>
       </div>
     </>
-  );
+  )
 }
 
-type Video = { url: string; title: string; description: string };
+// ---
+
+type Video = {
+  url: string
+  title: string
+  description: string
+}
 
 export function Video(video: Video) {
   return (
@@ -28,5 +61,5 @@ export function Video(video: Video) {
       </a>
       {/* <LikeButton video={video} /> */}
     </div>
-  );
+  )
 }
