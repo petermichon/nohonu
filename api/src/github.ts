@@ -1,7 +1,6 @@
 import { Octokit } from 'octokit'
 
-export async function update(owner: string, repo: string) {
-  const auth = Deno.env.get('GITHUB_API_TOKEN')
+export async function update(owner: string, repo: string, auth: string) {
   const octokitOptions = { auth }
   const octokit = new Octokit(octokitOptions)
 
@@ -20,9 +19,7 @@ export async function update(owner: string, repo: string) {
   const archive_download_url =
     artifactsList.data.artifacts[0].archive_download_url
 
-  let res: any
-
-  res = await octokit.request(archive_download_url, options)
+  const res = await octokit.request(archive_download_url, options)
 
   if (!res.status) {
     console.log(`status : ${res.status}`)

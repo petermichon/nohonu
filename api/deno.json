@@ -20,7 +20,7 @@
     }
   },
   "tasks": {
-    "dev": "deno run --env-file -P --no-prompt --watch main.ts",
+    "dev": "deno run -P --no-prompt --watch main.ts",
     "test": "deno test -P --watch"
   }
 }

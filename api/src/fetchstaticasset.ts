@@ -1,17 +1,13 @@
 // deno-lint-ignore no-import-prefix
 import { readZip } from 'https://deno.land/x/jszip/mod.ts'
 
-export async function fetchStaticAsset(
-  zipPath: string,
-  newPath: string
-): Promise<string> {
-  const path = zipPath
-  const zip = await readZip(path)
+export async function fetchAsset(zipP: string, path: string): Promise<string> {
+  const zip = await readZip(zipP)
   for (const entry of zip) {
     // console.log(entry.name)
   }
 
-  const blob = zip.file(newPath)
+  const blob = zip.file(path)
   if (!blob) {
     // const status = 404
     // const init = { status }
@@ -19,5 +15,6 @@ export async function fetchStaticAsset(
     // return response
   }
   const content = await blob.async('string')
+  // const content = ''
   return content
 }
