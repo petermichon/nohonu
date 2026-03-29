@@ -1,13 +1,9 @@
 import { createRoot } from 'react-dom/client'
 import { StrictMode } from 'react'
 
-import './index.css'
-
 import { App } from './App.tsx'
 
 export function main() {
-  get('index.html')
-
   const rootElement = document.getElementById('root')!
 
   const root = createRoot(rootElement)
@@ -21,7 +17,7 @@ export function main() {
   root.render(children)
 }
 
-async function get(file: string) {
+async function get(file: string): Promise<void> {
   // https://www.dropbox.com/scl/fo/hn1sewiyb2vb0z4rmlbuq/AK6nOnEyNYHPVFm6wfFaI0k?rlkey=plzfhmduqdfb24qmmzhqtfpfy&st=3oq5c0rn&dl=0
 
   // const path = 'hn1sewiyb2vb0z4rmlbuq/AK6nOnEyNYHPVFm6wfFaI0k'

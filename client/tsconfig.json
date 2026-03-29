@@ -1,7 +1,40 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    /* Base */
+    // "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    // "allowJs": true,
+    // "resolveJsonModule": true,
+    // "moduleDetection": "force",
+    // "isolatedModules": true,
+    // "verbatimModuleSyntax": true,
+    // ---
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    // ---
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUnusedParameters": true,
+    // ---
+    "checkJs": true,
+    "forceConsistentCasingInFileNames": true,
+    // ---
+    "erasableSyntaxOnly": true,
+    "noUncheckedSideEffectImports": true
+
+    /* DOM */
+    // "lib": ["es2022", "dom", "dom.iterable"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
 }
