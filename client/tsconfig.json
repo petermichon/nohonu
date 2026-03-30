@@ -30,7 +30,10 @@
     "forceConsistentCasingInFileNames": true,
     // ---
     "erasableSyntaxOnly": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "module": "preserve",
+    "noEmit": true
 
     /* DOM */
     // "lib": ["es2022", "dom", "dom.iterable"]
