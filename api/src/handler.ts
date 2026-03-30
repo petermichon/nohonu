@@ -13,6 +13,8 @@ export async function handler(req: Request): Promise<Response> {
 
   const method = req.method
 
+  console.log(method, pathname)
+
   if (subdomains === null || subdomains === '') {
     if (!pathname.startsWith('/api/') && method === 'GET') {
       // landing page / web app
@@ -80,7 +82,14 @@ export async function handler(req: Request): Promise<Response> {
       const zipPath = `./database/${subdomains}.zip`
 
       const contentType = getMimeType(newPath)
-      const body = await fetchAsset(zipPath, newPath)
+
+      let body: string
+      try {
+        body = await fetchAsset(zipPath, newPath)
+      } catch (e: unknown) {
+        throw e
+      }
+
       const status = 200
       const response = newResponse({ contentType, body, status })
       return response
@@ -89,6 +98,9 @@ export async function handler(req: Request): Promise<Response> {
 
   // ---
 
-  const response = new Response()
+  const status = 404
+  const contentType = 'text/plain'
+  const body = 'Not Found'
+  const response = newResponse({ contentType, body, status })
   return response
 }

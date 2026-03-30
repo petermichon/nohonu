@@ -6,7 +6,10 @@ type Resp = {
 
 export function newResponse(resp: Resp): Response {
   const response = new Response(resp.body, {
-    headers: { 'content-type': resp.contentType },
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'content-type': resp.contentType,
+    },
     status: resp.status,
   })
   return response
