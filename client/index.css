@@ -11,49 +11,18 @@ body {
   /* overflow: hidden; */
 }
 
-/* .m-0 {
-  margin: 0;
+.scrollbar-neutral-950 {
+  scrollbar-color: oklch(70.8% 0 0) oklch(14.5% 0 0);
 }
 
-.flex {
-  display: flex;
+.scrollbar-neutral-800 {
+  scrollbar-color: oklch(55.6% 0 0) oklch(26.9% 0 0);
 }
 
-.text-neutral-50 {
-  color: oklch(98.5% 0 0);
+.scrollbar-invisible {
+  scrollbar-width: none;
+  /* -ms-overflow-style: none; */ /* IE/Edge ? */
 }
-
-.bg-neutral-800 {
-  background-color: oklch(26.9% 0 0);
-}
-
-.w-full {
-  width: 100%;
-}
-
-.h-full {
-  height: 100%;
-}
-
-.w-screen {
-  width: 100vw;
-}
-
-.h-screen {
-  height: 100vh;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.p-2 {
-  padding: 10px 50px 20px;
-}
-
-.overflow-hidden {
-  overflow: hidden;
-} */
 
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
