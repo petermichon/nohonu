@@ -11,10 +11,20 @@ export function Topbar({}: {}) {
       <div className="flex-1">
         <></>
       </div>
-      <div className="flex m-1.5 flex-row">
-        <div className="h-full mx-0.5 aspect-square rounded-full bg-neutral-500 hover:bg-neutral-800 active:bg-neutral-700 cursor-pointer">
-          <></>
-        </div>
+      <Circle />
+      <Circle />
+      <Circle />
+      <Circle />
+      <Circle />
+    </div>
+  )
+}
+
+function Circle() {
+  return (
+    <div className="flex m-2 flex-row">
+      <div className="h-full aspect-square rounded-full bg-neutral-500 hover:bg-neutral-800 active:bg-neutral-700 cursor-pointer">
+        <></>
       </div>
     </div>
   )
