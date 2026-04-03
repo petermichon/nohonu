@@ -8,7 +8,14 @@ export function App() {
       <Topbar />
       <div className="flex flex-row flex-1 overflow-hidden bg-neutral-950">
         <Leftbar />
-        <Deployments />
+        <div className="w-4"></div>
+        <div className="flex flex-col w-full h-full">
+          <>
+            <div className="h-4"></div>
+            <Deployments />
+            <div className="h-4"></div>
+          </>
+        </div>
         <div className="w-4"></div>
       </div>
     </div>

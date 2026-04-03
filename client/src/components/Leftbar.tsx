@@ -2,7 +2,7 @@ import { NavSection } from './NavSection'
 
 export function Leftbar() {
   return (
-    <div className="h-full w-64 bg-neutral-950 flex flex-col overflow-y-auto">
+    <div className="h-full shrink-0 w-60 bg-neutral-950 flex flex-col overflow-y-auto">
       {/* <div className="h-14 my-2 mb-4 rounded-2xl ml-2"></div> */}
       <div className="h-9 rounded-md mx-2 outline outline-1 outline-neutral-800"></div>
       <NavSection />
