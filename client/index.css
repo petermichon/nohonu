@@ -4,46 +4,20 @@
 
 body {
   margin: 0;
-  /* display: flex; */
-  /* font-family: system-ui, Avenir, Helvetica, Arial, sans-serif; */
-  /* color: oklch(98.5% 0 0); */
-  /* background-color: oklch(26.9% 0 0); */
-  /* overflow: hidden; */
 }
 
 .scrollbar-neutral-950 {
-  scrollbar-color: oklch(70.8% 0 0) oklch(14.5% 0 0);
+  scrollbar-color: oklch(55.6% 0 0) oklch(14.5% 0 0);
 }
 
-.scrollbar-neutral-800 {
-  scrollbar-color: oklch(55.6% 0 0) oklch(26.9% 0 0);
+.scrollbar-neutral-900 {
+  scrollbar-color: oklch(43.9% 0 0) oklch(20.5% 0 0);
 }
+
+/* .scrollbar-neutral-800 {
+  scrollbar-color: oklch(55.6% 0 0) oklch(26.9% 0 0);
+} */
 
 .scrollbar-invisible {
   scrollbar-width: none;
-  /* -ms-overflow-style: none; */ /* IE/Edge ? */
 }
-
-/* :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-} */
-
-/* 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-} */

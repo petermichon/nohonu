@@ -25,7 +25,7 @@ type NavProps = {
 function Nav(nav: NavProps) {
   return (
     <a
-      className="h-9 cursor-pointer hover:bg-neutral-900 active:bg-neutral-800 rounded-md flex flex-row items-center text-neutral-400 hover:text-neutral-100"
+      className="h-9 cursor-pointer hover:bg-neutral-900 rounded-md flex flex-row items-center text-neutral-400 hover:text-neutral-100"
       // href=""
     >
       <div className="w-0.5"></div>
