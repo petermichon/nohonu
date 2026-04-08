@@ -1,6 +1,6 @@
 export function ListBody() {
   return (
-    <div className="flex-1 flex flex-col overflow-y-scroll bg-neutral-900">
+    <div className="flex-1 flex flex-col overflow-y-scroll bg-neutral-900 truncate">
       <DeploymentRow name="Veodee" domain="veodee.com" />
       <DeploymentRow name="My Portfolio" domain="portfolio.nohonu.com" />
       <DeploymentRow name="This Is An Example" domain="example.com" />

@@ -4,11 +4,14 @@ import { Box, CloudUpload, Globe, User, Theme } from './nav-icons'
 
 export function NavSection() {
   return (
-    <div className="flex flex-col px-2 gap-px mt-2">
+    <div className="flex flex-col px-2 gap-px mt-2 overflow-auto">
       <Nav name="Deployments" logo={<Box />} />
       <Nav name="Uploads" logo={<CloudUpload />} />
-      <Nav name="Domain Names" logo={<Globe />} />
-      <div className="h-px bg-neutral-800" />
+      <Nav name="Domains" logo={<Globe />} />
+      <div className="my-1 shrink-0">
+        <div className="h-px bg-neutral-800 shrink-0" />
+      </div>
+
       <Nav name="Account" logo={<User />} />
       <Nav name="Themes" logo={<Theme />} />
       {/* <Nav name="Plus" logo={<Box />} /> */}
@@ -25,7 +28,7 @@ type NavProps = {
 function Nav(nav: NavProps) {
   return (
     <a
-      className="h-9 cursor-pointer hover:bg-neutral-900 rounded-md flex flex-row items-center text-neutral-400 hover:text-neutral-100"
+      className="shrink-0 h-9 cursor-pointer hover:bg-neutral-900 rounded-md flex flex-row items-center text-neutral-400 hover:text-neutral-100"
       // href=""
     >
       <div className="w-0.5"></div>

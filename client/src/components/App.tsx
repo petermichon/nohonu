@@ -1,4 +1,4 @@
-import { Deployments } from './Deployments'
+import { Content } from './Content'
 import { Leftbar } from './Leftbar'
 import { Topbar } from './Topbar'
 
@@ -9,13 +9,7 @@ export function App() {
       <div className="flex flex-row flex-1 overflow-hidden bg-neutral-950">
         <Leftbar />
         <div className="w-4"></div>
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <>
-            <div className="h-4"></div>
-            <Deployments />
-            <div className="h-4"></div>
-          </>
-        </div>
+        <Content />
         <div className="w-4"></div>
       </div>
     </div>
