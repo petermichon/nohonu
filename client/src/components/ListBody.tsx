@@ -1,11 +1,12 @@
 export function ListBody() {
   return (
-    <div className="flex-1 flex flex-col overflow-y-scroll bg-neutral-900 truncate">
+    <div className="flex-1 flex flex-col overflow-y-scroll bg-neutral-900 ">
       <DeploymentRow name="Veodee" domain="veodee.com" />
       <DeploymentRow name="My Portfolio" domain="portfolio.nohonu.com" />
       <DeploymentRow name="This Is An Example" domain="example.com" />
       <DeploymentRow name="" domain="" />
       <DeploymentRow name="" domain="" />
+      <div className="h-4 shrink-0" />
       <div className="flex-1" />
     </div>
   )
@@ -18,7 +19,7 @@ type DeploymentRowProps = {
 
 function DeploymentRow(deployment: DeploymentRowProps) {
   return (
-    <div className="px-1.5 h-10 shrink-0 flex flex-row border-neutral-700 border-solid border-b-[1px] hover:bg-neutral-800">
+    <div className="px-1.5 h-10 shrink-0 flex flex-row border-neutral-700 border-solid border-b-[1px] hover:bg-neutral-800 truncate">
       <div className="aspect-square flex items-center justify-center">
         <div className="p-3 rounded-full aspect-square cursor-pointer hover:bg-neutral-700">
           <div className="rounded-sm p-[7px] aspect-square bg-neutral-600" />

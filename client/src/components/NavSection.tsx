@@ -4,14 +4,13 @@ import { Box, CloudUpload, Globe, User, Theme } from './nav-icons'
 
 export function NavSection() {
   return (
-    <div className="flex flex-col px-2 gap-px mt-2 overflow-auto">
+    <div className="flex flex-col px-2 gap-px mt-2 overflow-y-scroll">
       <Nav name="Deployments" logo={<Box />} />
       <Nav name="Uploads" logo={<CloudUpload />} />
       <Nav name="Domains" logo={<Globe />} />
       <div className="my-1 shrink-0">
         <div className="h-px bg-neutral-800 shrink-0" />
       </div>
-
       <Nav name="Account" logo={<User />} />
       <Nav name="Themes" logo={<Theme />} />
       {/* <Nav name="Plus" logo={<Box />} /> */}
