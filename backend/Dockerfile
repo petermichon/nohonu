@@ -1,5 +1,7 @@
 FROM denoland/deno:2.3.3
 
+RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY deno.json deno.lock main.ts ./
