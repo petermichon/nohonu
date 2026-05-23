@@ -3,11 +3,14 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 import { ThemeProvider } from './lib/ThemeProvider';
+import { ConnectionProvider } from './lib/ConnectionProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <ConnectionProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </ConnectionProvider>
   </StrictMode>
 );

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Plus, Upload, X, FileArchive, GitBranch, Loader2, AlertCircle, Globe } from 'lucide-react';
-import { API_BASE, API_HOST } from '../lib/api';
+import { useApi } from '../lib/api';
 
 type UploadMode = 'file' | 'github';
 
@@ -10,6 +10,7 @@ interface InlineDeployFormProps {
 }
 
 export function InlineDeployForm({ onDeploy, mode = 'compact' }: InlineDeployFormProps) {
+  const { apiFetch, host } = useApi();
   const [isOpen, setIsOpen] = useState(false);
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
   const [newDomain, setNewDomain] = useState('');
@@ -63,7 +64,7 @@ export function InlineDeployForm({ onDeploy, mode = 'compact' }: InlineDeployFor
     formData.append('domain', newDomain);
     formData.append('zip', selectedFile);
     try {
-      const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
+      const res = await apiFetch('/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         reset();
@@ -86,7 +87,7 @@ export function InlineDeployForm({ onDeploy, mode = 'compact' }: InlineDeployFor
     setUploading(true);
     setUploadError(null);
     try {
-      const res = await fetch(`${API_BASE}/fetch-github`, {
+      const res = await apiFetch('/fetch-github', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: newDomain, repo: githubRepo, branch: githubBranch || 'main' }),
@@ -186,7 +187,7 @@ export function InlineDeployForm({ onDeploy, mode = 'compact' }: InlineDeployFor
               autoFocus
             />
           </div>
-          <span className="text-stone-400 dark:text-stone-500 text-xs shrink-0">.{API_HOST}</span>
+          <span className="text-stone-400 dark:text-stone-500 text-xs shrink-0">.{host}</span>
         </div>
 
         {/* File upload or GitHub inputs */}

@@ -1,0 +1,7 @@
+petermichon.fr {
+	reverse_proxy backend:8080
+}
+
+*.petermichon.fr {
+	reverse_proxy backend:8080
+}

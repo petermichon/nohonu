@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Power, Loader2, Eye, Activity } from 'lucide-react';
-import { API_BASE, API_PROTOCOL, API_HOST } from '../lib/api';
+import { useApi } from '../lib/api';
 import { getAccentStyle, formatHits } from '../lib/utils';
 import type { Site } from '../lib/types';
 
@@ -13,8 +13,9 @@ interface SiteCardProps {
 }
 
 export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCardProps) {
+  const { apiBase, host, protocol } = useApi();
   const isLoading = loading === site.domain;
-  const siteUrl = `${site.domain}.${API_HOST}`;
+  const siteUrl = `${site.domain}.${host}`;
   const navigate = useNavigate();
   const initial = site.domain[0].toUpperCase();
   const [iconError, setIconError] = useState(false);
@@ -59,7 +60,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
         }`}>
           {!iconError ? (
             <img
-              src={`${API_BASE}/sites/${site.domain}/icon`}
+              src={`${apiBase}/sites/${site.domain}/icon`}
               alt=""
               className="w-5 h-5 object-contain"
               onError={() => setIconError(true)}
@@ -89,7 +90,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
             </span>
           </div>
           <a
-            href={`${API_PROTOCOL}//${siteUrl}`}
+            href={`${protocol}//${siteUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => !site.enabled && e.preventDefault()}
@@ -142,7 +143,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
           <a
-            href={`${API_PROTOCOL}//${siteUrl}`}
+            href={`${protocol}//${siteUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => !site.enabled && e.preventDefault()}
@@ -203,7 +204,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
           }`}>
             {!iconError ? (
               <img
-                src={`${API_BASE}/sites/${site.domain}/icon`}
+                src={`${apiBase}/sites/${site.domain}/icon`}
                 alt=""
                 className="w-7 h-7 object-contain"
                 onError={() => setIconError(true)}
@@ -235,7 +236,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
 
         {/* URL */}
         <a
-          href={`${API_PROTOCOL}//${siteUrl}`}
+          href={`${protocol}//${siteUrl}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => !site.enabled && e.preventDefault()}
@@ -292,7 +293,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
       {/* Footer actions */}
       <div className="mt-auto flex items-center justify-between px-5 py-4 border-t border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/30">
         <a
-          href={`${API_PROTOCOL}//${siteUrl}`}
+          href={`${protocol}//${siteUrl}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => !site.enabled && e.preventDefault()}

@@ -47,6 +47,12 @@ Mounts `./backend` into the container — any save to `main.ts` restarts the ser
 
 **Requirements on the VPS:** Docker with the Compose plugin, Git.
 
+The stack runs Caddy as a reverse proxy in front of the Deno backend. Caddy handles HTTPS automatically. The backend is not exposed to the internet directly.
+
+```
+Internet → :443 (Caddy) → backend:8080 (internal Docker network)
+```
+
 ### 1. Create a deploy key
 
 On your local machine:
@@ -61,7 +67,13 @@ GitHub → Settings → Deploy keys → Add deploy key (read-only is enough).
 Copy the **private key** to the VPS:
 
 ```bash
-ssh-copy-id -i ~/.ssh/nohonu_deploy user@your-vps   # or scp it manually
+scp ~/.ssh/nohonu_deploy user@your-vps:~/.ssh/nohonu_deploy
+```
+
+Then on the VPS set permissions:
+
+```bash
+chmod 600 ~/.ssh/nohonu_deploy
 ```
 
 On the VPS, add to `~/.ssh/config`:
@@ -76,9 +88,51 @@ Host github.com
 
 ```bash
 ssh user@your-vps
+```
+
+Test the deploy key works:
+
+```bash
+ssh -T git@github.com
+# Hi your-user! You've successfully authenticated...
+```
+
+Create the directory and clone (do **not** use `sudo` for the clone — it must run as your user so the deploy key is picked up):
+
+```bash
+sudo mkdir -p /opt/nohonu
+sudo chown $USER:$USER /opt/nohonu
 git clone git@github.com:your-user/nohonu-vibe.git /opt/nohonu
 cd /opt/nohonu
-docker compose up --build -d
+```
+
+Create your `.env` file with a strong random secret:
+
+```bash
+echo "API_KEY=$(openssl rand -hex 32)" > .env
+```
+
+Edit `Caddyfile` to set your domain (already set to `petermichon.fr`). Make sure your domain's DNS A record points to the VPS IP.
+
+Start everything:
+
+```bash
+sudo docker compose up --build -d
+```
+
+Open ports 80 and 443, block direct backend access:
+
+```bash
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw deny 8080
+```
+
+Verify:
+
+```bash
+curl https://petermichon.fr/health
+# {"status":"healthy"}
 ```
 
 ### 3. Redeploy after changes
@@ -87,7 +141,7 @@ docker compose up --build -d
 ssh user@your-vps
 cd /opt/nohonu
 git pull
-docker compose up --build -d
+sudo docker compose up --build -d
 ```
 
 Site data in the `sites_data` volume is untouched by redeployments.

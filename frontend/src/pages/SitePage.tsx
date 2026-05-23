@@ -20,7 +20,7 @@ import {
   Download,
 } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal';
-import { API_BASE, API_PROTOCOL, API_HOST } from '../lib/api';
+import { useApi } from '../lib/api';
 import { usePollData } from '../lib/usePollData';
 import { useClickOutside } from '../lib/useClickOutside';
 import { relativeTime, calcUptimePct, getAccentStyle } from '../lib/utils';
@@ -320,6 +320,7 @@ function VersionList({ versions, currentVersion, activating, deletingVersion, on
 
 function SitePage() {
   const { domain } = useParams<{ domain: string }>();
+  const { apiFetch, apiBase, host, protocol } = useApi();
   const navigate = useNavigate();
   const [site, setSite] = useState<Site | null>(null);
   const [loading, setLoading] = useState(true);
@@ -352,7 +353,7 @@ function SitePage() {
 
   const loadSite = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/sites/${domain}`);
+      const res = await apiFetch(`/sites/${domain}`);
       if (!res.ok) { setNotFound(true); return; }
       const data = await res.json();
       setSite(data as Site);
@@ -366,7 +367,7 @@ function SitePage() {
   const loadStats = useCallback(async () => {
     setStatsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/sites/${domain}/stats?slots=${statsRange}`);
+      const res = await apiFetch(`/sites/${domain}/stats?slots=${statsRange}`);
       const data = await res.json();
       setStats((data.stats as Slot[]) ?? []);
     } catch {
@@ -378,7 +379,7 @@ function SitePage() {
 
   const loadVisitors = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/sites/${domain}/visitors`);
+      const res = await apiFetch(`/sites/${domain}/visitors`);
       const data = await res.json();
       setVisitors((data.visitors as Visitor[]) ?? []);
     } catch {
@@ -389,7 +390,7 @@ function SitePage() {
   const loadVersions = useCallback(async () => {
     setVersionsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/sites/${domain}/versions`);
+      const res = await apiFetch(`/sites/${domain}/versions`);
       const data = await res.json();
       setVersions((data.versions as Version[]) ?? []);
       setCurrentVersion(data.current as number | null);
@@ -402,7 +403,7 @@ function SitePage() {
 
   const loadRepoHistory = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/sites/${domain}/repos`);
+      const res = await apiFetch(`/sites/${domain}/repos`);
       const data = await res.json();
       setRepoHistory((data.history as { repo: string; branch: string; lastUsed: number }[]) ?? []);
     } catch {
@@ -412,7 +413,7 @@ function SitePage() {
 
   const loadMeta = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/sites/${domain}/meta`);
+      const res = await apiFetch(`/sites/${domain}/meta`);
       const data = await res.json();
       setAccent(typeof data.accent === 'string' ? data.accent : null);
     } catch {
@@ -423,7 +424,7 @@ function SitePage() {
   const saveAccent = async (color: string | null) => {
     setAccent(color);
     try {
-      await fetch(`${API_BASE}/sites/${domain}/meta`, {
+      await apiFetch(`/sites/${domain}/meta`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accent: color }),
@@ -435,7 +436,7 @@ function SitePage() {
 
   const loadUptime = useCallback(async (slots: number) => {
     try {
-      const res = await fetch(`${API_BASE}/sites/${domain}/uptime?slots=${slots}`);
+      const res = await apiFetch(`/sites/${domain}/uptime?slots=${slots}`);
       const data = await res.json();
       setUptimeData((data.uptime as UptimeSlot[]) ?? []);
     } catch {
@@ -460,11 +461,11 @@ function SitePage() {
 
     try {
       if (confirmAction === 'delete') {
-        await fetch(`${API_BASE}/sites/${site.domain}`, { method: 'DELETE' });
+        await apiFetch(`/sites/${site.domain}`, { method: 'DELETE' });
         navigate('/');
         return;
       }
-      await fetch(`${API_BASE}/sites/${site.domain}/toggle`, { method: 'PATCH' });
+      await apiFetch(`/sites/${site.domain}/toggle`, { method: 'PATCH' });
       await loadSite();
     } catch {
       // Silent fail
@@ -485,7 +486,7 @@ function SitePage() {
     formData.append('domain', site.domain);
     formData.append('zip', file);
     try {
-      const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
+      const res = await apiFetch('/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         await loadSite();
@@ -509,7 +510,7 @@ function SitePage() {
     setUploading(true);
     setUploadError(null);
     try {
-      const res = await fetch(`${API_BASE}/fetch-github`, {
+      const res = await apiFetch('/fetch-github', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: site.domain, repo: githubRepo, branch: githubBranch || 'main' }),
@@ -536,7 +537,7 @@ function SitePage() {
     setVersionModal(null);
     setActivating(timestamp);
     try {
-      const res = await fetch(`${API_BASE}/sites/${site.domain}/versions/${timestamp}/activate`, { method: 'POST' });
+      const res = await apiFetch(`/sites/${site.domain}/versions/${timestamp}/activate`, { method: 'POST' });
       if (res.ok) {
         await loadSite();
         await loadVersions();
@@ -552,7 +553,7 @@ function SitePage() {
     if (!site || !versionModal) return;
     setDeletingVersion(versionModal.timestamp);
     try {
-      const res = await fetch(`${API_BASE}/sites/${site.domain}/versions/${versionModal.timestamp}`, { method: 'DELETE' });
+      const res = await apiFetch(`/sites/${site.domain}/versions/${versionModal.timestamp}`, { method: 'DELETE' });
       if (res.ok) await loadVersions();
     } catch {
       // Silent fail
@@ -564,7 +565,7 @@ function SitePage() {
 
   const downloadVersion = async (timestamp: number) => {
     if (!site) return;
-    const res = await fetch(`${API_BASE}/sites/${site.domain}/versions/${timestamp}/download`);
+    const res = await apiFetch(`/sites/${site.domain}/versions/${timestamp}/download`);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -576,7 +577,7 @@ function SitePage() {
     URL.revokeObjectURL(url);
   };
 
-  const siteUrl = `${API_PROTOCOL}//${site?.domain}.${API_HOST}`;
+  const siteUrl = `${protocol}//${site?.domain}.${host}`;
 
   if (loading) {
     return (
@@ -625,7 +626,7 @@ function SitePage() {
             }`}>
               {!iconError ? (
                 <img
-                  src={`${API_BASE}/sites/${site.domain}/icon`}
+                  src={`${apiBase}/sites/${site.domain}/icon`}
                   alt=""
                   className="w-6 h-6 object-contain"
                   onError={() => setIconError(true)}
@@ -664,7 +665,7 @@ function SitePage() {
                       : 'text-stone-300 dark:text-stone-600 pointer-events-none'
                   }`}
                 >
-                  {site.domain}.{API_HOST}
+                  {site.domain}.{host}
                   {site.enabled && <ExternalLink className="w-3 h-3" />}
                 </a>
                 {totalHits > 0 && (

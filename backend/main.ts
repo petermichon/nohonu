@@ -201,8 +201,16 @@ function getTotalHits(domain: string): number {
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key',
 };
+
+const API_KEY = Deno.env.get('API_KEY');
+
+function requireAuth(req: Request): Response | null {
+  if (!API_KEY) return null;
+  if (req.headers.get('X-Api-Key') === API_KEY) return null;
+  return error('Unauthorized', 401);
+}
 
 const json = (data: unknown, status = 200) =>
   Response.json(data, { status, headers: CORS });
@@ -598,6 +606,17 @@ async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Respo
 
   const url = new URL(req.url);
   const path = url.pathname;
+
+  const isApiRoute =
+    path === '/sites' ||
+    path === '/upload' ||
+    path === '/fetch-github' ||
+    (path.startsWith('/sites/') && req.method !== 'GET') ||
+    (path.startsWith('/sites/') && req.method === 'GET' && !/\/(icon|download)$/.test(path) && !/\/versions\/\d+\/download$/.test(path));
+  if (isApiRoute) {
+    const authError = requireAuth(req);
+    if (authError) return authError;
+  }
 
   // API routes
   if (path === '/health') return json({ status: 'healthy' });

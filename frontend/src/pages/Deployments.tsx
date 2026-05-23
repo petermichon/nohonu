@@ -3,12 +3,13 @@ import { Loader2, Plus, AlertCircle, Upload, X, FileArchive, Globe, Search, GitB
 import { SiteCard } from '../components/SiteCard';
 import { ConfirmModal } from '../lib/ConfirmModal';
 import { Modal } from '../lib/Modal';
-import { API_BASE, API_HOST } from '../lib/api';
+import { useApi } from '../lib/api';
 import type { Site } from '../lib/types';
 
 type UploadMode = 'file' | 'github';
 
 function Deployments() {
+  const { apiFetch, host } = useApi();
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -30,7 +31,7 @@ function Deployments() {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`${API_BASE}/sites`);
+      const res = await apiFetch('/sites');
       const data = await res.json();
       setSites(data.sites || []);
     } catch {
@@ -48,7 +49,7 @@ function Deployments() {
     setToggling(domain);
     setConfirmToggle(null);
     try {
-      await fetch(`${API_BASE}/sites/${domain}/toggle`, { method: 'PATCH' });
+      await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
       await loadSites();
     } catch {
       // Silent fail
@@ -65,7 +66,7 @@ function Deployments() {
     formData.append('domain', newDomain);
     formData.append('zip', selectedFile);
     try {
-      const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
+      const res = await apiFetch('/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         resetUpload();
@@ -102,7 +103,7 @@ function Deployments() {
     setUploading(true);
     setUploadError(null);
     try {
-      const res = await fetch(`${API_BASE}/fetch-github`, {
+      const res = await apiFetch('/fetch-github', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: newDomain, repo: githubRepo, branch: githubBranch || 'main' }),
@@ -273,7 +274,7 @@ function Deployments() {
                 autoFocus
               />
             </div>
-            <span className="text-stone-400 dark:text-stone-500 text-xs shrink-0">.{API_HOST}</span>
+            <span className="text-stone-400 dark:text-stone-500 text-xs shrink-0">.{host}</span>
           </div>
 
           {uploadMode === 'github' ? (

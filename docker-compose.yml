@@ -1,21 +1,38 @@
 services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal
+    restart: unless-stopped
+    depends_on:
+      - backend
+
   backend:
     build:
       context: ./backend
-    ports:
-      - "8080:8080"
     environment:
       PORT: "8080"
       SITES_DIR: /data/sites
+      API_KEY: ${API_KEY:?API_KEY is required}
     volumes:
       - sites_data:/data/sites
+    networks:
+      - internal
     restart: unless-stopped
 
   backend-dev:
     build:
       context: ./backend
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       PORT: "8080"
       SITES_DIR: /data/sites
@@ -25,5 +42,10 @@ services:
     command: ["deno", "run", "--watch", "--allow-net", "--allow-env", "--allow-read", "--allow-write=/data/sites", "--allow-run=unzip", "--no-prompt", "main.ts"]
     profiles: ["dev"]
 
+networks:
+  internal:
+
 volumes:
   sites_data:
+  caddy_data:
+  caddy_config:

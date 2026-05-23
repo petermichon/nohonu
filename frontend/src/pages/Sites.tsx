@@ -3,10 +3,11 @@ import { Loader2, AlertCircle, Search, LayoutGrid, Rows3 } from 'lucide-react';
 import { SiteCard } from '../components/SiteCard';
 import { InlineDeployForm } from '../components/InlineDeployForm';
 import { ConfirmModal } from '../lib/ConfirmModal';
-import { API_BASE } from '../lib/api';
+import { useApi } from '../lib/api';
 import type { Site } from '../lib/types';
 
 function Sites() {
+  const { apiFetch } = useApi();
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -19,7 +20,7 @@ function Sites() {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`${API_BASE}/sites`);
+      const res = await apiFetch('/sites');
       const data = await res.json();
       setSites(data.sites || []);
     } catch {
@@ -37,7 +38,7 @@ function Sites() {
     setToggling(domain);
     setConfirmToggle(null);
     try {
-      await fetch(`${API_BASE}/sites/${domain}/toggle`, { method: 'PATCH' });
+      await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
       await loadSites();
     } catch {
       // Silent fail
