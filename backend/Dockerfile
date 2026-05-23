@@ -1,7 +1,5 @@
 FROM denoland/deno:2.3.3
 
-RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
 COPY deno.json deno.lock main.ts ./
@@ -15,4 +13,4 @@ VOLUME ["/data/sites"]
 
 EXPOSE 8080
 
-CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write=/data/sites", "--allow-run=unzip", "--no-prompt", "main.ts"]
+CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write=/data/sites", "--no-prompt", "main.ts"]

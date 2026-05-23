@@ -1,3 +1,4 @@
+import { unzipSync } from 'fflate';
 const SITES_DIR = Deno.env.get('SITES_DIR') || './sites';
 const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 
@@ -274,18 +275,19 @@ async function extractSite(domain: string): Promise<boolean> {
 
   try {
     await Deno.mkdir(siteDir, { recursive: true });
-    const { success, stderr } = await new Deno.Command('unzip', {
-      args: ['-o', '-q', zipPath, '-d', siteDir],
-      stderr: 'piped',
-    }).output();
-    if (!success) {
-      console.error('Unzip failed:', new TextDecoder().decode(stderr));
-      await Deno.remove(siteDir, { recursive: true }).catch(() => {});
-      return false;
+    const zipData = await Deno.readFile(zipPath);
+    const files = unzipSync(zipData);
+    for (const [relativePath, data] of Object.entries(files)) {
+      if (relativePath.endsWith('/')) continue;
+      const outPath = `${siteDir}/${relativePath}`;
+      const dir = outPath.substring(0, outPath.lastIndexOf('/'));
+      await Deno.mkdir(dir, { recursive: true });
+      await Deno.writeFile(outPath, data as Uint8Array);
     }
     return true;
   } catch (err) {
     console.error('Extraction error:', err);
+    await Deno.remove(siteDir, { recursive: true }).catch(() => {});
     return false;
   }
 }
