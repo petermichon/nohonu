@@ -3,9 +3,7 @@
     "lib": ["deno.window"],
     "strict": true
   },
-  "imports": {
-    "fflate": "npm:fflate@0.8.2"
-  },
+  "imports": {},
   "tasks": {
     "dev": "deno run --watch --allow-net --allow-env --allow-read=. --allow-write=. --allow-run --no-prompt main.ts",
     "start": "deno run --allow-net --allow-env --allow-read=. --allow-write=. --allow-run --no-prompt main.ts"
