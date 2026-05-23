@@ -1,0 +1,40 @@
+{
+  "name": "Veodee - Watch YouTube videos",
+  "short_name": "Veodee",
+  "description": "Watch YouTube videos",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display_override": ["window-controls-overlay"],
+  "display": "fullscreen",
+  "orientation": "any",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "640x320",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Wonder Widgets"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "320x640",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Wonder Widgets"
+    }
+  ]
+}

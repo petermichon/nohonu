@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      SITES_DIR: /data/sites
+    volumes:
+      - sites_data:/data/sites
+    restart: unless-stopped
+
+  backend-dev:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      SITES_DIR: /data/sites
+    volumes:
+      - ./backend:/app
+      - sites_data:/data/sites
+    command: ["deno", "run", "--watch", "--allow-net", "--allow-env", "--allow-read", "--allow-write=/data/sites", "--allow-run=unzip", "--no-prompt", "main.ts"]
+    profiles: ["dev"]
+
+volumes:
+  sites_data:
