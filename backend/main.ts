@@ -272,6 +272,7 @@ async function extractSite(domain: string): Promise<boolean> {
   const zipPath = getCurrentVersionPath(domain, true);
 
   if (await Deno.stat(siteDir).then(() => true).catch(() => false)) return true;
+  if (!await Deno.stat(zipPath).then(() => true).catch(() => false)) return false;
 
   try {
     await Deno.mkdir(siteDir, { recursive: true });
@@ -337,17 +338,20 @@ async function handleGetIcon(domain: string) {
   const zipPath = await resolveZipPath(domain);
   if (!zipPath) return error('Site not found', 404);
 
-  for (const { name, type } of FAVICON_CANDIDATES) {
-    const result = await new Deno.Command('unzip', {
-      args: ['-p', zipPath, name],
-      stdout: 'piped',
-      stderr: 'null',
-    }).output();
-    if (result.success && result.stdout.length > 0) {
-      return new Response(result.stdout, {
-        headers: { ...CORS, 'Content-Type': type, 'Cache-Control': 'public, max-age=300' },
-      });
+  try {
+    const zipData = await Deno.readFile(zipPath);
+    const files = unzipSync(zipData);
+    for (const { name, type } of FAVICON_CANDIDATES) {
+      const data = files[name];
+      if (data && data.length > 0) {
+        return new Response(new Uint8Array(data), {
+          headers: { ...CORS, 'Content-Type': type, 'Cache-Control': 'public, max-age=300' },
+        });
+      }
     }
+  } catch (err) {
+    console.error('Icon extraction error:', err);
+    return error('Failed to read zip', 500);
   }
   return new Response(null, { status: 404, headers: CORS });
 }
