@@ -626,6 +626,20 @@ async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Respo
 
   // API routes
   if (path === '/health') return json({ status: 'healthy' });
+  if (path === '/check-domain' && req.method === 'GET') {
+    const domain = url.searchParams.get('domain') ?? '';
+    const host = domain.replace(/\.petermichon\.fr$/, '');
+    if (!validateDomain(host)) return new Response(null, { status: 404 });
+    let exists = false;
+    try {
+      for await (const entry of Deno.readDir(SITES_DIR)) {
+        if (entry.name.startsWith(`${host}@`) && entry.name.endsWith('.zip')) {
+          exists = true; break;
+        }
+      }
+    } catch { /* dir missing */ }
+    return new Response(null, { status: exists ? 200 : 404 });
+  }
   if (path === '/sites' && req.method === 'GET') return handleListSites();
 
   // Site-specific routes
