@@ -94,7 +94,7 @@ function UptimeChart({ uptime, range, onRangeChange, accent }: { uptime: UptimeS
                     ? isHovered ? (accent ? '' : 'bg-purple-400 dark:bg-purple-300') : (accent ? '' : 'bg-purple-300 dark:bg-purple-400')
                     : isHovered ? 'bg-stone-400 dark:bg-stone-500' : 'bg-stone-300 dark:bg-stone-600'
                 }`}
-                style={s.up ? { backgroundColor: isHovered ? accent : `${accent}cc` || undefined } : undefined}
+                style={s.up && accent ? { backgroundColor: isHovered ? accent : `${accent}cc` } : undefined}
               />
             </div>
           );
@@ -338,7 +338,7 @@ function SitePage() {
   const [currentVersion, setCurrentVersion] = useState<number | null>(null);
   const [activating, setActivating] = useState<number | null>(null);
   const [deletingVersion, setDeletingVersion] = useState<number | null>(null);
-  const [versionModal, setVersionModal] = useState<{ type: 'delete' | 'download' | 'activate'; timestamp: number; label: string } | null>(null);
+  const [versionModal, setVersionModal] = useState<{ type: 'delete' | 'activate'; timestamp: number; label: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [iconError, setIconError] = useState(false);
@@ -449,8 +449,10 @@ function SitePage() {
     loadSite();
     loadVersions();
     loadMeta();
-    loadUptime(uptimeRange);
-  }, [loadSite, loadVersions, loadMeta, loadUptime, uptimeRange]);
+  }, [loadSite, loadVersions, loadMeta]);
+
+  // Load/reload uptime when range changes
+  useEffect(() => { loadUptime(uptimeRange); }, [loadUptime, uptimeRange]);
 
   // Poll stats and visitors every minute
   usePollData(() => { loadStats(); loadVisitors(); loadUptime(uptimeRange); }, SLOT_MS, true);
@@ -735,7 +737,7 @@ function SitePage() {
       <UptimeChart
         uptime={uptimeData}
         range={uptimeRange}
-        onRangeChange={(r) => { setUptimeRange(r); }}
+        onRangeChange={setUptimeRange}
         accent={accent}
       />
 

@@ -1,0 +1,36 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+    environment:
+      PORT: "8080"
+      SITES_DIR: /data/sites
+      API_KEY: ${API_KEY:-}
+    volumes:
+      - sites_data:/data/sites
+    networks:
+      - app
+    restart: unless-stopped
+
+networks:
+  app:
+
+volumes:
+  sites_data:
+  caddy_data:
+  caddy_config:

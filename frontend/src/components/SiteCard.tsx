@@ -31,33 +31,35 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
           ? null
           : 'bg-purple-400';
 
+  const cardClass = site.enabled
+    ? 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-sm dark:hover:shadow-stone-900/50'
+    : 'bg-stone-50/70 dark:bg-stone-900/40 border-stone-200/60 dark:border-stone-800/40';
+
+  const iconBgClass = site.enabled
+    ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
+    : 'bg-stone-100 dark:bg-stone-800/60 text-stone-400 dark:text-stone-600';
+
+  const handleCardClick = (e: { target: EventTarget | null }) => {
+    if (!(e.target as HTMLElement).closest('button, a')) navigate(`/sites/${site.domain}`);
+  };
+
+  const uptimeBarStyle = uptimeBarColor === null && accentStyle ? { backgroundColor: accentStyle.color } : undefined;
+
   // COMPACT MODE - horizontal row layout
   if (mode === 'compact') {
     return (
       <div
-        onClick={(e) => {
-          if (!(e.target as HTMLElement).closest('button, a')) {
-            navigate(`/sites/${site.domain}`);
-          }
-        }}
-        className={`group flex items-center gap-4 px-4 py-3 rounded-xl border transition-all duration-150 cursor-pointer ${
-          site.enabled
-            ? 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-sm dark:hover:shadow-stone-900/50'
-            : 'bg-stone-50/70 dark:bg-stone-900/40 border-stone-200/60 dark:border-stone-800/40'
-        }`}
+        onClick={handleCardClick}
+        className={`group flex items-center gap-4 px-4 py-3 rounded-xl border transition-all duration-150 cursor-pointer ${cardClass}`}
       >
         {/* Accent strip */}
         <div
           className={`shrink-0 w-1 self-stretch rounded-full ${uptimeBarColor ?? ''}`}
-          style={uptimeBarColor === null && accentStyle ? { backgroundColor: accentStyle.color } : undefined}
+          style={uptimeBarStyle}
         />
 
         {/* Favicon */}
-        <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold select-none overflow-hidden ${
-          site.enabled
-            ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
-            : 'bg-stone-100 dark:bg-stone-800/60 text-stone-400 dark:text-stone-600'
-        }`}>
+        <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold select-none overflow-hidden ${iconBgClass}`}>
           {!iconError ? (
             <img
               src={`${apiBase}/sites/${site.domain}/icon`}
@@ -130,10 +132,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
               <div className="w-16 h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${uptimeBarColor ?? ''}`}
-                  style={{
-                    width: `${uptimePercent}%`,
-                    backgroundColor: uptimeBarColor === null && accentStyle ? accentStyle.color : undefined
-                  }}
+                  style={{ width: `${uptimePercent}%`, ...uptimeBarStyle }}
                 />
               </div>
             </div>
@@ -182,26 +181,14 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
   // NORMAL MODE - taller card with more content
   return (
     <div
-      onClick={(e) => {
-        if (!(e.target as HTMLElement).closest('button, a')) {
-          navigate(`/sites/${site.domain}`);
-        }
-      }}
-      className={`group flex flex-col rounded-xl border transition-all duration-150 cursor-pointer overflow-hidden ${
-        site.enabled
-          ? 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-sm dark:hover:shadow-stone-900/50'
-          : 'bg-stone-50/70 dark:bg-stone-900/40 border-stone-200/60 dark:border-stone-800/40'
-      }`}
+      onClick={handleCardClick}
+      className={`group flex flex-col rounded-xl border transition-all duration-150 cursor-pointer overflow-hidden ${cardClass}`}
     >
       {/* Top section */}
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
           {/* Favicon - larger */}
-          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold select-none overflow-hidden ${
-            site.enabled
-              ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
-              : 'bg-stone-100 dark:bg-stone-800/60 text-stone-400 dark:text-stone-600'
-          }`}>
+          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold select-none overflow-hidden ${iconBgClass}`}>
             {!iconError ? (
               <img
                 src={`${apiBase}/sites/${site.domain}/icon`}
@@ -281,10 +268,7 @@ export function SiteCard({ site, onToggle, loading, mode = 'compact' }: SiteCard
           <div className="h-2 w-full bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full ${uptimeBarColor ?? ''}`}
-              style={{
-                width: `${uptimePercent}%`,
-                backgroundColor: uptimeBarColor === null && accentStyle ? accentStyle.color : undefined
-              }}
+              style={{ width: `${uptimePercent}%`, ...uptimeBarStyle }}
             />
           </div>
         </div>

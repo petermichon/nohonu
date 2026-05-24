@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { SLOT_MS } from './types';
 import { getNextMinuteMs } from './utils';
 
@@ -10,24 +10,24 @@ export function usePollData(
   const fetchRef = useRef(fetchFn);
   fetchRef.current = fetchFn;
 
-  const poll = useCallback(() => {
-    fetchRef.current();
-  }, []);
-
   useEffect(() => {
+    const poll = () => fetchRef.current();
     poll();
 
     if (alignToMinute && intervalMs === SLOT_MS) {
+      let interval: ReturnType<typeof setInterval> | undefined;
       const msToNext = getNextMinuteMs();
       const timeout = setTimeout(() => {
         poll();
-        const interval = setInterval(poll, intervalMs);
-        return () => clearInterval(interval);
+        interval = setInterval(poll, intervalMs);
       }, msToNext);
-      return () => clearTimeout(timeout);
+      return () => {
+        clearTimeout(timeout);
+        clearInterval(interval);
+      };
     }
 
     const interval = setInterval(poll, intervalMs);
     return () => clearInterval(interval);
-  }, [poll, intervalMs, alignToMinute]);
+  }, [intervalMs, alignToMinute]);
 }

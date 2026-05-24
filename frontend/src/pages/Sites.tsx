@@ -10,7 +10,7 @@ function Sites() {
   const { apiFetch } = useApi();
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<false | 'connection' | 'unauthorized'>(false);
   const [toggling, setToggling] = useState<string | null>(null);
   const [confirmToggle, setConfirmToggle] = useState<{ domain: string; enabled: boolean } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,10 +21,11 @@ function Sites() {
     setError(false);
     try {
       const res = await apiFetch('/sites');
+      if (res.status === 401) { setError('unauthorized'); return; }
       const data = await res.json();
       setSites(data.sites || []);
     } catch {
-      setError(true);
+      setError('connection');
     } finally {
       setLoading(false);
     }
@@ -56,10 +57,10 @@ function Sites() {
     );
   }, [sites, searchQuery]);
 
-  const stats = useMemo(() => ({
-    enabled: sites.filter(s => s.enabled).length,
-    disabled: sites.filter(s => !s.enabled).length,
-  }), [sites]);
+  const stats = useMemo(() => sites.reduce(
+    (acc, s) => { s.enabled ? acc.enabled++ : acc.disabled++; return acc; },
+    { enabled: 0, disabled: 0 }
+  ), [sites]);
 
   return (
     <section className="mb-12">
@@ -135,8 +136,17 @@ function Sites() {
           <div className="w-12 h-12 bg-purple-200 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
             <AlertCircle className="w-6 h-6 text-purple-500 dark:text-purple-400" />
           </div>
-          <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
-          <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
+          {error === 'unauthorized' ? (
+            <>
+              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Invalid API key</p>
+              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Update your API key in connection settings</p>
+            </>
+          ) : (
+            <>
+              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
+              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
+            </>
+          )}
         </div>
       ) : sites.length === 0 ? (
         <div className="max-w-md mx-auto">

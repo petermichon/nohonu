@@ -2,14 +2,12 @@ FROM denoland/deno:2.3.3
 
 WORKDIR /app
 
-COPY deno.json deno.lock main.ts ./
+COPY deno.json deno.lock main.ts zip.ts ./
 
 RUN deno cache --frozen main.ts
 
 ENV PORT=8080
 ENV SITES_DIR=/data/sites
-
-VOLUME ["/data/sites"]
 
 EXPOSE 8080
 
