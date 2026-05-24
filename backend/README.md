@@ -72,7 +72,8 @@ The zip is extracted on first access. Only HTML requests are tracked for stats.
 |-------------|---------------|------------------------------------------------|
 | `PORT`      | `8080`        | Server port                                    |
 | `SITES_DIR` | `./sites`     | Path for storing site zips and extracted files |
-| `API_KEY`   | *(none)*      | Secret key for API authentication            |
+| `API_KEY`   | *(none)*      | Secret key for API authentication              |
+| `DOMAIN`    | `localhost`   | Domain for HTTPS certificates (Caddy)          |
 
 ## Deploying to a VPS
 
@@ -137,15 +138,27 @@ git clone git@github.com:your-user/nohonu-vibe.git /opt/nohonu
 cd /opt/nohonu/backend
 ```
 
-Create your `.env` file with a strong random secret:
+Create your `.env` file with a strong random secret and your domain:
 
 ```bash
 echo "API_KEY=$(openssl rand -hex 32)" > .env
+echo "DOMAIN=example.com" >> .env
 ```
 
-Edit `Caddyfile` and replace `your-domain.com` with your actual domain. Make sure your domain's DNS A record points to the VPS IP. Wildcard subdomains (`*.your-domain.com`) should also point to the VPS for multi-tenant site serving.
+Make sure your domain's DNS A record points to the VPS IP. Wildcard subdomains (`*.example.com`) should also point to the VPS for multi-tenant site serving.
 
 ```bash
+sudo docker compose up --build -d
+```
+
+**Note:** `sudo` does not preserve environment variables by default. If you prefer to pass `DOMAIN` inline instead of using a `.env` file, use one of these approaches:
+
+```bash
+# Option 1: Use sudo -E to preserve environment
+DOMAIN=example.com sudo -E docker compose up --build -d
+
+# Option 2: Export first, then run
+export DOMAIN=example.com
 sudo docker compose up --build -d
 ```
 
@@ -159,7 +172,7 @@ sudo ufw allow 443
 Verify:
 
 ```bash
-curl https://your-domain.com/health
+curl https://example.com/health
 # {"status":"healthy"}
 ```
 

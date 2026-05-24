@@ -1,12 +1,8 @@
-# Static site hosting with automatic HTTPS
-# Set DOMAIN in .env or pass as env var (defaults to localhost for local dev)
-
-{$DOMAIN:localhost} {
+petermichon.fr {
 	reverse_proxy backend:8080
 }
 
-# Wildcard subdomains for multi-tenant sites
-*.{$DOMAIN:localhost} {
+*.petermichon.fr {
 	reverse_proxy backend:8080
 }
 
