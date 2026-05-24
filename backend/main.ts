@@ -23,6 +23,8 @@ function getMetaPath(domain: string): string {
   return `${SITES_DIR}/${domain}.meta.json`;
 }
 
+const fileExists = (path: string) => Deno.stat(path).then(() => true).catch(() => false);
+
 type SiteMeta = { accent?: string };
 
 const VALID_ACCENT = /^#[0-9a-fA-F]{6}$/;
@@ -258,13 +260,12 @@ async function handlePatchMeta(domain: string, req: Request) {
   return json({ success: true, domain, ...current });
 }
 
-
 async function extractSite(domain: string): Promise<boolean> {
   const siteDir = `${SITES_DIR}/${domain}`;
   const zipPath = getCurrentVersionPath(domain, true);
 
-  if (await Deno.stat(siteDir).then(() => true).catch(() => false)) return true;
-  if (!await Deno.stat(zipPath).then(() => true).catch(() => false)) return false;
+  if (await fileExists(siteDir)) return true;
+  if (!await fileExists(zipPath)) return false;
 
   try {
     await Deno.mkdir(siteDir, { recursive: true });
@@ -352,9 +353,9 @@ async function handleListSites() {
 
 async function resolveZipPath(domain: string): Promise<string | null> {
   const enabled = getCurrentVersionPath(domain, true);
-  if (await Deno.stat(enabled).then(() => true).catch(() => false)) return enabled;
+  if (await fileExists(enabled)) return enabled;
   const disabled = getCurrentVersionPath(domain, false);
-  if (await Deno.stat(disabled).then(() => true).catch(() => false)) return disabled;
+  if (await fileExists(disabled)) return disabled;
   return null;
 }
 
@@ -493,20 +494,16 @@ async function handleListVersions(domain: string) {
   return json({ domain, versions, current });
 }
 
-async function archiveCurrentVersions(domain: string) {
-  for (const enabled of [true, false]) {
-    const path = getCurrentVersionPath(domain, enabled);
-    const stat = await Deno.stat(path).catch(() => null);
-    if (stat) await Deno.rename(path, getVersionPath(domain, stat.mtime?.getTime() ?? Date.now()));
-  }
-}
-
 async function handleActivate(domain: string, timestamp: number) {
   if (!validateDomain(domain)) return error('Invalid domain');
   const targetPath = getVersionPath(domain, timestamp);
   try { await Deno.stat(targetPath); } catch { return error('Version not found', 404); }
 
-  await archiveCurrentVersions(domain);
+  for (const enabled of [true, false]) {
+    const path = getCurrentVersionPath(domain, enabled);
+    const stat = await Deno.stat(path).catch(() => null);
+    if (stat) await Deno.rename(path, getVersionPath(domain, stat.mtime?.getTime() ?? Date.now()));
+  }
   await Deno.rename(targetPath, getCurrentVersionPath(domain, true));
   await Deno.remove(`${SITES_DIR}/${domain}`, { recursive: true }).catch(() => {});
 
@@ -541,13 +538,13 @@ async function handleToggleSite(domain: string) {
   const enabledPath = getCurrentVersionPath(domain, true);
   const disabledPath = getCurrentVersionPath(domain, false);
 
-  if (await Deno.stat(enabledPath).then(() => true).catch(() => false)) {
+  if (await fileExists(enabledPath)) {
     await Deno.rename(enabledPath, disabledPath);
     await Deno.remove(`${SITES_DIR}/${domain}`, { recursive: true }).catch(() => {});
     return json({ success: true, domain, enabled: false });
   }
 
-  if (await Deno.stat(disabledPath).then(() => true).catch(() => false)) {
+  if (await fileExists(disabledPath)) {
     await Deno.rename(disabledPath, enabledPath);
     return json({ success: true, domain, enabled: true });
   }
