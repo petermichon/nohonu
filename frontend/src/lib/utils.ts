@@ -22,7 +22,7 @@ export function calcUptimePct(uptimeData: { up: boolean | null }[]): number | nu
 
 export function getAccentStyle(accent: string | null | undefined, enabled: boolean): { bg: string; color: string } | null {
   if (!enabled || !accent) return null;
-  return { bg: `${accent}22`, color: accent };
+  return { bg: `${accent}22`, color: accent }; // 22 = ~13% alpha in hex
 }
 
 export function getNextMinuteMs(): number {

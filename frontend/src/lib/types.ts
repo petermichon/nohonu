@@ -1,6 +1,4 @@
 export const SLOT_MS = 60 * 1000;
-export const STATS_SLOTS = 60;
-export const UPTIME_SLOTS = 1440;
 
 export interface Site {
   domain: string;
@@ -36,9 +34,3 @@ export interface UptimeSlot {
 
 export type TimeRange = 15 | 60;
 export type UptimeRange = 60 | 720 | 1440;
-
-export interface RepoEntry {
-  repo: string;
-  branch: string;
-  lastUsed: number;
-}
