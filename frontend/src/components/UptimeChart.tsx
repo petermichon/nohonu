@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { SLOT_MS } from '../lib/types';
 import type { UptimeSlot, UptimeRange } from '../lib/types';
-import { getAccentStyle } from '../lib/utils';
+import { getAccentStyle, calcUptimePct } from '../lib/utils';
 
 interface UptimeChartProps {
   uptime: UptimeSlot[];
@@ -12,9 +12,7 @@ interface UptimeChartProps {
 
 export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChartProps) {
   const [hovered, setHovered] = useState<UptimeSlot | null>(null);
-  const checked = uptime.filter(s => s.up !== null);
-  const upCount = checked.filter(s => s.up).length;
-  const pct = checked.length === 0 ? null : Math.round((upCount / checked.length) * 100);
+  const pct = calcUptimePct(uptime);
   const accentStyle = getAccentStyle(accent, true);
 
   return (

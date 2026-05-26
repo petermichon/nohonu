@@ -31,26 +31,19 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5">
-            <button
-              onClick={() => onRangeChange(15)}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
-                range === 15
-                  ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
-                  : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
-              }`}
-            >
-              15m
-            </button>
-            <button
-              onClick={() => onRangeChange(60)}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
-                range === 60
-                  ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
-                  : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
-              }`}
-            >
-              60m
-            </button>
+            {([15, 60] as TimeRange[]).map((r) => (
+              <button
+                key={r}
+                onClick={() => onRangeChange(r)}
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                  range === r
+                    ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
+                    : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
+                }`}
+              >
+                {r}m
+              </button>
+            ))}
           </div>
           <button
             onClick={onReload}

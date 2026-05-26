@@ -6,10 +6,9 @@ type UploadMode = 'file' | 'github';
 
 interface InlineDeployFormProps {
   onDeploy: () => void;
-  mode?: 'normal' | 'compact';
 }
 
-export function InlineDeployForm({ onDeploy, mode = 'compact' }: InlineDeployFormProps) {
+export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const { apiFetch, host } = useApi();
   const [isOpen, setIsOpen] = useState(false);
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
@@ -106,37 +105,20 @@ export function InlineDeployForm({ onDeploy, mode = 'compact' }: InlineDeployFor
     }
   };
 
-  // Closed state - the add card (matches SiteCard dimensions)
   if (!isOpen) {
-    if (mode === 'compact') {
-      // Compact: horizontal row matching SiteCard compact (px-4 py-3, flex items-center)
-      return (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-all cursor-pointer h-[58px]"
-        >
-          <Plus className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-          <span className="text-sm font-medium text-stone-600 dark:text-stone-400">Deploy site</span>
-        </button>
-      );
-    }
-    // Normal: vertical card matching SiteCard normal (~210px min height with p-5 + footer)
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-all cursor-pointer min-h-[210px]"
+        className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-all cursor-pointer h-[58px]"
       >
-        <div className="w-14 h-14 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-          <Plus className="w-6 h-6 text-stone-500 dark:text-stone-400" />
-        </div>
+        <Plus className="w-4 h-4 text-stone-500 dark:text-stone-400" />
         <span className="text-sm font-medium text-stone-600 dark:text-stone-400">Deploy site</span>
       </button>
     );
   }
 
-  // Open state - expanded form (col-span-full in both modes)
   return (
-    <div className="col-span-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5">
+    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Deploy New Site</h3>
         <button

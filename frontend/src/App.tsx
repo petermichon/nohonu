@@ -12,38 +12,20 @@ function App() {
   return (
     <Router>
       <div className="h-screen flex flex-col bg-stone-50 dark:bg-stone-950">
-        {/* Desktop Top Navigation */}
-        <nav className="hidden sm:flex border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shrink-0 z-50">
-          <div className="px-6 w-full">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
+        {/* Top Navigation */}
+        <nav className="border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shrink-0 z-50">
+          <div className="px-3 sm:px-6">
+            <div className="flex items-center justify-between h-14 sm:h-16">
+              <div className="flex items-center gap-3 sm:gap-6">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Logo />
-                  <span className="text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
+                  <span className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
                     Nohonu
                   </span>
                 </div>
                 <DesktopNavigation />
               </div>
               <div className="flex items-center gap-1">
-                <SettingsPopover />
-                <ThemeToggle />
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        {/* Mobile Top Bar - Logo and theme toggle */}
-        <nav className="sm:hidden border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shrink-0 z-50">
-          <div className="px-3">
-            <div className="flex items-center h-14 gap-3">
-              <div className="flex items-center gap-2">
-                <Logo />
-                <span className="text-base font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
-                  Nohonu
-                </span>
-              </div>
-              <div className="ml-auto flex items-center gap-1">
                 <SettingsPopover />
                 <ThemeToggle />
               </div>

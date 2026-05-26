@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, AlertCircle, Search, LayoutGrid, Rows3 } from 'lucide-react';
+import { Loader2, AlertCircle, Search } from 'lucide-react';
 import { SiteCard } from '../components/SiteCard';
 import { InlineDeployForm } from '../components/InlineDeployForm';
 import { ConfirmModal } from '../lib/ConfirmModal';
@@ -14,7 +14,6 @@ function Sites() {
   const [toggling, setToggling] = useState<string | null>(null);
   const [confirmToggle, setConfirmToggle] = useState<{ domain: string; enabled: boolean } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'normal' | 'compact'>('normal');
 
   const loadSites = async () => {
     setLoading(true);
@@ -86,42 +85,16 @@ function Sites() {
 
         <div className="flex items-center gap-2">
           {!loading && !error && sites.length > 0 && (
-            <>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter..."
-                  className="w-32 sm:w-40 pl-8 pr-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600 transition-colors"
-                />
-              </div>
-              <div className="flex items-center bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5">
-                <button
-                  onClick={() => setViewMode('normal')}
-                  className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                    viewMode === 'normal'
-                      ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
-                      : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
-                  }`}
-                  title="Normal view"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('compact')}
-                  className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                    viewMode === 'compact'
-                      ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
-                      : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
-                  }`}
-                  title="Compact view"
-                >
-                  <Rows3 className="w-4 h-4" />
-                </button>
-              </div>
-            </>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter..."
+                className="w-32 sm:w-40 pl-8 pr-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600 transition-colors"
+              />
+            </div>
           )}
         </div>
       </div>
@@ -150,25 +123,23 @@ function Sites() {
         </div>
       ) : sites.length === 0 ? (
         <div className="max-w-md mx-auto">
-          <InlineDeployForm onDeploy={loadSites} mode="normal" />
+          <InlineDeployForm onDeploy={loadSites} />
         </div>
       ) : (
         <>
-          {/* Both modes use single column - cards take full width, different styling */}
           <div className="flex flex-col gap-3">
             {/* Site cards */}
             {filteredSites.map((site) => (
               <SiteCard
                 key={site.domain}
                 site={site}
-                mode={viewMode}
                 onToggle={(d) => setConfirmToggle({ domain: d, enabled: sites.find(s => s.domain === d)?.enabled ?? false })}
                 loading={toggling}
               />
             ))}
 
             {/* Deploy form card - at the end */}
-            <InlineDeployForm onDeploy={loadSites} mode={viewMode} />
+            <InlineDeployForm onDeploy={loadSites} />
           </div>
 
           {/* Empty state for search */}
