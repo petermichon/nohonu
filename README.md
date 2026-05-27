@@ -19,7 +19,7 @@ nohonu-vibe/
 cd backend && deno task dev
 
 # Terminal 2 — frontend
-cd frontend && npm install && npm run dev
+cd frontend && npm ci && npm run dev
 ```
 
 Frontend: http://localhost:5173  
