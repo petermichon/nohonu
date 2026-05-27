@@ -48,7 +48,9 @@ export function VersionPanel({
       const res = await apiFetch(`/sites/${domain}/repos`);
       const data = await res.json();
       setRepoHistory((data.history as { repo: string; branch: string; lastUsed: number }[]) ?? []);
-    } catch { /* non-critical */ }
+    } catch {
+      /* non-critical */
+    }
   };
 
   const handleUpload = async (file: File) => {
@@ -59,13 +61,15 @@ export function VersionPanel({
     setUploading(true);
     setUploadError(null);
     const formData = new FormData();
-    formData.append('domain', domain);
     formData.append('zip', file);
     try {
-      const res = await apiFetch('/upload', { method: 'POST', body: formData });
+      const res = await apiFetch(`/sites/${domain}/versions`, { method: 'POST', body: formData });
       const data = await res.json();
-      if (data.success) { onUploaded(); }
-      else { setUploadError(data.error || 'Upload failed'); }
+      if (data.success) {
+        onUploaded();
+      } else {
+        setUploadError(data.error || 'Upload failed');
+      }
     } catch {
       setUploadError('Upload failed');
     } finally {
@@ -81,10 +85,10 @@ export function VersionPanel({
     setUploading(true);
     setUploadError(null);
     try {
-      const res = await apiFetch('/fetch-github', {
+      const res = await apiFetch(`/sites/${domain}/versions/github`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain, repo: githubRepo, branch: githubBranch || 'main' }),
+        body: JSON.stringify({ repo: githubRepo, branch: githubBranch || 'main' }),
       });
       const data = await res.json();
       if (data.success) {
@@ -108,7 +112,10 @@ export function VersionPanel({
         <h2 className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
           Versions
           {versions.length > 0 && (
-            <span className="flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"><History className="w-3 h-3" />{versions.length} versions</span>
+            <span className="flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400">
+              <History className="w-3 h-3" />
+              {versions.length} versions
+            </span>
           )}
         </h2>
         <div className="flex items-center gap-2">
@@ -128,14 +135,26 @@ export function VersionPanel({
             <GitBranch className="w-3.5 h-3.5" />
             {showGithubFetch ? 'Cancel' : 'From GitHub'}
           </button>
-          <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-            uploading
-              ? 'text-stone-400 dark:text-stone-500'
-              : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
-          }`}>
+          <label
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+              uploading
+                ? 'text-stone-400 dark:text-stone-500'
+                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+            }`}
+          >
             {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
             {uploading ? 'Uploading...' : 'Upload New'}
-            <input type="file" accept=".zip" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ''; }} disabled={uploading} className="hidden" />
+            <input
+              type="file"
+              accept=".zip"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleUpload(f);
+                e.target.value = '';
+              }}
+              disabled={uploading}
+              className="hidden"
+            />
           </label>
         </div>
       </div>
@@ -171,9 +190,7 @@ export function VersionPanel({
                         {entry.repo}
                         <span className="text-stone-400 dark:text-stone-500 ml-2">@{entry.branch}</span>
                       </span>
-                      <span className="text-xs text-stone-400">
-                        {new Date(entry.lastUsed).toLocaleDateString()}
-                      </span>
+                      <span className="text-xs text-stone-400">{new Date(entry.lastUsed).toLocaleDateString()}</span>
                     </button>
                   ))}
                 </div>

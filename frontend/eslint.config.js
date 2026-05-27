@@ -18,5 +18,12 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'error',
+      'max-len': [
+        'error',
+        { code: 120, ignoreUrls: true, ignoreStrings: true },
+      ],
+    },
   },
 ]);

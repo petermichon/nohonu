@@ -1,5 +1,14 @@
 {
   "version": "5",
+  "specifiers": {
+    "npm:prettier@*": "3.8.3"
+  },
+  "npm": {
+    "prettier@3.8.3": {
+      "integrity": "sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==",
+      "bin": true
+    }
+  },
   "redirects": {
     "https://deno.land/std/media_types/mod.ts": "https://deno.land/std@0.224.0/media_types/mod.ts"
   },

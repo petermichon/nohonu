@@ -118,6 +118,12 @@ function Sites() {
             <>
               <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
               <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
+              <button
+                onClick={loadSites}
+                className="mt-3 px-3 py-1.5 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-lg hover:bg-stone-700 dark:hover:bg-stone-300 transition-colors"
+              >
+                Retry
+              </button>
             </>
           )}
         </div>

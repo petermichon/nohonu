@@ -26,15 +26,18 @@ Public endpoints (`/health`, `/check-domain`, static file serving) don't require
 ### Endpoints
 
 **Health & Validation**
+
 - `GET /health` - Health check, returns `{ "status": "healthy" }`
 - `GET /check-domain?domain=...` - Returns 200 if domain exists, 404 if not
 
 **Sites Management**
+
 - `GET /sites` - List all sites with stats (hits, uptime%, accent color)
 - `POST /upload` - Upload zip (multipart: `domain`, `zip`)
 - `POST /fetch-github` - Deploy from GitHub (JSON: `domain`, `repo`, `branch`)
 
 **Site Operations** (`/sites/:domain`)
+
 - `GET /sites/:domain` - Get site info
 - `DELETE /sites/:domain` - Delete site and all its data
 - `PATCH /sites/:domain/toggle` - Enable/disable site
@@ -44,17 +47,20 @@ Public endpoints (`/health`, `/check-domain`, static file serving) don't require
 - `PATCH /sites/:domain/meta` - Update metadata (accent hex color or null)
 
 **Stats & Monitoring**
+
 - `GET /sites/:domain/stats?slots=60` - Request count per minute slot (default 60)
 - `GET /sites/:domain/visitors` - Unique visitor IPs with request counts
 - `GET /sites/:domain/uptime?slots=60` - Uptime status per minute slot
 
 **Version Management** (`/sites/:domain/versions`)
+
 - `GET /sites/:domain/versions` - List all archived versions
 - `GET /sites/:domain/versions/:timestamp/download` - Download specific version
 - `POST /sites/:domain/versions/:timestamp/activate` - Rollback to version
 - `DELETE /sites/:domain/versions/:timestamp` - Delete a version
 
 **Repo History**
+
 - `GET /sites/:domain/repos` - List recently used GitHub repos for this domain
 
 ## Static File Serving
@@ -68,12 +74,12 @@ The zip is extracted on first access. Only HTML requests are tracked for stats.
 
 ## Environment Variables
 
-| Variable    | Default       | Description                                    |
-|-------------|---------------|------------------------------------------------|
-| `PORT`      | `8080`        | Server port                                    |
-| `SITES_DIR` | `./sites`     | Path for storing site zips and extracted files |
-| `API_KEY`   | *(none)*      | Secret key for API authentication              |
-| `DOMAIN`    | `localhost`   | Domain for HTTPS certificates (Caddy)          |
+| Variable    | Default     | Description                                    |
+| ----------- | ----------- | ---------------------------------------------- |
+| `PORT`      | `8080`      | Server port                                    |
+| `SITES_DIR` | `./sites`   | Path for storing site zips and extracted files |
+| `API_KEY`   | _(none)_    | Secret key for API authentication              |
+| `DOMAIN`    | `localhost` | Domain for HTTPS certificates (Caddy)          |
 
 ## Deploying to a VPS
 

@@ -40,7 +40,10 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     setUploadError(null);
     setSelectedFile(file);
     if (!newDomain && file.name.length > 4) {
-      const derived = file.name.slice(0, -4).toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const derived = file.name
+        .slice(0, -4)
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '');
       if (derived) setNewDomain(derived);
     }
   };
@@ -60,10 +63,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     setUploading(true);
     setUploadError(null);
     const formData = new FormData();
-    formData.append('domain', newDomain);
     formData.append('zip', selectedFile);
     try {
-      const res = await apiFetch('/upload', { method: 'POST', body: formData });
+      const res = await apiFetch(`/sites/${newDomain}/versions`, { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         reset();
@@ -86,10 +88,10 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     setUploading(true);
     setUploadError(null);
     try {
-      const res = await apiFetch('/fetch-github', {
+      const res = await apiFetch(`/sites/${newDomain}/versions/github`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: newDomain, repo: githubRepo, branch: githubBranch || 'main' }),
+        body: JSON.stringify({ repo: githubRepo, branch: githubBranch || 'main' }),
       });
       const data = await res.json();
       if (data.success) {
@@ -193,8 +195,14 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         ) : (
           <div
             onDrop={handleDrop}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+            }}
             onClick={() => fileInputRef.current?.click()}
             className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 p-6 cursor-pointer transition-all ${
               isDragging
@@ -208,7 +216,11 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               ref={fileInputRef}
               type="file"
               accept=".zip"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); e.target.value = ''; }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFileSelect(f);
+                e.target.value = '';
+              }}
               className="hidden"
             />
             {selectedFile ? (
@@ -219,7 +231,10 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                   <p className="text-[11px] text-stone-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedFile(null);
+                  }}
                   className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded cursor-pointer shrink-0"
                 >
                   <X className="w-3.5 h-3.5 text-stone-400" />
@@ -227,7 +242,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               </div>
             ) : (
               <>
-                <Upload className={`w-5 h-5 ${isDragging ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-500'}`} />
+                <Upload
+                  className={`w-5 h-5 ${isDragging ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-500'}`}
+                />
                 <p className="text-xs text-stone-500 dark:text-stone-400 text-center">
                   {isDragging ? 'Drop to upload' : 'Drop .zip or click to browse'}
                 </p>
@@ -246,16 +263,25 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
 
         {/* Deploy button */}
         <button
-          onClick={() => uploadMode === 'github' ? handleFetchGithub() : handleUpload()}
+          onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={uploading || (uploadMode === 'github' ? !githubRepo || !newDomain : !selectedFile || !newDomain)}
           className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-white dark:text-stone-900 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
           {uploading ? (
-            <><Loader2 className="w-4 h-4 animate-spin" />Deploying...</>
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Deploying...
+            </>
           ) : uploadMode === 'github' ? (
-            <><GitBranch className="w-4 h-4" />Fetch & Deploy</>
+            <>
+              <GitBranch className="w-4 h-4" />
+              Fetch & Deploy
+            </>
           ) : (
-            <><Upload className="w-4 h-4" />Deploy</>
+            <>
+              <Upload className="w-4 h-4" />
+              Deploy
+            </>
           )}
         </button>
       </div>
