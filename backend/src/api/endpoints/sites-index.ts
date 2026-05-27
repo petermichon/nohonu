@@ -1,5 +1,5 @@
 import { error, ensureDomain } from '../../shared/http.ts';
-import { listSites } from './sites-list.ts';
+import { listSites } from './sites-list-get.ts';
 import {
   getSiteInfo,
   downloadSite,
@@ -9,12 +9,12 @@ import {
   getSiteVisitors,
   getSiteUptime,
   getSiteRepos,
-} from './sites-info.ts';
+} from './sites-info-get.ts';
 import { getSiteVersions } from './sites-versions-get.ts';
-import { upload } from './upload-post.ts';
-import { fetchGithub } from './fetch-github-post.ts';
+import { upload } from './sites-versions-upload-post.ts';
+import { fetchGithub } from './sites-versions-github-post.ts';
 import { deleteVersion } from './sites-versions-delete.ts';
-import { activateVersion } from './sites-versions-post.ts';
+import { activateVersion } from './sites-versions-activate-post.ts';
 import { deleteSite } from './sites-delete.ts';
 import { toggleSite } from './sites-toggle-patch.ts';
 import { updateMeta } from './sites-meta-patch.ts';

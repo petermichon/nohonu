@@ -146,6 +146,8 @@ export function VersionPanel({
             {uploading ? 'Uploading...' : 'Upload New'}
             <input
               type="file"
+              id="newVersionFile"
+              name="newVersionFile"
               accept=".zip"
               onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -165,6 +167,8 @@ export function VersionPanel({
             <div ref={repoDropdownRef} className="flex-1 relative">
               <input
                 type="text"
+                id="versionGithubRepo"
+                name="versionGithubRepo"
                 value={githubRepo}
                 onChange={(e) => setGithubRepo(e.target.value)}
                 onFocus={() => repoHistory.length > 0 && setShowRepoDropdown(true)}
@@ -198,6 +202,8 @@ export function VersionPanel({
             </div>
             <input
               type="text"
+              id="versionGithubBranch"
+              name="versionGithubBranch"
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
