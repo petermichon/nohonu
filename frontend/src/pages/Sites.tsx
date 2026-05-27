@@ -20,7 +20,10 @@ function Sites() {
     setError(false);
     try {
       const res = await apiFetch('/sites');
-      if (res.status === 401) { setError('unauthorized'); return; }
+      if (res.status === 401) {
+        setError('unauthorized');
+        return;
+      }
       const data = await res.json();
       setSites(data.sites || []);
     } catch {
@@ -30,7 +33,9 @@ function Sites() {
     }
   };
 
-  useEffect(() => { loadSites(); }, []);
+  useEffect(() => {
+    loadSites();
+  }, []);
 
   const handleToggle = async () => {
     if (!confirmToggle) return;
@@ -48,18 +53,21 @@ function Sites() {
   };
 
   const filteredSites = useMemo(() => {
-    const filtered = sites.filter(s =>
-      s.domain.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    return filtered.sort((a, b) =>
-      b.enabled === a.enabled ? a.domain.localeCompare(b.domain) : b.enabled ? 1 : -1
-    );
+    const filtered = sites.filter((s) => s.domain.toLowerCase().includes(searchQuery.toLowerCase()));
+    return filtered.sort((a, b) => (b.enabled === a.enabled ? a.domain.localeCompare(b.domain) : b.enabled ? 1 : -1));
   }, [sites, searchQuery]);
 
-  const stats = useMemo(() => sites.reduce(
-    (acc, s) => { s.enabled ? acc.enabled++ : acc.disabled++; return acc; },
-    { enabled: 0, disabled: 0 }
-  ), [sites]);
+  const stats = useMemo(
+    () =>
+      sites.reduce(
+        (acc, s) => {
+          s.enabled ? acc.enabled++ : acc.disabled++;
+          return acc;
+        },
+        { enabled: 0, disabled: 0 }
+      ),
+    [sites]
+  );
 
   return (
     <section className="mb-12">
@@ -89,6 +97,8 @@ function Sites() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
               <input
                 type="text"
+                id="siteSearch"
+                name="siteSearch"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter..."
@@ -112,7 +122,9 @@ function Sites() {
           {error === 'unauthorized' ? (
             <>
               <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Invalid API key</p>
-              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Update your API key in connection settings</p>
+              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">
+                Update your API key in connection settings
+              </p>
             </>
           ) : (
             <>
@@ -139,7 +151,9 @@ function Sites() {
               <SiteCard
                 key={site.domain}
                 site={site}
-                onToggle={(d) => setConfirmToggle({ domain: d, enabled: sites.find(s => s.domain === d)?.enabled ?? false })}
+                onToggle={(d) =>
+                  setConfirmToggle({ domain: d, enabled: sites.find((s) => s.domain === d)?.enabled ?? false })
+                }
                 loading={toggling}
               />
             ))}

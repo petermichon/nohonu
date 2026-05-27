@@ -164,6 +164,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
             <input
               type="text"
+              id="domain"
+              name="domain"
               value={newDomain}
               onChange={(e) => setNewDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
               placeholder="subdomain"
@@ -179,6 +181,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           <div className="grid gap-3">
             <input
               type="text"
+              id="githubRepo"
+              name="githubRepo"
               value={githubRepo}
               onChange={(e) => setGithubRepo(e.target.value)}
               placeholder="owner/repo"
@@ -186,6 +190,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             />
             <input
               type="text"
+              id="githubBranch"
+              name="githubBranch"
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
@@ -215,6 +221,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             <input
               ref={fileInputRef}
               type="file"
+              id="zipFile"
+              name="zipFile"
               accept=".zip"
               onChange={(e) => {
                 const f = e.target.files?.[0];
