@@ -1,8 +1,15 @@
 import { readZip } from '../../shared/zip.ts';
-import { SITES_DIR, fileExists, VALID_DOMAIN } from '../../shared/paths.ts';
+import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { recordHit } from '../../services/analytics.ts';
-import { resolveZipPath } from '../../services/versions.ts';
+import { readSiteMetadata } from '../../services/sites-folder.ts';
 import { CORS } from '../../shared/http.ts';
+import {
+  extractedSiteExists,
+  extractSite,
+  readExtractedFile,
+  readActiveVersion,
+  versionExists,
+} from '../../services/sites-folder.ts';
 
 function getContentType(ext: string): string {
   const types: Record<string, string> = {
@@ -23,35 +30,29 @@ function getContentType(ext: string): string {
   return types[ext] ?? 'application/octet-stream';
 }
 
-async function extractSite(domain: string): Promise<boolean> {
-  const siteDir = `${SITES_DIR}/${domain}`;
-  const zipPath = await resolveZipPath(domain);
+async function ensureSiteExtracted(domain: string): Promise<boolean> {
+  const data = await readSiteMetadata(domain);
+  if (!data) {
+    return false;
+  }
 
-  if (await fileExists(siteDir)) {
+  if (await extractedSiteExists(domain)) {
     return true;
   }
-  if (!zipPath) {
+  if (!data.enabled || data.currentIndex === null) {
     return false;
   }
 
   try {
-    await Deno.mkdir(siteDir, { recursive: true });
-    const zipData = await Deno.readFile(zipPath);
-    const files = await readZip(zipData);
-    for (const [relativePath, data] of Object.entries(files)) {
-      const outPath = `${siteDir}/${relativePath}`;
-      const dir = outPath.substring(0, outPath.lastIndexOf('/'));
-      await Deno.mkdir(dir, { recursive: true });
-      await Deno.writeFile(outPath, data);
+    const zipData = await readActiveVersion(domain);
+    if (!zipData) {
+      return false;
     }
+    const files = await readZip(zipData);
+    await extractSite(domain, files);
     return true;
   } catch (err) {
     console.error('Extraction error:', err);
-    try {
-      await Deno.remove(siteDir, { recursive: true });
-    } catch {
-      /* already gone */
-    }
     return false;
   }
 }
@@ -79,7 +80,7 @@ export async function serveStatic(req: Request, path: string, info: Deno.ServeHa
   } else if (path.length > 1) {
     const parts = path.split('/').filter(Boolean);
     const potential = parts[0];
-    if (VALID_DOMAIN.test(potential) && (await resolveZipPath(potential))) {
+    if (VALID_DOMAIN.test(potential) && (await versionExists(potential, 1))) {
       domain = potential;
       const rest = parts.slice(1).join('/');
       let restOrIndex: string;
@@ -96,18 +97,15 @@ export async function serveStatic(req: Request, path: string, info: Deno.ServeHa
     return new Response('Not Found', { status: 404, headers: CORS });
   }
 
-  if (!(await extractSite(domain))) {
+  if (!(await ensureSiteExtracted(domain))) {
     return new Response('Site not found', { status: 404, headers: CORS });
   }
 
-  const fullPath = `${SITES_DIR}/${domain}${filePath}`;
-  let file: Deno.FsFile;
-  try {
-    file = await Deno.open(fullPath);
-  } catch {
+  const file = await readExtractedFile(domain, filePath);
+  if (!file) {
     return new Response('File not found', { status: 404, headers: CORS });
   }
-  const parts = fullPath.split('.');
+  const parts = filePath.split('.');
   const extRaw = parts.pop();
   const ext = extRaw ?? '';
   const contentType = getContentType(ext);

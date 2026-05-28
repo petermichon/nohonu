@@ -127,7 +127,7 @@ export function VersionPanel({
               setShowGithubFetch(!showGithubFetch);
             }}
             disabled={uploading}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:cursor-auto ${
               showGithubFetch
                 ? 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300'
                 : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
@@ -215,7 +215,7 @@ export function VersionPanel({
               type="button"
               onClick={handleFetchGithub}
               disabled={uploading || !githubRepo}
-              className="px-4 py-2 bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-800 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
             >
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GitBranch className="w-4 h-4" />}
               {uploading ? 'Fetching...' : 'Fetch & Add'}

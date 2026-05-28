@@ -36,7 +36,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
                 type="button"
                 key={r}
                 onClick={() => onRangeChange(r)}
-                className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
                   range === r
                     ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
                     : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
@@ -50,7 +50,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
             type="button"
             onClick={onReload}
             disabled={reloading}
-            className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+            className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer disabled:cursor-auto disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${reloading ? 'animate-spin' : ''}`} />
           </button>

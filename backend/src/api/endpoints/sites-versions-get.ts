@@ -1,23 +1,42 @@
 import { error, json } from '../../shared/http.ts';
-import { getVersionPath, fileExists } from '../../shared/paths.ts';
-import { listVersions } from '../../services/versions.ts';
-import { loadSiteData } from '../../services/meta.ts';
+import { versionExists, openVersion, readSiteMetadata, versionPath } from '../../services/sites-folder.ts';
 import type { RouteContext } from './sites-types.ts';
 
 export async function getSiteVersions({ domain, timestamp: index, subAction }: RouteContext): Promise<Response> {
   if (index && subAction === 'download') {
-    const vPath = getVersionPath(domain, index);
-    if (!(await fileExists(vPath))) {
+    if (!(await versionExists(domain, index))) {
       return error('Version not found', 404);
     }
-    const file = await Deno.open(vPath);
+    const file = await openVersion(domain, index);
     const headers = {
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${domain}-${index}.zip"`,
     };
     return new Response(file.readable, { headers });
   }
-  const versions = await listVersions(domain);
-  const data = await loadSiteData(domain);
+
+  const data = await readSiteMetadata(domain);
+  if (!data) {
+    return json({ domain, versions: [], current: null });
+  }
+
+  const versions: {
+    index: number;
+    size: number;
+    source: import('../../shared/paths.ts').VersionSource;
+    createdAt: number;
+  }[] = [];
+
+  for (const [key, entry] of Object.entries(data.versions)) {
+    const index = parseInt(key, 10);
+    try {
+      const stat = await Deno.stat(versionPath(domain, index));
+      versions.push({ index, size: stat.size, source: entry.source, createdAt: entry.createdAt });
+    } catch {
+      /* file missing, skip */
+    }
+  }
+
+  versions.sort((a, b) => b.index - a.index);
   return json({ domain, versions, current: data.currentIndex });
 }

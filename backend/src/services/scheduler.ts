@@ -1,24 +1,20 @@
 import { SLOT_MS, recordUptime } from './analytics.ts';
+import { listDomains } from './sites-folder.ts';
 import { SITES_DIR } from '../shared/paths.ts';
-import { loadSiteData } from './meta.ts';
 
-export async function checkSiteUptime(domain: string): Promise<boolean> {
-  const data = await loadSiteData(domain);
-  return data.enabled;
+async function getSitesList(): Promise<{ domain: string }[]> {
+  const domains = await listDomains();
+  return domains.map((domain) => ({ domain }));
 }
 
-async function listSites(): Promise<{ domain: string }[]> {
-  const sites: { domain: string }[] = [];
+async function checkSiteUptime(domain: string): Promise<boolean> {
   try {
-    for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.name.endsWith('.json') && !entry.name.includes('@')) {
-        sites.push({ domain: entry.name.slice(0, -'.json'.length) });
-      }
-    }
+    const content = await Deno.readTextFile(`${SITES_DIR}/${domain}.json`);
+    const data = JSON.parse(content) as { enabled?: boolean };
+    return data.enabled ?? true;
   } catch {
-    /* no dir */
+    return true;
   }
-  return sites;
 }
 
 async function checkAndRecord(domain: string): Promise<void> {
@@ -27,7 +23,7 @@ async function checkAndRecord(domain: string): Promise<void> {
 }
 
 async function runUptimeChecks(): Promise<void> {
-  const sites = await listSites();
+  const sites = await getSitesList();
   const checks = sites.map(({ domain }) => {
     return checkAndRecord(domain);
   });

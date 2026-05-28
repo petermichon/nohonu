@@ -124,7 +124,7 @@ export function SettingsPopover() {
             <button
               type="submit"
               disabled={status === 'checking'}
-              className="w-full py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-stone-900 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-stone-900 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
             >
               {status === 'checking' && <Loader2 className="w-4 h-4 animate-spin" />}
               {(status === 'valid' || status === 'open') && <Check className="w-4 h-4" />}

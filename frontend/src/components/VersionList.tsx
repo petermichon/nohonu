@@ -107,7 +107,7 @@ export function VersionList({
                 type="button"
                 onClick={() => onDelete(v.index)}
                 disabled={isDeleting || isCurrent}
-                className={`p-1.5 text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
+                className={`p-1.5 text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors disabled:opacity-30 cursor-pointer disabled:cursor-auto ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
                 title={isCurrent ? 'Cannot delete active version' : 'Delete'}
               >
                 {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -116,7 +116,7 @@ export function VersionList({
                 type="button"
                 onClick={() => onActivate(v.index)}
                 disabled={isActivating || isCurrent}
-                className="ml-1 flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
+                className="ml-1 flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-30 cursor-pointer disabled:cursor-auto bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
                 title={isCurrent ? 'Already active' : 'Activate'}
               >
                 {isActivating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowUp className="w-3.5 h-3.5" />}

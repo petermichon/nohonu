@@ -1,5 +1,11 @@
-import { addRepoToHistory } from '../../services/meta.ts';
-import { saveZipAsVersion } from '../../services/versions.ts';
+import {
+  readSiteMetadata,
+  writeSiteMetadata,
+  versionPath,
+  DEFAULT_DATA,
+  versionsDir,
+  domainDir,
+} from '../../services/sites-folder.ts';
 import { error, json, parseJson } from '../../shared/http.ts';
 import type { RouteContext } from './sites-types.ts';
 
@@ -44,14 +50,35 @@ export async function fetchGithub(req: Request, { domain }: RouteContext): Promi
   }
 
   try {
-    await addRepoToHistory(domain, repo, ref);
+    const existingData = await readSiteMetadata(domain);
+    const data = existingData ?? { ...DEFAULT_DATA };
+    const filtered = data.repoHistory.filter((h) => {
+      return !(h.repo === repo && h.branch === ref);
+    });
+    filtered.unshift({ repo, branch: ref, lastUsed: Date.now() });
+    data.repoHistory = filtered.slice(0, 10);
+    await writeSiteMetadata(domain, data);
   } catch (err) {
     console.error('GitHub save failed:', err);
     return error('Failed to save version', 500);
   }
+
   let result: { success: true; domain: string; index: number };
   try {
-    result = await saveZipAsVersion(domain, zipData, { type: 'github', repo, branch: ref });
+    const existingData = await readSiteMetadata(domain);
+    const data = existingData ?? { ...DEFAULT_DATA };
+    const index = data.nextIndex;
+    data.nextIndex = index + 1;
+    data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
+    if (data.currentIndex === null) {
+      data.currentIndex = index;
+    }
+    await Deno.mkdir(domainDir(domain), { recursive: true });
+    await Deno.mkdir(versionsDir(domain), { recursive: true });
+    await Deno.writeFile(versionPath(domain, index), zipData);
+    // Write metadata after zip file (validation requires file to exist)
+    await writeSiteMetadata(domain, data);
+    result = { success: true, domain, index };
   } catch (err) {
     console.error('GitHub save failed:', err);
     return error('Failed to save version', 500);

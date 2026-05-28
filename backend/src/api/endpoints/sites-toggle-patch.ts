@@ -1,21 +1,17 @@
 import { error, json } from '../../shared/http.ts';
-import { SITES_DIR } from '../../shared/paths.ts';
-import { loadSiteData, saveSiteData } from '../../services/meta.ts';
+import { deleteExtractedSite } from '../../services/sites-folder.ts';
+import { readSiteMetadata, writeSiteMetadata } from '../../services/sites-folder.ts';
 import type { RouteContext } from './sites-types.ts';
 
 export async function toggleSite({ domain }: RouteContext): Promise<Response> {
-  const data = await loadSiteData(domain);
-  if (data.currentIndex === null) {
+  const data = await readSiteMetadata(domain);
+  if (!data || data.currentIndex === null) {
     return error('Site not found', 404);
   }
   data.enabled = !data.enabled;
-  await saveSiteData(domain, data);
+  await writeSiteMetadata(domain, data);
   if (!data.enabled) {
-    try {
-      await Deno.remove(`${SITES_DIR}/${domain}`, { recursive: true });
-    } catch {
-      /* already gone */
-    }
+    await deleteExtractedSite(domain);
   }
   return json({ success: true, domain, enabled: data.enabled });
 }

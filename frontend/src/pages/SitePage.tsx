@@ -370,7 +370,7 @@ function SitePage() {
               type="button"
               onClick={() => setConfirmAction(site.enabled ? 'disable' : 'enable')}
               disabled={actionLoading}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:cursor-auto disabled:opacity-50 ${
                 site.enabled
                   ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
                   : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
@@ -434,7 +434,7 @@ function SitePage() {
             type="button"
             onClick={() => setConfirmAction('delete')}
             disabled={actionLoading}
-            className="flex items-center gap-2 px-3 py-2 text-purple-500 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 text-purple-500 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:cursor-auto disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
             Delete

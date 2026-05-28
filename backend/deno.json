@@ -14,8 +14,8 @@
     "include": ["./"]
   },
   "tasks": {
-    "dev": "deno run --watch --allow-net --allow-env --allow-read=. --allow-write=. --no-prompt main.ts",
-    "start": "deno run --allow-net --allow-env --allow-read=. --allow-write=. --no-prompt main.ts",
+    "dev": "deno run --watch --allow-net --allow-env --allow-read=./sites --allow-write=./sites --no-prompt main.ts",
+    "start": "deno run --allow-net --allow-env --allow-read=./sites --allow-write=./sites --no-prompt main.ts",
     "format": "deno run -A npm:prettier --write .",
     "format:check": "deno run -A npm:prettier --check ."
   }

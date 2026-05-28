@@ -279,7 +279,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           type="button"
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={uploading || (uploadMode === 'github' ? !githubRepo || !newDomain : !selectedFile || !newDomain)}
-          className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-white dark:text-stone-900 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 text-white dark:text-stone-900 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
         >
           {uploading ? (
             <>

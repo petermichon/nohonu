@@ -1,5 +1,5 @@
 import { checkMethod, ensureDomain } from '../../shared/http.ts';
-import { resolveZipPath } from '../../services/versions.ts';
+import { readSiteMetadata, readActiveVersion } from '../../services/sites-folder.ts';
 
 export async function checkDomain(req: Request): Promise<Response> {
   const methodError = checkMethod(req, 'GET');
@@ -16,10 +16,13 @@ export async function checkDomain(req: Request): Promise<Response> {
     return new Response(undefined, { status: 404 });
   }
 
-  const zipPath = await resolveZipPath(validDomain);
-  if (zipPath) {
-    return new Response(undefined, { status: 200 });
-  } else {
+  const data = await readSiteMetadata(validDomain);
+  if (!data || data.currentIndex === null) {
     return new Response(undefined, { status: 404 });
   }
+  const version = await readActiveVersion(validDomain);
+  if (!version) {
+    return new Response(undefined, { status: 404 });
+  }
+  return new Response(undefined, { status: 200 });
 }

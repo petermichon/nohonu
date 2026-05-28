@@ -1,4 +1,5 @@
-export const SITES_DIR = Deno.env.get('SITES_DIR') ?? './sites';
+const sitesDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../sites`;
+export const SITES_DIR = sitesDir;
 export const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 
 export type VersionSource = { type: 'upload' } | { type: 'github'; repo: string; branch: string };
@@ -17,15 +18,8 @@ export type SiteData = {
   accent?: string;
   repoHistory: RepoEntry[];
   versions: Record<string, VersionEntry>;
+  extracted: boolean;
 };
-
-export function getSiteDataPath(domain: string): string {
-  return `${SITES_DIR}/${domain}.json`;
-}
-
-export function getVersionPath(domain: string, index: number): string {
-  return `${SITES_DIR}/${domain}@${index}.zip`;
-}
 
 export async function fileExists(path: string): Promise<boolean> {
   try {
