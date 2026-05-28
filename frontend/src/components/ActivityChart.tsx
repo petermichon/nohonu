@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Eye, RefreshCw, Globe } from 'lucide-react';
-import { relativeTime } from '../lib/utils';
-import { SLOT_MS } from '../lib/types';
-import type { Slot, Visitor, TimeRange } from '../lib/types';
+import { relativeTime } from '../lib/utils.ts';
+import { SLOT_MS } from '../lib/types.ts';
+import type { Slot, Visitor, TimeRange } from '../lib/types.ts';
 
 interface ActivityChartProps {
   stats: Slot[];
@@ -33,6 +33,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
           <div className="flex items-center bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5">
             {([15, 60] as TimeRange[]).map((r) => (
               <button
+                type="button"
                 key={r}
                 onClick={() => onRangeChange(r)}
                 className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
@@ -46,6 +47,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
             ))}
           </div>
           <button
+            type="button"
             onClick={onReload}
             disabled={reloading}
             className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
@@ -67,8 +69,13 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
             >
               {isHovered && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md whitespace-nowrap pointer-events-none z-10 text-center">
-                  <p className="flex items-center gap-1 text-xs font-semibold text-stone-900 dark:text-stone-100"><Eye className="w-3 h-3 text-stone-400 dark:text-stone-500" />{s.count} <span className="font-normal text-stone-400 dark:text-stone-500">views</span></p>
-                  <p className="text-[10px] text-stone-400 dark:text-stone-500">{new Date(s.slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="flex items-center gap-1 text-xs font-semibold text-stone-900 dark:text-stone-100">
+                    <Eye className="w-3 h-3 text-stone-400 dark:text-stone-500" />
+                    {s.count} <span className="font-normal text-stone-400 dark:text-stone-500">views</span>
+                  </p>
+                  <p className="text-[10px] text-stone-400 dark:text-stone-500">
+                    {new Date(s.slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               )}
               <div
@@ -77,10 +84,10 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
                   isHovered
                     ? 'bg-stone-500 dark:bg-stone-300'
                     : isCurrentSlot
-                    ? 'bg-stone-600 dark:bg-stone-400'
-                    : s.count === 0
-                    ? 'bg-stone-100 dark:bg-stone-800'
-                    : 'bg-stone-300 dark:bg-stone-600'
+                      ? 'bg-stone-600 dark:bg-stone-400'
+                      : s.count === 0
+                        ? 'bg-stone-100 dark:bg-stone-800'
+                        : 'bg-stone-300 dark:bg-stone-600'
                 }`}
               />
             </div>
@@ -105,7 +112,8 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-stone-400 dark:text-stone-500">{relativeTime(v.last)}</span>
                   <span className="flex items-center gap-0.5 text-xs font-medium text-stone-500 dark:text-stone-400">
-                    <Eye className="w-3 h-3" />{v.count}
+                    <Eye className="w-3 h-3" />
+                    {v.count}
                   </span>
                 </div>
               </div>

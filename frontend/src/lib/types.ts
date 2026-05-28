@@ -11,9 +11,10 @@ export interface Site {
 export type VersionSource = { type: 'upload' } | { type: 'github'; repo: string; branch: string };
 
 export interface Version {
-  timestamp: number;
+  index: number;
   size: number;
   source?: VersionSource;
+  createdAt: number;
 }
 
 export interface Slot {

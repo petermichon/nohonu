@@ -1,33 +1,18 @@
 import { SLOT_MS, recordUptime } from './analytics.ts';
-import { SITES_DIR, getCurrentVersionPath } from '../shared/paths.ts';
-import { resolveZipPath } from './versions.ts';
+import { SITES_DIR } from '../shared/paths.ts';
+import { loadSiteData } from './meta.ts';
 
 export async function checkSiteUptime(domain: string): Promise<boolean> {
-  const zipPath = await resolveZipPath(domain);
-  if (!zipPath) {
-    return false;
-  }
-  const currentPath = getCurrentVersionPath(domain, true);
-  return zipPath === currentPath;
+  const data = await loadSiteData(domain);
+  return data.enabled;
 }
 
 async function listSites(): Promise<{ domain: string }[]> {
   const sites: { domain: string }[] = [];
   try {
     for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.name.includes('@')) {
-        continue;
-      }
-      const disabled = entry.name.endsWith('.zip.disabled');
-      if (disabled || entry.name.endsWith('.zip')) {
-        let suffixLength: number;
-        if (disabled) {
-          suffixLength = -'.zip.disabled'.length;
-        } else {
-          suffixLength = -'.zip'.length;
-        }
-        const domain = entry.name.slice(0, suffixLength);
-        sites.push({ domain });
+      if (entry.name.endsWith('.json') && !entry.name.includes('@')) {
+        sites.push({ domain: entry.name.slice(0, -'.json'.length) });
       }
     }
   } catch {

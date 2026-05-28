@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Loader2, AlertCircle, Search } from 'lucide-react';
-import { SiteCard } from '../components/SiteCard';
-import { InlineDeployForm } from '../components/InlineDeployForm';
-import { ConfirmModal } from '../lib/ConfirmModal';
-import { useApi } from '../lib/api';
-import type { Site } from '../lib/types';
+import { SiteCard } from '../components/SiteCard.tsx';
+import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
+import { ConfirmModal } from '../lib/ConfirmModal.tsx';
+import { useApi } from '../lib/api.ts';
+import type { Site } from '../lib/types.ts';
 
 function Sites() {
   const { apiFetch } = useApi();
@@ -131,6 +131,7 @@ function Sites() {
               <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
               <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
               <button
+                type="button"
                 onClick={loadSites}
                 className="mt-3 px-3 py-1.5 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-lg hover:bg-stone-700 dark:hover:bg-stone-300 transition-colors"
               >
@@ -167,6 +168,7 @@ function Sites() {
             <div className="text-center py-12 mt-4">
               <p className="text-sm text-stone-500 dark:text-stone-400">No sites match "{searchQuery}"</p>
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
                 className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 mt-1"
               >

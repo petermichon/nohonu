@@ -49,7 +49,7 @@ export async function fetchGithub(req: Request, { domain }: RouteContext): Promi
     console.error('GitHub save failed:', err);
     return error('Failed to save version', 500);
   }
-  let result: { success: true; domain: string; timestamp: number };
+  let result: { success: true; domain: string; index: number };
   try {
     result = await saveZipAsVersion(domain, zipData, { type: 'github', repo, branch: ref });
   } catch (err) {

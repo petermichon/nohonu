@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Plus, Upload, X, FileArchive, GitBranch, Loader2, AlertCircle, Globe } from 'lucide-react';
-import { useApi } from '../lib/api';
+import { useApi } from '../lib/api.ts';
 
 type UploadMode = 'file' | 'github';
 
@@ -110,6 +110,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   if (!isOpen) {
     return (
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-all cursor-pointer h-[58px]"
       >
@@ -124,6 +125,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Deploy New Site</h3>
         <button
+          type="button"
           onClick={reset}
           className="p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer"
         >
@@ -135,6 +137,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         {/* Mode toggle */}
         <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 rounded-lg p-1 w-fit">
           <button
+            type="button"
             onClick={() => setUploadMode('file')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
               uploadMode === 'file'
@@ -146,6 +149,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             File
           </button>
           <button
+            type="button"
             onClick={() => setUploadMode('github')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
               uploadMode === 'github'
@@ -239,6 +243,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                   <p className="text-[11px] text-stone-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                 </div>
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedFile(null);
@@ -271,6 +276,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
 
         {/* Deploy button */}
         <button
+          type="button"
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={uploading || (uploadMode === 'github' ? !githubRepo || !newDomain : !selectedFile || !newDomain)}
           className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 disabled:cursor-not-allowed text-white dark:text-stone-900 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"

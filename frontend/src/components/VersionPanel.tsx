@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
 import { Upload, Loader2, GitBranch, History } from 'lucide-react';
-import { useApi } from '../lib/api';
-import { useClickOutside } from '../lib/useClickOutside';
-import { VersionList } from './VersionList';
-import type { Version } from '../lib/types';
+import { useApi } from '../lib/api.ts';
+import { useClickOutside } from '../lib/useClickOutside.ts';
+import { VersionList } from './VersionList.tsx';
+import type { Version } from '../lib/types.ts';
 
 interface VersionPanelProps {
   domain: string;
@@ -121,6 +121,7 @@ export function VersionPanel({
         <div className="flex items-center gap-2">
           {versionsLoading && <Loader2 className="w-3 h-3 text-stone-400 animate-spin" />}
           <button
+            type="button"
             onClick={() => {
               if (!showGithubFetch) loadRepoHistory();
               setShowGithubFetch(!showGithubFetch);
@@ -182,6 +183,7 @@ export function VersionPanel({
                   </div>
                   {repoHistory.map((entry, i) => (
                     <button
+                      type="button"
                       key={i}
                       onClick={() => {
                         setGithubRepo(entry.repo);
@@ -210,6 +212,7 @@ export function VersionPanel({
               className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
             />
             <button
+              type="button"
               onClick={handleFetchGithub}
               disabled={uploading || !githubRepo}
               className="px-4 py-2 bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"

@@ -1,17 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Power, Trash2, Loader2, AlertCircle, Eye } from 'lucide-react';
-import { ConfirmModal } from '../lib/ConfirmModal';
-import { useApi } from '../lib/api';
-import { usePollData } from '../lib/usePollData';
-import { calcUptimePct, getAccentStyle } from '../lib/utils';
-import { UptimeChart } from '../components/UptimeChart';
-import { ActivityChart } from '../components/ActivityChart';
-import { VersionPanel } from '../components/VersionPanel';
-import { SLOT_MS } from '../lib/types';
-import type { Site, Version, Slot, Visitor, UptimeSlot, TimeRange, UptimeRange } from '../lib/types';
+import { ConfirmModal } from '../lib/ConfirmModal.tsx';
+import { useApi } from '../lib/api.ts';
+import { usePollData } from '../lib/usePollData.ts';
+import { calcUptimePct, getAccentStyle } from '../lib/utils.ts';
+import { UptimeChart } from '../components/UptimeChart.tsx';
+import { ActivityChart } from '../components/ActivityChart.tsx';
+import { VersionPanel } from '../components/VersionPanel.tsx';
+import { SLOT_MS } from '../lib/types.ts';
+import type { Site, Version, Slot, Visitor, UptimeSlot, TimeRange, UptimeRange } from '../lib/types.ts';
 
-const ACCENT_COLORS = ['#8b5cf6','#3b82f6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#f97316'];
+const ACCENT_COLORS = ['#8b5cf6', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#f97316'];
 
 function SitePage() {
   const { domain } = useParams<{ domain: string }>();
@@ -33,7 +33,11 @@ function SitePage() {
   const [currentVersion, setCurrentVersion] = useState<number | null>(null);
   const [activating, setActivating] = useState<number | null>(null);
   const [deletingVersion, setDeletingVersion] = useState<number | null>(null);
-  const [versionModal, setVersionModal] = useState<{ type: 'delete' | 'activate'; timestamp: number; label: string } | null>(null);
+  const [versionModal, setVersionModal] = useState<{
+    type: 'delete' | 'activate';
+    timestamp: number;
+    label: string;
+  } | null>(null);
   const [iconError, setIconError] = useState(false);
   const [accent, setAccent] = useState<string | null>(null);
   const uptimeMountedRef = useRef(false);
@@ -41,7 +45,10 @@ function SitePage() {
   const loadSite = useCallback(async () => {
     try {
       const res = await apiFetch(`/sites/${domain}`);
-      if (!res.ok) { setNotFound(true); return; }
+      if (!res.ok) {
+        setNotFound(true);
+        return;
+      }
       const data = await res.json();
       setSite(data as Site);
     } catch {
@@ -111,15 +118,18 @@ function SitePage() {
     }
   };
 
-  const loadUptime = useCallback(async (slots: number) => {
-    try {
-      const res = await apiFetch(`/sites/${domain}/uptime?slots=${slots}`);
-      const data = await res.json();
-      setUptimeData((data.uptime as UptimeSlot[]) ?? []);
-    } catch {
-      // non-critical
-    }
-  }, [domain]);
+  const loadUptime = useCallback(
+    async (slots: number) => {
+      try {
+        const res = await apiFetch(`/sites/${domain}/uptime?slots=${slots}`);
+        const data = await res.json();
+        setUptimeData((data.uptime as UptimeSlot[]) ?? []);
+      } catch {
+        // non-critical
+      }
+    },
+    [domain]
+  );
 
   // Initial data load
   useEffect(() => {
@@ -130,12 +140,23 @@ function SitePage() {
 
   // Reload uptime only when range changes (not on initial mount — usePollData handles that)
   useEffect(() => {
-    if (!uptimeMountedRef.current) { uptimeMountedRef.current = true; return; }
+    if (!uptimeMountedRef.current) {
+      uptimeMountedRef.current = true;
+      return;
+    }
     loadUptime(uptimeRange);
   }, [loadUptime, uptimeRange]);
 
   // Poll stats and visitors every minute
-  usePollData(() => { loadStats(); loadVisitors(); loadUptime(uptimeRange); }, SLOT_MS, true);
+  usePollData(
+    () => {
+      loadStats();
+      loadVisitors();
+      loadUptime(uptimeRange);
+    },
+    SLOT_MS,
+    true
+  );
 
   const handleConfirm = async () => {
     if (!confirmAction || !site) return;
@@ -220,7 +241,10 @@ function SitePage() {
           <AlertCircle className="w-6 h-6 text-purple-500 dark:text-purple-400" />
         </div>
         <p className="text-stone-700 dark:text-stone-300 text-sm font-medium">Site not found</p>
-        <Link to="/" className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 mt-2 inline-block">
+        <Link
+          to="/"
+          className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 mt-2 inline-block"
+        >
           Back to sites
         </Link>
       </div>
@@ -247,9 +271,13 @@ function SitePage() {
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold select-none overflow-hidden ${
-              site.enabled ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300' : 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600'
-            }`}>
+            <div
+              className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold select-none overflow-hidden ${
+                site.enabled
+                  ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
+                  : 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600'
+              }`}
+            >
               {!iconError ? (
                 <img
                   src={`${apiBase}/sites/${site.domain}/icon`}
@@ -257,7 +285,9 @@ function SitePage() {
                   className="w-6 h-6 object-contain"
                   onError={() => setIconError(true)}
                 />
-              ) : initial}
+              ) : (
+                initial
+              )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -323,15 +353,21 @@ function SitePage() {
             <div className="flex items-center gap-1.5">
               {ACCENT_COLORS.map((color) => (
                 <button
+                  type="button"
                   key={color}
                   onClick={() => saveAccent(accent === color ? null : color)}
                   className="w-4 h-4 rounded-full transition-transform hover:scale-110 cursor-pointer"
-                  style={{ backgroundColor: color, outline: accent === color ? `2px solid ${color}` : '2px solid transparent', outlineOffset: '2px' }}
+                  style={{
+                    backgroundColor: color,
+                    outline: accent === color ? `2px solid ${color}` : '2px solid transparent',
+                    outlineOffset: '2px',
+                  }}
                   title={color}
                 />
               ))}
             </div>
             <button
+              type="button"
               onClick={() => setConfirmAction(site.enabled ? 'disable' : 'enable')}
               disabled={actionLoading}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 ${
@@ -358,12 +394,7 @@ function SitePage() {
         />
       )}
 
-      <UptimeChart
-        uptime={uptimeData}
-        range={uptimeRange}
-        onRangeChange={setUptimeRange}
-        accent={accent}
-      />
+      <UptimeChart uptime={uptimeData} range={uptimeRange} onRangeChange={setUptimeRange} accent={accent} />
 
       <VersionPanel
         domain={site.domain}
@@ -373,16 +404,34 @@ function SitePage() {
         activating={activating}
         deletingVersion={deletingVersion}
         accent={accent}
-        onActivate={(ts) => setVersionModal({ type: 'activate', timestamp: ts, label: new Date(ts).toLocaleString() })}
-        onDelete={(ts) => setVersionModal({ type: 'delete', timestamp: ts, label: new Date(ts).toLocaleString() })}
+        onActivate={(idx) => {
+          const v = versions.find((v) => v.index === idx);
+          setVersionModal({
+            type: 'activate',
+            timestamp: idx,
+            label: v ? new Date(v.createdAt).toLocaleString() : `#${idx}`,
+          });
+        }}
+        onDelete={(idx) => {
+          const v = versions.find((v) => v.index === idx);
+          setVersionModal({
+            type: 'delete',
+            timestamp: idx,
+            label: v ? new Date(v.createdAt).toLocaleString() : `#${idx}`,
+          });
+        }}
         onDownload={downloadVersion}
-        onUploaded={async () => { await loadSite(); await loadVersions(); }}
+        onUploaded={async () => {
+          await loadSite();
+          await loadVersions();
+        }}
       />
 
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 mt-3">
         <h2 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Actions</h2>
         <div className="flex flex-wrap gap-2">
           <button
+            type="button"
             onClick={() => setConfirmAction('delete')}
             disabled={actionLoading}
             className="flex items-center gap-2 px-3 py-2 text-purple-500 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"

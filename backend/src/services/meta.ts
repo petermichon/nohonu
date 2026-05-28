@@ -1,39 +1,35 @@
-import { getMetaPath, getRepoHistoryPath, SiteMeta } from '../shared/paths.ts';
+import { SITES_DIR, getSiteDataPath, SiteData, RepoEntry } from '../shared/paths.ts';
 
 export const VALID_ACCENT = /^#[0-9a-fA-F]{6}$/;
 
-export type RepoEntry = { repo: string; branch: string; lastUsed: number };
+const DEFAULT_DATA: SiteData = {
+  nextIndex: 1,
+  currentIndex: null,
+  enabled: true,
+  repoHistory: [],
+  versions: {},
+};
 
-export async function loadMeta(domain: string): Promise<SiteMeta> {
+export async function loadSiteData(domain: string): Promise<SiteData> {
   try {
-    const content = await Deno.readTextFile(getMetaPath(domain));
-    return JSON.parse(content) as SiteMeta;
+    const content = await Deno.readTextFile(getSiteDataPath(domain));
+    return { ...DEFAULT_DATA, ...JSON.parse(content) } as SiteData;
   } catch {
-    return {};
+    return { ...DEFAULT_DATA };
   }
 }
 
-export async function saveMeta(domain: string, meta: SiteMeta): Promise<void> {
-  const json = JSON.stringify(meta);
-  await Deno.writeTextFile(getMetaPath(domain), json);
-}
-
-export async function loadRepoHistory(domain: string): Promise<RepoEntry[]> {
-  try {
-    const content = await Deno.readTextFile(getRepoHistoryPath(domain));
-    return JSON.parse(content) as RepoEntry[];
-  } catch {
-    return [];
-  }
+export async function saveSiteData(domain: string, data: SiteData): Promise<void> {
+  await Deno.mkdir(SITES_DIR, { recursive: true });
+  await Deno.writeTextFile(getSiteDataPath(domain), JSON.stringify(data, null, 2));
 }
 
 export async function addRepoToHistory(domain: string, repo: string, branch: string): Promise<void> {
-  const history = await loadRepoHistory(domain);
-  const filtered = history.filter((h) => {
+  const data = await loadSiteData(domain);
+  const filtered = data.repoHistory.filter((h: RepoEntry) => {
     return !(h.repo === repo && h.branch === branch);
   });
   filtered.unshift({ repo, branch, lastUsed: Date.now() });
-  const data = filtered.slice(0, 10);
-  const json = JSON.stringify(data);
-  await Deno.writeTextFile(getRepoHistoryPath(domain), json);
+  data.repoHistory = filtered.slice(0, 10);
+  await saveSiteData(domain, data);
 }

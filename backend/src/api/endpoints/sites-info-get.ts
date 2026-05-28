@@ -1,7 +1,6 @@
 import { error, json, CORS } from '../../shared/http.ts';
-import { getCurrentVersionPath } from '../../shared/paths.ts';
 import { getStats, getVisitors, getUptime } from '../../services/analytics.ts';
-import { loadMeta, loadRepoHistory } from '../../services/meta.ts';
+import { loadSiteData } from '../../services/meta.ts';
 import { resolveZipPath, getIcon } from '../../services/versions.ts';
 import type { RouteContext } from './sites-types.ts';
 
@@ -10,9 +9,8 @@ export async function getSiteInfo({ domain }: RouteContext): Promise<Response> {
   if (!zipPath) {
     return error('Site not found', 404);
   }
-  const currentPath = getCurrentVersionPath(domain, true);
-  const enabled = zipPath === currentPath;
-  return json({ domain, enabled });
+  const data = await loadSiteData(domain);
+  return json({ domain, enabled: data.enabled });
 }
 
 export async function downloadSite({ domain }: RouteContext): Promise<Response> {
@@ -39,8 +37,8 @@ export async function getSiteIcon({ domain }: RouteContext): Promise<Response> {
 }
 
 export async function getSiteMeta({ domain }: RouteContext): Promise<Response> {
-  const meta = await loadMeta(domain);
-  return json({ domain, ...meta });
+  const data = await loadSiteData(domain);
+  return json({ domain, accent: data.accent });
 }
 
 export function getSiteStats({ domain, url }: RouteContext): Response {
@@ -79,6 +77,6 @@ export function getSiteUptime({ domain, url }: RouteContext): Response {
 }
 
 export async function getSiteRepos({ domain }: RouteContext): Promise<Response> {
-  const history = await loadRepoHistory(domain);
-  return json({ domain, history });
+  const data = await loadSiteData(domain);
+  return json({ domain, history: data.repoHistory });
 }

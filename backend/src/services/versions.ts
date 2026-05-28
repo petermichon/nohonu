@@ -1,120 +1,55 @@
-import {
-  SITES_DIR,
-  fileExists,
-  getCurrentVersionPath,
-  getVersionMetaPath,
-  getVersionPath,
-  Version,
-  VersionSource,
-} from '../shared/paths.ts';
+import { SITES_DIR, getVersionPath, Version, VersionSource } from '../shared/paths.ts';
+import { loadSiteData, saveSiteData } from './meta.ts';
 import { readZip } from '../shared/zip.ts';
 
-export async function loadVersionSource(domain: string, timestamp: number): Promise<VersionSource | undefined> {
-  try {
-    const content = await Deno.readTextFile(getVersionMetaPath(domain, timestamp));
-    return JSON.parse(content) as VersionSource;
-  } catch {
-    return undefined;
-  }
-}
-
 export async function listVersions(domain: string): Promise<Version[]> {
+  const data = await loadSiteData(domain);
   const versions: Version[] = [];
-  const prefix = `${domain}@`;
 
-  try {
-    for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.name.startsWith(prefix) && entry.name.endsWith('.zip') && !entry.name.includes('.disabled')) {
-        const timestamp = parseInt(entry.name.slice(prefix.length, -4), 10);
-        if (!isNaN(timestamp)) {
-          const filePath = `${SITES_DIR}/${entry.name}`;
-          let stat: Deno.FileInfo | undefined;
-          try {
-            stat = await Deno.stat(filePath);
-          } catch {
-            /* file does not exist */
-          }
-          if (stat) {
-            const source = await loadVersionSource(domain, timestamp);
-            versions.push({
-              timestamp,
-              size: stat.size,
-              source,
-            });
-          }
-        }
-      }
-    }
-  } catch {
-    /* no dir */
-  }
-
-  versions.sort((a, b) => {
-    return b.timestamp - a.timestamp;
-  });
-  return versions;
-}
-
-export async function getCurrentVersionTimestamp(domain: string): Promise<number | undefined> {
-  for (const enabled of [true, false]) {
+  for (const [key, entry] of Object.entries(data.versions)) {
+    const index = parseInt(key, 10);
+    const filePath = getVersionPath(domain, index);
     let stat: Deno.FileInfo | undefined;
     try {
-      stat = await Deno.stat(getCurrentVersionPath(domain, enabled));
+      stat = await Deno.stat(filePath);
     } catch {
       /* file does not exist */
     }
     if (stat) {
-      const mtime = stat.mtime?.getTime();
-      return mtime ?? undefined;
+      versions.push({ index, size: stat.size, source: entry.source, createdAt: entry.createdAt });
     }
   }
-  return undefined;
+
+  versions.sort((a, b) => b.index - a.index);
+  return versions;
 }
 
 export async function saveZipAsVersion(
   domain: string,
   zipData: Uint8Array,
-  source?: VersionSource,
-): Promise<{ success: true; domain: string; timestamp: number }> {
+  source: VersionSource,
+): Promise<{ success: true; domain: string; index: number }> {
   await Deno.mkdir(SITES_DIR, { recursive: true });
-  const timestamp = Date.now();
-  const versionPath = getVersionPath(domain, timestamp);
-  await Deno.writeFile(versionPath, zipData);
-  if (source) {
-    const metaPath = getVersionMetaPath(domain, timestamp);
-    const json = JSON.stringify(source);
-    await Deno.writeTextFile(metaPath, json);
+  const data = await loadSiteData(domain);
+  const index = data.nextIndex;
+  data.nextIndex = index + 1;
+  data.versions[String(index)] = { source, createdAt: Date.now() };
+  if (data.currentIndex === null) {
+    data.currentIndex = index;
   }
-  const hasLive = await resolveZipPath(domain);
-  if (!hasLive) {
-    const oldVersionPath = getVersionPath(domain, timestamp);
-    const currentPath = getCurrentVersionPath(domain, true);
-    await Deno.rename(oldVersionPath, currentPath);
-    if (source) {
-      const oldMetaPath = getVersionMetaPath(domain, timestamp);
-      const newMetaPath = getVersionMetaPath(domain, 0);
-      await Deno.rename(oldMetaPath, newMetaPath);
-    }
-    const siteDir = `${SITES_DIR}/${domain}`;
-    try {
-      await Deno.remove(siteDir, { recursive: true });
-    } catch {
-      /* already gone */
-    }
-  }
-  return { success: true, domain, timestamp };
+
+  await Deno.writeFile(getVersionPath(domain, index), zipData);
+  await saveSiteData(domain, data);
+  return { success: true, domain, index };
 }
 
 export async function resolveZipPath(domain: string): Promise<string | undefined> {
-  const enabled = getCurrentVersionPath(domain, true);
-  if (await fileExists(enabled)) {
-    return enabled;
+  const data = await loadSiteData(domain);
+  if (!data.enabled || data.currentIndex === null) {
+    return undefined;
   }
-  const disabled = getCurrentVersionPath(domain, false);
-  if (await fileExists(disabled)) {
-    return disabled;
-  }
-  return undefined;
+  const path = getVersionPath(domain, data.currentIndex);
+  return path;
 }
 
 const FAVICON_CANDIDATES: { name: string; type: string }[] = [

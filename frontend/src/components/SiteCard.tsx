@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Power, Loader2, Eye, Activity } from 'lucide-react';
-import { useApi } from '../lib/api';
-import { getAccentStyle, formatHits } from '../lib/utils';
-import type { Site } from '../lib/types';
+import { useApi } from '../lib/api.ts';
+import { getAccentStyle, formatHits } from '../lib/utils.ts';
+import type { Site } from '../lib/types.ts';
 
 interface SiteCardProps {
   site: Site;
@@ -50,13 +50,12 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
       className={`group flex items-center gap-4 px-4 py-3 rounded-xl border transition-all duration-150 cursor-pointer ${cardClass}`}
     >
       {/* Accent strip */}
-      <div
-        className={`shrink-0 w-1 self-stretch rounded-full ${uptimeBarColor ?? ''}`}
-        style={uptimeBarStyle}
-      />
+      <div className={`shrink-0 w-1 self-stretch rounded-full ${uptimeBarColor ?? ''}`} style={uptimeBarStyle} />
 
       {/* Favicon */}
-      <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold select-none overflow-hidden ${iconBgClass}`}>
+      <div
+        className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold select-none overflow-hidden ${iconBgClass}`}
+      >
         {!iconError ? (
           <img
             src={`${apiBase}/sites/${site.domain}/icon`}
@@ -64,15 +63,19 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
             className="w-5 h-5 object-contain"
             onError={() => setIconError(true)}
           />
-        ) : initial}
+        ) : (
+          initial
+        )}
       </div>
 
       {/* Domain + URL */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3 className={`text-sm font-semibold truncate ${
-            site.enabled ? 'text-stone-900 dark:text-stone-100' : 'text-stone-500 dark:text-stone-400'
-          }`}>
+          <h3
+            className={`text-sm font-semibold truncate ${
+              site.enabled ? 'text-stone-900 dark:text-stone-100' : 'text-stone-500 dark:text-stone-400'
+            }`}
+          >
             {site.domain}
           </h3>
           <span
@@ -159,7 +162,11 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
           </div>
         ) : (
           <button
-            onClick={(e) => { e.stopPropagation(); onToggle?.(site.domain); }}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle?.(site.domain);
+            }}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               site.enabled
                 ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'

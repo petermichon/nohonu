@@ -1,5 +1,5 @@
 import { readZip } from '../../shared/zip.ts';
-import { SITES_DIR, fileExists, getCurrentVersionPath, VALID_DOMAIN } from '../../shared/paths.ts';
+import { SITES_DIR, fileExists, VALID_DOMAIN } from '../../shared/paths.ts';
 import { recordHit } from '../../services/analytics.ts';
 import { resolveZipPath } from '../../services/versions.ts';
 import { CORS } from '../../shared/http.ts';
@@ -25,12 +25,12 @@ function getContentType(ext: string): string {
 
 async function extractSite(domain: string): Promise<boolean> {
   const siteDir = `${SITES_DIR}/${domain}`;
-  const zipPath = getCurrentVersionPath(domain, true);
+  const zipPath = await resolveZipPath(domain);
 
   if (await fileExists(siteDir)) {
     return true;
   }
-  if (!(await fileExists(zipPath))) {
+  if (!zipPath) {
     return false;
   }
 

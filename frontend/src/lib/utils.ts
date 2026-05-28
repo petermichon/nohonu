@@ -1,4 +1,4 @@
-import { SLOT_MS } from './types';
+import { SLOT_MS } from './types.ts';
 
 export function relativeTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -20,7 +20,10 @@ export function calcUptimePct(uptimeData: { up: boolean | null }[]): number | nu
   return Math.round((checked.filter((s) => s.up).length / checked.length) * 100);
 }
 
-export function getAccentStyle(accent: string | null | undefined, enabled: boolean): { bg: string; color: string } | null {
+export function getAccentStyle(
+  accent: string | null | undefined,
+  enabled: boolean
+): { bg: string; color: string } | null {
   if (!enabled || !accent) return null;
   return { bg: `${accent}22`, color: accent }; // 22 = ~13% alpha in hex
 }

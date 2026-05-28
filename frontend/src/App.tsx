@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Logo } from './components/Logo';
-import { DesktopNavigation, MobileNavigation } from './components/Navigation';
-import { SettingsPopover } from './components/SettingsPopover';
-import { ThemeToggle } from './components/ThemeToggle';
-import Sites from './pages/Sites';
-import Domains from './pages/Domains';
-import Servers from './pages/Servers';
-import SitePage from './pages/SitePage';
+import { Logo } from './components/Logo.tsx';
+import { DesktopNavigation, MobileNavigation } from './components/Navigation.tsx';
+import { SettingsPopover } from './components/SettingsPopover.tsx';
+import { ThemeToggle } from './components/ThemeToggle.tsx';
+import Sites from './pages/Sites.tsx';
+import Domains from './pages/Domains.tsx';
+import Servers from './pages/Servers.tsx';
+import SitePage from './pages/SitePage.tsx';
 
 function App() {
   return (

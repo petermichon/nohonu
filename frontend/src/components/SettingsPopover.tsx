@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Settings, Check, AlertCircle, Loader2 } from 'lucide-react';
-import { useConnection } from '../lib/ConnectionProvider';
-import { useClickOutside } from '../lib/useClickOutside';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
+import { useClickOutside } from '../lib/useClickOutside.ts';
 
 type AuthStatus = 'idle' | 'checking' | 'valid' | 'open' | 'invalid' | 'unreachable';
 
@@ -56,6 +56,7 @@ export function SettingsPopover() {
   return (
     <div className="relative" ref={ref}>
       <button
+        type="button"
         onClick={() => {
           setUrl(apiBase);
           setKey(apiKey);

@@ -4,10 +4,14 @@
     "strict": true
   },
   "lint": {
+    "include": ["./"],
     "rules": {
       "tags": ["recommended"],
       "include": ["explicit-function-return-type", "explicit-module-boundary-types", "eqeqeq"]
     }
+  },
+  "fmt": {
+    "include": ["./"]
   },
   "tasks": {
     "dev": "deno run --watch --allow-net --allow-env --allow-read=. --allow-write=. --no-prompt main.ts",
