@@ -17,6 +17,7 @@ interface VersionPanelProps {
   onDelete: (ts: number) => void;
   onDownload: (ts: number) => void;
   onUploaded: () => void;
+  onToast: (message: string, success?: boolean) => void;
 }
 
 export function VersionPanel({
@@ -31,6 +32,7 @@ export function VersionPanel({
   onDelete,
   onDownload,
   onUploaded,
+  onToast,
 }: VersionPanelProps) {
   const { apiFetch } = useApi();
   const [uploading, setUploading] = useState(false);
@@ -67,11 +69,14 @@ export function VersionPanel({
       const data = await res.json();
       if (data.success) {
         onUploaded();
+        onToast('Version uploaded', true);
       } else {
         setUploadError(data.error || 'Upload failed');
+        onToast('Upload failed', false);
       }
     } catch {
       setUploadError('Upload failed');
+      onToast('Upload failed', false);
     } finally {
       setUploading(false);
     }
@@ -96,11 +101,14 @@ export function VersionPanel({
         setGithubBranch('');
         setShowGithubFetch(false);
         onUploaded();
+        onToast('Version fetched from GitHub', true);
       } else {
         setUploadError(data.error || 'Fetch failed');
+        onToast('Fetch failed', false);
       }
     } catch {
       setUploadError('Fetch failed');
+      onToast('Fetch failed', false);
     } finally {
       setUploading(false);
     }
@@ -127,20 +135,20 @@ export function VersionPanel({
               setShowGithubFetch(!showGithubFetch);
             }}
             disabled={uploading}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:cursor-auto ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto ${
               showGithubFetch
                 ? 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300'
-                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800'
             } disabled:opacity-50`}
           >
             <GitBranch className="w-3.5 h-3.5" />
             {showGithubFetch ? 'Cancel' : 'From GitHub'}
           </button>
           <label
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer ${
               uploading
                 ? 'text-stone-400 dark:text-stone-500'
-                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
+                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800'
             }`}
           >
             {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
@@ -215,7 +223,7 @@ export function VersionPanel({
               type="button"
               onClick={handleFetchGithub}
               disabled={uploading || !githubRepo}
-              className="px-4 py-2 bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-800 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
+              className="px-4 py-2 bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-800 disabled:hover:bg-stone-300 dark:disabled:hover:bg-stone-800 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
             >
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GitBranch className="w-4 h-4" />}
               {uploading ? 'Fetching...' : 'Fetch & Add'}
@@ -225,20 +233,24 @@ export function VersionPanel({
       )}
 
       {uploadError && <p className="text-xs text-purple-500 dark:text-purple-400 mb-3">{uploadError}</p>}
-      {versions.length === 0 ? (
-        <p className="text-sm text-stone-400 dark:text-stone-500">No versions yet</p>
-      ) : (
-        <VersionList
-          versions={versions}
-          currentVersion={currentVersion}
-          activating={activating}
-          deletingVersion={deletingVersion}
-          onActivate={onActivate}
-          onDelete={onDelete}
-          onDownload={onDownload}
-          accent={accent}
-        />
-      )}
+      <div className="h-64 overflow-y-auto">
+        {versions.length === 0 ? (
+          <div className="h-full flex items-center justify-center">
+            <p className="text-sm text-stone-400 dark:text-stone-500">No versions yet</p>
+          </div>
+        ) : (
+          <VersionList
+            versions={versions}
+            currentVersion={currentVersion}
+            activating={activating}
+            deletingVersion={deletingVersion}
+            onActivate={onActivate}
+            onDelete={onDelete}
+            onDownload={onDownload}
+            accent={accent}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -60,7 +60,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
           type="button"
           onClick={onClose}
           disabled={loading}
-          className="flex-1 px-4 py-2 border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium rounded-lg transition-colors cursor-pointer disabled:cursor-auto disabled:opacity-50"
+          className="flex-1 px-4 py-2 border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50"
         >
           Cancel
         </button>
@@ -68,7 +68,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
           type="button"
           onClick={onConfirm}
           disabled={loading}
-          className={`flex-1 px-4 py-2 ${btnClass} text-white font-medium rounded-lg transition-colors cursor-pointer disabled:cursor-auto disabled:opacity-50`}
+          className={`flex-1 px-4 py-2 ${btnClass} text-white font-medium rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50`}
         >
           {confirm}
         </button>

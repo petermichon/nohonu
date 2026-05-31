@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SLOT_MS } from '../lib/types.ts';
 import type { UptimeSlot, UptimeRange } from '../lib/types.ts';
 import { getAccentStyle, calcUptimePct } from '../lib/utils.ts';
+import { UptimeTooltip } from './ChartTooltip.tsx';
 
 interface UptimeChartProps {
   uptime: UptimeSlot[];
@@ -35,7 +36,7 @@ export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChar
               type="button"
               key={r}
               onClick={() => onRangeChange(r)}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+              className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
                 range === r
                   ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
                   : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
@@ -55,29 +56,14 @@ export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChar
               className="relative flex-1 flex items-end h-full cursor-default"
               onMouseEnter={() => setHovered(s)}
             >
-              {isHovered && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md whitespace-nowrap pointer-events-none z-10 text-center">
-                  <p
-                    className={`text-xs font-semibold ${
-                      s.up === null
-                        ? 'text-stone-400 dark:text-stone-500'
-                        : s.up
-                          ? accentStyle
-                            ? ''
-                            : 'text-purple-400 dark:text-purple-300'
-                          : 'text-stone-600 dark:text-stone-400'
-                    }`}
-                    style={s.up && accentStyle ? { color: accentStyle.color } : undefined}
-                  >
-                    {s.up === null ? 'No data' : s.up ? 'Up' : 'Down'}
-                  </p>
-                  <p className="text-[10px] text-stone-400 dark:text-stone-500">
-                    {new Date(s.slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              )}
+              <UptimeTooltip
+                status={s.up === null ? 'nodata' : s.up ? 'up' : 'down'}
+                time={new Date(s.slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                visible={isHovered}
+                accentColor={accentStyle?.color}
+              />
               <div
-                className={`w-full h-full rounded-sm transition-colors ${
+                className={`w-full h-full rounded-sm ${
                   s.up === null
                     ? 'bg-stone-100 dark:bg-stone-800'
                     : s.up

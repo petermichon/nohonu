@@ -63,7 +63,7 @@ export function SettingsPopover() {
           setStatus('idle');
           setOpen((o) => !o);
         }}
-        className="p-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer"
+        className="p-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
         title="Connection settings"
       >
         <Settings className="w-5 h-5" />
@@ -92,7 +92,7 @@ export function SettingsPopover() {
                   setStatus('idle');
                 }}
                 placeholder="http://localhost:8080"
-                className="w-full px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400 transition-colors"
+                className="w-full px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
               />
             </div>
             <div>
@@ -108,7 +108,7 @@ export function SettingsPopover() {
                   setStatus('idle');
                 }}
                 placeholder="Leave empty if not set"
-                className="w-full px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400 transition-colors"
+                className="w-full px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
               />
             </div>
             {statusMsg[status] && (
@@ -124,7 +124,7 @@ export function SettingsPopover() {
             <button
               type="submit"
               disabled={status === 'checking'}
-              className="w-full py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-stone-900 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
+              className="w-full py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-stone-900 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
             >
               {status === 'checking' && <Loader2 className="w-4 h-4 animate-spin" />}
               {(status === 'valid' || status === 'open') && <Check className="w-4 h-4" />}

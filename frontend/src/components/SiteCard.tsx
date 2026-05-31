@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Power, Loader2, Eye, Activity } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { getAccentStyle, formatHits } from '../lib/utils.ts';
+import { Tooltip } from './Tooltip.tsx';
 import type { Site } from '../lib/types.ts';
 
 interface SiteCardProps {
@@ -47,7 +48,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`group flex items-center gap-4 px-4 py-3 rounded-xl border transition-all duration-150 cursor-pointer ${cardClass}`}
+      className={`group flex items-center gap-4 px-4 py-3 rounded-xl border cursor-pointer ${cardClass}`}
     >
       {/* Accent strip */}
       <div className={`shrink-0 w-1 self-stretch rounded-full ${uptimeBarColor ?? ''}`} style={uptimeBarStyle} />
@@ -96,7 +97,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => !site.enabled && e.preventDefault()}
-          className={`text-xs truncate block transition-colors ${
+          className={`text-xs truncate block ${
             site.enabled
               ? 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
               : 'text-stone-400/60 dark:text-stone-600 pointer-events-none'
@@ -141,41 +142,43 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
-        <a
-          href={`${protocol}//${siteUrl}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => !site.enabled && e.preventDefault()}
-          className={`p-1.5 rounded-lg transition-colors ${
-            site.enabled
-              ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
-              : 'text-stone-300 dark:text-stone-700 pointer-events-none'
-          }`}
-          title={site.enabled ? 'Open site' : 'Site disabled'}
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
+        <Tooltip content={site.enabled ? 'Open site' : 'Site disabled'}>
+          <a
+            href={`${protocol}//${siteUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => !site.enabled && e.preventDefault()}
+            className={`p-1.5 rounded-lg ${
+              site.enabled
+                ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
+                : 'text-stone-300 dark:text-stone-700 pointer-events-none'
+            }`}
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </Tooltip>
 
         {isLoading ? (
           <div className="p-1.5">
             <Loader2 className="w-3.5 h-3.5 text-stone-400 animate-spin" />
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle?.(site.domain);
-            }}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-              site.enabled
-                ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
-                : 'text-stone-400 dark:text-stone-600 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-            title={site.enabled ? 'Disable site' : 'Enable site'}
-          >
-            <Power className="w-3.5 h-3.5" />
-          </button>
+          <Tooltip content={site.enabled ? 'Disable site' : 'Enable site'}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle?.(site.domain);
+              }}
+              className={`p-1.5 rounded-lg cursor-pointer ${
+                site.enabled
+                  ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  : 'text-stone-400 dark:text-stone-600 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              <Power className="w-3.5 h-3.5" />
+            </button>
+          </Tooltip>
         )}
       </div>
     </div>

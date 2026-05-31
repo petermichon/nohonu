@@ -14,10 +14,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     globalThis.addEventListener('keydown', handler);
-    document.body.style.overflow = 'hidden';
     return () => {
       globalThis.removeEventListener('keydown', handler);
-      document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
 
@@ -36,7 +34,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer"
+            className="p-1 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
