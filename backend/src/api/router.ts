@@ -12,7 +12,8 @@ import { getSiteStats } from './endpoints/sites-info-stats.ts';
 import { getSiteVisitors } from './endpoints/sites-info-visitors.ts';
 import { getSiteUptime } from './endpoints/sites-info-uptime.ts';
 import { getSiteRepos } from './endpoints/sites-info-repos.ts';
-import { getSiteVersions } from './endpoints/sites-versions-get.ts';
+import { listSiteVersions } from './endpoints/sites-versions-list-get.ts';
+import { downloadSiteVersion } from './endpoints/sites-versions-download.ts';
 import { upload } from './endpoints/sites-versions-upload-post.ts';
 import { fetchGithub } from './endpoints/sites-versions-github-post.ts';
 import { deleteVersion } from './endpoints/sites-versions-delete.ts';
@@ -42,7 +43,8 @@ const SITE_GET_ROUTES: [string, CtxRouteHandler][] = [
   ['visitors', getSiteVisitors],
   ['uptime', getSiteUptime],
   ['repos', getSiteRepos],
-  ['versions', getSiteVersions],
+  ['versions', listSiteVersions],
+  ['versions/download', downloadSiteVersion],
 ];
 
 async function handleSiteRoute(req: Request, path: string): Promise<Response> {
@@ -130,6 +132,7 @@ function matchRoute(path: string): Endpoint | undefined {
 }
 
 export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
+  const start = Date.now();
   const url = new URL(req.url);
   const path = url.pathname;
 
@@ -141,17 +144,21 @@ export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promis
 
   // Static file serving as fallback
   if (!route) {
+    let response: Response;
     try {
-      return await serveStatic(req, path, info);
+      response = await serveStatic(req, path, info);
     } catch (err) {
       console.error('Error in static endpoint:', err);
-      return new Response('Internal server error', { status: 500, headers: CORS });
+      response = new Response('Internal server error', { status: 500, headers: CORS });
     }
+    console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
+    return response;
   }
 
   if (route.auth) {
     const authError = requireAuth(req);
     if (authError) {
+      console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
       return authError;
     }
   }
@@ -161,7 +168,7 @@ export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promis
     response = await route.handler(req, path, info);
   } catch (err) {
     console.error('Error in endpoint:', err);
-    return new Response('Internal server error', { status: 500, headers: CORS });
+    response = new Response('Internal server error', { status: 500, headers: CORS });
   }
 
   let headers: Headers;
@@ -181,5 +188,6 @@ export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promis
     statusText: response.statusText,
     headers,
   });
+  console.log(`${req.method} ${path} ${finalResponse.status} ${Date.now() - start}ms`);
   return finalResponse;
 }

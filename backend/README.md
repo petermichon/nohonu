@@ -1,6 +1,7 @@
 # Nohonu Backend
 
-Deno 2.0 HTTP server for static site hosting. Handles zip uploads, version management, GitHub integration, and real-time statistics.
+Deno 2.0 HTTP server for static site hosting. Handles zip uploads, version management, GitHub integration, and real-time
+statistics.
 
 ## Features
 
@@ -10,6 +11,43 @@ Deno 2.0 HTTP server for static site hosting. Handles zip uploads, version manag
 - **Real-time stats** - Request counts, unique visitors, uptime monitoring
 - **Subdomain serving** - Sites served on `*.your-domain.com`
 - **Path-based serving** - Alternative access via `/site-name/` paths
+
+## Architecture
+
+The backend follows a 3-layer architecture:
+
+```
+┌─────────────────────────────────────────┐
+│              API Layer                  │
+│    (HTTP handling, thin wrappers)       │
+│         src/api/endpoints/              │
+├─────────────────────────────────────────┤
+│           Use Cases Layer               │
+│  (Business logic, one function per      │
+│       complete user action)             │
+│         src/usecases/sites/             │
+├─────────────────────────────────────────┤
+│            Core Layer                   │
+│   (State management, file I/O, raw      │
+│        analytics data storage)          │
+│    src/core/sites/ + src/core/analytics/│
+└─────────────────────────────────────────┘
+```
+
+**Core Layer** (`src/core/`): Handles raw state - file operations, metadata persistence, analytics data structures. No
+HTTP knowledge.
+
+**Use Cases Layer** (`src/usecases/`): Contains business logic. Each function represents one complete user action (e.g.,
+`deleteSite()`, `deployFromGithub()`). Composes multiple core operations but knows nothing about HTTP.
+
+**API Layer** (`src/api/`): Thin HTTP wrappers. Each endpoint calls exactly one usecase function. Handles request
+parsing, auth, and response formatting.
+
+This separation enables:
+
+- **Testability** - Test business logic without HTTP server
+- **Clarity** - Each usecase maps directly to a user goal
+- **Reusability** - Usecases callable from CLI, scheduled jobs, etc.
 
 ## API
 
@@ -33,8 +71,8 @@ Public endpoints (`/health`, `/check-domain`, static file serving) don't require
 **Sites Management**
 
 - `GET /sites` - List all sites with stats (hits, uptime%, accent color)
-- `POST /upload` - Upload zip (multipart: `domain`, `zip`)
-- `POST /fetch-github` - Deploy from GitHub (JSON: `domain`, `repo`, `branch`)
+- `POST /sites/:domain/versions` - Upload zip (multipart: `zip`)
+- `POST /sites/:domain/versions/github` - Deploy from GitHub (JSON: `repo`, `branch`)
 
 **Site Operations** (`/sites/:domain`)
 
@@ -77,7 +115,7 @@ The zip is extracted on first access. Only HTML requests are tracked for stats.
 | Variable    | Default     | Description                                    |
 | ----------- | ----------- | ---------------------------------------------- |
 | `PORT`      | `8080`      | Server port                                    |
-| `SITES_DIR` | `./sites`   | Path for storing site zips and extracted files |
+| `SITES_DIR` | `./data`    | Path for storing site zips and extracted files |
 | `API_KEY`   | _(none)_    | Secret key for API authentication              |
 | `DOMAIN`    | `localhost` | Domain for HTTPS certificates (Caddy)          |
 
@@ -85,7 +123,8 @@ The zip is extracted on first access. Only HTML requests are tracked for stats.
 
 **Requirements on the VPS:** Docker with the Compose plugin, Git.
 
-The stack runs Caddy as a reverse proxy in front of the Deno backend on a shared Docker network. Caddy handles HTTPS automatically. The backend has no published ports and is unreachable from outside Docker.
+The stack runs Caddy as a reverse proxy in front of the Deno backend on a shared Docker network. Caddy handles HTTPS
+automatically. The backend has no published ports and is unreachable from outside Docker.
 
 ```
 Internet → :80/:443 (Caddy) → backend:8080 (Docker app network)
@@ -135,7 +174,8 @@ ssh -T git@github.com
 # Hi your-user! You've successfully authenticated...
 ```
 
-Create the directory and clone (do **not** use `sudo` for the clone — it must run as your user so the deploy key is picked up):
+Create the directory and clone (do **not** use `sudo` for the clone — it must run as your user so the deploy key is
+picked up):
 
 ```bash
 sudo mkdir -p /opt/nohonu
@@ -151,13 +191,15 @@ echo "API_KEY=$(openssl rand -hex 32)" > .env
 echo "DOMAIN=example.com" >> .env
 ```
 
-Make sure your domain's DNS A record points to the VPS IP. Wildcard subdomains (`*.example.com`) should also point to the VPS for multi-tenant site serving.
+Make sure your domain's DNS A record points to the VPS IP. Wildcard subdomains (`*.example.com`) should also point to
+the VPS for multi-tenant site serving.
 
 ```bash
 sudo docker compose up --build -d
 ```
 
-**Note:** `sudo` does not preserve environment variables by default. If you prefer to pass `DOMAIN` inline instead of using a `.env` file, use one of these approaches:
+**Note:** `sudo` does not preserve environment variables by default. If you prefer to pass `DOMAIN` inline instead of
+using a `.env` file, use one of these approaches:
 
 ```bash
 # Option 1: Use sudo -E to preserve environment
@@ -229,10 +271,10 @@ Requires Deno 2.x. The server auto-reloads on file changes.
 # Health check
 curl http://localhost:8080/health
 
-# Upload a site
-curl -X POST http://localhost:8080/upload \
-  -F "domain=my-site" \
-  -F "zip=@site.zip"
+# Upload a site (requires API_KEY)
+curl -X POST http://localhost:8080/sites/my-site/versions \
+  -F "zip=@site.zip" \
+  -H "X-Api-Key: your-key"
 
 # List sites
 curl http://localhost:8080/sites \
@@ -243,5 +285,4 @@ curl http://localhost:8080/sites \
 
 Domains must match: `^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$`
 
-Valid: `my-site`, `blog123`, `a-b-c`
-Invalid: `-start`, `end-`, `UPPER`, `a.b`
+Valid: `my-site`, `blog123`, `a-b-c` Invalid: `-start`, `end-`, `UPPER`, `a.b`

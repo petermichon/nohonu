@@ -1,7 +1,9 @@
 import { VALID_DOMAIN } from './paths.ts';
 
+const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? '*';
+
 export const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key',
 };
@@ -30,6 +32,15 @@ export function validateDomain(domain: unknown): domain is string {
   return typeof domain === 'string' && VALID_DOMAIN.test(domain);
 }
 
+export function extractClientIp(req: Request, remoteAddr: Deno.NetAddr): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  if (realIp) return realIp;
+  if (remoteAddr?.hostname) return remoteAddr.hostname;
+  return 'unknown';
+}
+
 /** Check request method and return 405 if mismatch */
 export function checkMethod(req: Request, allowed: string): Response | undefined {
   if (req.method === allowed) {
@@ -44,6 +55,10 @@ export function ensureDomain(domain: unknown): Response | string {
     return domain;
   }
   return error('Invalid domain');
+}
+
+export function assert(condition: boolean, message: string): asserts condition {
+  if (!condition) throw new Error(message);
 }
 
 /** Parse JSON body with error handling */

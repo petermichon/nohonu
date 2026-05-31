@@ -1,16 +1,11 @@
-import { json, API_KEY, checkMethod } from '../../shared/http.ts';
+import { json, checkMethod } from '../../shared/http.ts';
+import * as authUc from '../../usecases/auth/index.ts';
 
 export function auth(req: Request): Response {
   const methodError = checkMethod(req, 'GET');
-  if (methodError) {
-    return methodError;
-  }
-  if (!API_KEY) {
-    return json({ secured: false });
-  }
-  if (req.headers.get('X-Api-Key') === API_KEY) {
-    return json({ secured: true, valid: true });
-  } else {
-    return json({ secured: true, valid: false }, 401);
-  }
+  if (methodError) return methodError;
+
+  const result = authUc.checkAuth(req.headers.get('X-Api-Key'));
+  const status = result.secured && !result.valid ? 401 : 200;
+  return json(result, status);
 }

@@ -1,11 +1,11 @@
 import { error, json } from '../../shared/http.ts';
-import { readSiteMetadata } from '../../services/sites-folder.ts';
+import * as sites from '../../usecases/sites/index.ts';
 import type { RouteContext } from './sites-types.ts';
 
 export async function getSiteMeta({ domain }: RouteContext): Promise<Response> {
-  const data = await readSiteMetadata(domain);
-  if (!data) {
+  const meta = await sites.getSiteMeta(domain);
+  if (!meta) {
     return error('Site not found', 404);
   }
-  return json({ domain, accent: data.accent });
+  return json({ domain, accent: meta.accent });
 }

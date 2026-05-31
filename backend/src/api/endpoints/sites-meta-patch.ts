@@ -1,23 +1,17 @@
 import { error, json, parseJson } from '../../shared/http.ts';
-import { readSiteMetadata, writeSiteMetadata, VALID_ACCENT } from '../../services/sites-folder.ts';
+import * as sites from '../../usecases/sites/index.ts';
 import type { RouteContext } from './sites-types.ts';
 
 export async function updateMeta({ domain }: RouteContext, req: Request): Promise<Response> {
   const body = await parseJson<{ accent?: string | undefined }>(req);
-  if (body instanceof Response) {
-    return body;
-  }
+  if (body instanceof Response) return body;
 
-  const data = await readSiteMetadata(domain);
-  if (!data) {
-    return error('Site not found', 404);
+  try {
+    await sites.updateSiteMeta(domain, body);
+    return json({ domain, accent: body.accent });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to update meta';
+    const status = message.includes('not found') ? 404 : 400;
+    return error(message, status);
   }
-  if ('accent' in body) {
-    if (body.accent !== undefined && !VALID_ACCENT.test(body.accent)) {
-      return error('Invalid accent color');
-    }
-    data.accent = body.accent;
-  }
-  await writeSiteMetadata(domain, data);
-  return json({ success: true, domain, accent: data.accent });
 }

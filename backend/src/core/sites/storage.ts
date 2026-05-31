@@ -1,4 +1,5 @@
-import { SITES_DIR, SiteData } from '../shared/paths.ts';
+import { SITES_DIR, SiteData } from '../../shared/paths.ts';
+import { assert } from '../../shared/http.ts';
 
 // Path helpers for new domain-based structure
 export function domainDir(domain: string): string {
@@ -36,22 +37,7 @@ export const DEFAULT_DATA: SiteData = {
   extracted: false,
 };
 
-// used in:
-//   - sites-meta-patch.ts
-//   - sites-list-get.ts
-//   - sites-versions-activate-post.ts
-//   - sites-toggle-patch.ts
-//   - sites-versions-upload-post.ts
-//   - sites-versions-get.ts
-//   - sites-versions-delete.ts
-//   - check-domain-get.ts
-//   - get.ts
-//   - sites-versions-github-post.ts
-//   - sites-info-get.ts (getSiteInfo)
-//   - sites-info-download.ts (downloadSite)
-//   - sites-info-icon.ts (getSiteIcon)
-//   - sites-info-meta.ts (getSiteMeta)
-//   - sites-info-repos.ts (getSiteRepos)
+// Low-level: Read site metadata
 export async function readSiteMetadata(domain: string): Promise<SiteData | undefined> {
   let content: string;
   try {
@@ -71,14 +57,9 @@ export async function readSiteMetadata(domain: string): Promise<SiteData | undef
   }
 }
 
-// used in:
-//   - sites-toggle-patch.ts
-//   - sites-versions-delete.ts (called from deleteVersion)
-//   - sites-versions-github-post.ts (2x)
-//   - sites-versions-upload-post.ts
-//   - sites-versions-activate-post.ts
-//   - sites-meta-patch.ts
+// Low-level: Write site metadata
 export async function writeSiteMetadata(domain: string, data: SiteData): Promise<void> {
+  assert(data.nextIndex >= 1, `nextIndex must be >= 1 for ${domain}, got ${data.nextIndex}`);
   // Validate coherence: if currentIndex is set, the version file must exist
   if (data.currentIndex !== null) {
     try {
@@ -90,25 +71,20 @@ export async function writeSiteMetadata(domain: string, data: SiteData): Promise
   await Deno.writeTextFile(metadataPath(domain), JSON.stringify(data, null, 2));
 }
 
-// used in:
-//   - sites-versions-get.ts (download specific version)
+// Low-level: Open a version file handle
 export async function openVersion(domain: string, index: number): Promise<Deno.FsFile> {
   return await Deno.open(versionPath(domain, index));
 }
 
-// used in:
-//   - internal (no direct endpoint usage)
+// Low-level: Read version file contents
 export async function readVersion(domain: string, index: number): Promise<Uint8Array> {
   return await Deno.readFile(versionPath(domain, index));
 }
 
-// used in:
-//   - sites-versions-delete.ts (refactored to update metadata)
-export async function deleteVersion(domain: string, index: number): Promise<void> {
+// Low-level: Delete a version file and update metadata
+export async function deleteVersionFile(domain: string, index: number): Promise<void> {
   const data = await readSiteMetadata(domain);
-  if (!data) {
-    throw new Error(`Site not found: ${domain}`);
-  }
+  assert(data !== undefined, `Site not found: ${domain}`);
 
   try {
     await Deno.remove(versionPath(domain, index));
@@ -129,13 +105,10 @@ export async function deleteVersion(domain: string, index: number): Promise<void
   await writeSiteMetadata(domain, data);
 }
 
-// used in:
-//   - sites-versions-activate-post.ts (called from endpoint)
-export async function activateVersion(domain: string, index: number): Promise<void> {
+// Low-level: Set current version index
+export async function setCurrentVersion(domain: string, index: number): Promise<void> {
   const data = await readSiteMetadata(domain);
-  if (!data) {
-    throw new Error(`Site not found: ${domain}`);
-  }
+  assert(data !== undefined, `Site not found: ${domain}`);
 
   // Validate version exists
   try {
@@ -148,16 +121,10 @@ export async function activateVersion(domain: string, index: number): Promise<vo
   data.currentIndex = index;
   data.enabled = true;
   await writeSiteMetadata(domain, data);
-
-  // Delete old extracted site to force re-extraction with new version
-  await deleteExtractedSite(domain);
 }
 
-// used in:
-//   - sites-versions-activate-post.ts (called from activateVersion)
-//   - sites-toggle-patch.ts
-//   - extractSite (cleanup on failure)
-export async function deleteExtractedSite(domain: string): Promise<void> {
+// Low-level: Delete extracted site files
+export async function deleteExtractedFiles(domain: string): Promise<void> {
   try {
     await Deno.remove(extractedDir(domain), { recursive: true });
   } catch (error) {
@@ -173,9 +140,8 @@ export async function deleteExtractedSite(domain: string): Promise<void> {
   }
 }
 
-// used in:
-//   - sites-delete.ts (delete entire site)
-export async function deleteAllSiteFiles(domain: string): Promise<void> {
+// Low-level: Delete entire site directory
+export async function deleteSiteFiles(domain: string): Promise<void> {
   try {
     await Deno.remove(domainDir(domain), { recursive: true });
   } catch (error) {
@@ -184,11 +150,7 @@ export async function deleteAllSiteFiles(domain: string): Promise<void> {
   }
 }
 
-// used in:
-//   - sites-versions-delete.ts
-//   - sites-versions-activate-post.ts
-//   - sites-versions-get.ts
-//   - get.ts
+// Low-level: Check if version file exists
 export async function versionExists(domain: string, index: number): Promise<boolean> {
   try {
     await Deno.stat(versionPath(domain, index));
@@ -200,15 +162,13 @@ export async function versionExists(domain: string, index: number): Promise<bool
   }
 }
 
-// used in:
-//   - get.ts (ensureSiteExtracted)
+// Low-level: Check if extracted site exists
 export async function extractedSiteExists(domain: string): Promise<boolean> {
   const data = await readSiteMetadata(domain);
   return data?.extracted ?? false;
 }
 
-// used in:
-//   - get.ts (serveStatic)
+// Low-level: Read an extracted file
 export async function readExtractedFile(domain: string, filePath: string): Promise<Deno.FsFile | undefined> {
   const fullPath = extractedFilePath(domain, filePath);
   try {
@@ -220,9 +180,8 @@ export async function readExtractedFile(domain: string, filePath: string): Promi
   }
 }
 
-// used in:
-//   - get.ts (ensureSiteExtracted)
-export async function extractSite(domain: string, files: Record<string, Uint8Array>): Promise<void> {
+// Low-level: Extract files to site directory
+export async function extractFiles(domain: string, files: Record<string, Uint8Array>): Promise<void> {
   try {
     await Deno.mkdir(extractedDir(domain), { recursive: true });
 
@@ -263,14 +222,12 @@ export async function extractSite(domain: string, files: Record<string, Uint8Arr
     }
   } catch {
     // Clean up partial extraction on failure
-    await deleteExtractedSite(domain);
+    await deleteExtractedFiles(domain);
     throw new Error('Extraction failed');
   }
 }
 
-// used in:
-//   - scheduler.ts
-//   - sites-list-get.ts
+// Low-level: List all domains with metadata
 export async function listDomains(): Promise<string[]> {
   const domains: string[] = [];
   try {
@@ -292,13 +249,7 @@ export async function listDomains(): Promise<string[]> {
   return domains;
 }
 
-// --- Composed functions (built from core operations) ---
-
-// used in:
-//   - get.ts (ensureSiteExtracted)
-//   - sites-info-get.ts (getSiteInfo)
-//   - sites-info-icon.ts (getSiteIcon)
-//   - check-domain-get.ts
+// Low-level: Read active version contents
 export async function readActiveVersion(domain: string): Promise<Uint8Array | undefined> {
   const data = await readSiteMetadata(domain);
   if (!data || data.currentIndex === null) {
@@ -311,8 +262,7 @@ export async function readActiveVersion(domain: string): Promise<Uint8Array | un
   }
 }
 
-// used in:
-//   - sites-info-download.ts (downloadSite)
+// Low-level: Open active version file handle
 export async function openActiveVersion(domain: string): Promise<Deno.FsFile | undefined> {
   const data = await readSiteMetadata(domain);
   if (!data || data.currentIndex === null) {

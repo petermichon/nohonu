@@ -1,4 +1,4 @@
-const sitesDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../sites`;
+const sitesDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../data`;
 export const SITES_DIR = sitesDir;
 export const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 

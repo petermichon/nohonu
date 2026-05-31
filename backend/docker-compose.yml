@@ -21,10 +21,10 @@ services:
       context: .
     environment:
       PORT: '8080'
-      SITES_DIR: /data/sites
+      SITES_DIR: /data
       API_KEY: ${API_KEY:-}
     volumes:
-      - sites_data:/data/sites
+      - data:/data
     networks:
       - app
     restart: unless-stopped
@@ -33,6 +33,6 @@ networks:
   app:
 
 volumes:
-  sites_data:
+  data:
   caddy_data:
   caddy_config:
