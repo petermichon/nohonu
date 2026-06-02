@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Power, Loader2, Eye, Activity } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { getAccentStyle, formatHits } from '../lib/utils.ts';
+import { extractAccentColor } from '../lib/extractColor.ts';
 import { Tooltip } from './Tooltip.tsx';
 import type { Site } from '../lib/types.ts';
 
@@ -19,8 +20,19 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
   const navigate = useNavigate();
   const initial = site.domain[0].toUpperCase();
   const [iconError, setIconError] = useState(false);
+  const [extractedAccent, setExtractedAccent] = useState<string | null>(null);
 
-  const accentStyle = getAccentStyle(site.accent, site.enabled);
+  // Auto-extract accent from icon if not set
+  useEffect(() => {
+    if (!site.accent && !iconError) {
+      const iconUrl = `${apiBase}/sites/${site.domain}/icon`;
+      extractAccentColor(iconUrl).then((color) => {
+        if (color) setExtractedAccent(color);
+      });
+    }
+  }, [site.accent, site.domain, apiBase, iconError]);
+
+  const accentStyle = getAccentStyle(site.accent || extractedAccent, site.enabled);
   const uptimePercent = site.uptime ?? 0;
   const uptimeBarColor =
     site.uptime === null
@@ -151,7 +163,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
             className={`p-1.5 rounded-lg ${
               site.enabled
                 ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
-                : 'text-stone-300 dark:text-stone-700 pointer-events-none'
+                : 'text-stone-300 dark:text-stone-700'
             }`}
           >
             <ExternalLink className="w-3.5 h-3.5" />

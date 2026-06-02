@@ -18,11 +18,7 @@ export function Toast({ message, visible, onClose, success = true }: ToastProps)
         <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
       )}
       <span className="text-sm font-medium">{message}</span>
-      <button
-        type="button"
-        onClick={onClose}
-        className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors"
-      >
+      <button type="button" onClick={onClose} className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-800">
         <X className="w-4 h-4" />
       </button>
     </div>

@@ -77,3 +77,30 @@ html.dark {
 .dark .themed-scroll::-webkit-scrollbar-thumb:hover {
   background: #57534e; /* stone-600 */
 }
+
+/* Sidebar slide-in animation */
+@keyframes slideInRight {
+  from {
+    transform: translateX(-4px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(4px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.sidebar-animate-right {
+  animation: slideInRight 0.15s ease-out;
+}
+
+.sidebar-animate-left {
+  animation: slideInLeft 0.15s ease-out;
+}

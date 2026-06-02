@@ -233,23 +233,25 @@ export function VersionPanel({
       )}
 
       {uploadError && <p className="text-xs text-purple-500 dark:text-purple-400 mb-3">{uploadError}</p>}
-      <div className="h-64 overflow-y-auto">
-        {versions.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-sm text-stone-400 dark:text-stone-500">No versions yet</p>
-          </div>
-        ) : (
-          <VersionList
-            versions={versions}
-            currentVersion={currentVersion}
-            activating={activating}
-            deletingVersion={deletingVersion}
-            onActivate={onActivate}
-            onDelete={onDelete}
-            onDownload={onDownload}
-            accent={accent}
-          />
-        )}
+      <div className="h-64 relative">
+        <div className="absolute inset-0 overflow-y-auto">
+          {versions.length === 0 ? (
+            <div className="h-full flex items-center justify-center">
+              <p className="text-sm text-stone-400 dark:text-stone-500">No versions yet</p>
+            </div>
+          ) : (
+            <VersionList
+              versions={versions}
+              currentVersion={currentVersion}
+              activating={activating}
+              deletingVersion={deletingVersion}
+              onActivate={onActivate}
+              onDelete={onDelete}
+              onDownload={onDownload}
+              accent={accent}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

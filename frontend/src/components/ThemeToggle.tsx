@@ -18,7 +18,7 @@ export function ThemeToggle() {
           <button
             type="button"
             onClick={() => setTheme(value)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer ${
               theme === value
                 ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'

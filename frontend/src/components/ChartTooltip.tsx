@@ -1,4 +1,5 @@
 import { Eye } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
 
 interface ChartTooltipProps {
   visible: boolean;
@@ -6,12 +7,31 @@ interface ChartTooltipProps {
 }
 
 export function ChartTooltip({ visible, children }: ChartTooltipProps) {
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (visible && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.top - 8,
+        left: rect.left + rect.width / 2,
+      });
+    }
+  }, [visible]);
+
   if (!visible) return null;
 
   return (
-    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md whitespace-nowrap pointer-events-none z-10 text-center">
-      {children}
-    </div>
+    <>
+      <div ref={containerRef} className="absolute inset-0 pointer-events-none" />
+      <div
+        className="fixed z-50 px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md whitespace-nowrap pointer-events-none text-center -translate-x-1/2 -translate-y-full"
+        style={{ top: position.top, left: position.left }}
+      >
+        {children}
+      </div>
+    </>
   );
 }
 

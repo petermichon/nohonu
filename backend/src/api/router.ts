@@ -1,4 +1,4 @@
-import { CORS, requireAuth, error, ensureDomain } from '../shared/http.ts';
+import { CORS, requireAuth, error, ensureDomain, delay } from '../shared/http.ts';
 import { health } from './endpoints/health-get.ts';
 import { auth } from './endpoints/auth-get.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
@@ -132,6 +132,7 @@ function matchRoute(path: string): Endpoint | undefined {
 }
 
 export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
+  await delay(1000);
   const start = Date.now();
   const url = new URL(req.url);
   const path = url.pathname;

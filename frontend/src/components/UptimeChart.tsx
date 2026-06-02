@@ -1,8 +1,20 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SLOT_MS } from '../lib/types.ts';
 import type { UptimeSlot, UptimeRange } from '../lib/types.ts';
 import { getAccentStyle, calcUptimePct } from '../lib/utils.ts';
 import { UptimeTooltip } from './ChartTooltip.tsx';
+
+const RANGE_LABELS: Record<UptimeRange, string> = {
+  60: '1h',
+  720: '12h',
+  1440: '24h',
+};
+
+const TIME_LABELS: Record<UptimeRange, string> = {
+  60: '1h ago',
+  720: '12h ago',
+  1440: '24h ago',
+};
 
 interface UptimeChartProps {
   uptime: UptimeSlot[];
@@ -11,10 +23,30 @@ interface UptimeChartProps {
   accent?: string | null;
 }
 
+function getBarClassName(up: boolean | null, isHovered: boolean, hasAccent: boolean): string {
+  if (up === null) return 'bg-stone-100 dark:bg-stone-800';
+  if (up) {
+    if (isHovered) return hasAccent ? '' : 'bg-purple-400 dark:bg-purple-300';
+    return hasAccent ? '' : 'bg-purple-300 dark:bg-purple-400';
+  }
+  return isHovered ? 'bg-stone-400 dark:bg-stone-500' : 'bg-stone-300 dark:bg-stone-600';
+}
+
+function getBarStyle(
+  up: boolean | null,
+  isHovered: boolean,
+  accent: string | null | undefined
+): React.CSSProperties | undefined {
+  if (up && accent) {
+    return { backgroundColor: isHovered ? accent : `${accent}cc` };
+  }
+  return undefined;
+}
+
 export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChartProps) {
   const [hovered, setHovered] = useState<UptimeSlot | null>(null);
-  const pct = calcUptimePct(uptime);
-  const accentStyle = getAccentStyle(accent, true);
+  const pct = useMemo(() => calcUptimePct(uptime), [uptime]);
+  const accentStyle = useMemo(() => getAccentStyle(accent, true), [accent]);
 
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 mt-3">
@@ -42,18 +74,41 @@ export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChar
                   : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
               }`}
             >
-              {r === 60 ? '1h' : r === 720 ? '12h' : '24h'}
+              {RANGE_LABELS[r]}
             </button>
           ))}
         </div>
       </div>
-      <div className="flex items-end gap-px h-8 relative" onMouseLeave={() => setHovered(null)}>
+      <div
+        className="flex items-end gap-0.5 h-8 relative overflow-x-scroll overflow-y-visible chart-scrollbar"
+        style={{
+          scrollbarColor: 'rgb(214 211 209) transparent',
+          scrollbarWidth: 'thin',
+        }}
+        onMouseLeave={() => setHovered(null)}
+      >
+        <style>{`
+          .chart-scrollbar::-webkit-scrollbar {
+            height: 8px;
+          }
+          .chart-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .chart-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgb(214 211 209);
+            border-radius: 4px;
+          }
+          .chart-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgb(168 162 158);
+          }
+        `}</style>
         {uptime.map((s) => {
           const isHovered = hovered?.slot === s.slot;
           return (
             <div
               key={s.slot}
-              className="relative flex-1 flex items-end h-full cursor-default"
+              className="relative shrink-0 flex items-end h-full cursor-default"
+              style={{ width: '10px' }}
               onMouseEnter={() => setHovered(s)}
             >
               <UptimeTooltip
@@ -63,31 +118,15 @@ export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChar
                 accentColor={accentStyle?.color}
               />
               <div
-                className={`w-full h-full rounded-sm ${
-                  s.up === null
-                    ? 'bg-stone-100 dark:bg-stone-800'
-                    : s.up
-                      ? isHovered
-                        ? accent
-                          ? ''
-                          : 'bg-purple-400 dark:bg-purple-300'
-                        : accent
-                          ? ''
-                          : 'bg-purple-300 dark:bg-purple-400'
-                      : isHovered
-                        ? 'bg-stone-400 dark:bg-stone-500'
-                        : 'bg-stone-300 dark:bg-stone-600'
-                }`}
-                style={s.up && accent ? { backgroundColor: isHovered ? accent : `${accent}cc` } : undefined}
+                className={`w-full h-full rounded-sm ${getBarClassName(s.up, isHovered, !!accent)}`}
+                style={getBarStyle(s.up, isHovered, accent)}
               />
             </div>
           );
         })}
       </div>
       <div className="flex justify-between mt-2">
-        <span className="text-xs text-stone-400 dark:text-stone-500">
-          {range >= 1440 ? '24h ago' : range >= 720 ? '12h ago' : '1h ago'}
-        </span>
+        <span className="text-xs text-stone-400 dark:text-stone-500">{TIME_LABELS[range]}</span>
         <span className="text-xs text-stone-400 dark:text-stone-500">now</span>
       </div>
     </div>

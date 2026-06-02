@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useConnection } from './ConnectionProvider.tsx';
 
 export function useApi() {
@@ -9,9 +10,12 @@ export function useApi() {
   } catch {
     /* invalid URL */
   }
-  const apiFetch = (path: string, init?: RequestInit) => {
-    const headers: HeadersInit = apiKey ? { 'X-Api-Key': apiKey } : {};
-    return fetch(`${apiBase}${path}`, { ...init, headers: { ...headers, ...init?.headers } });
-  };
+  const apiFetch = useCallback(
+    (path: string, init?: RequestInit) => {
+      const headers: HeadersInit = apiKey ? { 'X-Api-Key': apiKey } : {};
+      return fetch(`${apiBase}${path}`, { ...init, headers: { ...headers, ...init?.headers } });
+    },
+    [apiBase, apiKey]
+  );
   return { apiBase, apiKey, host, protocol, apiFetch };
 }

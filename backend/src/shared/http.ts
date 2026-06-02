@@ -69,3 +69,8 @@ export async function parseJson<T>(req: Request): Promise<Response | T> {
     return error('Invalid JSON');
   }
 }
+
+/** Artificial delay for testing purposes */
+export async function delay(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
