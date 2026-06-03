@@ -81,10 +81,12 @@ export function SettingsPopover() {
             }}
           >
             <div>
-              <label className="text-xs text-stone-500 dark:text-stone-400 mb-1 block">API URL</label>
+              <label htmlFor="popoverApiUrl" className="text-xs text-stone-500 dark:text-stone-400 mb-1 block">
+                API URL
+              </label>
               <input
                 type="text"
-                id="apiUrl"
+                id="popoverApiUrl"
                 name="apiUrl"
                 value={url}
                 onChange={(e) => {
@@ -96,10 +98,12 @@ export function SettingsPopover() {
               />
             </div>
             <div>
-              <label className="text-xs text-stone-500 dark:text-stone-400 mb-1 block">API Key</label>
+              <label htmlFor="popoverApiKey" className="text-xs text-stone-500 dark:text-stone-400 mb-1 block">
+                API Key
+              </label>
               <input
                 type="password"
-                id="apiKey"
+                id="popoverApiKey"
                 name="apiKey"
                 autoComplete="off"
                 value={key}

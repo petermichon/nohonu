@@ -560,11 +560,12 @@ function SitePage() {
                   ? 'You must disable the site before deleting it.'
                   : 'Enable the toggle to access deletion options.'}
               </span>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label htmlFor="allowDeletion" className="flex items-center gap-2 cursor-pointer">
                 <span className="text-xs text-stone-700 dark:text-stone-300">Enable</span>
                 <div className="relative">
                   <input
                     type="checkbox"
+                    id="allowDeletion"
                     checked={allowDeletion}
                     onChange={(e) => setAllowDeletion(e.target.checked)}
                     disabled={actionLoading || !site}
@@ -626,13 +627,6 @@ function SitePage() {
           domain={versionModal?.label ?? ''}
           loading={!!deletingVersion}
         />
-
-        {/* Footer */}
-        <div className="mt-[80vh] pt-8 border-t border-stone-200 dark:border-stone-800">
-          <p className="text-xs text-stone-400 dark:text-stone-500">
-            © {new Date().getFullYear()} Nohonu. All rights reserved.
-          </p>
-        </div>
       </div>
     </section>
   );

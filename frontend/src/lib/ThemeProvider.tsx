@@ -46,9 +46,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     };
   }, [theme]);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
-  }, [resolvedTheme]);
+  document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
 
   return <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme }}>{children}</ThemeContext.Provider>;
 }

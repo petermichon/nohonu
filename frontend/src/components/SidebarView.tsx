@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { BackButton } from './BackButton.tsx';
 
 interface SidebarViewProps {
@@ -22,6 +22,27 @@ export function SidebarView({
   animationKey,
   animationDirection,
 }: SidebarViewProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+
+    const handleAnimationEnd = () => {
+      if (contentRef.current) {
+        // Add animation-complete class to re-enable hover styles
+        contentRef.current.classList.add('animation-complete');
+      }
+    };
+
+    contentRef.current.addEventListener('animationend', handleAnimationEnd);
+
+    return () => {
+      if (contentRef.current) {
+        contentRef.current.removeEventListener('animationend', handleAnimationEnd);
+      }
+    };
+  }, [animationKey]);
+
   return (
     <>
       {showBackButton && (
@@ -30,6 +51,7 @@ export function SidebarView({
 
       <div
         key={animationKey}
+        ref={contentRef}
         className={`flex flex-col gap-0.5 mt-0.5 ${
           animationDirection === 'right' ? 'sidebar-animate-right' : 'sidebar-animate-left'
         }`}

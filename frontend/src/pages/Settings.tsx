@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Check, AlertCircle, Loader2 } from 'lucide-react';
+import { Check, AlertCircle, Loader2, Palette, Server, Globe } from 'lucide-react';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { ThemeToggle } from '../components/ThemeToggle.tsx';
+import { Section } from '../components/Section.tsx';
+import { useLanguage } from '../lib/LanguageProvider.tsx';
 
 type AuthStatus = 'idle' | 'checking' | 'valid' | 'open' | 'invalid' | 'unreachable';
 
@@ -16,6 +18,7 @@ const statusMsg: Record<AuthStatus, string | null> = {
 
 export default function Settings() {
   const { apiBase, apiKey, setConnection } = useConnection();
+  const { language, setLanguage } = useLanguage();
   const [url, setUrl] = useState(apiBase);
   const [key, setKey] = useState(apiKey);
   const [status, setStatus] = useState<AuthStatus>('idle');
@@ -52,19 +55,38 @@ export default function Settings() {
     <div>
       <h1 className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mb-6">Settings</h1>
 
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 mb-4">
-        <p className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-4">
-          Appearance
-        </p>
+      <Section id="appearance" icon={Palette} title="Appearance">
         <div className="flex items-center gap-3">
           <ThemeToggle />
         </div>
-      </div>
+      </Section>
 
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6">
-        <p className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-4">
-          Connection
-        </p>
+      <Section id="language" icon={Globe} title="Language">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setLanguage('en')}
+            className={`px-3 py-1.5 text-sm rounded-lg border transition-colors cursor-pointer ${
+              language === 'en'
+                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
+                : 'bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600'
+            }`}
+          >
+            English
+          </button>
+          <button
+            onClick={() => setLanguage('fr')}
+            className={`px-3 py-1.5 text-sm rounded-lg border transition-colors cursor-pointer ${
+              language === 'fr'
+                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
+                : 'bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600'
+            }`}
+          >
+            Français
+          </button>
+        </div>
+      </Section>
+
+      <Section id="connection" icon={Server} title="Connection">
         <form
           className="grid gap-4 max-w-md"
           onSubmit={(e) => {
@@ -73,7 +95,9 @@ export default function Settings() {
           }}
         >
           <div>
-            <label className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">API URL</label>
+            <label htmlFor="apiUrl" className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">
+              API URL
+            </label>
             <input
               type="text"
               id="apiUrl"
@@ -88,7 +112,9 @@ export default function Settings() {
             />
           </div>
           <div>
-            <label className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">API Key</label>
+            <label htmlFor="apiKey" className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">
+              API Key
+            </label>
             <input
               type="password"
               id="apiKey"
@@ -123,7 +149,9 @@ export default function Settings() {
             {status === 'checking' ? 'Checking…' : status === 'valid' || status === 'open' ? 'Saved' : 'Save'}
           </button>
         </form>
-      </div>
+      </Section>
+
+      <div className="min-h-[50vh]" />
     </div>
   );
 }

@@ -81,26 +81,39 @@ html.dark {
 /* Sidebar slide-in animation */
 @keyframes slideInRight {
   from {
-    transform: translateX(-4px);
+    transform: translateX(-8px);
+    opacity: 0;
   }
   to {
     transform: translateX(0);
+    opacity: 1;
   }
 }
 
 @keyframes slideInLeft {
   from {
-    transform: translateX(4px);
+    transform: translateX(8px);
+    opacity: 0;
   }
   to {
     transform: translateX(0);
+    opacity: 1;
   }
 }
 
 .sidebar-animate-right {
-  animation: slideInRight 0.15s ease-out;
+  animation: slideInRight 0.1s ease-out;
 }
 
 .sidebar-animate-left {
-  animation: slideInLeft 0.15s ease-out;
+  animation: slideInLeft 0.1s ease-out;
+}
+
+/* Disable hover effects during animation (only when not complete) */
+.sidebar-animate-right:not(.animation-complete) a:hover,
+.sidebar-animate-left:not(.animation-complete) a:hover,
+.sidebar-animate-right:not(.animation-complete) button:hover,
+.sidebar-animate-left:not(.animation-complete) button:hover {
+  background-color: inherit !important;
+  color: inherit !important;
 }

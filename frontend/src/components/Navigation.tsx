@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Rocket, Globe, Server, ChevronRight, Palette } from 'lucide-react';
+import { Rocket, Globe, Server, ChevronRight, Palette, User, Key, FileText, Scale, Shield, Info } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useApi } from '../lib/api.ts';
 import { SectionNav } from './SectionNav.tsx';
@@ -23,7 +23,21 @@ export function DesktopNavigation() {
   const isActive = useIsActive();
   const { apiFetch, apiBase } = useApi();
   const [sites, setSites] = useState<Site[]>([]);
-  const [view, setView] = useState<'main' | 'sites' | 'site' | 'domains' | 'servers' | 'about'>('main');
+  const [view, setView] = useState<
+    | 'main'
+    | 'sites'
+    | 'site'
+    | 'domains'
+    | 'servers'
+    | 'about'
+    | 'settings'
+    | 'account'
+    | 'legal'
+    | 'privacy'
+    | 'terms'
+    | 'copyright'
+    | 'mentions-legales'
+  >('main');
   const [loading, setLoading] = useState(true);
   const [iconErrors, setIconErrors] = useState<Set<string>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
@@ -48,6 +62,28 @@ export function DesktopNavigation() {
     if (location.pathname === '/servers') return [...segments, { label: 'Servers', to: '/servers' }];
     if (location.pathname === '/settings') return [...segments, { label: 'Settings', to: '/settings' }];
     if (location.pathname === '/about') return [...segments, { label: 'About', to: '/about' }];
+    if (location.pathname === '/account') return [...segments, { label: 'Account', to: '/account' }];
+    if (location.pathname === '/legal') return [...segments, { label: 'Legal', to: '/legal' }];
+    if (location.pathname === '/legal/privacy-policy')
+      return [...segments, { label: 'Legal', to: '/legal' }, { label: 'Privacy Policy', to: '/legal/privacy-policy' }];
+    if (location.pathname === '/legal/terms-of-service')
+      return [
+        ...segments,
+        { label: 'Legal', to: '/legal' },
+        { label: 'Terms of Service', to: '/legal/terms-of-service' },
+      ];
+    if (location.pathname === '/legal/copyright-policy')
+      return [
+        ...segments,
+        { label: 'Legal', to: '/legal' },
+        { label: 'Copyright Policy', to: '/legal/copyright-policy' },
+      ];
+    if (location.pathname === '/legal/mentions-legales')
+      return [
+        ...segments,
+        { label: 'Legal', to: '/legal' },
+        { label: 'Mentions légales', to: '/legal/mentions-legales' },
+      ];
     return segments;
   };
 
@@ -82,6 +118,20 @@ export function DesktopNavigation() {
       setView('servers');
     } else if (location.pathname === '/about') {
       setView('about');
+    } else if (location.pathname === '/settings') {
+      setView('settings');
+    } else if (location.pathname === '/account') {
+      setView('account');
+    } else if (location.pathname === '/legal') {
+      setView('legal');
+    } else if (location.pathname === '/legal/privacy-policy') {
+      setView('privacy');
+    } else if (location.pathname === '/legal/terms-of-service') {
+      setView('terms');
+    } else if (location.pathname === '/legal/copyright-policy') {
+      setView('copyright');
+    } else if (location.pathname === '/legal/mentions-legales') {
+      setView('mentions-legales');
     } else if (
       !location.pathname.startsWith('/sites') &&
       !location.pathname.startsWith('/domains') &&
@@ -271,6 +321,406 @@ export function DesktopNavigation() {
     );
   }
 
+  if (view === 'settings') {
+    const pathSegments = getPathSegments();
+    return (
+      <>
+        {/* Current path */}
+        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+          {pathSegments.map((segment, index) => (
+            <span key={segment.to}>
+              {index > 0 && ' / '}
+              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+                {segment.label}
+              </Link>
+            </span>
+          ))}
+        </div>
+
+        <SidebarView
+          backTo="/"
+          backLabel="Home"
+          currentLabel="Settings"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+        >
+          <NavItems>
+            <SectionNav
+              onNavigate={() => {}}
+              sections={[
+                { id: 'appearance', label: 'Appearance', icon: Palette },
+                { id: 'language', label: 'Language', icon: Globe },
+                { id: 'connection', label: 'Connection', icon: Server },
+              ]}
+            />
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
+  if (view === 'legal') {
+    const pathSegments = getPathSegments();
+    return (
+      <>
+        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+          {pathSegments.map((segment, index) => (
+            <span key={segment.to}>
+              {index > 0 && ' / '}
+              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+                {segment.label}
+              </Link>
+            </span>
+          ))}
+        </div>
+
+        <SidebarView
+          backTo="/"
+          backLabel="Home"
+          currentLabel="Legal"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+        >
+          <NavItems>
+            <NavButton to="/legal/privacy-policy" icon={FileText} label="Privacy Policy" rightIcon={ChevronRight} />
+            <NavButton to="/legal/terms-of-service" icon={Scale} label="Terms of Service" rightIcon={ChevronRight} />
+            <NavButton to="/legal/copyright-policy" icon={Shield} label="Copyright Policy" rightIcon={ChevronRight} />
+            <NavButton to="/legal/mentions-legales" icon={Info} label="Mentions légales" rightIcon={ChevronRight} />
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
+  if (view === 'mentions-legales') {
+    const pathSegments = getPathSegments();
+    return (
+      <>
+        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+          {pathSegments.map((segment, index) => (
+            <span key={segment.to}>
+              {index > 0 && ' / '}
+              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+                {segment.label}
+              </Link>
+            </span>
+          ))}
+        </div>
+
+        <SidebarView
+          backTo="/legal"
+          backLabel="Legal"
+          currentLabel="Mentions légales"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+        >
+          <NavItems>
+            <SectionNav
+              onNavigate={() => {}}
+              sections={[
+                {
+                  id: 'editeur',
+                  label: 'Éditeur',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      1
+                    </span>
+                  ),
+                },
+                {
+                  id: 'directeur',
+                  label: 'Directeur',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      2
+                    </span>
+                  ),
+                },
+                {
+                  id: 'hebergement',
+                  label: 'Hébergement',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      3
+                    </span>
+                  ),
+                },
+              ]}
+            />
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
+  if (view === 'copyright') {
+    const pathSegments = getPathSegments();
+    const numIcon =
+      (n: number) =>
+      ({ className }: { className?: string }) => (
+        <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>{n}</span>
+      );
+    return (
+      <>
+        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+          {pathSegments.map((segment, index) => (
+            <span key={segment.to}>
+              {index > 0 && ' / '}
+              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+                {segment.label}
+              </Link>
+            </span>
+          ))}
+        </div>
+
+        <SidebarView
+          backTo="/legal"
+          backLabel="Legal"
+          currentLabel="Copyright Policy"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+        >
+          <NavItems>
+            <SectionNav
+              onNavigate={() => {}}
+              sections={[
+                { id: 'overview', label: 'Overview', icon: numIcon(1) },
+                { id: 'reporting', label: 'Reporting', icon: numIcon(2) },
+                { id: 'our-response', label: 'Our Response', icon: numIcon(3) },
+                { id: 'counter-notice', label: 'Counter-Notice', icon: numIcon(4) },
+                { id: 'repeat-infringers', label: 'Repeat Infringers', icon: numIcon(5) },
+                { id: 'contact', label: 'Contact', icon: numIcon(6) },
+              ]}
+            />
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
+  if (view === 'terms') {
+    const pathSegments = getPathSegments();
+    const numIcon =
+      (n: number) =>
+      ({ className }: { className?: string }) => (
+        <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>{n}</span>
+      );
+    return (
+      <>
+        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+          {pathSegments.map((segment, index) => (
+            <span key={segment.to}>
+              {index > 0 && ' / '}
+              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+                {segment.label}
+              </Link>
+            </span>
+          ))}
+        </div>
+
+        <SidebarView
+          backTo="/legal"
+          backLabel="Legal"
+          currentLabel="Terms of Service"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+        >
+          <NavItems>
+            <SectionNav
+              onNavigate={() => {}}
+              sections={[
+                { id: 'acceptance', label: 'Acceptance', icon: numIcon(1) },
+                { id: 'description', label: 'Description', icon: numIcon(2) },
+                { id: 'accounts', label: 'User Accounts', icon: numIcon(3) },
+                { id: 'acceptable-use', label: 'Acceptable Use', icon: numIcon(4) },
+                { id: 'content', label: 'Your Content', icon: numIcon(5) },
+                { id: 'payment', label: 'Payment', icon: numIcon(6) },
+                { id: 'availability', label: 'Availability', icon: numIcon(7) },
+                { id: 'liability', label: 'Liability', icon: numIcon(8) },
+                { id: 'indemnification', label: 'Indemnification', icon: numIcon(9) },
+                { id: 'termination', label: 'Termination', icon: numIcon(10) },
+                { id: 'changes', label: 'Changes', icon: numIcon(11) },
+                { id: 'governing-law', label: 'Governing Law', icon: numIcon(12) },
+                { id: 'contact', label: 'Contact Us', icon: numIcon(13) },
+              ]}
+            />
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
+  if (view === 'privacy') {
+    const pathSegments = getPathSegments();
+    return (
+      <>
+        {/* Current path */}
+        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+          {pathSegments.map((segment, index) => (
+            <span key={segment.to}>
+              {index > 0 && ' / '}
+              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+                {segment.label}
+              </Link>
+            </span>
+          ))}
+        </div>
+
+        <SidebarView
+          backTo="/legal"
+          backLabel="Legal"
+          currentLabel="Privacy Policy"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+        >
+          <NavItems>
+            <SectionNav
+              onNavigate={() => {}}
+              sections={[
+                {
+                  id: 'introduction',
+                  label: 'Introduction',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      1
+                    </span>
+                  ),
+                },
+                {
+                  id: 'information-we-collect',
+                  label: 'Info We Collect',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      2
+                    </span>
+                  ),
+                },
+                {
+                  id: 'how-we-use',
+                  label: 'How We Use It',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      3
+                    </span>
+                  ),
+                },
+                {
+                  id: 'data-sharing',
+                  label: 'Data Sharing',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      4
+                    </span>
+                  ),
+                },
+                {
+                  id: 'data-retention',
+                  label: 'Data Retention',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      5
+                    </span>
+                  ),
+                },
+                {
+                  id: 'cookies',
+                  label: 'Cookies & Storage',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      6
+                    </span>
+                  ),
+                },
+                {
+                  id: 'your-rights',
+                  label: 'Your Rights',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      7
+                    </span>
+                  ),
+                },
+                {
+                  id: 'security',
+                  label: 'Security',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      8
+                    </span>
+                  ),
+                },
+                {
+                  id: 'childrens-privacy',
+                  label: "Children's Privacy",
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      9
+                    </span>
+                  ),
+                },
+                {
+                  id: 'changes',
+                  label: 'Changes',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      10
+                    </span>
+                  ),
+                },
+                {
+                  id: 'contact',
+                  label: 'Contact Us',
+                  icon: ({ className }: { className?: string }) => (
+                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
+                      11
+                    </span>
+                  ),
+                },
+              ]}
+            />
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
+  if (view === 'account') {
+    const pathSegments = getPathSegments();
+    return (
+      <>
+        {/* Current path */}
+        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+          {pathSegments.map((segment, index) => (
+            <span key={segment.to}>
+              {index > 0 && ' / '}
+              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+                {segment.label}
+              </Link>
+            </span>
+          ))}
+        </div>
+
+        <SidebarView
+          backTo="/"
+          backLabel="Home"
+          currentLabel="Account"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+        >
+          <NavItems>
+            <SectionNav
+              onNavigate={() => {}}
+              sections={[
+                { id: 'profile', label: 'Profile', icon: User },
+                { id: 'security', label: 'Security', icon: Key },
+              ]}
+            />
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
   if (view === 'about') {
     const pathSegments = getPathSegments();
     return (
@@ -334,21 +784,6 @@ export function DesktopNavigation() {
             <NavButton key={to} to={to} icon={Icon} label={label} isActive={isActive(to)} rightIcon={ChevronRight} />
           ))}
         </NavItems>
-
-        {/* Separator */}
-        <div className="border-t border-stone-200 dark:border-stone-800 my-2" />
-
-        {/* About link - separate section */}
-        <Link
-          to="/about"
-          className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
-        >
-          <div className="flex items-center gap-3">
-            <Palette className="w-4 h-4" />
-            <span>About</span>
-          </div>
-          <ChevronRight className="w-4 h-4 shrink-0" />
-        </Link>
       </SidebarView>
     </>
   );

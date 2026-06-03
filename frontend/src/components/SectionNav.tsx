@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { NavButton } from './NavButton.tsx';
-import { SECTIONS } from '../lib/sectionsConfig.ts';
+import { SECTIONS, type SectionConfig } from '../lib/sectionsConfig.ts';
 
 interface SectionNavProps {
   onNavigate: (id: string) => void;
+  sections?: SectionConfig[];
 }
 
-export function SectionNav({ onNavigate }: SectionNavProps) {
-  const [activeSection, setActiveSection] = useState('overview');
+export function SectionNav({ onNavigate, sections: sectionsProp }: SectionNavProps) {
+  const items = sectionsProp ?? SECTIONS;
+  const [activeSection, setActiveSection] = useState(items[0]?.id ?? '');
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = SECTIONS.map((s) => document.getElementById(s.id)).filter(Boolean);
+      const sections = items.map((s) => document.getElementById(s.id)).filter(Boolean);
 
       for (const section of sections) {
         const rect = section!.getBoundingClientRect();
@@ -26,7 +28,7 @@ export function SectionNav({ onNavigate }: SectionNavProps) {
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [items]);
 
   const handleClick = (id: string) => {
     const element = document.getElementById(id);
@@ -40,7 +42,7 @@ export function SectionNav({ onNavigate }: SectionNavProps) {
 
   return (
     <div className="flex flex-col gap-0.5">
-      {SECTIONS.map((section) => {
+      {items.map((section) => {
         const isActive = activeSection === section.id;
         return (
           <NavButton
