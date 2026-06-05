@@ -25,7 +25,13 @@ type Font =
   | 'oswald'
   | 'times-new-roman'
   | 'pt-sans'
-  | 'raleway';
+  | 'raleway'
+  | 'jetbrains-mono'
+  | 'montserrat'
+  | 'exo'
+  | 'exo-2'
+  | 'rubik'
+  | 'cinzel';
 
 interface FontContextType {
   font: Font;
@@ -62,7 +68,13 @@ export function FontProvider({ children }: { children: ReactNode }) {
       saved === 'oswald' ||
       saved === 'times-new-roman' ||
       saved === 'pt-sans' ||
-      saved === 'raleway'
+      saved === 'raleway' ||
+      saved === 'jetbrains-mono' ||
+      saved === 'montserrat' ||
+      saved === 'exo' ||
+      saved === 'exo-2' ||
+      saved === 'rubik' ||
+      saved === 'cinzel'
     )
       return saved;
     return 'system';
@@ -137,6 +149,27 @@ export function FontProvider({ children }: { children: ReactNode }) {
       case 'raleway':
         document.body.style.fontFamily =
           '"Raleway", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        break;
+      case 'jetbrains-mono':
+        document.body.style.fontFamily = '"JetBrains Mono", monospace';
+        break;
+      case 'montserrat':
+        document.body.style.fontFamily =
+          '"Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        break;
+      case 'exo':
+        document.body.style.fontFamily = '"Exo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        break;
+      case 'exo-2':
+        document.body.style.fontFamily =
+          '"Exo 2", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        break;
+      case 'rubik':
+        document.body.style.fontFamily =
+          '"Rubik", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        break;
+      case 'cinzel':
+        document.body.style.fontFamily = '"Cinzel", serif';
         break;
       case 'sans-serif':
         document.body.style.fontFamily = 'sans-serif';

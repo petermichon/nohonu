@@ -124,13 +124,25 @@ export function TopBar() {
     { value: 'lato' as const, icon: null, label: 'Lato', className: "font-['Lato']" },
     { value: 'oswald' as const, icon: null, label: 'Oswald', className: "font-['Oswald']" },
     { value: 'pt-sans' as const, icon: null, label: 'PT Sans', className: "font-['PT_Sans']" },
-    { value: 'raleway' as const, icon: null, label: 'Raleway', divider: true, className: "font-['Raleway']" },
-    { value: 'lucida-grande' as const, icon: null, label: 'Lucida Grande', className: "font-['Lucida_Grande']" },
+    { value: 'raleway' as const, icon: null, label: 'Raleway', className: "font-['Raleway']" },
+    { value: 'montserrat' as const, icon: null, label: 'Montserrat', className: "font-['Montserrat']" },
+    { value: 'exo' as const, icon: null, label: 'Exo', className: "font-['Exo']" },
+    { value: 'exo-2' as const, icon: null, label: 'Exo 2', className: "font-['Exo_2']" },
+    { value: 'rubik' as const, icon: null, label: 'Rubik', className: "font-['Rubik']" },
+    { value: 'cinzel' as const, icon: null, label: 'Cinzel', className: "font-['Cinzel']" },
+    {
+      value: 'jetbrains-mono' as const,
+      icon: null,
+      label: 'JetBrains Mono',
+      divider: true,
+      className: "font-['JetBrains_Mono']",
+    },
     { value: 'arial' as const, icon: null, label: 'Arial', className: "font-['Arial']" },
     { value: 'verdana' as const, icon: null, label: 'Verdana', className: "font-['Verdana']" },
+    { value: 'tahoma' as const, icon: null, label: 'Tahoma', className: "font-['Tahoma']" },
+    { value: 'lucida-grande' as const, icon: null, label: 'Lucida Grande', className: "font-['Lucida_Grande']" },
     { value: 'helvetica-neue' as const, icon: null, label: 'Helvetica Neue', className: "font-['Helvetica_Neue']" },
     { value: 'helvetica' as const, icon: null, label: 'Helvetica', className: "font-['Helvetica']" },
-    { value: 'tahoma' as const, icon: null, label: 'Tahoma', className: "font-['Tahoma']" },
     {
       value: 'trebuchet-ms' as const,
       icon: null,
@@ -150,7 +162,6 @@ export function TopBar() {
       value: 'courier-new' as const,
       icon: null,
       label: 'Courier New',
-      divider: true,
       className: "font-['Courier_New']",
     },
     { value: 'consolas' as const, icon: null, label: 'Consolas', className: "font-['Consolas']" },
@@ -186,7 +197,7 @@ export function TopBar() {
                     setMenuView('main');
                   }}
                 />
-                <div className="absolute right-0 top-full mt-2 z-50 bg-stone-50 dark:bg-stone-950 rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 p-2 w-[228px] max-h-[80vh] overflow-y-auto">
+                <div className="absolute right-0 top-full mt-2 z-50 bg-stone-50 dark:bg-stone-950 rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto">
                   <div className="flex flex-col gap-0.5">
                     {menuView === 'main' && (
                       <>
@@ -281,7 +292,7 @@ export function TopBar() {
             {isProfileOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} />
-                <div className="absolute right-0 top-full mt-2 z-50 bg-stone-50 dark:bg-stone-950 rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 p-2 w-[228px] max-h-[80vh] overflow-y-auto">
+                <div className="absolute right-0 top-full mt-2 z-50 bg-stone-50 dark:bg-stone-950 rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto">
                   <div className="flex flex-col gap-0.5">
                     {profileOptions.map(({ to, label }) => (
                       <Link

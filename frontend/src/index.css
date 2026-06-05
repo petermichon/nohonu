@@ -19,6 +19,24 @@
 @import '@fontsource/raleway/400.css';
 @import '@fontsource/raleway/500.css';
 @import '@fontsource/raleway/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/700.css';
+@import '@fontsource/montserrat/400.css';
+@import '@fontsource/montserrat/500.css';
+@import '@fontsource/montserrat/700.css';
+@import '@fontsource/exo/400.css';
+@import '@fontsource/exo/500.css';
+@import '@fontsource/exo/700.css';
+@import '@fontsource/exo-2/400.css';
+@import '@fontsource/exo-2/500.css';
+@import '@fontsource/exo-2/700.css';
+@import '@fontsource/rubik/400.css';
+@import '@fontsource/rubik/500.css';
+@import '@fontsource/rubik/700.css';
+@import '@fontsource/cinzel/400.css';
+@import '@fontsource/cinzel/500.css';
+@import '@fontsource/cinzel/700.css';
 
 @variant dark (&:where(.dark, .dark *));
 
