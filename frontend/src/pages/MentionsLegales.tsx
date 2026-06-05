@@ -2,7 +2,7 @@ import { BackButton } from '../components/BackButton.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
 
 export default function MentionsLegales() {
-  const { language } = useLanguage();
+  const { resolvedLanguage } = useLanguage();
 
   return (
     <div className="space-y-8">
@@ -10,7 +10,7 @@ export default function MentionsLegales() {
 
       <div>
         <h1 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">
-          {language === 'fr' ? 'Mentions légales' : 'Legal notice'}
+          {resolvedLanguage === 'fr' ? 'Mentions légales' : 'Legal notice'}
         </h1>
         <p className="text-sm text-stone-400 dark:text-stone-500">
           Conformément aux articles L.111-1 et suivants du Code de la consommation

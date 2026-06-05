@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Rocket, Globe, Server, ChevronRight, Palette, User, Key, FileText, Scale, Shield, Info } from 'lucide-react';
+import { Rocket, Globe, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useApi } from '../lib/api.ts';
 import { SectionNav } from './SectionNav.tsx';
@@ -12,6 +12,10 @@ const NAV_ITEMS = [
   { to: '/domains', label: 'Domains', Icon: Globe },
   { to: '/servers', label: 'Servers', Icon: Server },
 ];
+
+const SETTINGS_ACCOUNT_ITEMS = [{ to: '/account', label: 'Account', Icon: User }];
+
+const LEGAL_ITEMS = [{ to: '/legal', label: 'Legal', Icon: Scale }];
 
 function useIsActive() {
   const location = useLocation();
@@ -30,7 +34,6 @@ export function DesktopNavigation() {
     | 'domains'
     | 'servers'
     | 'about'
-    | 'settings'
     | 'account'
     | 'legal'
     | 'privacy'
@@ -60,7 +63,6 @@ export function DesktopNavigation() {
     }
     if (location.pathname === '/domains') return [...segments, { label: 'Domains', to: '/domains' }];
     if (location.pathname === '/servers') return [...segments, { label: 'Servers', to: '/servers' }];
-    if (location.pathname === '/settings') return [...segments, { label: 'Settings', to: '/settings' }];
     if (location.pathname === '/about') return [...segments, { label: 'About', to: '/about' }];
     if (location.pathname === '/account') return [...segments, { label: 'Account', to: '/account' }];
     if (location.pathname === '/legal') return [...segments, { label: 'Legal', to: '/legal' }];
@@ -118,8 +120,6 @@ export function DesktopNavigation() {
       setView('servers');
     } else if (location.pathname === '/about') {
       setView('about');
-    } else if (location.pathname === '/settings') {
-      setView('settings');
     } else if (location.pathname === '/account') {
       setView('account');
     } else if (location.pathname === '/legal') {
@@ -315,44 +315,6 @@ export function DesktopNavigation() {
           <NavItems>
             {/* Empty state */}
             <div className="px-3 py-2 text-sm text-stone-400">No servers</div>
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'settings') {
-    const pathSegments = getPathSegments();
-    return (
-      <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
-        <SidebarView
-          backTo="/"
-          backLabel="Home"
-          currentLabel="Settings"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-        >
-          <NavItems>
-            <SectionNav
-              onNavigate={() => {}}
-              sections={[
-                { id: 'appearance', label: 'Appearance', icon: Palette },
-                { id: 'language', label: 'Language', icon: Globe },
-                { id: 'connection', label: 'Connection', icon: Server },
-              ]}
-            />
           </NavItems>
         </SidebarView>
       </>
@@ -713,6 +675,7 @@ export function DesktopNavigation() {
               sections={[
                 { id: 'profile', label: 'Profile', icon: User },
                 { id: 'security', label: 'Security', icon: Key },
+                { id: 'connection', label: 'Connection', icon: Server },
               ]}
             />
           </NavItems>
@@ -783,6 +746,22 @@ export function DesktopNavigation() {
           {NAV_ITEMS.map(({ to, label, Icon }) => (
             <NavButton key={to} to={to} icon={Icon} label={label} isActive={isActive(to)} rightIcon={ChevronRight} />
           ))}
+
+          {/* Separator */}
+          <div className="my-2 border-t border-stone-200 dark:border-stone-800" />
+
+          {/* Account */}
+          {SETTINGS_ACCOUNT_ITEMS.map(({ to, label, Icon }) => (
+            <NavButton key={to} to={to} icon={Icon} label={label} isActive={isActive(to)} rightIcon={ChevronRight} />
+          ))}
+
+          {/* Separator */}
+          <div className="my-2 border-t border-stone-200 dark:border-stone-800" />
+
+          {/* Legal */}
+          {LEGAL_ITEMS.map(({ to, label, Icon }) => (
+            <NavButton key={to} to={to} icon={Icon} label={label} isActive={isActive(to)} rightIcon={ChevronRight} />
+          ))}
         </NavItems>
       </SidebarView>
     </>
@@ -797,7 +776,7 @@ export function MobileNavigation() {
     { to: '/servers', label: 'Servers', Icon: Server },
   ];
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 z-50">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-stone-50 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 z-50">
       <div className="flex items-center">
         {MOBILE_NAV_ITEMS.map(({ to, label, Icon }) => (
           <Link

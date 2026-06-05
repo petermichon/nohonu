@@ -3,7 +3,7 @@ import { FileText, Scale, Shield, Info } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
 
-const getLegalPages = (language: 'en' | 'fr') => [
+const getLegalPages = (resolvedLanguage: 'en' | 'fr') => [
   {
     to: '/legal/privacy-policy',
     label: 'Privacy Policy',
@@ -24,15 +24,15 @@ const getLegalPages = (language: 'en' | 'fr') => [
   },
   {
     to: '/legal/mentions-legales',
-    label: language === 'fr' ? 'Mentions légales' : 'Legal notice',
+    label: resolvedLanguage === 'fr' ? 'Mentions légales' : 'Legal notice',
     description: 'Legal identification and company information (French LCEN compliance).',
     Icon: Info,
   },
 ];
 
 export default function Legal() {
-  const { language } = useLanguage();
-  const LEGAL_PAGES = getLegalPages(language);
+  const { resolvedLanguage } = useLanguage();
+  const LEGAL_PAGES = getLegalPages(resolvedLanguage);
 
   return (
     <div className="space-y-8">
@@ -50,7 +50,7 @@ export default function Legal() {
           <Link
             key={to}
             to={to}
-            className="flex items-start gap-4 p-5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl hover:border-stone-300 dark:hover:border-stone-700 transition-colors"
+            className="flex items-start gap-4 p-5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl hover:border-stone-300 dark:hover:border-stone-700"
           >
             <div className="shrink-0 w-10 h-10 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
               <Icon className="w-5 h-5 text-stone-500 dark:text-stone-400" />
@@ -61,6 +61,10 @@ export default function Legal() {
             </div>
           </Link>
         ))}
+      </div>
+
+      <div className="text-center text-xs text-stone-400 dark:text-stone-500 py-8">
+        &copy; {new Date().getFullYear()} Nohonu. All rights reserved.
       </div>
 
       <div className="min-h-[50vh]" />

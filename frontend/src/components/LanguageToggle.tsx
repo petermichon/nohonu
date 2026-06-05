@@ -1,21 +1,18 @@
-import { Sun, Moon, Monitor, Check } from 'lucide-react';
-import { useTheme } from '../lib/ThemeProvider.tsx';
+import { Languages, Check } from 'lucide-react';
+import { useLanguage } from '../lib/LanguageProvider.tsx';
 import { useState } from 'react';
 
-export function ThemeToggle() {
-  const { theme, resolvedTheme, setTheme } = useTheme();
+export function LanguageToggle() {
+  const { language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   const options = [
-    { value: 'light' as const, icon: Sun, label: 'Light' },
-    { value: 'dark' as const, icon: Moon, label: 'Dark' },
-    { value: 'system' as const, icon: Monitor, label: 'System' },
+    { value: 'auto' as const, label: 'System' },
+    { value: 'en' as const, label: 'English' },
+    { value: 'fr' as const, label: 'Français' },
   ];
 
-  // When theme is 'system', show the resolved theme icon instead of Monitor
-  const displayTheme = theme === 'system' ? resolvedTheme : theme;
-  const displayOption = options.find((opt) => opt.value === displayTheme);
-  const currentOption = options.find((opt) => opt.value === theme);
+  const currentOption = options.find((opt) => opt.value === language);
 
   return (
     <div className="relative">
@@ -24,7 +21,7 @@ export function ThemeToggle() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer"
       >
-        <displayOption.icon className="w-4 h-4" />
+        <Languages className="w-4 h-4" />
         <span className="hidden sm:inline">{currentOption?.label}</span>
       </button>
       {isOpen && (
@@ -32,25 +29,22 @@ export function ThemeToggle() {
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 top-full mt-2 z-50 bg-stone-50 dark:bg-stone-950 rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 p-2 min-w-[140px]">
             <div className="flex flex-col gap-0.5">
-              {options.map(({ value, icon: Icon, label }) => (
+              {options.map(({ value, label }) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => {
-                    setTheme(value);
+                    setLanguage(value);
                   }}
                   className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer ${
-                    theme === value
+                    language === value
                       ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'
                       : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4" />
-                    <span>{label}</span>
-                  </div>
+                  <span>{label}</span>
                   <Check
-                    className={`w-4 h-4 ml-2 transition-opacity ${theme === value ? 'opacity-100 text-stone-900 dark:text-stone-100' : 'opacity-0'}`}
+                    className={`w-4 h-4 ml-2 transition-opacity ${language === value ? 'opacity-100 text-stone-900 dark:text-stone-100' : 'opacity-0'}`}
                   />
                 </button>
               ))}

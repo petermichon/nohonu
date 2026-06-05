@@ -46,7 +46,10 @@ export function SidebarView({
   return (
     <>
       {showBackButton && (
-        <BackButton to={backTo} label={backLabel} variant="sidebar" currentLabel={currentLabel} disabled={disabled} />
+        <>
+          <BackButton to={backTo} label={backLabel} variant="sidebar" currentLabel={currentLabel} disabled={disabled} />
+          <div className="my-2 border-t border-transparent" />
+        </>
       )}
 
       <div

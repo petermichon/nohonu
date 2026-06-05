@@ -1,17 +1,15 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Logo } from './components/Logo.tsx';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { DesktopNavigation, MobileNavigation } from './components/Navigation.tsx';
-import { Settings, UserCircle, Info, Scale } from 'lucide-react';
+import { TopBar } from './components/TopBar.tsx';
 import { ToastProvider } from './lib/ToastContext.tsx';
 import { GlobalToast } from './components/GlobalToast.tsx';
-import { LanguageProvider, useLanguage } from './lib/LanguageProvider.tsx';
+import { LanguageProvider } from './lib/LanguageProvider.tsx';
+import { FontProvider } from './lib/FontProvider.tsx';
 import Home from './pages/Home.tsx';
 import Sites from './pages/Sites.tsx';
 import Domains from './pages/Domains.tsx';
 import Servers from './pages/Servers.tsx';
 import SitePage from './pages/SitePage.tsx';
-import SettingsPage from './pages/Settings.tsx';
-import AboutUs from './pages/AboutUs.tsx';
 import AccountPage from './pages/Account.tsx';
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx';
 import TermsOfService from './pages/TermsOfService.tsx';
@@ -20,104 +18,44 @@ import CopyrightPolicy from './pages/CopyrightPolicy.tsx';
 import MentionsLegales from './pages/MentionsLegales.tsx';
 
 function AppContent() {
-  const { language } = useLanguage();
-
   return (
     <Router>
-      <div className="min-h-screen flex bg-stone-50 dark:bg-stone-950">
-        {/* Desktop Sidebar */}
-        <aside className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shrink-0 overflow-hidden z-40">
-          <div className="h-14 px-4 shrink-0 flex items-center border-b border-stone-200 dark:border-stone-800">
-            <Link to="/" className="flex items-center gap-3">
-              <Logo />
-              <span className="text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">Nohonu</span>
-            </Link>
-          </div>
-          <nav className="flex-1 p-2 overflow-y-auto">
-            <DesktopNavigation />
-          </nav>
-          <div className="p-2 border-t border-stone-200 dark:border-stone-800 shrink-0">
-            <Link
-              to="/settings"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
-            >
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
-            </Link>
-            <Link
-              to="/account"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
-            >
-              <UserCircle className="w-4 h-4" />
-              <span>Account</span>
-            </Link>
-            <div className="my-2 border-t border-stone-200 dark:border-stone-800" />
-            <Link
-              to="/about"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
-            >
-              <Info className="w-4 h-4" />
-              <span>About</span>
-            </Link>
-            <Link
-              to="/legal"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
-            >
-              <Scale className="w-4 h-4" />
-              <span>Legal</span>
-            </Link>
-          </div>
-        </aside>
+      <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950">
+        {/* Top Bar */}
+        <TopBar />
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0 md:ml-64">
-          {/* Mobile Header */}
-          <div className="md:hidden sticky top-0 border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shrink-0 z-50">
-            <div className="px-4 py-3 flex items-center justify-between">
-              <Link to="/" className="flex items-center gap-2">
-                <Logo />
-                <span className="text-base font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
-                  Nohonu
-                </span>
-              </Link>
-              <div className="flex items-center gap-2" />
-            </div>
-          </div>
+        {/* Main Content Area */}
+        <div className="flex-1 flex">
+          {/* Desktop Sidebar */}
+          <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 fixed left-0 top-14 bottom-0 overflow-hidden">
+            <nav className="flex-1 p-2 overflow-y-auto">
+              <DesktopNavigation />
+            </nav>
+          </aside>
 
           {/* Page Content */}
-          <div className="flex-1">
-            <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-12 pb-20 sm:pb-12 md:pb-12">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/sites" element={<Sites />} />
-                <Route path="/sites/:domain" element={<SitePage />} />
-                <Route path="/domains" element={<Domains />} />
-                <Route path="/servers" element={<Servers />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/account" element={<AccountPage />} />
-                <Route path="/about" element={<AboutUs />} />
-                <Route path="/legal" element={<Legal />} />
-                <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/legal/terms-of-service" element={<TermsOfService />} />
-                <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
-                <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
-              </Routes>
+          <div className="flex-1 flex flex-col min-w-0 md:ml-64">
+            <div className="flex-1">
+              <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-12 pb-20 sm:pb-12 md:pb-12">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/sites" element={<Sites />} />
+                  <Route path="/sites/:domain" element={<SitePage />} />
+                  <Route path="/domains" element={<Domains />} />
+                  <Route path="/servers" element={<Servers />} />
+                  <Route path="/account" element={<AccountPage />} />
+                  <Route path="/legal" element={<Legal />} />
+                  <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/legal/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
+                  <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
+                </Routes>
+              </div>
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            <MobileNavigation />
           </div>
-
-          {/* Footer */}
-          <footer className="mt-12 border-t border-stone-200 dark:border-stone-800 py-6 px-3 sm:px-6">
-            <div className="max-w-4xl mx-auto text-center text-xs text-stone-400 dark:text-stone-500">
-              <span>&copy; {new Date().getFullYear()} Nohonu</span>
-              <span className="mx-2">•</span>
-              <Link to="/legal/mentions-legales" className="hover:text-stone-600 dark:hover:text-stone-300">
-                {language === 'fr' ? 'Mentions légales' : 'Legal notice'}
-              </Link>
-            </div>
-          </footer>
-
-          {/* Mobile Bottom Navigation */}
-          <MobileNavigation />
         </div>
       </div>
       <GlobalToast />
@@ -128,9 +66,11 @@ function AppContent() {
 function App() {
   return (
     <LanguageProvider>
-      <ToastProvider>
-        <AppContent />
-      </ToastProvider>
+      <FontProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </FontProvider>
     </LanguageProvider>
   );
 }

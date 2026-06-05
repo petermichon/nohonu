@@ -2,4 +2,32 @@
 export default {
   darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      fontFamily: {
+        Inter: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        Roboto: ['Roboto', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        Open_Sans: ['"Open Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        Lato: ['"Lato"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        Oswald: ['"Oswald"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        PT_Sans: ['"PT Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        Raleway: ['"Raleway"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        Arial: ['Arial', 'Helvetica', 'sans-serif'],
+        Verdana: ['Verdana', 'Geneva', 'sans-serif'],
+        Helvetica_Neue: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        Helvetica: ['Helvetica', 'Arial', 'sans-serif'],
+        Georgia: ['Georgia', 'serif'],
+        Tahoma: ['Tahoma', 'Geneva', 'sans-serif'],
+        Trebuchet_MS: ['"Trebuchet MS"', 'Helvetica', 'sans-serif'],
+        Lucida_Grande: ['"Lucida Grande"', '"Lucida Sans Unicode"', '"Lucida Sans"', 'Geneva', 'sans-serif'],
+        Times_New_Roman: ['"Times New Roman"', 'Times', 'serif'],
+        Menlo: ['Menlo', 'Monaco', '"Courier New"', 'monospace'],
+        Monaco: ['Monaco', '"Courier New"', 'monospace'],
+        Courier_New: ['"Courier New"', 'Courier', 'monospace'],
+        Consolas: ['Consolas', '"Courier New"', 'monospace'],
+        serif: ['serif'],
+        cursive: ['cursive'],
+      },
+    },
+  },
 };
