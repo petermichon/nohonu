@@ -4,13 +4,20 @@ import './index.css';
 import App from './App.tsx';
 import { ThemeProvider } from './lib/ThemeProvider.tsx';
 import { ConnectionProvider } from './lib/ConnectionProvider.tsx';
+import { applyFont, validFonts, waitForFont, type Font } from './lib/FontProvider.tsx';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ConnectionProvider>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </ConnectionProvider>
-  </StrictMode>
-);
+const savedFont = localStorage.getItem('font');
+const font = savedFont && validFonts.includes(savedFont as Font) ? (savedFont as Font) : 'system';
+
+applyFont(font);
+waitForFont(font).then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <ConnectionProvider>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </ConnectionProvider>
+    </StrictMode>
+  );
+});

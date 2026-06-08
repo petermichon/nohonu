@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+@import '@fontsource/noto-sans/400.css';
+@import '@fontsource/noto-sans/500.css';
+@import '@fontsource/noto-sans/700.css';
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
@@ -45,7 +48,7 @@ html {
   overflow-y: scroll;
 }
 
-body {
+#root {
   -webkit-font-smoothing: antialiased;
   font-family:
     'Inter',
@@ -161,4 +164,18 @@ html.dark {
 .sidebar-animate-right:not(.animation-complete) button:hover,
 .sidebar-animate-left:not(.animation-complete) button:hover {
   background-color: inherit !important;
+}
+
+.sidebar-animate-right:not(.animation-complete) a,
+.sidebar-animate-left:not(.animation-complete) a,
+.sidebar-animate-right:not(.animation-complete) button,
+.sidebar-animate-left:not(.animation-complete) button {
+  color: #78716c !important;
+}
+
+.dark .sidebar-animate-right:not(.animation-complete) a,
+.dark .sidebar-animate-left:not(.animation-complete) a,
+.dark .sidebar-animate-right:not(.animation-complete) button,
+.dark .sidebar-animate-left:not(.animation-complete) button {
+  color: #a8a29e !important;
 }

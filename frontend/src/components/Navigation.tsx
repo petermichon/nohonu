@@ -22,7 +22,7 @@ function useIsActive() {
   return (path: string) => location.pathname === path || (path === '/sites' && location.pathname.startsWith('/sites/'));
 }
 
-export function DesktopNavigation() {
+export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boolean }) {
   const location = useLocation();
   const isActive = useIsActive();
   const { apiFetch, apiBase } = useApi();
@@ -150,27 +150,15 @@ export function DesktopNavigation() {
   };
 
   if (view === 'sites') {
-    const pathSegments = getPathSegments();
     return (
       <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
         <SidebarView
           backTo="/"
           backLabel="Home"
           currentLabel="Sites"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             {loading ? (
@@ -178,47 +166,20 @@ export function DesktopNavigation() {
             ) : sites.length === 0 ? (
               <div className="px-3 py-2 text-sm text-stone-400">No sites</div>
             ) : (
-              sites.map((site) => {
-                const initial = site.domain[0].toUpperCase();
-                const hasIconError = iconErrors.has(site.domain);
-                return (
-                  <Link
-                    key={site.domain}
-                    to={`/sites/${site.domain}`}
-                    className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium group ${
-                      location.pathname === `/sites/${site.domain}`
-                        ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'
-                        : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {/* Favicon */}
-                      <div
-                        className={`w-4 h-4 rounded flex items-center justify-center shrink-0 overflow-hidden ${
-                          site.enabled ? 'bg-stone-100 dark:bg-stone-800' : 'bg-stone-100 dark:bg-stone-800/60'
-                        }`}
-                      >
-                        {!hasIconError ? (
-                          <img
-                            src={`${apiBase}/sites/${site.domain}/icon`}
-                            alt=""
-                            className="w-3 h-3 object-contain"
-                            onError={() => handleIconError(site.domain)}
-                          />
-                        ) : (
-                          <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
-                            {initial}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Domain */}
-                      <span className="truncate">{site.domain}</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 shrink-0" />
-                  </Link>
-                );
-              })
+              sites.map((site) => (
+                <NavButton
+                  key={site.domain}
+                  to={`/sites/${site.domain}`}
+                  label={site.domain}
+                  iconUrl={`${apiBase}/sites/${site.domain}/icon`}
+                  hasIconError={iconErrors.has(site.domain)}
+                  iconEnabled={site.enabled}
+                  isActive={location.pathname === `/sites/${site.domain}`}
+                  onIconError={() => handleIconError(site.domain)}
+                  rightIcon={ChevronRight}
+                  isCollapsed={isCollapsed}
+                />
+              ))
             )}
           </NavItems>
         </SidebarView>
@@ -227,30 +188,18 @@ export function DesktopNavigation() {
   }
 
   if (view === 'site') {
-    const pathSegments = getPathSegments();
     return (
       <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
         <SidebarView
           backTo="/sites"
           backLabel="Sites"
-          currentLabel={pathSegments[pathSegments.length - 1].label}
+          currentLabel="Site"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
-            <SectionNav onNavigate={() => {}} />
+            <SectionNav onNavigate={() => {}} isCollapsed={isCollapsed} />
           </NavItems>
         </SidebarView>
       </>
@@ -258,27 +207,15 @@ export function DesktopNavigation() {
   }
 
   if (view === 'domains') {
-    const pathSegments = getPathSegments();
     return (
       <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
         <SidebarView
           backTo="/"
           backLabel="Home"
           currentLabel="Domains"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             {/* Empty state */}
@@ -290,27 +227,15 @@ export function DesktopNavigation() {
   }
 
   if (view === 'servers') {
-    const pathSegments = getPathSegments();
     return (
       <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
         <SidebarView
           backTo="/"
           backLabel="Home"
           currentLabel="Servers"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             {/* Empty state */}
@@ -340,14 +265,40 @@ export function DesktopNavigation() {
           backTo="/"
           backLabel="Home"
           currentLabel="Legal"
+          showBackButton={false}
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
-            <NavButton to="/legal/privacy-policy" icon={FileText} label="Privacy Policy" rightIcon={ChevronRight} />
-            <NavButton to="/legal/terms-of-service" icon={Scale} label="Terms of Service" rightIcon={ChevronRight} />
-            <NavButton to="/legal/copyright-policy" icon={Shield} label="Copyright Policy" rightIcon={ChevronRight} />
-            <NavButton to="/legal/mentions-legales" icon={Info} label="Mentions légales" rightIcon={ChevronRight} />
+            <NavButton
+              to="/legal/privacy-policy"
+              icon={FileText}
+              label="Privacy Policy"
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
+            <NavButton
+              to="/legal/terms-of-service"
+              icon={Scale}
+              label="Terms of Service"
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
+            <NavButton
+              to="/legal/copyright-policy"
+              icon={Shield}
+              label="Copyright Policy"
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
+            <NavButton
+              to="/legal/mentions-legales"
+              icon={Info}
+              label="Mentions légales"
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
           </NavItems>
         </SidebarView>
       </>
@@ -375,10 +326,12 @@ export function DesktopNavigation() {
           currentLabel="Mentions légales"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             <SectionNav
               onNavigate={() => {}}
+              isCollapsed={isCollapsed}
               sections={[
                 {
                   id: 'editeur',
@@ -441,10 +394,12 @@ export function DesktopNavigation() {
           currentLabel="Copyright Policy"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             <SectionNav
               onNavigate={() => {}}
+              isCollapsed={isCollapsed}
               sections={[
                 { id: 'overview', label: 'Overview', icon: numIcon(1) },
                 { id: 'reporting', label: 'Reporting', icon: numIcon(2) },
@@ -486,10 +441,12 @@ export function DesktopNavigation() {
           currentLabel="Terms of Service"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             <SectionNav
               onNavigate={() => {}}
+              isCollapsed={isCollapsed}
               sections={[
                 { id: 'acceptance', label: 'Acceptance', icon: numIcon(1) },
                 { id: 'description', label: 'Description', icon: numIcon(2) },
@@ -513,31 +470,20 @@ export function DesktopNavigation() {
   }
 
   if (view === 'privacy') {
-    const pathSegments = getPathSegments();
     return (
       <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
         <SidebarView
           backTo="/legal"
           backLabel="Legal"
           currentLabel="Privacy Policy"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             <SectionNav
               onNavigate={() => {}}
+              isCollapsed={isCollapsed}
               sections={[
                 {
                   id: 'introduction',
@@ -647,31 +593,20 @@ export function DesktopNavigation() {
   }
 
   if (view === 'account') {
-    const pathSegments = getPathSegments();
     return (
       <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
         <SidebarView
           backTo="/"
           backLabel="Home"
           currentLabel="Account"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             <SectionNav
               onNavigate={() => {}}
+              isCollapsed={isCollapsed}
               sections={[
                 { id: 'profile', label: 'Profile', icon: User },
                 { id: 'security', label: 'Security', icon: Key },
@@ -685,27 +620,15 @@ export function DesktopNavigation() {
   }
 
   if (view === 'about') {
-    const pathSegments = getPathSegments();
     return (
       <>
-        {/* Current path */}
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
         <SidebarView
           backTo="/"
           backLabel="Home"
           currentLabel="About"
           animationKey={animationKey}
           animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
         >
           <NavItems>
             {/* Empty state */}
@@ -718,18 +641,6 @@ export function DesktopNavigation() {
 
   return (
     <>
-      {/* Current path */}
-      <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-        {getPathSegments().map((segment, index) => (
-          <span key={segment.to}>
-            {index > 0 && ' / '}
-            <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-              {segment.label}
-            </Link>
-          </span>
-        ))}
-      </div>
-
       <SidebarView
         backTo="/"
         backLabel="Back"
@@ -737,14 +648,30 @@ export function DesktopNavigation() {
         disabled
         animationKey={animationKey}
         animationDirection={animationDirection}
+        isCollapsed={isCollapsed}
       >
         <NavItems>
           {/* Sites button */}
-          <NavButton to="/sites" icon={Rocket} label="Sites" isActive={isSitesActive} rightIcon={ChevronRight} />
+          <NavButton
+            to="/sites"
+            icon={Rocket}
+            label="Sites"
+            isActive={isSitesActive}
+            rightIcon={ChevronRight}
+            isCollapsed={isCollapsed}
+          />
 
           {/* Other nav items */}
           {NAV_ITEMS.map(({ to, label, Icon }) => (
-            <NavButton key={to} to={to} icon={Icon} label={label} isActive={isActive(to)} rightIcon={ChevronRight} />
+            <NavButton
+              key={to}
+              to={to}
+              icon={Icon}
+              label={label}
+              isActive={isActive(to)}
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
           ))}
 
           {/* Separator */}
@@ -752,7 +679,15 @@ export function DesktopNavigation() {
 
           {/* Account */}
           {SETTINGS_ACCOUNT_ITEMS.map(({ to, label, Icon }) => (
-            <NavButton key={to} to={to} icon={Icon} label={label} isActive={isActive(to)} rightIcon={ChevronRight} />
+            <NavButton
+              key={to}
+              to={to}
+              icon={Icon}
+              label={label}
+              isActive={isActive(to)}
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
           ))}
 
           {/* Separator */}
@@ -760,7 +695,15 @@ export function DesktopNavigation() {
 
           {/* Legal */}
           {LEGAL_ITEMS.map(({ to, label, Icon }) => (
-            <NavButton key={to} to={to} icon={Icon} label={label} isActive={isActive(to)} rightIcon={ChevronRight} />
+            <NavButton
+              key={to}
+              to={to}
+              icon={Icon}
+              label={label}
+              isActive={isActive(to)}
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
           ))}
         </NavItems>
       </SidebarView>

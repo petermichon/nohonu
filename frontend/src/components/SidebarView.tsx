@@ -10,6 +10,7 @@ interface SidebarViewProps {
   disabled?: boolean;
   animationKey: number;
   animationDirection: 'left' | 'right';
+  isCollapsed?: boolean;
 }
 
 export function SidebarView({
@@ -21,6 +22,7 @@ export function SidebarView({
   disabled = false,
   animationKey,
   animationDirection,
+  isCollapsed = false,
 }: SidebarViewProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +49,14 @@ export function SidebarView({
     <>
       {showBackButton && (
         <>
-          <BackButton to={backTo} label={backLabel} variant="sidebar" currentLabel={currentLabel} disabled={disabled} />
+          <BackButton
+            to={backTo}
+            label={backLabel}
+            variant="sidebar"
+            currentLabel={currentLabel}
+            disabled={disabled}
+            isCollapsed={isCollapsed}
+          />
           <div className="my-2 border-t border-transparent" />
         </>
       )}

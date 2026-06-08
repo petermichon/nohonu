@@ -7,15 +7,46 @@ interface BackButtonProps {
   variant?: 'inline' | 'sidebar';
   currentLabel?: string;
   disabled?: boolean;
+  isCollapsed?: boolean;
 }
 
-export function BackButton({ to, label, variant = 'inline', currentLabel, disabled = false }: BackButtonProps) {
+export function BackButton({
+  to,
+  label,
+  variant = 'inline',
+  currentLabel,
+  disabled = false,
+  isCollapsed = false,
+}: BackButtonProps) {
+  const displayLabel = variant === 'sidebar' && currentLabel ? currentLabel : label;
+
+  if (isCollapsed && variant === 'sidebar') {
+    const baseClassName = 'flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-medium gap-1';
+    const className = disabled
+      ? `${baseClassName} text-stone-400 dark:text-stone-600 opacity-50`
+      : `${baseClassName} text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100`;
+
+    if (disabled) {
+      return (
+        <div className={className}>
+          <ChevronLeft className="w-4 h-4 shrink-0" />
+          <span className="text-[10px] text-center leading-tight">{displayLabel}</span>
+        </div>
+      );
+    }
+
+    return (
+      <Link to={to} className={className}>
+        <ChevronLeft className="w-4 h-4 shrink-0" />
+        <span className="text-[10px] text-center leading-tight">{displayLabel}</span>
+      </Link>
+    );
+  }
+
   const baseClassName =
     variant === 'sidebar'
       ? 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium'
       : 'inline-flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer';
-
-  const displayLabel = variant === 'sidebar' && currentLabel ? currentLabel : label;
 
   if (disabled) {
     return (

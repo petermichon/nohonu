@@ -5,9 +5,10 @@ import { SECTIONS, type SectionConfig } from '../lib/sectionsConfig.ts';
 interface SectionNavProps {
   onNavigate: (id: string) => void;
   sections?: SectionConfig[];
+  isCollapsed?: boolean;
 }
 
-export function SectionNav({ onNavigate, sections: sectionsProp }: SectionNavProps) {
+export function SectionNav({ onNavigate, sections: sectionsProp, isCollapsed = false }: SectionNavProps) {
   const items = sectionsProp ?? SECTIONS;
   const [activeSection, setActiveSection] = useState(items[0]?.id ?? '');
 
@@ -51,6 +52,7 @@ export function SectionNav({ onNavigate, sections: sectionsProp }: SectionNavPro
             label={section.label}
             isActive={isActive}
             onClick={() => handleClick(section.id)}
+            isCollapsed={isCollapsed}
           />
         );
       })}
