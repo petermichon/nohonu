@@ -1,41 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { AlertCircle, Search } from 'lucide-react';
 import { SiteCard } from '../components/SiteCard.tsx';
 import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
 import { BackButton } from '../components/BackButton.tsx';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
 import { useApi } from '../lib/api.ts';
-import type { Site } from '../lib/types.ts';
+import { useSites } from '../lib/SitesProvider.tsx';
 
 function Sites() {
   const { apiFetch } = useApi();
-  const [sites, setSites] = useState<Site[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<false | 'connection' | 'unauthorized'>(false);
+  const { sites, loading, error, refreshSites } = useSites();
   const [toggling, setToggling] = useState<string | null>(null);
   const [confirmToggle, setConfirmToggle] = useState<{ domain: string; enabled: boolean } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const loadSites = async () => {
-    setError(false);
-    try {
-      const res = await apiFetch('/sites');
-      if (res.status === 401) {
-        setError('unauthorized');
-        return;
-      }
-      const data = await res.json();
-      setSites(data.sites || []);
-    } catch {
-      setError('connection');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadSites();
-  }, []);
 
   const handleToggle = async () => {
     if (!confirmToggle) return;
@@ -44,7 +21,7 @@ function Sites() {
     setConfirmToggle(null);
     try {
       await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
-      await loadSites();
+      await refreshSites();
     } catch {
       // Silent fail
     } finally {
@@ -135,7 +112,7 @@ function Sites() {
                 <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
                 <button
                   type="button"
-                  onClick={loadSites}
+                  onClick={refreshSites}
                   className="mt-3 px-3 py-1.5 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-lg hover:bg-stone-700 dark:hover:bg-stone-300"
                 >
                   Retry
@@ -206,7 +183,7 @@ function Sites() {
               )}
 
               {/* Deploy form card - always visible */}
-              <InlineDeployForm onDeploy={loadSites} />
+              <InlineDeployForm onDeploy={refreshSites} />
             </div>
 
             {/* Empty state for search */}

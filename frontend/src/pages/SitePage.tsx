@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ExternalLink, Power, Trash2, Eye, AlertCircle } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
 import { useApi } from '../lib/api.ts';
+import { useSites } from '../lib/SitesProvider.tsx';
 import { usePollData } from '../lib/usePollData.ts';
 import { calcUptimePct, getAccentStyle } from '../lib/utils.ts';
 import { extractAccentColor } from '../lib/extractColor.ts';
@@ -22,6 +23,7 @@ const ACCENT_COLORS = ['#8b5cf6', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#
 function SitePage() {
   const { domain } = useParams<{ domain: string }>();
   const { apiFetch, apiBase, host, protocol } = useApi();
+  const { refreshSites } = useSites();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [site, setSite] = useState<Site | null>(null);
@@ -540,6 +542,7 @@ function SitePage() {
             onUploaded={async () => {
               await loadSite();
               await loadVersions();
+              await refreshSites();
             }}
             onToast={(message, success = true) => {
               showToast(message, success);

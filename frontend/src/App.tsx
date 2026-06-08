@@ -6,6 +6,7 @@ import { GlobalToast } from './components/GlobalToast.tsx';
 import { LanguageProvider } from './lib/LanguageProvider.tsx';
 import { FontProvider } from './lib/FontProvider.tsx';
 import { SidebarProvider, useSidebar } from './lib/SidebarProvider.tsx';
+import { SitesProvider } from './lib/SitesProvider.tsx';
 import { Menu } from 'lucide-react';
 import { Logo } from './components/Logo.tsx';
 import Home from './pages/Home.tsx';
@@ -117,9 +118,11 @@ function App() {
     <LanguageProvider>
       <FontProvider>
         <SidebarProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
+          <SitesProvider>
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
+          </SitesProvider>
         </SidebarProvider>
       </FontProvider>
     </LanguageProvider>

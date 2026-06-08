@@ -2,11 +2,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { Rocket, Globe, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useApi } from '../lib/api.ts';
+import { useSites } from '../lib/SitesProvider.tsx';
 import { SectionNav } from './SectionNav.tsx';
 import { NavButton } from './NavButton.tsx';
 import { SidebarView } from './SidebarView.tsx';
 import { NavItems } from './NavItems.tsx';
-import type { Site } from '../lib/types.ts';
 
 const NAV_ITEMS = [
   { to: '/domains', label: 'Domains', Icon: Globe },
@@ -25,8 +25,8 @@ function useIsActive() {
 export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boolean }) {
   const location = useLocation();
   const isActive = useIsActive();
-  const { apiFetch, apiBase } = useApi();
-  const [sites, setSites] = useState<Site[]>([]);
+  const { apiBase } = useApi();
+  const { sites, loading } = useSites();
   const [view, setView] = useState<
     | 'main'
     | 'sites'
@@ -41,7 +41,6 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
     | 'copyright'
     | 'mentions-legales'
   >('main');
-  const [loading, setLoading] = useState(true);
   const [iconErrors, setIconErrors] = useState<Set<string>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
   const [animationDirection, setAnimationDirection] = useState<'left' | 'right'>('right');
@@ -88,21 +87,6 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
       ];
     return segments;
   };
-
-  useEffect(() => {
-    const loadSites = async () => {
-      try {
-        const res = await apiFetch('/sites');
-        const data = await res.json();
-        setSites(data.sites || []);
-      } catch {
-        setSites([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadSites();
-  }, [apiFetch]);
 
   useEffect(() => {
     // Determine animation direction based on path depth

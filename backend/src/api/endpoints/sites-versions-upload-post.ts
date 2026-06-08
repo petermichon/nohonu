@@ -14,5 +14,5 @@ export async function upload(req: Request, { domain }: RouteContext): Promise<Re
   const zipData = new Uint8Array(buffer);
 
   const result = await sites.uploadVersion(domain, zipData);
-  return json({ domain, index: result.index });
+  return json({ success: true, domain, index: result.index });
 }
