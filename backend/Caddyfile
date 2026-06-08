@@ -1,14 +1,3 @@
-petermichon.fr {
-	reverse_proxy backend:8080
-}
-
-*.petermichon.fr {
-	reverse_proxy backend:8080
-	tls {
-		dns ovh
-	}
-}
-
 nohonu.com {
 	reverse_proxy backend:8080
 }
