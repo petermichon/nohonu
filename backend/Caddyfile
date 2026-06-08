@@ -5,7 +5,7 @@ petermichon.fr {
 *.petermichon.fr {
 	reverse_proxy backend:8080
 	tls {
-		dns ovh {$OVH_ENDPOINT} {$OVH_APPLICATION_KEY} {$OVH_APPLICATION_SECRET} {$OVH_CONSUMER_KEY}
+		dns ovh
 	}
 }
 
