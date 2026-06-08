@@ -8,3 +8,14 @@ petermichon.fr {
 		dns ovh
 	}
 }
+
+nohonu.com {
+	reverse_proxy backend:8080
+}
+
+*.nohonu.com {
+	reverse_proxy backend:8080
+	tls {
+		dns ovh
+	}
+}
