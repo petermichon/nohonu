@@ -1,11 +1,17 @@
 services:
   caddy:
-    image: caddy:2-alpine
+    build:
+      dockerfile: Dockerfile.caddy
+      context: .
     ports:
       - '80:80'
       - '443:443'
     environment:
       DOMAIN: ${DOMAIN:-localhost}
+      OVH_ENDPOINT: ${OVH_ENDPOINT}
+      OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
+      OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
+      OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
