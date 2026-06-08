@@ -132,7 +132,7 @@ function matchRoute(path: string): Endpoint | undefined {
 }
 
 export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
-  await delay(1000);
+  // await delay(1000);
   const start = Date.now();
   const url = new URL(req.url);
   const path = url.pathname;
