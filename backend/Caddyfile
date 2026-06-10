@@ -1,13 +1,10 @@
-{env.DOMAIN} {
+nohonu.com {
 	reverse_proxy backend:8080
 }
 
-# Wildcard subdomains with TLS (only when OVH credentials are set)
-{env.OVH_APPLICATION_KEY} {
-	*.{env.DOMAIN} {
-		reverse_proxy backend:8080
-		tls {
-			dns ovh
-		}
+*.nohonu.com {
+	reverse_proxy backend:8080
+	tls {
+		dns ovh
 	}
 }
