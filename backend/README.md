@@ -112,12 +112,11 @@ The zip is extracted on first access. Only HTML requests are tracked for stats.
 
 ## Environment Variables
 
-| Variable    | Default     | Description                                    |
-| ----------- | ----------- | ---------------------------------------------- |
-| `PORT`      | `8080`      | Server port                                    |
-| `SITES_DIR` | `./data`    | Path for storing site zips and extracted files |
-| `API_KEY`   | _(none)_    | Secret key for API authentication              |
-| `DOMAIN`    | `localhost` | Domain for HTTPS certificates (Caddy)          |
+| Variable    | Default  | Description                                    |
+| ----------- | -------- | ---------------------------------------------- |
+| `PORT`      | `8080`   | Server port                                    |
+| `SITES_DIR` | `./data` | Path for storing site zips and extracted files |
+| `API_KEY`   | _(none)_ | Secret key for API authentication              |
 
 ## Deploying to a VPS
 
@@ -184,11 +183,10 @@ git clone git@github.com:your-user/nohonu-vibe.git /opt/nohonu
 cd /opt/nohonu/backend
 ```
 
-Create your `.env` file with a strong random secret and your domain:
+Create your `.env` file with a strong random secret (see `.env.example` for reference):
 
 ```bash
 echo "API_KEY=$(openssl rand -hex 32)" > .env
-echo "DOMAIN=example.com" >> .env
 ```
 
 Make sure your domain's DNS A record points to the VPS IP. Wildcard subdomains (`*.example.com`) should also point to
