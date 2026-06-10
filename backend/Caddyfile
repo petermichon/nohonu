@@ -1,8 +1,8 @@
-nohonu.com {
+{$DOMAIN:localhost} {
 	reverse_proxy backend:8080
 }
 
-*.nohonu.com {
+*.{$DOMAIN:localhost} {
 	reverse_proxy backend:8080
 	tls {
 		dns ovh
