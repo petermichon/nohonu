@@ -2,9 +2,12 @@
 	reverse_proxy backend:8080
 }
 
-*.{env.DOMAIN} {
-	reverse_proxy backend:8080
-	tls {
-		dns ovh
+# Wildcard subdomains with TLS (only when OVH credentials are set)
+{env.OVH_APPLICATION_KEY} {
+	*.{env.DOMAIN} {
+		reverse_proxy backend:8080
+		tls {
+			dns ovh
+		}
 	}
 }
