@@ -140,7 +140,7 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
       }
     }
     if (action === 'custom-domains') {
-      if (subAction === 'verify') {
+      if (verifyAction === 'verify') {
         return verifyCustomDomain(ctx);
       }
       if (!subAction) {
