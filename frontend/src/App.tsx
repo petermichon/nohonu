@@ -12,6 +12,7 @@ import { Logo } from './components/Logo.tsx';
 import Home from './pages/Home.tsx';
 import Sites from './pages/Sites.tsx';
 import Domains from './pages/Domains.tsx';
+import DomainExplore from './pages/DomainExplore.tsx';
 import Servers from './pages/Servers.tsx';
 import SitePage from './pages/SitePage.tsx';
 import AccountPage from './pages/Account.tsx';
@@ -93,6 +94,7 @@ function AppContent() {
                 <Route path="/sites" element={<Sites />} />
                 <Route path="/sites/:domain" element={<SitePage />} />
                 <Route path="/domains" element={<Domains />} />
+                <Route path="/domains/explore" element={<DomainExplore />} />
                 <Route path="/servers" element={<Servers />} />
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/legal" element={<Legal />} />

@@ -1,5 +1,6 @@
 import { Globe } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
+import { Link } from 'react-router-dom';
 
 function Domains() {
   return (
@@ -16,6 +17,12 @@ function Domains() {
           </div>
           <p className="text-stone-500 dark:text-stone-400 text-sm">No custom domains configured</p>
           <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">Add a custom domain to your sites</p>
+          <Link
+            to="/domains/explore"
+            className="inline-block mt-4 text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 underline"
+          >
+            Explore new domains
+          </Link>
         </div>
       </div>
     </section>

@@ -6,6 +6,7 @@ export interface Site {
   hits: number;
   uptime: number | null;
   accent?: string;
+  customDomains?: { domain: string; verified: boolean }[];
 }
 
 export type VersionSource = { type: 'upload' } | { type: 'github'; repo: string; branch: string };

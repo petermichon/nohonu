@@ -82,6 +82,28 @@ export default function Account() {
               placeholder="http://localhost:8080"
               className="w-full px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
             />
+            <div className="flex gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setUrl('http://localhost');
+                  setStatus('idle');
+                }}
+                className="px-3 py-1.5 text-xs bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md cursor-pointer"
+              >
+                Localhost
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUrl('https://nohonu.com');
+                  setStatus('idle');
+                }}
+                className="px-3 py-1.5 text-xs bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md cursor-pointer"
+              >
+                nohonu.com
+              </button>
+            </div>
           </div>
           <div>
             <label htmlFor="apiKey" className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Rocket, Globe, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info } from 'lucide-react';
+import { Rocket, Globe, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info, Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useApi } from '../lib/api.ts';
 import { useSites } from '../lib/SitesProvider.tsx';
@@ -32,6 +32,7 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
     | 'sites'
     | 'site'
     | 'domains'
+    | 'domains-explore'
     | 'servers'
     | 'about'
     | 'account'
@@ -61,6 +62,8 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
       return [...segments, { label: 'Sites', to: '/sites' }, { label: domain, to: `/sites/${domain}` }];
     }
     if (location.pathname === '/domains') return [...segments, { label: 'Domains', to: '/domains' }];
+    if (location.pathname === '/domains/explore')
+      return [...segments, { label: 'Domains', to: '/domains' }, { label: 'Explore', to: '/domains/explore' }];
     if (location.pathname === '/servers') return [...segments, { label: 'Servers', to: '/servers' }];
     if (location.pathname === '/about') return [...segments, { label: 'About', to: '/about' }];
     if (location.pathname === '/account') return [...segments, { label: 'Account', to: '/account' }];
@@ -98,6 +101,8 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
       setView('site');
     } else if (isSitesActive) {
       setView('sites');
+    } else if (location.pathname === '/domains/explore') {
+      setView('domains-explore');
     } else if (isDomainsActive) {
       setView('domains');
     } else if (isServersActive) {
@@ -202,8 +207,33 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
           isCollapsed={isCollapsed}
         >
           <NavItems>
-            {/* Empty state */}
+            <NavButton
+              to="/domains/explore"
+              icon={Search}
+              label="Explore"
+              rightIcon={ChevronRight}
+              isCollapsed={isCollapsed}
+            />
             <div className="px-3 py-2 text-sm text-stone-400">No domains</div>
+          </NavItems>
+        </SidebarView>
+      </>
+    );
+  }
+
+  if (view === 'domains-explore') {
+    return (
+      <>
+        <SidebarView
+          backTo="/domains"
+          backLabel="Domains"
+          currentLabel="Explore"
+          animationKey={animationKey}
+          animationDirection={animationDirection}
+          isCollapsed={isCollapsed}
+        >
+          <NavItems>
+            <div className="px-3 py-2 text-sm text-stone-400">No sections</div>
           </NavItems>
         </SidebarView>
       </>

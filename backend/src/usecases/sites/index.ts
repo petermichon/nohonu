@@ -2,6 +2,38 @@ import { VALID_DOMAIN } from '../../shared/paths.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 
+// Custom domain registry cache: Map<customDomain, internalDomain>
+let customDomainCache: Map<string, string> | null = null;
+
+async function buildCustomDomainCache(): Promise<void> {
+  const cache = new Map<string, string>();
+  const domains = await storage.listDomains();
+  
+  for (const domain of domains) {
+    const data = await storage.readSiteMetadata(domain);
+    if (data?.customDomains) {
+      for (const entry of data.customDomains) {
+        if (entry.verified) {
+          cache.set(entry.domain, domain);
+        }
+      }
+    }
+  }
+  
+  customDomainCache = cache;
+}
+
+export function invalidateCustomDomainCache(): void {
+  customDomainCache = null;
+}
+
+export async function getCustomDomainCache(): Promise<Map<string, string>> {
+  if (!customDomainCache) {
+    await buildCustomDomainCache();
+  }
+  return customDomainCache!;
+}
+
 export async function listSites(): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string }>> {
   const domains = await storage.listDomains();
   return Promise.all(
@@ -111,6 +143,77 @@ export function getSiteUptime(domain: string, slots: number): { slot: number; up
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof slots === 'number' && !isNaN(slots) && slots > 0, 'slots must be a positive number');
   return analytics.getUptime(domain, slots);
+}
+
+export async function getCustomDomains(domain: string): Promise<{ domain: string; verified: boolean }[]> {
+  const data = await storage.readSiteMetadata(domain);
+  if (!data) return [];
+  return data.customDomains ?? [];
+}
+
+export async function addCustomDomain(domain: string, customDomain: string): Promise<void> {
+  const data = await storage.readSiteMetadata(domain);
+  if (!data) throw new Error('Site not found');
+  
+  if (!data.customDomains) {
+    data.customDomains = [];
+  }
+  
+  // Check for duplicate
+  if (data.customDomains.some((entry) => entry.domain === customDomain)) {
+    throw new Error('Custom domain already exists');
+  }
+  
+  data.customDomains.push({ domain: customDomain, verified: false });
+  await storage.writeSiteMetadata(domain, data);
+  invalidateCustomDomainCache();
+}
+
+export async function removeCustomDomain(domain: string, customDomain: string): Promise<void> {
+  const data = await storage.readSiteMetadata(domain);
+  if (!data) throw new Error('Site not found');
+  
+  if (!data.customDomains) {
+    throw new Error('Custom domain not found');
+  }
+  
+  const filtered = data.customDomains.filter((entry) => entry.domain !== customDomain);
+  if (filtered.length === data.customDomains.length) {
+    throw new Error('Custom domain not found');
+  }
+  
+  data.customDomains = filtered;
+  await storage.writeSiteMetadata(domain, data);
+  invalidateCustomDomainCache();
+}
+
+export async function verifyCustomDomain(domain: string, customDomain: string): Promise<{ verified: boolean }> {
+  const { verifyCustomDomain: dnsVerifyCustomDomain } = await import('./customDomains.ts');
+  const data = await storage.readSiteMetadata(domain);
+  if (!data) throw new Error('Site not found');
+  
+  if (!data.customDomains) {
+    throw new Error('Custom domain not found');
+  }
+  
+  const entry = data.customDomains.find((e) => e.domain === customDomain);
+  if (!entry) {
+    throw new Error('Custom domain not found');
+  }
+  
+  const isVerified = await dnsVerifyCustomDomain(domain, customDomain);
+  entry.verified = isVerified;
+  
+  await storage.writeSiteMetadata(domain, data);
+  invalidateCustomDomainCache();
+  
+  return { verified: isVerified };
+}
+
+export async function getVerificationToken(domain: string): Promise<{ token: string }> {
+  const { getVerificationToken: dnsGetToken } = await import('./customDomains.ts');
+  const token = await dnsGetToken(domain);
+  return { token };
 }
 
 export async function toggleSite(domain: string): Promise<{ enabled: boolean }> {
@@ -259,6 +362,15 @@ export async function serveSiteFile(domain: string, filePath: string): Promise<{
 export async function resolveDomainAndServe(host: string, path: string): Promise<{ domain: string; filePath: string } | null> {
   console.assert(typeof host === 'string' && host.length > 0, 'host must be a non-empty string');
   console.assert(typeof path === 'string', 'path must be a string');
+  
+  // Check custom domain registry first
+  const cache = await getCustomDomainCache();
+  const mappedDomain = cache.get(host);
+  if (mappedDomain) {
+    const filePath = path === '/' ? '/index.html' : path;
+    return { domain: mappedDomain, filePath };
+  }
+  
   const subdomainMatch = host.match(/^([^.]+)\./);
 
   if (subdomainMatch && !['www', 'localhost'].includes(subdomainMatch[1])) {

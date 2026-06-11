@@ -12,7 +12,7 @@ interface MenuSectionProps {
   backLabel: string;
   options: Array<{
     value: string;
-    icon: React.ComponentType<{ className?: string }> | string;
+    icon: React.ComponentType<{ className?: string }> | string | null;
     label: string;
     divider?: boolean;
     className?: string;
@@ -85,6 +85,8 @@ export function TopBar() {
       return [...segments, { label: 'Sites', to: '/sites' }, { label: domain, to: `/sites/${domain}` }];
     }
     if (location.pathname === '/domains') return [...segments, { label: 'Domains', to: '/domains' }];
+    if (location.pathname === '/domains/explore')
+      return [...segments, { label: 'Domains', to: '/domains' }, { label: 'Explore', to: '/domains/explore' }];
     if (location.pathname === '/servers') return [...segments, { label: 'Servers', to: '/servers' }];
     if (location.pathname === '/about') return [...segments, { label: 'About', to: '/about' }];
     if (location.pathname === '/account') return [...segments, { label: 'Account', to: '/account' }];
@@ -298,7 +300,7 @@ export function TopBar() {
                           backLabel="Theme"
                           options={themeOptions}
                           currentValue={theme}
-                          onSelect={setTheme}
+                          onSelect={(value) => setTheme(value as any)}
                         />
                       )}
                       {menuView === 'language' && (
@@ -307,7 +309,7 @@ export function TopBar() {
                           backLabel="Language"
                           options={languageOptions}
                           currentValue={language}
-                          onSelect={setLanguage}
+                          onSelect={(value) => setLanguage(value as any)}
                         />
                       )}
                       {menuView === 'font' && (
@@ -316,7 +318,7 @@ export function TopBar() {
                           backLabel="Font"
                           options={fontOptions}
                           currentValue={font}
-                          onSelect={setFont}
+                          onSelect={(value) => setFont(value as any)}
                         />
                       )}
                     </div>

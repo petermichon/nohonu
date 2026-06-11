@@ -2,6 +2,7 @@ import { CORS, requireAuth, error, ensureDomain, delay } from '../shared/http.ts
 import { health } from './endpoints/health-get.ts';
 import { auth } from './endpoints/auth-get.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
+import { checkCustomDomain } from './endpoints/check-custom-domain-get.ts';
 import { serveStatic } from './endpoints/get.ts';
 import { listSites } from './endpoints/sites-list-get.ts';
 import { getSiteInfo } from './endpoints/sites-info-get.ts';
@@ -21,6 +22,11 @@ import { activateVersion } from './endpoints/sites-versions-activate-post.ts';
 import { deleteSite } from './endpoints/sites-delete.ts';
 import { toggleSite } from './endpoints/sites-toggle-patch.ts';
 import { updateMeta } from './endpoints/sites-meta-patch.ts';
+import { getCustomDomains } from './endpoints/sites-custom-domains-get.ts';
+import { addCustomDomain } from './endpoints/sites-custom-domains-post.ts';
+import { deleteCustomDomain } from './endpoints/sites-custom-domains-delete.ts';
+import { verifyCustomDomain } from './endpoints/sites-custom-domains-verify-post.ts';
+import { getVerificationToken } from './endpoints/sites-custom-domains-token-get.ts';
 import type { CtxRouteHandler, RouteContext } from './endpoints/sites-types.ts';
 
 type Endpoint = {
@@ -32,6 +38,7 @@ const routes: Record<string, Endpoint> = {
   '/health': { handler: health },
   '/auth': { handler: auth },
   '/check-domain': { handler: checkDomain },
+  '/check-custom-domain': { handler: checkCustomDomain },
 };
 
 const SITE_GET_ROUTES: [string, CtxRouteHandler][] = [
@@ -61,7 +68,9 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
   const parts = path.split('/').filter(Boolean);
   const domain = parts[1];
   const action = parts[2];
-  const subAction = parts[4];
+  const subAction = parts[3];
+  const customDomain = parts[3];
+  const verifyAction = parts[4];
   const timestamp = parseInt(parts[3], 10);
 
   const domainCheck = ensureDomain(domain);
@@ -75,7 +84,17 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
   } else {
     parsedTimestamp = timestamp;
   }
-  const ctx: RouteContext = { domain, action, subAction, timestamp: parsedTimestamp, url };
+
+  // For custom-domains, customDomain is in parts[3], verify action is in parts[4]
+  // For versions, subAction is the timestamp
+  const ctx: RouteContext = {
+    domain,
+    action,
+    subAction: action === 'custom-domains' ? verifyAction : subAction,
+    customDomain: action === 'custom-domains' ? customDomain : undefined,
+    timestamp: parsedTimestamp,
+    url,
+  };
 
   if (req.method === 'GET') {
     const compareAction = action ?? '';
@@ -86,26 +105,47 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
     if (route) {
       return route[1](ctx);
     }
+
+    // Custom domains GET
+    if (action === 'custom-domains') {
+      if (subAction === 'token') {
+        return getVerificationToken(ctx);
+      }
+      return getCustomDomains(ctx);
+    }
   }
 
   if (req.method === 'DELETE') {
     if (action === 'versions') {
       return deleteVersion(ctx);
     }
+    if (action === 'custom-domains') {
+      return deleteCustomDomain(ctx);
+    }
     if (!action) {
       return deleteSite(ctx);
     }
   }
 
-  if (req.method === 'POST' && action === 'versions') {
-    if (subAction === 'activate') {
-      return activateVersion(ctx);
+  if (req.method === 'POST') {
+    if (action === 'versions') {
+      if (subAction === 'activate') {
+        return activateVersion(ctx);
+      }
+      if (subAction === 'github') {
+        return fetchGithub(req, ctx);
+      }
+      if (!subAction) {
+        return upload(req, ctx);
+      }
     }
-    if (subAction === 'github') {
-      return fetchGithub(req, ctx);
-    }
-    if (!subAction) {
-      return upload(req, ctx);
+    if (action === 'custom-domains') {
+      if (subAction === 'verify') {
+        return verifyCustomDomain(ctx);
+      }
+      if (!subAction) {
+        return addCustomDomain(ctx, req);
+      }
     }
   }
 

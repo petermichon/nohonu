@@ -11,6 +11,7 @@ export type Version = {
   createdAt: number;
 };
 export type RepoEntry = { repo: string; branch: string; lastUsed: number };
+export type CustomDomainEntry = { domain: string; verified: boolean };
 export type SiteData = {
   nextIndex: number;
   currentIndex: number | null;
@@ -19,6 +20,7 @@ export type SiteData = {
   repoHistory: RepoEntry[];
   versions: Record<string, VersionEntry>;
   extracted: boolean;
+  customDomains?: CustomDomainEntry[];
 };
 
 export async function fileExists(path: string): Promise<boolean> {

@@ -5,6 +5,7 @@ export type RouteContext = {
   domain: string;
   action?: string;
   subAction?: string;
+  customDomain?: string;
   timestamp?: number;
   url: URL;
 };

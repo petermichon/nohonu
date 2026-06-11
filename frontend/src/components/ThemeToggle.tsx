@@ -24,7 +24,7 @@ export function ThemeToggle() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer"
       >
-        <displayOption.icon className="w-4 h-4" />
+        {displayOption && <displayOption.icon className="w-4 h-4" />}
         <span className="hidden sm:inline">{currentOption?.label}</span>
       </button>
       {isOpen && (
