@@ -7,6 +7,8 @@ export function useApi() {
   let protocol = 'http:';
   try {
     ({ host, protocol } = new URL(apiBase));
+    // Strip port from host for subdomain URLs
+    host = host.split(':')[0];
   } catch {
     /* invalid URL */
   }

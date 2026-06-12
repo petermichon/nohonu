@@ -7,18 +7,26 @@ interface Connection {
 
 interface ConnectionContextType extends Connection {
   setConnection: (c: Connection) => void;
+  setApiBase: (url: string) => void;
+  setApiKey: (key: string) => void;
 }
 
 const DEFAULT: Connection = {
-  apiBase: 'http://localhost:8080',
+  apiBase: 'https://localhost/api',
   apiKey: '',
 };
 
 function load(): Connection {
   try {
-    const raw = localStorage.getItem('connection');
-    if (raw) return { ...DEFAULT, ...JSON.parse(raw) };
-  } catch { /* ignore */ }
+    const apiBase = localStorage.getItem('apiBase');
+    const apiKey = localStorage.getItem('apiKey');
+    return {
+      apiBase: apiBase || DEFAULT.apiBase,
+      apiKey: apiKey || DEFAULT.apiKey,
+    };
+  } catch {
+    /* ignore */
+  }
   return DEFAULT;
 }
 
@@ -28,12 +36,23 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [connection, setConnectionState] = useState<Connection>(load);
 
   const setConnection = (c: Connection) => {
-    localStorage.setItem('connection', JSON.stringify(c));
+    localStorage.setItem('apiBase', c.apiBase);
+    localStorage.setItem('apiKey', c.apiKey);
     setConnectionState(c);
   };
 
+  const setApiBase = (url: string) => {
+    localStorage.setItem('apiBase', url);
+    setConnectionState((prev) => ({ ...prev, apiBase: url }));
+  };
+
+  const setApiKey = (key: string) => {
+    localStorage.setItem('apiKey', key);
+    setConnectionState((prev) => ({ ...prev, apiKey: key }));
+  };
+
   return (
-    <ConnectionContext.Provider value={{ ...connection, setConnection }}>
+    <ConnectionContext.Provider value={{ ...connection, setConnection, setApiBase, setApiKey }}>
       {children}
     </ConnectionContext.Provider>
   );

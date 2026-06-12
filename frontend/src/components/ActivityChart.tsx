@@ -19,6 +19,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
   const max = Math.max(...stats.map((s) => s.count), 1);
   const total = stats.reduce((a, b) => a + b.count, 0);
   const now = Math.floor(Date.now() / SLOT_MS);
+  const sortedVisitors = [...visitors].sort((a, b) => b.last - a.last);
 
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 mt-3">
@@ -123,8 +124,8 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
           <span className="text-xs font-medium text-stone-500 dark:text-stone-400">Visitors</span>
         </div>
         <div className="h-24 overflow-y-auto space-y-1">
-          {visitors.length > 0 ? (
-            visitors.map((v) => (
+          {sortedVisitors.length > 0 ? (
+            sortedVisitors.map((v) => (
               <div key={v.ip} className="flex items-center justify-between">
                 <span className="text-xs font-mono text-stone-600 dark:text-stone-300">{v.ip}</span>
                 <div className="flex items-center gap-2">

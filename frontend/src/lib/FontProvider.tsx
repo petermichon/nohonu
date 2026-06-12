@@ -33,7 +33,9 @@ export type Font =
   | 'exo'
   | 'exo-2'
   | 'rubik'
-  | 'cinzel';
+  | 'cinzel'
+  | 'mona-sans'
+  | 'noto-sans-mono';
 
 export const fontNames: Partial<Record<Font, string>> = {
   'noto-sans': 'Noto Sans',
@@ -50,6 +52,8 @@ export const fontNames: Partial<Record<Font, string>> = {
   'exo-2': 'Exo 2',
   rubik: 'Rubik',
   cinzel: 'Cinzel',
+  'mona-sans': 'Mona Sans',
+  'noto-sans-mono': 'Noto Sans Mono',
 };
 
 const fontFamilies: Record<Font, string> = {
@@ -82,6 +86,8 @@ const fontFamilies: Record<Font, string> = {
   'exo-2': "'Exo 2'",
   rubik: "'Rubik'",
   cinzel: "'Cinzel'",
+  'mona-sans': "'Mona Sans'",
+  'noto-sans-mono': "'Noto Sans Mono'",
   'sans-serif': 'sans-serif',
   serif: 'serif',
   cursive: 'cursive',

@@ -168,6 +168,8 @@ export function TopBar() {
       { value: 'exo-2', label: 'Exo 2' },
       { value: 'rubik', label: 'Rubik' },
       { value: 'cinzel', label: 'Cinzel' },
+      { value: 'mona-sans', label: 'Mona Sans' },
+      { value: 'noto-sans-mono', label: 'Noto Sans Mono' },
       { value: 'jetbrains-mono', label: 'JetBrains Mono', divider: true },
       { value: 'arial', label: 'Arial' },
       { value: 'verdana', label: 'Verdana' },
