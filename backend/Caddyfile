@@ -5,7 +5,15 @@
 }
 
 {$DOMAIN:localhost} {
-	reverse_proxy backend:8080
+	handle_path /api/* {
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		root * /srv/frontend
+		try_files {path} /index.html
+		file_server
+	}
 }
 
 *.{$DOMAIN:localhost} {
