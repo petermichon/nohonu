@@ -11,13 +11,20 @@ export function ChartTooltip({ visible, children }: ChartTooltipProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (visible && containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.top - 8,
-        left: rect.left + rect.width / 2,
-      });
-    }
+    if (!visible) return;
+    let rafId: number;
+    const update = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setPosition({
+          top: rect.top - 8,
+          left: rect.left + rect.width / 2,
+        });
+      }
+      rafId = requestAnimationFrame(update);
+    };
+    rafId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(rafId);
   }, [visible]);
 
   if (!visible) return null;

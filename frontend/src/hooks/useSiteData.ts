@@ -15,6 +15,8 @@ export interface SiteDataReturn {
   setStatsRange: (r: TimeRange) => void;
   visitors: Visitor[];
   uptimeData: UptimeSlot[];
+  uptimeLoading: boolean;
+  uptimeAllData: UptimeSlot[];
   uptimeRange: UptimeRange;
   setUptimeRange: (r: UptimeRange) => void;
   accent: string | null;
@@ -24,6 +26,7 @@ export interface SiteDataReturn {
   currentVersion: number | null;
   loadSite: () => Promise<void>;
   loadStats: () => Promise<void>;
+  loadUptime: (slots: number) => Promise<void>;
   loadVersions: () => Promise<void>;
 }
 
@@ -34,9 +37,11 @@ export function useSiteData(domain: string): SiteDataReturn {
   const [notFound, setNotFound] = useState(false);
   const [stats, setStats] = useState<Slot[]>([]);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [uptimeLoading, setUptimeLoading] = useState(false);
   const [statsRange, setStatsRange] = useState<TimeRange>(60);
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [uptimeData, setUptimeData] = useState<UptimeSlot[]>([]);
+  const [uptimeAllData, setUptimeAllData] = useState<UptimeSlot[]>([]);
   const [uptimeRange, setUptimeRange] = useState<UptimeRange>(60);
   const [accent, setAccent] = useState<string | null>(null);
   const [versions, setVersions] = useState<Version[]>([]);
@@ -144,16 +149,29 @@ export function useSiteData(domain: string): SiteDataReturn {
 
   const loadUptime = useCallback(
     async (slots: number) => {
+      setUptimeLoading(true);
       try {
         const res = await apiFetch(`/sites/${domain}/uptime?slots=${slots}`);
         const data = await res.json();
         setUptimeData((data.uptime as UptimeSlot[]) ?? []);
       } catch {
         // non-critical
+      } finally {
+        setUptimeLoading(false);
       }
     },
     [domain, apiFetch]
   );
+
+  const loadUptimeAll = useCallback(async () => {
+    try {
+      const res = await apiFetch(`/sites/${domain}/uptime?slots=1440`);
+      const data = await res.json();
+      setUptimeAllData((data.uptime as UptimeSlot[]) ?? []);
+    } catch {
+      // non-critical
+    }
+  }, [domain, apiFetch]);
 
   // Initial data load
   useEffect(() => {
@@ -186,6 +204,7 @@ export function useSiteData(domain: string): SiteDataReturn {
       loadStats();
       loadVisitors();
       loadUptime(uptimeRange);
+      loadUptimeAll();
     },
     SLOT_MS,
     true
@@ -201,6 +220,8 @@ export function useSiteData(domain: string): SiteDataReturn {
     setStatsRange,
     visitors,
     uptimeData,
+    uptimeLoading,
+    uptimeAllData,
     uptimeRange,
     setUptimeRange,
     accent,
@@ -210,6 +231,7 @@ export function useSiteData(domain: string): SiteDataReturn {
     currentVersion,
     loadSite,
     loadStats,
+    loadUptime,
     loadVersions,
   };
 }

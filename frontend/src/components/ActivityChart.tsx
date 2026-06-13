@@ -66,21 +66,6 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
         }}
         onMouseLeave={() => setHovered(null)}
       >
-        <style>{`
-          .chart-scrollbar::-webkit-scrollbar {
-            height: 8px;
-          }
-          .chart-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          .chart-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgb(214 211 209);
-            border-radius: 4px;
-          }
-          .chart-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: rgb(168 162 158);
-          }
-        `}</style>
         {stats.map((s) => {
           const barH = s.count === 0 ? 2 : Math.max(4, Math.round((s.count / max) * 56));
           const isCurrentSlot = s.slot === now;

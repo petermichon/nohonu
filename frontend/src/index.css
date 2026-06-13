@@ -185,3 +185,17 @@ html.dark {
 .dark .sidebar-animate-left:not(.animation-complete) button {
   color: #a8a29e !important;
 }
+
+.chart-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+.chart-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chart-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(214 211 209);
+  border-radius: 4px;
+}
+.chart-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(168 162 158);
+}

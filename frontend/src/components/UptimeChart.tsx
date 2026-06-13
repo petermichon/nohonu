@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { SLOT_MS } from '../lib/types.ts';
 import type { UptimeSlot, UptimeRange } from '../lib/types.ts';
 import { getAccentStyle, calcUptimePct } from '../lib/utils.ts';
@@ -18,8 +19,11 @@ const TIME_LABELS: Record<UptimeRange, string> = {
 
 interface UptimeChartProps {
   uptime: UptimeSlot[];
+  allUptime: UptimeSlot[];
   range: UptimeRange;
   onRangeChange: (r: UptimeRange) => void;
+  onReload: () => void;
+  reloading: boolean;
   accent?: string | null;
 }
 
@@ -43,9 +47,17 @@ function getBarStyle(
   return undefined;
 }
 
-export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChartProps) {
+export function UptimeChart({
+  uptime,
+  allUptime,
+  range,
+  onRangeChange,
+  onReload,
+  reloading,
+  accent,
+}: UptimeChartProps) {
   const [hovered, setHovered] = useState<UptimeSlot | null>(null);
-  const pct = useMemo(() => calcUptimePct(uptime), [uptime]);
+  const pct = useMemo(() => calcUptimePct(allUptime), [allUptime]);
   const accentStyle = useMemo(() => getAccentStyle(accent, true), [accent]);
 
   return (
@@ -62,21 +74,31 @@ export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChar
             </span>
           )}
         </div>
-        <div className="flex items-center bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5">
-          {([60, 720, 1440] as UptimeRange[]).map((r) => (
-            <button
-              type="button"
-              key={r}
-              onClick={() => onRangeChange(r)}
-              className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
-                range === r
-                  ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
-                  : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
-              }`}
-            >
-              {RANGE_LABELS[r]}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5">
+            {([60, 720, 1440] as UptimeRange[]).map((r) => (
+              <button
+                type="button"
+                key={r}
+                onClick={() => onRangeChange(r)}
+                className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
+                  range === r
+                    ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
+                    : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
+                }`}
+              >
+                {RANGE_LABELS[r]}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={onReload}
+            disabled={reloading}
+            className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${reloading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
       <div
@@ -87,21 +109,6 @@ export function UptimeChart({ uptime, range, onRangeChange, accent }: UptimeChar
         }}
         onMouseLeave={() => setHovered(null)}
       >
-        <style>{`
-          .chart-scrollbar::-webkit-scrollbar {
-            height: 8px;
-          }
-          .chart-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          .chart-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgb(214 211 209);
-            border-radius: 4px;
-          }
-          .chart-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: rgb(168 162 158);
-          }
-        `}</style>
         {uptime.map((s) => {
           const isHovered = hovered?.slot === s.slot;
           return (

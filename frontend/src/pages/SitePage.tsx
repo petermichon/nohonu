@@ -37,6 +37,8 @@ function SitePage() {
     setStatsRange,
     visitors,
     uptimeData,
+    uptimeAllData,
+    uptimeLoading,
     uptimeRange,
     setUptimeRange,
     accent,
@@ -46,6 +48,7 @@ function SitePage() {
     currentVersion,
     loadSite,
     loadStats,
+    loadUptime,
     loadVersions,
   } = useSiteData(domain!);
 
@@ -212,7 +215,15 @@ function SitePage() {
         </Section>
 
         <Section id="uptime" icon={SECTION_MAP['uptime'].icon} title={SECTION_MAP['uptime'].label} container={false}>
-          <UptimeChart uptime={uptimeData} range={uptimeRange} onRangeChange={setUptimeRange} accent={accent} />
+          <UptimeChart
+            uptime={uptimeData}
+            allUptime={uptimeAllData}
+            range={uptimeRange}
+            onRangeChange={setUptimeRange}
+            onReload={() => loadUptime(uptimeRange)}
+            reloading={uptimeLoading}
+            accent={accent}
+          />
         </Section>
 
         <Section
