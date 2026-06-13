@@ -4,7 +4,7 @@ A static site hosting platform. Upload zip archives, serve them on subdomains.
 
 ## Project Structure
 
-```
+```txt
 nohonu-vibe/
 ├── frontend/        # React + TypeScript + Vite + Tailwind
 └── backend/         # Deno HTTP server + deploy config
@@ -22,8 +22,8 @@ cd backend && deno task dev
 cd frontend && npm ci && npm run dev
 ```
 
-Frontend: http://localhost:5173  
-Backend: http://localhost:8080
+Frontend: <http://localhost:5173>  
+Backend: <http://localhost:8080>
 
 See [backend/README.md](backend/README.md) for API reference, Docker setup, and deployment instructions.  
 See [frontend/README.md](frontend/README.md) for frontend development details.
