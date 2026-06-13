@@ -22,9 +22,10 @@ export function BackButton({
 
   if (isCollapsed && variant === 'sidebar') {
     const baseClassName = 'flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-medium gap-1';
-    const className = disabled
-      ? `${baseClassName} text-stone-400 dark:text-stone-600 opacity-50`
-      : `${baseClassName} text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100`;
+    const hoverClasses = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100';
+    const disabledClass = `${baseClassName} text-stone-400 dark:text-stone-600 opacity-50`;
+    const enabledClass = `${baseClassName} text-stone-600 dark:text-stone-400 ${hoverClasses}`;
+    const className = disabled ? disabledClass : enabledClass;
 
     if (disabled) {
       return (
@@ -62,10 +63,9 @@ export function BackButton({
     );
   }
 
+  const sidebarHover = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100';
   const interactiveClassName =
-    variant === 'sidebar'
-      ? `${baseClassName} text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100`
-      : baseClassName;
+    variant === 'sidebar' ? `${baseClassName} text-stone-600 dark:text-stone-400 ${sidebarHover}` : baseClassName;
 
   return (
     <Link to={to} className={interactiveClassName}>

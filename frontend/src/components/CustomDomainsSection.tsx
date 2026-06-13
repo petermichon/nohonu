@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Plus, Check, X } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
@@ -46,9 +46,13 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
     }
   }, [domain, apiFetch]);
 
+  const mountedRef = useRef(false);
   useEffect(() => {
-    loadCustomDomains();
-    loadVerificationToken();
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      loadCustomDomains();
+      loadVerificationToken();
+    }
   }, [loadCustomDomains, loadVerificationToken]);
 
   const addCustomDomain = async () => {
@@ -116,11 +120,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
   };
 
   return (
-    <Section
-      id="custom-domains"
-      icon={SECTION_MAP['custom-domains'].icon}
-      title={SECTION_MAP['custom-domains'].label}
-    >
+    <Section id="custom-domains" icon={SECTION_MAP['custom-domains'].icon} title={SECTION_MAP['custom-domains'].label}>
       <div className="space-y-4">
         {/* DNS Instructions */}
         {verificationToken && (
@@ -138,9 +138,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             {showDnsInstructions && (
               <div className="mt-3 space-y-2 text-xs">
                 <div className="p-2 rounded bg-stone-100 dark:bg-stone-800">
-                  <p className="font-medium text-stone-700 dark:text-stone-300 mb-1">
-                    TXT Record (for verification):
-                  </p>
+                  <p className="font-medium text-stone-700 dark:text-stone-300 mb-1">TXT Record (for verification):</p>
                   <code className="block text-stone-600 dark:text-stone-400 break-all">
                     _nohonu.{newCustomDomain || 'example.com'} → {verificationToken}
                   </code>

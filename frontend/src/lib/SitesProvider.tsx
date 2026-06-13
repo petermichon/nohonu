@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useApi } from './api.ts';
 import type { Site } from './types.ts';
 
@@ -34,8 +34,12 @@ export function SitesProvider({ children }: { children: ReactNode }) {
     }
   }, [apiFetch]);
 
+  const mountedRef = useRef(false);
   useEffect(() => {
-    refreshSites();
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      refreshSites();
+    }
   }, [refreshSites]);
 
   return <SitesContext.Provider value={{ sites, loading, error, refreshSites }}>{children}</SitesContext.Provider>;

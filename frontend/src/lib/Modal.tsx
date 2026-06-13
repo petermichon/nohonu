@@ -22,13 +22,13 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   if (!isOpen) return null;
 
   const widthClass = size === 'sm' ? 'max-w-sm' : 'max-w-md';
+  const baseModalClasses =
+    'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 w-full';
+  const modalClasses = `${baseModalClasses} ${widthClass}`;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div
-        className={`bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 w-full ${widthClass}`}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className={modalClasses} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-medium text-stone-900 dark:text-stone-100">{title}</h2>
           <button

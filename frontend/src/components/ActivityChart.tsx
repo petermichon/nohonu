@@ -16,9 +16,9 @@ interface ActivityChartProps {
 
 export function ActivityChart({ stats, visitors, onReload, reloading, range, onRangeChange }: ActivityChartProps) {
   const [hovered, setHovered] = useState<Slot | null>(null);
+  const [now] = useState(() => Math.floor(Date.now() / SLOT_MS));
   const max = Math.max(...stats.map((s) => s.count), 1);
   const total = stats.reduce((a, b) => a + b.count, 0);
-  const now = Math.floor(Date.now() / SLOT_MS);
   const sortedVisitors = [...visitors].sort((a, b) => b.last - a.last);
 
   return (

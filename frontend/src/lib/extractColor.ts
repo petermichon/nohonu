@@ -2,7 +2,7 @@ export async function extractDominantColor(imageUrl: string): Promise<string | n
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    
+
     img.onload = () => {
       try {
         const canvas = document.createElement('canvas');
@@ -15,9 +15,9 @@ export async function extractDominantColor(imageUrl: string): Promise<string | n
         canvas.width = 1;
         canvas.height = 1;
         ctx.drawImage(img, 0, 0, 1, 1);
-        
+
         const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        
+
         // Skip if image is mostly white or black
         const brightness = (r + g + b) / 3;
         if (brightness > 240 || brightness < 15) {
@@ -42,7 +42,7 @@ export async function extractAccentColor(imageUrl: string): Promise<string | nul
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    
+
     img.onload = () => {
       try {
         const canvas = document.createElement('canvas');
@@ -57,38 +57,38 @@ export async function extractAccentColor(imageUrl: string): Promise<string | nul
         canvas.width = size;
         canvas.height = size;
         ctx.drawImage(img, 0, 0, size, size);
-        
+
         const imageData = ctx.getImageData(0, 0, size, size);
         const data = imageData.data;
-        
+
         // Sample pixels and build color frequency map
         const colorMap = new Map<string, number>();
         const step = 4; // Sample every 4th pixel for performance
-        
+
         for (let i = 0; i < data.length; i += 4 * step) {
           const r = data[i];
           const g = data[i + 1];
           const b = data[i + 2];
           const a = data[i + 3];
-          
+
           // Skip transparent or very light/dark pixels
           if (a < 128) continue;
           const brightness = (r + g + b) / 3;
           if (brightness > 240 || brightness < 15) continue;
-          
+
           // Quantize colors (round to nearest 32 to group similar colors)
           const qr = Math.round(r / 32) * 32;
           const qg = Math.round(g / 32) * 32;
           const qb = Math.round(b / 32) * 32;
           const key = `${qr},${qg},${qb}`;
-          
+
           colorMap.set(key, (colorMap.get(key) || 0) + 1);
         }
-        
+
         // Find most frequent color
         let maxCount = 0;
         let dominantColor: string | null = null;
-        
+
         for (const [key, count] of colorMap) {
           if (count > maxCount) {
             maxCount = count;
@@ -96,7 +96,7 @@ export async function extractAccentColor(imageUrl: string): Promise<string | nul
             dominantColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
           }
         }
-        
+
         resolve(dominantColor);
       } catch {
         resolve(null);

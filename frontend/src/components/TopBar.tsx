@@ -1,5 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, MoreVertical, Sun, Moon, Languages, Check, ChevronLeft, LogIn, Type, Menu } from 'lucide-react';
+import {
+  User,
+  MoreVertical,
+  Sun,
+  Moon,
+  Languages,
+  Check,
+  ChevronLeft,
+  LogIn,
+  Type,
+  Menu,
+  Scale,
+  Info,
+} from 'lucide-react';
 import React from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
@@ -294,6 +307,29 @@ export function TopBar() {
                             <Type className="w-4 h-4" />
                             <span>Font</span>
                           </button>
+                          <div className="border-t border-stone-200 dark:border-stone-700 my-1" />
+                          <Link
+                            to="/legal"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setMenuView('main');
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
+                          >
+                            <Scale className="w-4 h-4" />
+                            <span>Legal</span>
+                          </Link>
+                          <Link
+                            to="/about"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setMenuView('main');
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
+                          >
+                            <Info className="w-4 h-4" />
+                            <span>About</span>
+                          </Link>
                         </>
                       )}
                       {menuView === 'theme' && (
@@ -302,7 +338,7 @@ export function TopBar() {
                           backLabel="Theme"
                           options={themeOptions}
                           currentValue={theme}
-                          onSelect={(value) => setTheme(value as any)}
+                          onSelect={(value) => setTheme(value as 'light' | 'dark' | 'system')}
                         />
                       )}
                       {menuView === 'language' && (
@@ -311,7 +347,7 @@ export function TopBar() {
                           backLabel="Language"
                           options={languageOptions}
                           currentValue={language}
-                          onSelect={(value) => setLanguage(value as any)}
+                          onSelect={(value) => setLanguage(value as 'auto' | 'en' | 'fr')}
                         />
                       )}
                       {menuView === 'font' && (
@@ -320,7 +356,7 @@ export function TopBar() {
                           backLabel="Font"
                           options={fontOptions}
                           currentValue={font}
-                          onSelect={(value) => setFont(value as any)}
+                          onSelect={(value) => setFont(value as Font)}
                         />
                       )}
                     </div>

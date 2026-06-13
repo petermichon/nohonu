@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { NavButton } from './NavButton.tsx';
-import { SECTIONS, type SectionConfig } from '../lib/sectionsConfig.ts';
+import { type SectionConfig } from '../lib/sectionsConfig.ts';
 
 interface SectionNavProps {
   onNavigate: (id: string) => void;
@@ -9,10 +9,17 @@ interface SectionNavProps {
 }
 
 export function SectionNav({ onNavigate, sections: sectionsProp, isCollapsed = false }: SectionNavProps) {
-  const items = sectionsProp ?? SECTIONS;
+  const items = useMemo(() => sectionsProp ?? [], [sectionsProp]);
   const [activeSection, setActiveSection] = useState(items[0]?.id ?? '');
+  const mountedRef = useRef(false);
 
   useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      setActiveSection(items[0]?.id ?? '');
+    }
+    if (items.length === 0) return;
+
     const handleScroll = () => {
       const sections = items.map((s) => document.getElementById(s.id)).filter(Boolean);
 
@@ -40,6 +47,8 @@ export function SectionNav({ onNavigate, sections: sectionsProp, isCollapsed = f
       onNavigate(id);
     }
   };
+
+  if (items.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-0.5">

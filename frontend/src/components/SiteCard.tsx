@@ -66,20 +66,24 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
       <div className={`shrink-0 w-1 self-stretch rounded-full ${uptimeBarColor ?? ''}`} style={uptimeBarStyle} />
 
       {/* Favicon */}
-      <div
-        className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold select-none overflow-hidden ${iconBgClass}`}
-      >
-        {!iconError ? (
-          <img
-            src={`${apiBase}/sites/${site.domain}/icon`}
-            alt=""
-            className="w-5 h-5 object-contain"
-            onError={() => setIconError(true)}
-          />
-        ) : (
-          initial
-        )}
-      </div>
+      {(() => {
+        const baseIconClasses =
+          'shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold select-none overflow-hidden';
+        return (
+          <div className={`${baseIconClasses} ${iconBgClass}`}>
+            {!iconError ? (
+              <img
+                src={`${apiBase}/sites/${site.domain}/icon`}
+                alt=""
+                className="w-5 h-5 object-contain"
+                onError={() => setIconError(true)}
+              />
+            ) : (
+              initial
+            )}
+          </div>
+        );
+      })()}
 
       {/* Domain + URL */}
       <div className="min-w-0 flex-1">

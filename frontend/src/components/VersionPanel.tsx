@@ -135,11 +135,15 @@ export function VersionPanel({
               setShowGithubFetch(!showGithubFetch);
             }}
             disabled={uploading}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto ${
-              showGithubFetch
-                ? 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300'
-                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800'
-            } disabled:opacity-50`}
+            className={(() => {
+              const baseClasses =
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto';
+              const activeClasses = 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300';
+              const inactiveClasses =
+                'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800';
+              const stateClasses = showGithubFetch ? activeClasses : inactiveClasses;
+              return `${baseClasses} ${stateClasses} disabled:opacity-50`;
+            })()}
           >
             <GitBranch className="w-3.5 h-3.5" />
             {showGithubFetch ? 'Cancel' : 'From GitHub'}

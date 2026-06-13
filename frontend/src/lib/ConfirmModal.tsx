@@ -1,6 +1,6 @@
 import { Power, Trash2, Loader2, ArrowUp } from 'lucide-react';
 import { Modal } from './Modal.tsx';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type Action = 'delete' | 'enable' | 'disable' | 'delete-version' | 'activate-version';
 
@@ -39,26 +39,31 @@ const CONFIG: Record<
   },
 };
 
-function getIcon(action: Action, loading: boolean) {
-  if (loading) return Loader2;
-  if (action === 'delete' || action === 'delete-version') return Trash2;
-  if (action === 'activate-version') return ArrowUp;
-  return Power;
-}
+const ICON_MAP: Record<Action, React.ComponentType<{ className?: string }>> = {
+  delete: Trash2,
+  'delete-version': Trash2,
+  'activate-version': ArrowUp,
+  enable: Power,
+  disable: Power,
+};
 
 export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loading }: ConfirmModalProps) {
   const { title, message, confirm, isDanger, requiresTimer } = CONFIG[action];
-  const Icon = getIcon(action, loading ?? false);
+  const Icon = loading ? Loader2 : ICON_MAP[action];
   const iconClass = isDanger ? 'text-purple-400 dark:text-purple-300' : 'text-stone-600 dark:text-stone-400';
   const btnClass = isDanger
     ? 'bg-purple-400 hover:bg-purple-500'
     : 'bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600';
 
   const [countdown, setCountdown] = useState(3);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     if (isOpen && requiresTimer) {
-      setCountdown(3);
+      if (!hasInitializedRef.current) {
+        hasInitializedRef.current = true;
+        setCountdown(3);
+      }
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -68,13 +73,16 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
           return prev - 1;
         });
       }, 1000);
-      return () => clearInterval(timer);
-    } else {
-      setCountdown(3);
+      return () => {
+        clearInterval(timer);
+        hasInitializedRef.current = false;
+      };
     }
   }, [isOpen, requiresTimer]);
 
   const isConfirmDisabled = loading || (requiresTimer && countdown > 0);
+  const confirmBtnBase =
+    'flex-1 px-4 py-2 text-white font-medium rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
@@ -100,7 +108,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
           type="button"
           onClick={onConfirm}
           disabled={isConfirmDisabled}
-          className={`flex-1 px-4 py-2 ${btnClass} text-white font-medium rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50`}
+          className={`${confirmBtnBase} ${btnClass}`}
         >
           {requiresTimer && countdown > 0 ? `${confirm} (${countdown})` : confirm}
         </button>

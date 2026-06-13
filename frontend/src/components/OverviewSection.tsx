@@ -60,16 +60,15 @@ export function OverviewSection({
         (() => {
           const initial = site.domain[0].toUpperCase();
           const accentStyle = getAccentStyle(accent, site.enabled);
+          const baseIconClasses =
+            'shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold select-none overflow-hidden';
+          const enabledIconClasses = 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300';
+          const disabledIconClasses = 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600';
+          const iconStateClasses = site.enabled ? enabledIconClasses : disabledIconClasses;
           return (
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
-                <div
-                  className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold select-none overflow-hidden ${
-                    site.enabled
-                      ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
-                      : 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600'
-                  }`}
-                >
+                <div className={`${baseIconClasses} ${iconStateClasses}`}>
                   {!iconError ? (
                     <img
                       src={`${apiBase}/sites/${site.domain}/icon`}
@@ -83,9 +82,7 @@ export function OverviewSection({
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100 truncate">
-                      {site.domain}
-                    </h1>
+                    <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100 truncate">{site.domain}</h1>
                     <span
                       className={`shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                         !site.enabled
@@ -94,9 +91,7 @@ export function OverviewSection({
                             ? ''
                             : 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300'
                       }`}
-                      style={
-                        accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined
-                      }
+                      style={accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined}
                     >
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${!site.enabled ? 'bg-stone-400 dark:bg-stone-500' : accentStyle ? '' : 'bg-purple-400'}`}

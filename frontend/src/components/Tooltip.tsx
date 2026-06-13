@@ -62,14 +62,19 @@ export function Tooltip({ content, children, position = 'top' }: TooltipProps) {
       <div ref={childRef} className="inline-flex">
         {children}
       </div>
-      {visible && (
-        <div
-          className={`fixed z-50 px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md text-stone-900 dark:text-stone-100 text-xs rounded-lg whitespace-nowrap pointer-events-none ${transformClasses[position]}`}
-          style={{ top: tooltipPos.top, left: tooltipPos.left }}
-        >
-          {content}
-        </div>
-      )}
+      {visible &&
+        (() => {
+          const baseClasses =
+            'fixed z-50 px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md text-stone-900 dark:text-stone-100 text-xs rounded-lg whitespace-nowrap pointer-events-none';
+          return (
+            <div
+              className={`${baseClasses} ${transformClasses[position]}`}
+              style={{ top: tooltipPos.top, left: tooltipPos.left }}
+            >
+              {content}
+            </div>
+          );
+        })()}
     </div>
   );
 }

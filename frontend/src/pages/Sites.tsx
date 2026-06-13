@@ -41,7 +41,11 @@ function Sites() {
     () =>
       sites.reduce(
         (acc, s) => {
-          s.enabled ? acc.enabled++ : acc.disabled++;
+          if (s.enabled) {
+            acc.enabled++;
+          } else {
+            acc.disabled++;
+          }
           return acc;
         },
         { enabled: 0, disabled: 0 }

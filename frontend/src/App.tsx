@@ -22,6 +22,40 @@ import Legal from './pages/Legal.tsx';
 import CopyrightPolicy from './pages/CopyrightPolicy.tsx';
 import MentionsLegales from './pages/MentionsLegales.tsx';
 
+function SidebarContent({
+  isCollapsed,
+  onToggle,
+  title,
+}: {
+  isCollapsed: boolean;
+  onToggle: () => void;
+  title: string;
+}) {
+  return (
+    <>
+      <div className="h-14 border-b border-stone-200 dark:border-stone-800 flex items-center p-2 gap-2">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex items-center justify-center gap-3 w-10 h-10 rounded-lg text-sm font-medium cursor-pointer text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
+          title={title}
+        >
+          <Menu className="w-4 h-4 shrink-0" />
+        </button>
+        {!isCollapsed && (
+          <Link to="/" className="flex items-center gap-2">
+            <Logo />
+            <span className="font-bold text-xl text-stone-900 dark:text-stone-100 tracking-tight">Nohonu</span>
+          </Link>
+        )}
+      </div>
+      <nav className="flex-1 p-2 overflow-y-auto">
+        <DesktopNavigation isCollapsed={isCollapsed} />
+      </nav>
+    </>
+  );
+}
+
 function AppContent() {
   const { isCollapsed, isMobileOpen, closeMobileSidebar, toggleSidebar } = useSidebar();
 
@@ -30,29 +64,13 @@ function AppContent() {
       <div className="min-h-screen flex bg-stone-50 dark:bg-stone-950">
         {/* Desktop Sidebar - Full height on left */}
         <aside
-          className={`hidden md:flex flex-col shrink-0 border-r border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 fixed left-0 top-0 bottom-0 overflow-hidden z-20 ${
-            isCollapsed ? 'w-16' : 'w-64'
-          }`}
+          className={`hidden md:flex flex-col shrink-0 border-r border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 fixed left-0 top-0 bottom-0 overflow-hidden z-20 ${isCollapsed ? 'w-16' : 'w-64'}`}
         >
-          <div className="h-14 border-b border-stone-200 dark:border-stone-800 flex items-center p-2 gap-2">
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              className="flex items-center justify-center gap-3 w-10 h-10 rounded-lg text-sm font-medium cursor-pointer text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
-              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <Menu className="w-4 h-4 shrink-0" />
-            </button>
-            {!isCollapsed && (
-              <Link to="/" className="flex items-center gap-2">
-                <Logo />
-                <span className="font-bold text-xl text-stone-900 dark:text-stone-100 tracking-tight">Nohonu</span>
-              </Link>
-            )}
-          </div>
-          <nav className="flex-1 p-2 overflow-y-auto">
-            <DesktopNavigation isCollapsed={isCollapsed} />
-          </nav>
+          <SidebarContent
+            isCollapsed={isCollapsed}
+            onToggle={toggleSidebar}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          />
         </aside>
 
         {/* Mobile Sidebar Overlay */}
@@ -60,23 +78,7 @@ function AppContent() {
           <>
             <div className="fixed inset-0 bg-black/30 z-70 md:hidden" onClick={closeMobileSidebar} />
             <aside className="md:hidden fixed left-0 top-0 bottom-0 w-64 bg-stone-50 dark:bg-stone-950 border-r border-stone-200 dark:border-stone-800 z-80 flex flex-col">
-              <div className="h-14 border-b border-stone-200 dark:border-stone-800 flex items-center p-2 gap-2">
-                <button
-                  type="button"
-                  onClick={closeMobileSidebar}
-                  className="flex items-center justify-center gap-3 w-10 h-10 rounded-lg text-sm font-medium cursor-pointer text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
-                  title="Close sidebar"
-                >
-                  <Menu className="w-4 h-4 shrink-0" />
-                </button>
-                <Link to="/" className="flex items-center gap-2">
-                  <Logo />
-                  <span className="font-bold text-xl text-stone-900 dark:text-stone-100 tracking-tight">Nohonu</span>
-                </Link>
-              </div>
-              <nav className="flex-1 p-2 overflow-y-auto">
-                <DesktopNavigation isCollapsed={false} />
-              </nav>
+              <SidebarContent isCollapsed={false} onToggle={closeMobileSidebar} title="Close sidebar" />
             </aside>
           </>
         )}

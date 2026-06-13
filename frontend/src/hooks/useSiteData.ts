@@ -174,10 +174,14 @@ export function useSiteData(domain: string): SiteDataReturn {
   }, [domain, apiFetch]);
 
   // Initial data load
+  const mountedRef = useRef(false);
   useEffect(() => {
-    loadSite();
-    loadVersions();
-    loadMeta();
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      loadSite();
+      loadVersions();
+      loadMeta();
+    }
   }, [loadSite, loadVersions, loadMeta]);
 
   // Reload uptime only when range changes (not on initial mount — usePollData handles that)

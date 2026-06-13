@@ -1,21 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Rocket, Globe, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info, Search } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { Rocket, ChevronRight } from 'lucide-react';
+import { useState, useLayoutEffect, useRef } from 'react';
 import { useApi } from '../lib/api.ts';
 import { useSites } from '../lib/SitesProvider.tsx';
 import { SectionNav } from './SectionNav.tsx';
 import { NavButton } from './NavButton.tsx';
 import { SidebarView } from './SidebarView.tsx';
 import { NavItems } from './NavItems.tsx';
-
-const NAV_ITEMS = [
-  { to: '/domains', label: 'Domains', Icon: Globe },
-  { to: '/servers', label: 'Servers', Icon: Server },
-];
-
-const SETTINGS_ACCOUNT_ITEMS = [{ to: '/account', label: 'Account', Icon: User }];
-
-const LEGAL_ITEMS = [{ to: '/legal', label: 'Legal', Icon: Scale }];
+import { SIDEBAR_ROUTES, MAIN_NAV_ITEMS, MOBILE_NAV_ITEMS, type SidebarRouteConfig } from '../lib/sidebarConfig.tsx';
 
 function useIsActive() {
   const location = useLocation();
@@ -27,715 +19,192 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
   const isActive = useIsActive();
   const { apiBase } = useApi();
   const { sites, loading } = useSites();
-  const [view, setView] = useState<
-    | 'main'
-    | 'sites'
-    | 'site'
-    | 'domains'
-    | 'domains-explore'
-    | 'servers'
-    | 'about'
-    | 'account'
-    | 'legal'
-    | 'privacy'
-    | 'terms'
-    | 'copyright'
-    | 'mentions-legales'
-  >('main');
   const [iconErrors, setIconErrors] = useState<Set<string>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
   const [animationDirection, setAnimationDirection] = useState<'left' | 'right'>('right');
   const previousPathRef = useRef(location.pathname);
 
-  const isSitesActive = isActive('/sites');
-  const isDomainsActive = isActive('/domains');
-  const isServersActive = isActive('/servers');
-  const isSiteDetailActive = location.pathname.startsWith('/sites/') && location.pathname !== '/sites';
-
-  // Get current path segments
-  const getPathSegments = () => {
-    const segments = [{ label: 'Home', to: '/' }];
-    if (location.pathname === '/') return segments;
-    if (location.pathname === '/sites') return [...segments, { label: 'Sites', to: '/sites' }];
-    if (location.pathname.startsWith('/sites/')) {
-      const domain = location.pathname.split('/')[2];
-      return [...segments, { label: 'Sites', to: '/sites' }, { label: domain, to: `/sites/${domain}` }];
+  // Derive active route from config
+  const activeRoute: SidebarRouteConfig | undefined = SIDEBAR_ROUTES.find((route) => {
+    if (route.matchPrefix) {
+      return location.pathname.startsWith(route.path);
     }
-    if (location.pathname === '/domains') return [...segments, { label: 'Domains', to: '/domains' }];
-    if (location.pathname === '/domains/explore')
-      return [...segments, { label: 'Domains', to: '/domains' }, { label: 'Explore', to: '/domains/explore' }];
-    if (location.pathname === '/servers') return [...segments, { label: 'Servers', to: '/servers' }];
-    if (location.pathname === '/about') return [...segments, { label: 'About', to: '/about' }];
-    if (location.pathname === '/account') return [...segments, { label: 'Account', to: '/account' }];
-    if (location.pathname === '/legal') return [...segments, { label: 'Legal', to: '/legal' }];
-    if (location.pathname === '/legal/privacy-policy')
-      return [...segments, { label: 'Legal', to: '/legal' }, { label: 'Privacy Policy', to: '/legal/privacy-policy' }];
-    if (location.pathname === '/legal/terms-of-service')
-      return [
-        ...segments,
-        { label: 'Legal', to: '/legal' },
-        { label: 'Terms of Service', to: '/legal/terms-of-service' },
-      ];
-    if (location.pathname === '/legal/copyright-policy')
-      return [
-        ...segments,
-        { label: 'Legal', to: '/legal' },
-        { label: 'Copyright Policy', to: '/legal/copyright-policy' },
-      ];
-    if (location.pathname === '/legal/mentions-legales')
-      return [
-        ...segments,
-        { label: 'Legal', to: '/legal' },
-        { label: 'Mentions légales', to: '/legal/mentions-legales' },
-      ];
-    return segments;
-  };
+    return location.pathname === route.path;
+  });
 
-  useEffect(() => {
-    // Determine animation direction based on path depth
-    const currentSegments = location.pathname.split('/').filter(Boolean);
-    const previousSegments = previousPathRef.current.split('/').filter(Boolean);
-    const direction = currentSegments.length > previousSegments.length ? 'left' : 'right';
+  const previousRoutePathRef = useRef(activeRoute?.path);
 
-    if (isSiteDetailActive) {
-      setView('site');
-    } else if (isSitesActive) {
-      setView('sites');
-    } else if (location.pathname === '/domains/explore') {
-      setView('domains-explore');
-    } else if (isDomainsActive) {
-      setView('domains');
-    } else if (isServersActive) {
-      setView('servers');
-    } else if (location.pathname === '/about') {
-      setView('about');
-    } else if (location.pathname === '/account') {
-      setView('account');
-    } else if (location.pathname === '/legal') {
-      setView('legal');
-    } else if (location.pathname === '/legal/privacy-policy') {
-      setView('privacy');
-    } else if (location.pathname === '/legal/terms-of-service') {
-      setView('terms');
-    } else if (location.pathname === '/legal/copyright-policy') {
-      setView('copyright');
-    } else if (location.pathname === '/legal/mentions-legales') {
-      setView('mentions-legales');
-    } else if (
-      !location.pathname.startsWith('/sites') &&
-      !location.pathname.startsWith('/domains') &&
-      !location.pathname.startsWith('/servers')
-    ) {
-      setView('main');
+  // useLayoutEffect fires before paint, preventing the one-frame flash
+  // that useEffect would cause when the sidebar view changes
+  useLayoutEffect(() => {
+    const routeChanged = activeRoute?.path !== previousRoutePathRef.current;
+    if (routeChanged) {
+      const currentSegments = location.pathname.split('/').filter(Boolean);
+      const previousSegments = previousPathRef.current.split('/').filter(Boolean);
+      const direction = currentSegments.length > previousSegments.length ? 'left' : 'right';
+
+      setAnimationDirection(direction);
+      setAnimationKey((prev) => prev + 1);
     }
-
-    setAnimationDirection(direction);
-    setAnimationKey((prev) => prev + 1);
     previousPathRef.current = location.pathname;
-  }, [isSiteDetailActive, isSitesActive, isDomainsActive, isServersActive, location.pathname]);
+    previousRoutePathRef.current = activeRoute?.path;
+  }, [location.pathname, activeRoute?.path]);
 
   const handleIconError = (domain: string) => {
     setIconErrors((prev) => new Set(prev).add(domain));
   };
 
-  if (view === 'sites') {
+  // Derive breadcrumbs from config or path hierarchy
+  const getBreadcrumbs = () => {
+    if (activeRoute?.breadcrumbs) {
+      return activeRoute.breadcrumbs;
+    }
+
+    const segments = [{ label: 'Home', to: '/' }];
+    if (location.pathname === '/') return segments;
+
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    let currentPath = '';
+
+    const pathSegments = pathParts.map((part) => {
+      currentPath += '/' + part;
+      const label = part
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      return { label, to: currentPath };
+    });
+
+    return [...segments, ...pathSegments];
+  };
+
+  // Main/home view (no route matched)
+  if (!activeRoute) {
     return (
       <>
         <SidebarView
           backTo="/"
-          backLabel="Home"
-          currentLabel="Sites"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            {loading ? (
-              <div className="px-3 py-2 text-sm text-stone-400">Loading sites...</div>
-            ) : sites.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-stone-400">No sites</div>
-            ) : (
-              sites.map((site) => (
-                <NavButton
-                  key={site.domain}
-                  to={`/sites/${site.domain}`}
-                  label={site.domain}
-                  iconUrl={`${apiBase}/sites/${site.domain}/icon`}
-                  hasIconError={iconErrors.has(site.domain)}
-                  iconEnabled={site.enabled}
-                  isActive={location.pathname === `/sites/${site.domain}`}
-                  onIconError={() => handleIconError(site.domain)}
-                  rightIcon={ChevronRight}
-                  isCollapsed={isCollapsed}
-                />
-              ))
-            )}
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'site') {
-    return (
-      <>
-        <SidebarView
-          backTo="/sites"
-          backLabel="Sites"
-          currentLabel="Site"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <SectionNav onNavigate={() => {}} isCollapsed={isCollapsed} />
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'domains') {
-    return (
-      <>
-        <SidebarView
-          backTo="/"
-          backLabel="Home"
-          currentLabel="Domains"
+          backLabel="Back"
+          currentLabel="Home"
+          disabled
           animationKey={animationKey}
           animationDirection={animationDirection}
           isCollapsed={isCollapsed}
         >
           <NavItems>
             <NavButton
-              to="/domains/explore"
-              icon={Search}
-              label="Explore"
+              to="/sites"
+              icon={Rocket}
+              label="Sites"
+              isActive={isActive('/sites')}
               rightIcon={ChevronRight}
               isCollapsed={isCollapsed}
             />
-            <div className="px-3 py-2 text-sm text-stone-400">No domains</div>
+
+            {MAIN_NAV_ITEMS.map(({ to, label, icon }) => (
+              <NavButton
+                key={to}
+                to={to}
+                icon={icon}
+                label={label}
+                isActive={isActive(to)}
+                rightIcon={ChevronRight}
+                isCollapsed={isCollapsed}
+              />
+            ))}
           </NavItems>
         </SidebarView>
       </>
     );
   }
 
-  if (view === 'domains-explore') {
-    return (
-      <>
-        <SidebarView
-          backTo="/domains"
-          backLabel="Domains"
-          currentLabel="Explore"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <div className="px-3 py-2 text-sm text-stone-400">No sections</div>
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
+  // Render breadcrumbs if configured
+  const breadcrumbs = getBreadcrumbs();
+  const breadcrumbElement = activeRoute.showBreadcrumbs ? (
+    <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+      {breadcrumbs.map((segment, index) => (
+        <span key={segment.to}>
+          {index > 0 && ' / '}
+          <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
+            {segment.label}
+          </Link>
+        </span>
+      ))}
+    </div>
+  ) : null;
 
-  if (view === 'servers') {
-    return (
-      <>
-        <SidebarView
-          backTo="/"
-          backLabel="Home"
-          currentLabel="Servers"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            {/* Empty state */}
-            <div className="px-3 py-2 text-sm text-stone-400">No servers</div>
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'legal') {
-    const pathSegments = getPathSegments();
-    return (
-      <>
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
-        <SidebarView
-          backTo="/"
-          backLabel="Home"
-          currentLabel="Legal"
-          showBackButton={false}
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <NavButton
-              to="/legal/privacy-policy"
-              icon={FileText}
-              label="Privacy Policy"
-              rightIcon={ChevronRight}
-              isCollapsed={isCollapsed}
-            />
-            <NavButton
-              to="/legal/terms-of-service"
-              icon={Scale}
-              label="Terms of Service"
-              rightIcon={ChevronRight}
-              isCollapsed={isCollapsed}
-            />
-            <NavButton
-              to="/legal/copyright-policy"
-              icon={Shield}
-              label="Copyright Policy"
-              rightIcon={ChevronRight}
-              isCollapsed={isCollapsed}
-            />
-            <NavButton
-              to="/legal/mentions-legales"
-              icon={Info}
-              label="Mentions légales"
-              rightIcon={ChevronRight}
-              isCollapsed={isCollapsed}
-            />
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'mentions-legales') {
-    const pathSegments = getPathSegments();
-    return (
-      <>
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
-        <SidebarView
-          backTo="/legal"
-          backLabel="Legal"
-          currentLabel="Mentions légales"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <SectionNav
-              onNavigate={() => {}}
-              isCollapsed={isCollapsed}
-              sections={[
-                {
-                  id: 'editeur',
-                  label: 'Éditeur',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      1
-                    </span>
-                  ),
-                },
-                {
-                  id: 'directeur',
-                  label: 'Directeur',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      2
-                    </span>
-                  ),
-                },
-                {
-                  id: 'hebergement',
-                  label: 'Hébergement',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      3
-                    </span>
-                  ),
-                },
-              ]}
-            />
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'copyright') {
-    const pathSegments = getPathSegments();
-    const numIcon =
-      (n: number) =>
-      ({ className }: { className?: string }) => (
-        <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>{n}</span>
+  // Render content based on config
+  const renderContent = () => {
+    if (activeRoute.renderSiteList) {
+      return (
+        <>
+          {loading ? (
+            <div className="px-3 py-2 text-sm text-stone-400">Loading sites...</div>
+          ) : sites.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-stone-400">No sites</div>
+          ) : (
+            sites.map((site) => (
+              <NavButton
+                key={site.domain}
+                to={`/sites/${site.domain}`}
+                label={site.domain}
+                iconUrl={`${apiBase}/sites/${site.domain}/icon`}
+                hasIconError={iconErrors.has(site.domain)}
+                iconEnabled={site.enabled}
+                isActive={location.pathname === `/sites/${site.domain}`}
+                onIconError={() => handleIconError(site.domain)}
+                rightIcon={ChevronRight}
+                isCollapsed={isCollapsed}
+              />
+            ))
+          )}
+        </>
       );
-    return (
-      <>
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
+    }
 
-        <SidebarView
-          backTo="/legal"
-          backLabel="Legal"
-          currentLabel="Copyright Policy"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
+    if (activeRoute.sections) {
+      return <SectionNav onNavigate={() => {}} isCollapsed={isCollapsed} sections={activeRoute.sections} />;
+    }
+
+    if (activeRoute.children) {
+      return activeRoute.children.map((child) => (
+        <NavButton
+          key={child.to}
+          to={child.to}
+          icon={child.icon}
+          label={child.label}
+          rightIcon={child.rightIcon}
           isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <SectionNav
-              onNavigate={() => {}}
-              isCollapsed={isCollapsed}
-              sections={[
-                { id: 'overview', label: 'Overview', icon: numIcon(1) },
-                { id: 'reporting', label: 'Reporting', icon: numIcon(2) },
-                { id: 'our-response', label: 'Our Response', icon: numIcon(3) },
-                { id: 'counter-notice', label: 'Counter-Notice', icon: numIcon(4) },
-                { id: 'repeat-infringers', label: 'Repeat Infringers', icon: numIcon(5) },
-                { id: 'contact', label: 'Contact', icon: numIcon(6) },
-              ]}
-            />
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
+        />
+      ));
+    }
 
-  if (view === 'terms') {
-    const pathSegments = getPathSegments();
-    const numIcon =
-      (n: number) =>
-      ({ className }: { className?: string }) => (
-        <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>{n}</span>
-      );
-    return (
-      <>
-        <div className="px-3 py-2 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-          {pathSegments.map((segment, index) => (
-            <span key={segment.to}>
-              {index > 0 && ' / '}
-              <Link to={segment.to} className="hover:text-stone-600 dark:hover:text-stone-300">
-                {segment.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-
-        <SidebarView
-          backTo="/legal"
-          backLabel="Legal"
-          currentLabel="Terms of Service"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <SectionNav
-              onNavigate={() => {}}
-              isCollapsed={isCollapsed}
-              sections={[
-                { id: 'acceptance', label: 'Acceptance', icon: numIcon(1) },
-                { id: 'description', label: 'Description', icon: numIcon(2) },
-                { id: 'accounts', label: 'User Accounts', icon: numIcon(3) },
-                { id: 'acceptable-use', label: 'Acceptable Use', icon: numIcon(4) },
-                { id: 'content', label: 'Your Content', icon: numIcon(5) },
-                { id: 'payment', label: 'Payment', icon: numIcon(6) },
-                { id: 'availability', label: 'Availability', icon: numIcon(7) },
-                { id: 'liability', label: 'Liability', icon: numIcon(8) },
-                { id: 'indemnification', label: 'Indemnification', icon: numIcon(9) },
-                { id: 'termination', label: 'Termination', icon: numIcon(10) },
-                { id: 'changes', label: 'Changes', icon: numIcon(11) },
-                { id: 'governing-law', label: 'Governing Law', icon: numIcon(12) },
-                { id: 'contact', label: 'Contact Us', icon: numIcon(13) },
-              ]}
-            />
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'privacy') {
-    return (
-      <>
-        <SidebarView
-          backTo="/legal"
-          backLabel="Legal"
-          currentLabel="Privacy Policy"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <SectionNav
-              onNavigate={() => {}}
-              isCollapsed={isCollapsed}
-              sections={[
-                {
-                  id: 'introduction',
-                  label: 'Introduction',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      1
-                    </span>
-                  ),
-                },
-                {
-                  id: 'information-we-collect',
-                  label: 'Info We Collect',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      2
-                    </span>
-                  ),
-                },
-                {
-                  id: 'how-we-use',
-                  label: 'How We Use It',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      3
-                    </span>
-                  ),
-                },
-                {
-                  id: 'data-sharing',
-                  label: 'Data Sharing',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      4
-                    </span>
-                  ),
-                },
-                {
-                  id: 'data-retention',
-                  label: 'Data Retention',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      5
-                    </span>
-                  ),
-                },
-                {
-                  id: 'cookies',
-                  label: 'Cookies & Storage',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      6
-                    </span>
-                  ),
-                },
-                {
-                  id: 'your-rights',
-                  label: 'Your Rights',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      7
-                    </span>
-                  ),
-                },
-                {
-                  id: 'security',
-                  label: 'Security',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      8
-                    </span>
-                  ),
-                },
-                {
-                  id: 'childrens-privacy',
-                  label: "Children's Privacy",
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      9
-                    </span>
-                  ),
-                },
-                {
-                  id: 'changes',
-                  label: 'Changes',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      10
-                    </span>
-                  ),
-                },
-                {
-                  id: 'contact',
-                  label: 'Contact Us',
-                  icon: ({ className }: { className?: string }) => (
-                    <span className={`${className} inline-flex items-center justify-center text-[11px] font-medium`}>
-                      11
-                    </span>
-                  ),
-                },
-              ]}
-            />
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'account') {
-    return (
-      <>
-        <SidebarView
-          backTo="/"
-          backLabel="Home"
-          currentLabel="Account"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            <SectionNav
-              onNavigate={() => {}}
-              isCollapsed={isCollapsed}
-              sections={[
-                { id: 'profile', label: 'Profile', icon: User },
-                { id: 'security', label: 'Security', icon: Key },
-                { id: 'connection', label: 'Connection', icon: Server },
-              ]}
-            />
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
-
-  if (view === 'about') {
-    return (
-      <>
-        <SidebarView
-          backTo="/"
-          backLabel="Home"
-          currentLabel="About"
-          animationKey={animationKey}
-          animationDirection={animationDirection}
-          isCollapsed={isCollapsed}
-        >
-          <NavItems>
-            {/* Empty state */}
-            <div className="px-3 py-2 text-sm text-stone-400">No sections</div>
-          </NavItems>
-        </SidebarView>
-      </>
-    );
-  }
+    return <div className="px-3 py-2 text-sm text-stone-400">No sections</div>;
+  };
 
   return (
-    <>
-      <SidebarView
-        backTo="/"
-        backLabel="Back"
-        currentLabel="Home"
-        disabled
-        animationKey={animationKey}
-        animationDirection={animationDirection}
-        isCollapsed={isCollapsed}
-      >
-        <NavItems>
-          {/* Sites button */}
-          <NavButton
-            to="/sites"
-            icon={Rocket}
-            label="Sites"
-            isActive={isSitesActive}
-            rightIcon={ChevronRight}
-            isCollapsed={isCollapsed}
-          />
-
-          {/* Other nav items */}
-          {NAV_ITEMS.map(({ to, label, Icon }) => (
-            <NavButton
-              key={to}
-              to={to}
-              icon={Icon}
-              label={label}
-              isActive={isActive(to)}
-              rightIcon={ChevronRight}
-              isCollapsed={isCollapsed}
-            />
-          ))}
-
-          {/* Separator */}
-          <div className="my-2 border-t border-stone-200 dark:border-stone-800" />
-
-          {/* Account */}
-          {SETTINGS_ACCOUNT_ITEMS.map(({ to, label, Icon }) => (
-            <NavButton
-              key={to}
-              to={to}
-              icon={Icon}
-              label={label}
-              isActive={isActive(to)}
-              rightIcon={ChevronRight}
-              isCollapsed={isCollapsed}
-            />
-          ))}
-
-          {/* Separator */}
-          <div className="my-2 border-t border-stone-200 dark:border-stone-800" />
-
-          {/* Legal */}
-          {LEGAL_ITEMS.map(({ to, label, Icon }) => (
-            <NavButton
-              key={to}
-              to={to}
-              icon={Icon}
-              label={label}
-              isActive={isActive(to)}
-              rightIcon={ChevronRight}
-              isCollapsed={isCollapsed}
-            />
-          ))}
-        </NavItems>
-      </SidebarView>
-    </>
+    <SidebarView
+      backTo={activeRoute.backTo}
+      backLabel={activeRoute.backLabel}
+      currentLabel={activeRoute.currentLabel}
+      showBackButton={activeRoute.showBackButton}
+      disabled={activeRoute.disabled}
+      animationKey={animationKey}
+      animationDirection={animationDirection}
+      isCollapsed={isCollapsed}
+      breadcrumbs={breadcrumbElement}
+    >
+      <NavItems>{renderContent()}</NavItems>
+    </SidebarView>
   );
 }
 
 export function MobileNavigation() {
   const isActive = useIsActive();
-  const MOBILE_NAV_ITEMS = [
-    { to: '/sites', label: 'Sites', Icon: Rocket },
-    { to: '/domains', label: 'Domains', Icon: Globe },
-    { to: '/servers', label: 'Servers', Icon: Server },
-  ];
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-stone-50 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 z-50">
       <div className="flex items-center">
-        {MOBILE_NAV_ITEMS.map(({ to, label, Icon }) => (
+        {MOBILE_NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <Link
             key={to}
             to={to}
@@ -745,7 +214,7 @@ export function MobileNavigation() {
                 : 'text-stone-600 dark:text-stone-400'
             }`}
           >
-            <Icon className="w-5 h-5" />
+            {Icon && <Icon className="w-5 h-5" />}
             <span className="text-xs">{label}</span>
           </Link>
         ))}

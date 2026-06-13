@@ -8,7 +8,10 @@ export function usePollData(
   alignToMinute: boolean = true
 ) {
   const fetchRef = useRef(fetchFn);
-  fetchRef.current = fetchFn;
+
+  useEffect(() => {
+    fetchRef.current = fetchFn;
+  }, [fetchFn]);
 
   useEffect(() => {
     const poll = () => fetchRef.current();

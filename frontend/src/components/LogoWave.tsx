@@ -1,25 +1,13 @@
 export function LogoWave() {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      className="w-8 h-8"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="waveGradient" x1="2" y1="2" x2="30" y2="30">
           <stop offset="0%" stopColor="#0ea5e9" />
           <stop offset="100%" stopColor="#0284c7" />
         </linearGradient>
       </defs>
-      <rect
-        x="2"
-        y="2"
-        width="28"
-        height="28"
-        rx="8"
-        fill="url(#waveGradient)"
-      />
+      <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#waveGradient)" />
       {/* Wave 1 */}
       <path
         d="M4 18C6 16 8 14 10 16C12 18 14 20 16 18C18 16 20 14 22 16C24 18 26 20 28 18"

@@ -20,10 +20,14 @@ export default defineConfig([
     },
     rules: {
       '@typescript-eslint/no-unused-vars': 'error',
-      'max-len': [
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/consistent-type-imports': [
         'error',
-        { code: 120, ignoreUrls: true, ignoreStrings: true },
+        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
+      'no-console': 'warn',
+      'max-len': ['error', { code: 120, ignoreUrls: true, ignoreStrings: true }],
+      'react-refresh/only-export-components': 'off',
     },
   },
 ]);

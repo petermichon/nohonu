@@ -32,28 +32,32 @@ export function ThemeToggle() {
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 top-full mt-2 z-50 bg-stone-50 dark:bg-stone-950 rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 p-2 min-w-[140px]">
             <div className="flex flex-col gap-0.5">
-              {options.map(({ value, icon: Icon, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => {
-                    setTheme(value);
-                  }}
-                  className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer ${
-                    theme === value
-                      ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'
-                      : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4" />
-                    <span>{label}</span>
-                  </div>
-                  <Check
-                    className={`w-4 h-4 ml-2 transition-opacity ${theme === value ? 'opacity-100 text-stone-900 dark:text-stone-100' : 'opacity-0'}`}
-                  />
-                </button>
-              ))}
+              {options.map(({ value, icon: Icon, label }) => {
+                const baseClasses =
+                  'w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer';
+                const activeClasses = 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100';
+                const inactiveClasses =
+                  'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100';
+                const stateClasses = theme === value ? activeClasses : inactiveClasses;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setTheme(value);
+                    }}
+                    className={`${baseClasses} ${stateClasses}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <span>{label}</span>
+                    </div>
+                    <Check
+                      className={`w-4 h-4 ml-2 transition-opacity ${theme === value ? 'opacity-100 text-stone-900 dark:text-stone-100' : 'opacity-0'}`}
+                    />
+                  </button>
+                );
+              })}
             </div>
           </div>
         </>

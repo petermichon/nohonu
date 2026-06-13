@@ -1,25 +1,13 @@
 export function LogoSakura() {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      className="w-8 h-8"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="sakuraGradient" x1="2" y1="2" x2="30" y2="30">
           <stop offset="0%" stopColor="#f472b6" />
           <stop offset="100%" stopColor="#db2777" />
         </linearGradient>
       </defs>
-      <rect
-        x="2"
-        y="2"
-        width="28"
-        height="28"
-        rx="8"
-        fill="url(#sakuraGradient)"
-      />
+      <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sakuraGradient)" />
       {/* Cherry blossom petals */}
       <path
         d="M16 8C16 8 13 11 13 14C13 15.5 14 16.5 15 17L16 18L17 17C18 16.5 19 15.5 19 14C19 11 16 8 16 8Z"

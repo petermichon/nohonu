@@ -11,6 +11,7 @@ interface SidebarViewProps {
   animationKey: number;
   animationDirection: 'left' | 'right';
   isCollapsed?: boolean;
+  breadcrumbs?: ReactNode;
 }
 
 export function SidebarView({
@@ -22,25 +23,27 @@ export function SidebarView({
   disabled = false,
   animationKey,
   animationDirection,
+  breadcrumbs,
   isCollapsed = false,
 }: SidebarViewProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!contentRef.current) return;
+    const ref = contentRef.current;
+    if (!ref) return;
 
     const handleAnimationEnd = () => {
-      if (contentRef.current) {
+      if (ref) {
         // Add animation-complete class to re-enable hover styles
-        contentRef.current.classList.add('animation-complete');
+        ref.classList.add('animation-complete');
       }
     };
 
-    contentRef.current.addEventListener('animationend', handleAnimationEnd);
+    ref.addEventListener('animationend', handleAnimationEnd);
 
     return () => {
-      if (contentRef.current) {
-        contentRef.current.removeEventListener('animationend', handleAnimationEnd);
+      if (ref) {
+        ref.removeEventListener('animationend', handleAnimationEnd);
       }
     };
   }, [animationKey]);
@@ -68,6 +71,7 @@ export function SidebarView({
           animationDirection === 'right' ? 'sidebar-animate-right' : 'sidebar-animate-left'
         }`}
       >
+        {breadcrumbs}
         {children}
       </div>
     </>

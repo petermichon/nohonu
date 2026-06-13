@@ -203,67 +203,74 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             />
           </div>
         ) : (
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragLeave={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-            }}
-            onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 p-6 cursor-pointer ${
-              isDragging
-                ? 'border-stone-900 dark:border-stone-400 bg-stone-50 dark:bg-stone-800/50'
-                : selectedFile
-                  ? 'border-stone-400 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/30'
-                  : 'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600'
-            }`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              id="zipFile"
-              name="zipFile"
-              accept=".zip"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFileSelect(f);
-                e.target.value = '';
-              }}
-              className="hidden"
-            />
-            {selectedFile ? (
-              <div className="flex items-center gap-2 w-full">
-                <FileArchive className="w-5 h-5 text-stone-500 dark:text-stone-400 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-stone-900 dark:text-stone-100 truncate">{selectedFile.name}</p>
-                  <p className="text-[11px] text-stone-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedFile(null);
+          (() => {
+            const baseClasses =
+              'border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 p-6 cursor-pointer';
+            const draggingClasses = 'border-stone-900 dark:border-stone-400 bg-stone-50 dark:bg-stone-800/50';
+            const selectedClasses = 'border-stone-400 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/30';
+            const defaultClasses =
+              'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600';
+            const stateClasses = isDragging ? draggingClasses : selectedFile ? selectedClasses : defaultClasses;
+            return (
+              <div
+                onDrop={handleDrop}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                className={`${baseClasses} ${stateClasses}`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="zipFile"
+                  name="zipFile"
+                  accept=".zip"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleFileSelect(f);
+                    e.target.value = '';
                   }}
-                  className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded cursor-pointer shrink-0"
-                >
-                  <X className="w-3.5 h-3.5 text-stone-400" />
-                </button>
-              </div>
-            ) : (
-              <>
-                <Upload
-                  className={`w-5 h-5 ${isDragging ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-500'}`}
+                  className="hidden"
                 />
-                <p className="text-xs text-stone-500 dark:text-stone-400 text-center">
-                  {isDragging ? 'Drop to upload' : 'Drop .zip or click to browse'}
-                </p>
-              </>
-            )}
-          </div>
+                {selectedFile ? (
+                  <div className="flex items-center gap-2 w-full">
+                    <FileArchive className="w-5 h-5 text-stone-500 dark:text-stone-400 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-stone-900 dark:text-stone-100 truncate">
+                        {selectedFile.name}
+                      </p>
+                      <p className="text-[11px] text-stone-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFile(null);
+                      }}
+                      className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded cursor-pointer shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5 text-stone-400" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload
+                      className={`w-5 h-5 ${isDragging ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-500'}`}
+                    />
+                    <p className="text-xs text-stone-500 dark:text-stone-400 text-center">
+                      {isDragging ? 'Drop to upload' : 'Drop .zip or click to browse'}
+                    </p>
+                  </>
+                )}
+              </div>
+            );
+          })()
         )}
 
         {/* Error message */}

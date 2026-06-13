@@ -47,8 +47,8 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
         <div>
           <div className="flex items-center justify-between gap-4">
             <p className="text-xs text-stone-700 dark:text-stone-300">
-              Deleting a site is permanent and cannot be undone. All data, including versions and statistics, will
-              be permanently removed.
+              Deleting a site is permanent and cannot be undone. All data, including versions and statistics, will be
+              permanently removed.
             </p>
             <button
               type="button"
