@@ -1,7 +1,7 @@
 services:
   caddy:
     build:
-      dockerfile: backend/Dockerfile.caddy
+      dockerfile: deploy/Dockerfile.caddy
       context: ..
     ports:
       - '80:80'
@@ -24,7 +24,7 @@ services:
 
   backend:
     build:
-      context: .
+      context: ../backend
     environment:
       PORT: '8080'
       SITES_DIR: /data

@@ -181,7 +181,7 @@ picked up):
 sudo mkdir -p /opt/nohonu
 sudo chown $USER:$USER /opt/nohonu
 git clone git@github.com:your-user/nohonu-vibe.git /opt/nohonu
-cd /opt/nohonu/backend
+cd /opt/nohonu/deploy
 ```
 
 Create your `.env` file with a strong random secret and your domain (see `.env.example` for reference):
@@ -229,7 +229,7 @@ curl https://example.com/health
 ```bash
 ssh user@your-vps
 cd /opt/nohonu && git pull
-cd backend && sudo docker compose up --build -d
+cd deploy && sudo docker compose up --build -d
 ```
 
 Site data in the `sites_data` volume is untouched by redeployments.
@@ -239,22 +239,22 @@ Site data in the `sites_data` volume is untouched by redeployments.
 ### Docker (production)
 
 ```bash
-docker compose up --build -d
-docker compose down        # stop
-docker compose down -v     # stop and delete all site data
+cd deploy && docker compose up --build -d
+cd deploy && docker compose down        # stop
+cd deploy && docker compose down -v     # stop and delete all site data
 ```
 
 ### Docker (dev — port 8080 published)
 
 ```bash
-docker compose run --rm -p 127.0.0.1:8080:8080 backend
-docker compose run --rm -p 127.0.0.1:8080:8080 --build backend  # with rebuild
+cd deploy && docker compose run --rm -p 127.0.0.1:8080:8080 backend
+cd deploy && docker compose run --rm -p 127.0.0.1:8080:8080 --build backend  # with rebuild
 ```
 
 ### Docker (dev — hot reload)
 
 ```bash
-docker compose run --rm -p 127.0.0.1:8080:8080 -v .:/app backend deno run --watch --allow-net --allow-env --allow-read --allow-write=/data/sites --no-prompt main.ts
+cd deploy && docker compose run --rm -p 127.0.0.1:8080:8080 -v ../backend:/app backend deno run --watch --allow-net --allow-env --allow-read --allow-write=/data/sites --no-prompt main.ts
 ```
 
 ### Local development
