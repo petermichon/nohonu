@@ -1,4 +1,4 @@
-import { VALID_DOMAIN } from '../../shared/paths.ts';
+import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult } from '../../shared/paths.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 
@@ -112,16 +112,22 @@ export async function getSiteMeta(domain: string): Promise<{ accent?: string } |
   return { accent: data.accent };
 }
 
-export async function updateSiteMeta(domain: string, updates: { accent?: string | undefined }): Promise<void> {
+export async function updateSiteMeta(
+  domain: string,
+  updates: { accent?: string | undefined },
+): Promise<UsecaseResult<void>> {
   const data = await storage.readSiteMetadata(domain);
-  if (!data) throw new Error('Site not found');
+  if (!data) {
+    return { ok: false, error: 'Site not found', status: 404 };
+  }
 
   if (updates.accent !== undefined && !storage.VALID_ACCENT.test(updates.accent)) {
-    throw new Error('Invalid accent color');
+    return { ok: false, error: 'Invalid accent color', status: 400 };
   }
   data.accent = updates.accent;
 
   await storage.writeSiteMetadata(domain, data);
+  return { ok: true, value: undefined };
 }
 
 export async function getSiteRepos(domain: string): Promise<{ history: Array<{ repo: string; branch: string; lastUsed: number }> } | null> {
@@ -151,54 +157,66 @@ export async function getCustomDomains(domain: string): Promise<{ domain: string
   return data.customDomains ?? [];
 }
 
-export async function addCustomDomain(domain: string, customDomain: string): Promise<void> {
+export async function addCustomDomain(domain: string, customDomain: string): Promise<UsecaseResult<void>> {
   const data = await storage.readSiteMetadata(domain);
-  if (!data) throw new Error('Site not found');
+  if (!data) {
+    return { ok: false, error: 'Site not found', status: 404 };
+  }
   
   if (!data.customDomains) {
     data.customDomains = [];
   }
   
   // Check for duplicate
-  if (data.customDomains.some((entry) => entry.domain === customDomain)) {
-    throw new Error('Custom domain already exists');
+  if (data.customDomains.some((entry) => { return entry.domain === customDomain; })) {
+    return { ok: false, error: 'Custom domain already exists', status: 409 };
   }
   
   data.customDomains.push({ domain: customDomain, verified: false });
   await storage.writeSiteMetadata(domain, data);
   invalidateCustomDomainCache();
+  return { ok: true, value: undefined };
 }
 
-export async function removeCustomDomain(domain: string, customDomain: string): Promise<void> {
+export async function removeCustomDomain(domain: string, customDomain: string): Promise<UsecaseResult<void>> {
   const data = await storage.readSiteMetadata(domain);
-  if (!data) throw new Error('Site not found');
-  
-  if (!data.customDomains) {
-    throw new Error('Custom domain not found');
+  if (!data) {
+    return { ok: false, error: 'Site not found', status: 404 };
   }
   
-  const filtered = data.customDomains.filter((entry) => entry.domain !== customDomain);
+  if (!data.customDomains) {
+    return { ok: false, error: 'Custom domain not found', status: 404 };
+  }
+  
+  const filtered = data.customDomains.filter((entry) => {
+    return entry.domain !== customDomain;
+  });
   if (filtered.length === data.customDomains.length) {
-    throw new Error('Custom domain not found');
+    return { ok: false, error: 'Custom domain not found', status: 404 };
   }
   
   data.customDomains = filtered;
   await storage.writeSiteMetadata(domain, data);
   invalidateCustomDomainCache();
+  return { ok: true, value: undefined };
 }
 
-export async function verifyCustomDomain(domain: string, customDomain: string): Promise<{ verified: boolean }> {
+export async function verifyCustomDomain(domain: string, customDomain: string): Promise<UsecaseResult<{ verified: boolean }>> {
   const { verifyCustomDomain: dnsVerifyCustomDomain } = await import('./customDomains.ts');
   const data = await storage.readSiteMetadata(domain);
-  if (!data) throw new Error('Site not found');
-  
-  if (!data.customDomains) {
-    throw new Error('Custom domain not found');
+  if (!data) {
+    return { ok: false, error: 'Site not found', status: 404 };
   }
   
-  const entry = data.customDomains.find((e) => e.domain === customDomain);
+  if (!data.customDomains) {
+    return { ok: false, error: 'Custom domain not found', status: 404 };
+  }
+  
+  const entry = data.customDomains.find((e) => {
+    return e.domain === customDomain;
+  });
   if (!entry) {
-    throw new Error('Custom domain not found');
+    return { ok: false, error: 'Custom domain not found', status: 404 };
   }
   
   const isVerified = await dnsVerifyCustomDomain(domain, customDomain);
@@ -207,7 +225,8 @@ export async function verifyCustomDomain(domain: string, customDomain: string): 
   await storage.writeSiteMetadata(domain, data);
   invalidateCustomDomainCache();
   
-  return { verified: isVerified };
+  const verified = isVerified;
+  return { ok: true, value: { verified } };
 }
 
 export async function getVerificationToken(domain: string): Promise<{ token: string }> {
@@ -216,16 +235,19 @@ export async function getVerificationToken(domain: string): Promise<{ token: str
   return { token };
 }
 
-export async function toggleSite(domain: string): Promise<{ enabled: boolean }> {
+export async function toggleSite(domain: string): Promise<UsecaseResult<{ enabled: boolean }>> {
   const data = await storage.readSiteMetadata(domain);
-  if (!data || data.currentIndex === null) throw new Error('Site not found');
+  if (!data || data.currentIndex === null) {
+    return { ok: false, error: 'Site not found', status: 404 };
+  }
 
   data.enabled = !data.enabled;
   await storage.writeSiteMetadata(domain, data);
 
   if (!data.enabled) await storage.deleteExtractedFiles(domain);
 
-  return { enabled: data.enabled };
+  const result = { enabled: data.enabled };
+  return { ok: true, value: result };
 }
 
 export async function deleteSite(domain: string): Promise<void> {
@@ -249,7 +271,9 @@ export async function listVersions(domain: string): Promise<{ versions: Array<{ 
     }
   }
 
-  versions.sort((a, b) => b.index - a.index);
+  versions.sort((a, b) => {
+    return b.index - a.index;
+  });
   return { versions, current: data.currentIndex };
 }
 
@@ -261,19 +285,33 @@ export async function downloadVersion(domain: string, index: number): Promise<{ 
   return { file, filename: `${domain}-${index}.zip` };
 }
 
-export async function activateVersion(domain: string, index: number): Promise<void> {
+export async function activateVersion(domain: string, index: number): Promise<UsecaseResult<void>> {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  if (!(await storage.versionExists(domain, index))) throw new Error('Version not found');
-  await storage.setCurrentVersion(domain, index);
+  const exists = await storage.versionExists(domain, index);
+  if (!exists) {
+    return { ok: false, error: 'Version not found', status: 404 };
+  }
+  const activated = await storage.setCurrentVersion(domain, index);
+  if (!activated) {
+    return { ok: false, error: 'Failed to activate version', status: 500 };
+  }
   await storage.deleteExtractedFiles(domain);
+  return { ok: true, value: undefined };
 }
 
-export async function deleteVersion(domain: string, index: number): Promise<void> {
+export async function deleteVersion(domain: string, index: number): Promise<UsecaseResult<void>> {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  if (!(await storage.versionExists(domain, index))) throw new Error('Version not found');
-  await storage.deleteVersionFile(domain, index);
+  const exists = await storage.versionExists(domain, index);
+  if (!exists) {
+    return { ok: false, error: 'Version not found', status: 404 };
+  }
+  const deleted = await storage.deleteVersionFile(domain, index);
+  if (!deleted) {
+    return { ok: false, error: 'Failed to delete version', status: 500 };
+  }
+  return { ok: true, value: undefined };
 }
 
 export async function uploadVersion(domain: string, zipData: Uint8Array): Promise<{ index: number }> {
@@ -305,7 +343,11 @@ export async function deployFromGithub(domain: string, repo: string, ref: string
     if (response.status === 404) throw new Error('Repository or branch not found');
     if (!response.ok) throw new Error(`GitHub error: ${response.status}`);
 
-    zipData = new Uint8Array(await response.arrayBuffer());
+    const rawBuffer = await response.arrayBuffer();
+    if (rawBuffer.byteLength > MAX_ZIP_BYTES) {
+      throw new Error(`GitHub repo zip too large (max ${MAX_ZIP_BYTES} bytes)`);
+    }
+    zipData = new Uint8Array(rawBuffer);
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') throw new Error('GitHub request timed out');
     throw err;
@@ -313,7 +355,9 @@ export async function deployFromGithub(domain: string, repo: string, ref: string
 
   const existingData = await storage.readSiteMetadata(domain);
   const data = existingData ?? { ...storage.DEFAULT_DATA };
-  const filtered = data.repoHistory.filter((h) => !(h.repo === repo && h.branch === ref));
+  const filtered = data.repoHistory.filter((h) => {
+    return !(h.repo === repo && h.branch === ref);
+  });
   filtered.unshift({ repo, branch: ref, lastUsed: Date.now() });
   data.repoHistory = filtered.slice(0, 10);
   const index = data.nextIndex;

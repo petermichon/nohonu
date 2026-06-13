@@ -3,6 +3,7 @@ import { SITES_DIR } from '../../shared/paths.ts';
 export const SLOT_MS = 60 * 1000;
 export const STATS_SLOTS = 60;
 export const UPTIME_SLOTS = 1440;
+export const MAX_VISITORS_PER_DOMAIN = 500;
 
 const ANALYTICS_PATH = `${SITES_DIR}/analytics.json`;
 
@@ -91,6 +92,19 @@ export function recordHit(domain: string, ip: string): void {
     count: prevCount + 1,
     last: Date.now(),
   });
+  if (domainVisitors.size > MAX_VISITORS_PER_DOMAIN) {
+    let oldestIp = '';
+    let oldestTime = Infinity;
+    for (const [entryIp, entryData] of domainVisitors.entries()) {
+      if (entryData.last < oldestTime) {
+        oldestTime = entryData.last;
+        oldestIp = entryIp;
+      }
+    }
+    if (oldestIp) {
+      domainVisitors.delete(oldestIp);
+    }
+  }
 }
 
 export function getVisitors(domain: string): { ip: string; count: number; last: number }[] {

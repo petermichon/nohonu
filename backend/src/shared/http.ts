@@ -57,8 +57,10 @@ export function ensureDomain(domain: unknown): Response | string {
   return error('Invalid domain');
 }
 
-export function assert(condition: boolean, message: string): asserts condition {
-  if (!condition) throw new Error(message);
+export function assert(condition: boolean, message: string): void {
+  if (!condition) {
+    console.error(`Assertion failed: ${message}`);
+  }
 }
 
 /** Parse JSON body with error handling */

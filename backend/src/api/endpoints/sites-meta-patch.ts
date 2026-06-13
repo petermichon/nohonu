@@ -6,12 +6,9 @@ export async function updateMeta({ domain }: RouteContext, req: Request): Promis
   const body = await parseJson<{ accent?: string | undefined }>(req);
   if (body instanceof Response) return body;
 
-  try {
-    await sites.updateSiteMeta(domain, body);
-    return json({ domain, accent: body.accent });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to update meta';
-    const status = message.includes('not found') ? 404 : 400;
-    return error(message, status);
+  const result = await sites.updateSiteMeta(domain, body);
+  if (!result.ok) {
+    return error(result.error, result.status);
   }
+  return json({ domain, accent: body.accent });
 }

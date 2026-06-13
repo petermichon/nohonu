@@ -4,10 +4,9 @@ import type { RouteContext } from './sites-types.ts';
 
 export async function deleteVersion({ domain, timestamp: index }: RouteContext): Promise<Response> {
   if (!index || isNaN(index)) return error('Invalid index');
-  try {
-    await sites.deleteVersion(domain, index);
-    return json({ domain, index });
-  } catch {
-    return error('Version not found', 404);
+  const result = await sites.deleteVersion(domain, index);
+  if (!result.ok) {
+    return error(result.error, result.status);
   }
+  return json({ domain, index });
 }

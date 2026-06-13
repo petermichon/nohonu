@@ -17,6 +17,7 @@
     "dev": "deno run --watch --allow-net --allow-env --allow-read=./data --allow-write=./data --no-prompt main.ts",
     "start": "deno run --allow-net --allow-env --allow-read=./data --allow-write=./data --no-prompt main.ts",
     "format": "deno run -A npm:prettier --write .",
-    "format:check": "deno run -A npm:prettier --check ."
+    "format:check": "deno run -A npm:prettier --check .",
+    "test": "deno test --allow-read --allow-write=/tmp --allow-env"
   }
 }

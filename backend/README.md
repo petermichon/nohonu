@@ -16,7 +16,7 @@ statistics.
 
 The backend follows a 3-layer architecture:
 
-```
+```txt
 ┌─────────────────────────────────────────┐
 │              API Layer                  │
 │    (HTTP handling, thin wrappers)       │
@@ -55,7 +55,7 @@ This separation enables:
 
 When `API_KEY` environment variable is set, all write operations require the header:
 
-```
+```txt
 X-Api-Key: your-secret-key
 ```
 
@@ -63,18 +63,18 @@ Public endpoints (`/health`, `/check-domain`, static file serving) don't require
 
 ### Endpoints
 
-**Health & Validation**
+#### Health & Validation
 
 - `GET /health` - Health check, returns `{ "status": "healthy" }`
 - `GET /check-domain?domain=...` - Returns 200 if domain exists, 404 if not
 
-**Sites Management**
+#### Sites Management
 
 - `GET /sites` - List all sites with stats (hits, uptime%, accent color)
 - `POST /sites/:domain/versions` - Upload zip (multipart: `zip`)
 - `POST /sites/:domain/versions/github` - Deploy from GitHub (JSON: `repo`, `branch`)
 
-**Site Operations** (`/sites/:domain`)
+#### Site Operations (`/sites/:domain`)
 
 - `GET /sites/:domain` - Get site info
 - `DELETE /sites/:domain` - Delete site and all its data
@@ -84,20 +84,20 @@ Public endpoints (`/health`, `/check-domain`, static file serving) don't require
 - `GET /sites/:domain/meta` - Get metadata (accent color)
 - `PATCH /sites/:domain/meta` - Update metadata (accent hex color or null)
 
-**Stats & Monitoring**
+#### Stats & Monitoring
 
 - `GET /sites/:domain/stats?slots=60` - Request count per minute slot (default 60)
 - `GET /sites/:domain/visitors` - Unique visitor IPs with request counts
 - `GET /sites/:domain/uptime?slots=60` - Uptime status per minute slot
 
-**Version Management** (`/sites/:domain/versions`)
+#### Version Management (`/sites/:domain/versions`)
 
 - `GET /sites/:domain/versions` - List all archived versions
 - `GET /sites/:domain/versions/:timestamp/download` - Download specific version
 - `POST /sites/:domain/versions/:timestamp/activate` - Rollback to version
 - `DELETE /sites/:domain/versions/:timestamp` - Delete a version
 
-**Repo History**
+#### Repo History
 
 - `GET /sites/:domain/repos` - List recently used GitHub repos for this domain
 
@@ -126,7 +126,7 @@ The zip is extracted on first access. Only HTML requests are tracked for stats.
 The stack runs Caddy as a reverse proxy in front of the Deno backend on a shared Docker network. Caddy handles HTTPS
 automatically. The backend has no published ports and is unreachable from outside Docker.
 
-```
+```txt
 Internet → :80/:443 (Caddy) → backend:8080 (Docker app network)
 ```
 
@@ -155,7 +155,7 @@ chmod 600 ~/.ssh/nohonu_deploy
 
 On the VPS, add to `~/.ssh/config`:
 
-```
+```txt
 Host github.com
   IdentityFile ~/.ssh/nohonu_deploy
   IdentitiesOnly yes

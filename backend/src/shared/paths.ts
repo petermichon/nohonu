@@ -1,6 +1,8 @@
 const sitesDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../data`;
 export const SITES_DIR = sitesDir;
 export const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+export const VALID_CUSTOM_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;
+export const MAX_CUSTOM_DOMAIN_LENGTH = 253;
 
 export type VersionSource = { type: 'upload' } | { type: 'github'; repo: string; branch: string };
 export type VersionEntry = { source: VersionSource; createdAt: number };
@@ -31,3 +33,7 @@ export async function fileExists(path: string): Promise<boolean> {
     return false;
   }
 }
+
+export const MAX_ZIP_BYTES = 52_428_800; // 50 MB
+
+export type UsecaseResult<T> = { ok: true; value: T } | { ok: false; error: string; status: number };

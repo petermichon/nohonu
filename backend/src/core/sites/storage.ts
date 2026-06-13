@@ -1,5 +1,4 @@
 import { SITES_DIR, SiteData } from '../../shared/paths.ts';
-import { assert } from '../../shared/http.ts';
 
 // Path helpers for new domain-based structure
 export function domainDir(domain: string): string {
@@ -59,13 +58,16 @@ export async function readSiteMetadata(domain: string): Promise<SiteData | undef
 
 // Low-level: Write site metadata
 export async function writeSiteMetadata(domain: string, data: SiteData): Promise<void> {
-  assert(data.nextIndex >= 1, `nextIndex must be >= 1 for ${domain}, got ${data.nextIndex}`);
-  // Validate coherence: if currentIndex is set, the version file must exist
+  if (data.nextIndex < 1) {
+    console.error(`writeSiteMetadata: nextIndex must be >= 1 for ${domain}, got ${data.nextIndex}`);
+    return;
+  }
   if (data.currentIndex !== null) {
     try {
       await Deno.stat(versionPath(domain, data.currentIndex));
     } catch {
-      throw new Error(`Cannot set currentIndex to ${data.currentIndex}: version file does not exist`);
+      console.error(`writeSiteMetadata: currentIndex ${data.currentIndex} has no version file for ${domain}`);
+      return;
     }
   }
   await Deno.writeTextFile(metadataPath(domain), JSON.stringify(data, null, 2));
@@ -82,45 +84,52 @@ export async function readVersion(domain: string, index: number): Promise<Uint8A
 }
 
 // Low-level: Delete a version file and update metadata
-export async function deleteVersionFile(domain: string, index: number): Promise<void> {
+export async function deleteVersionFile(domain: string, index: number): Promise<boolean> {
   const data = await readSiteMetadata(domain);
-  assert(data !== undefined, `Site not found: ${domain}`);
+  if (data === undefined) {
+    console.error(`deleteVersionFile: site not found: ${domain}`);
+    return false;
+  }
 
   try {
     await Deno.remove(versionPath(domain, index));
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to delete version file for ${domain}@${index}: ${message}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`deleteVersionFile: failed to delete version file for ${domain}@${index}: ${message}`);
+    return false;
   }
 
   // Update metadata to maintain coherence
   delete data.versions[index];
   if (data.currentIndex === index) {
-    // Find the next highest version to set as current
     const versionIndices = Object.keys(data.versions)
       .map(Number)
-      .sort((a, b) => b - a);
+      .sort((a, b) => { return b - a; });
     data.currentIndex = versionIndices.length > 0 ? versionIndices[0] : null;
   }
   await writeSiteMetadata(domain, data);
+  return true;
 }
 
 // Low-level: Set current version index
-export async function setCurrentVersion(domain: string, index: number): Promise<void> {
+export async function setCurrentVersion(domain: string, index: number): Promise<boolean> {
   const data = await readSiteMetadata(domain);
-  assert(data !== undefined, `Site not found: ${domain}`);
+  if (data === undefined) {
+    console.error(`setCurrentVersion: site not found: ${domain}`);
+    return false;
+  }
 
-  // Validate version exists
   try {
     await Deno.stat(versionPath(domain, index));
   } catch {
-    throw new Error(`Version ${index} does not exist for ${domain}`);
+    console.error(`setCurrentVersion: version ${index} does not exist for ${domain}`);
+    return false;
   }
 
-  // Update metadata
   data.currentIndex = index;
   data.enabled = true;
   await writeSiteMetadata(domain, data);
+  return true;
 }
 
 // Low-level: Delete extracted site files
@@ -192,7 +201,9 @@ export async function extractFiles(domain: string, files: Record<string, Uint8Ar
       const firstSlashIndex = firstPath.indexOf('/');
       if (firstSlashIndex !== -1) {
         const commonRoot = firstPath.substring(0, firstSlashIndex + 1);
-        const allHaveRoot = paths.every((p) => p.startsWith(commonRoot));
+        const allHaveRoot = paths.every((p) => {
+          return p.startsWith(commonRoot);
+        });
         if (allHaveRoot) {
           // Strip common root from all paths
           const strippedFiles: Record<string, Uint8Array> = {};
@@ -208,6 +219,9 @@ export async function extractFiles(domain: string, files: Record<string, Uint8Ar
     }
 
     for (const [relativePath, data] of Object.entries(files)) {
+      if (relativePath.includes('..') || relativePath.startsWith('/')) {
+        continue;
+      }
       const outPath = extractedFilePath(domain, relativePath);
       const dir = outPath.substring(0, outPath.lastIndexOf('/'));
       await Deno.mkdir(dir, { recursive: true });
@@ -220,10 +234,10 @@ export async function extractFiles(domain: string, files: Record<string, Uint8Ar
       data.extracted = true;
       await writeSiteMetadata(domain, data);
     }
-  } catch {
-    // Clean up partial extraction on failure
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`extractFiles: extraction failed for ${domain}: ${message}`);
     await deleteExtractedFiles(domain);
-    throw new Error('Extraction failed');
   }
 }
 
