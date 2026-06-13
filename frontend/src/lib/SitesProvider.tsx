@@ -26,7 +26,7 @@ export function SitesProvider({ children }: { children: ReactNode }) {
         return;
       }
       const data = await res.json();
-      setSites(data.sites || []);
+      setSites(data.sites ?? []);
     } catch {
       setError('connection');
     } finally {
@@ -38,11 +38,7 @@ export function SitesProvider({ children }: { children: ReactNode }) {
     refreshSites();
   }, [refreshSites]);
 
-  return (
-    <SitesContext.Provider value={{ sites, loading, error, refreshSites }}>
-      {children}
-    </SitesContext.Provider>
-  );
+  return <SitesContext.Provider value={{ sites, loading, error, refreshSites }}>{children}</SitesContext.Provider>;
 }
 
 export function useSites() {

@@ -21,8 +21,8 @@ function load(): Connection {
     const apiBase = localStorage.getItem('apiBase');
     const apiKey = localStorage.getItem('apiKey');
     return {
-      apiBase: apiBase || DEFAULT.apiBase,
-      apiKey: apiKey || DEFAULT.apiKey,
+      apiBase: apiBase ?? DEFAULT.apiBase,
+      apiKey: apiKey ?? DEFAULT.apiKey,
     };
   } catch {
     /* ignore */

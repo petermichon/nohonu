@@ -6,24 +6,27 @@ import { BackButton } from '../components/BackButton.tsx';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
 import { useApi } from '../lib/api.ts';
 import { useSites } from '../lib/SitesProvider.tsx';
+import { useToast } from '../lib/ToastContext.tsx';
 
 function Sites() {
   const { apiFetch } = useApi();
   const { sites, loading, error, refreshSites } = useSites();
+  const { showToast } = useToast();
   const [toggling, setToggling] = useState<string | null>(null);
   const [confirmToggle, setConfirmToggle] = useState<{ domain: string; enabled: boolean } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleToggle = async () => {
     if (!confirmToggle) return;
-    const { domain } = confirmToggle;
+    const { domain, enabled } = confirmToggle;
     setToggling(domain);
     setConfirmToggle(null);
     try {
       await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
       await refreshSites();
+      showToast(`Site ${enabled ? 'disabled' : 'enabled'}`, true);
     } catch {
-      // Silent fail
+      showToast('Failed to update site', false);
     } finally {
       setToggling(null);
     }

@@ -1,10 +1,54 @@
 import { Link } from 'react-router-dom';
-import { Rocket, Globe, Server, ChevronRight } from 'lucide-react';
+import { Rocket, Globe, Server, ChevronRight, Eye } from 'lucide-react';
+import { useSites } from '../lib/SitesProvider.tsx';
+import { formatHits } from '../lib/utils.ts';
 
 function Home() {
+  const { sites, loading, error } = useSites();
+
+  const onlineCount = sites.filter((s) => s.enabled).length;
+  const offlineCount = sites.filter((s) => !s.enabled).length;
+  const totalHits = sites.reduce((acc, s) => acc + s.hits, 0);
+
   return (
     <section className="mb-12">
       <h1 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-6">Home</h1>
+
+      {/* Live summary strip — only shown when data is available */}
+      {!error && (
+        <div className="flex items-center gap-6 mb-6">
+          {loading ? (
+            <>
+              <div className="h-8 w-24 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
+              <div className="h-8 w-24 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
+              <div className="h-8 w-24 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
+            </>
+          ) : sites.length > 0 ? (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-purple-400 shrink-0" />
+                <span className="text-sm text-stone-700 dark:text-stone-300">
+                  <span className="font-semibold">{onlineCount}</span> online
+                </span>
+              </div>
+              {offlineCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-600 shrink-0" />
+                  <span className="text-sm text-stone-700 dark:text-stone-300">
+                    <span className="font-semibold">{offlineCount}</span> offline
+                  </span>
+                </div>
+              )}
+              {totalHits > 0 && (
+                <div className="flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>{formatHits(totalHits)} total hits</span>
+                </div>
+              )}
+            </>
+          ) : null}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Sites Card */}
@@ -19,7 +63,13 @@ function Home() {
             <ChevronRight className="w-4 h-4 text-stone-400 dark:text-stone-600 group-hover:text-stone-600 dark:group-hover:text-stone-400" />
           </div>
           <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Sites</h2>
-          <p className="text-sm text-stone-500 dark:text-stone-400">Manage your monitored sites</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">
+            {loading
+              ? 'Manage your monitored sites'
+              : sites.length > 0
+                ? `${sites.length} site${sites.length === 1 ? '' : 's'}`
+                : 'Manage your monitored sites'}
+          </p>
         </Link>
 
         {/* Domains Card */}

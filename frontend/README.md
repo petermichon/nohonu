@@ -50,7 +50,7 @@ When API_KEY is set on the backend, add it in Settings for authenticated request
 
 ## Project Structure
 
-```
+```txt
 src/
 ├── pages/           # Route components
 │   ├── Sites.tsx    # Main site list
