@@ -12,7 +12,7 @@ interface ConnectionContextType extends Connection {
 }
 
 const DEFAULT: Connection = {
-  apiBase: 'https://localhost/api',
+  apiBase: 'https://nohonu.com/api',
   apiKey: '',
 };
 

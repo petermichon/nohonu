@@ -134,32 +134,32 @@ export default function Account() {
               <button
                 type="button"
                 onClick={() => {
-                  setUrl('https://localhost/api');
-                  setUrlStatus('idle');
-                }}
-                className="px-3 py-1.5 text-xs bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md cursor-pointer"
-              >
-                localhost
-              </button>
-              <button
-                type="button"
-                onClick={() => {
                   setUrl('http://localhost:8080');
                   setUrlStatus('idle');
                 }}
                 className="px-3 py-1.5 text-xs bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md cursor-pointer"
               >
-                localhost:8080
+                http://localhost:8080
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  setUrl('https://nohonu.com');
+                  setUrl('https://localhost/api');
                   setUrlStatus('idle');
                 }}
                 className="px-3 py-1.5 text-xs bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md cursor-pointer"
               >
-                nohonu.com
+                https://localhost/api
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUrl('https://nohonu.com/api');
+                  setUrlStatus('idle');
+                }}
+                className="px-3 py-1.5 text-xs bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md cursor-pointer"
+              >
+                https://nohonu.com/api
               </button>
             </div>
             {urlStatusMsg[urlStatus] && (
