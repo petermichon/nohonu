@@ -155,6 +155,19 @@ function Domains() {
           </div>
         )}
       </div>
+
+      {/* Explore Domains Section */}
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 mt-6">
+        <h2 className="text-lg font-medium text-stone-900 dark:text-stone-100 mb-1">Explore Domains</h2>
+        <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Search and register new domains</p>
+
+        <Link
+          to="/domains/explore"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 font-medium cursor-pointer no-underline"
+        >
+          Explore new domains
+        </Link>
+      </div>
     </section>
   );
 }
