@@ -81,7 +81,7 @@ export function UptimeChart({
       groupSlots.add(groupSlot);
       const existing = grouped.get(groupSlot);
       if (existing === undefined) {
-        grouped.set(groupSlot, s.up);
+        grouped.set(groupSlot, s.up === null ? undefined : s.up);
       } else if (s.up === true) {
         // If any slot in group is up, the group is up
         grouped.set(groupSlot, true);
@@ -108,8 +108,8 @@ export function UptimeChart({
     return result;
   }, [uptime, range, now]);
 
-  const getBarColor = (up: boolean | null, isCurrent: boolean, accent: string | null | undefined) => {
-    if (up === null) return '#f5f5f4';
+  const getBarColor = (up: boolean | undefined, isCurrent: boolean, accent: string | null | undefined) => {
+    if (up === undefined) return '#f5f5f4';
     if (up) {
       if (isCurrent) return accent ? accent : '#a855f7';
       return accent ? `${accent}cc` : '#d8b4fe';
