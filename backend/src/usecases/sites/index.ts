@@ -31,7 +31,7 @@ export async function getCustomDomainCache(): Promise<Map<string, string>> {
   if (!customDomainCache) {
     await buildCustomDomainCache();
   }
-  return customDomainCache!;
+  return customDomainCache as Map<string, string>;
 }
 
 export async function listSites(): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string }>> {
@@ -135,20 +135,22 @@ export async function getSiteRepos(domain: string): Promise<{ history: Array<{ r
   return data ? { history: data.repoHistory } : null;
 }
 
-export function getSiteStats(domain: string, slots: number): { slot: number; count: number }[] {
+export function getSiteStats(domain: string, slots: number, groupMinutes = 1): { slot: number; count: number }[] {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof slots === 'number' && !isNaN(slots) && slots > 0, 'slots must be a positive number');
-  return analytics.getStats(domain, slots);
+  console.assert(typeof groupMinutes === 'number' && !isNaN(groupMinutes) && groupMinutes > 0, 'groupMinutes must be a positive number');
+  return analytics.getStats(domain, slots, groupMinutes);
 }
 
 export function getSiteVisitors(domain: string): { ip: string; count: number; last: number }[] {
   return analytics.getVisitors(domain);
 }
 
-export function getSiteUptime(domain: string, slots: number): { slot: number; up: boolean | undefined }[] {
+export function getSiteUptime(domain: string, slots: number, groupMinutes = 1): { slot: number; up: boolean | undefined }[] {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof slots === 'number' && !isNaN(slots) && slots > 0, 'slots must be a positive number');
-  return analytics.getUptime(domain, slots);
+  console.assert(typeof groupMinutes === 'number' && !isNaN(groupMinutes) && groupMinutes > 0, 'groupMinutes must be a positive number');
+  return analytics.getUptime(domain, slots, groupMinutes);
 }
 
 export async function getCustomDomains(domain: string): Promise<{ domain: string; verified: boolean }[]> {
@@ -437,7 +439,7 @@ export async function resolveDomainAndServe(host: string, path: string): Promise
   
   const subdomainMatch = host.match(/^([^.]+)\./);
 
-  if (subdomainMatch && !['www', 'localhost'].includes(subdomainMatch[1])) {
+  if (subdomainMatch && subdomainMatch[1] && !['www', 'localhost'].includes(subdomainMatch[1])) {
     const domain = subdomainMatch[1];
     const filePath = path === '/' ? '/index.html' : path;
     return { domain, filePath };
@@ -446,7 +448,7 @@ export async function resolveDomainAndServe(host: string, path: string): Promise
   if (path.length > 1) {
     const parts = path.split('/').filter(Boolean);
     const potential = parts[0];
-    if (VALID_DOMAIN.test(potential)) {
+    if (potential && VALID_DOMAIN.test(potential)) {
       const info = await storage.readSiteMetadata(potential);
       if (info && info.currentIndex !== null) {
         const domain = potential;

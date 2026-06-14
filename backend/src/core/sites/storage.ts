@@ -105,7 +105,7 @@ export async function deleteVersionFile(domain: string, index: number): Promise<
     const versionIndices = Object.keys(data.versions)
       .map(Number)
       .sort((a, b) => { return b - a; });
-    data.currentIndex = versionIndices.length > 0 ? versionIndices[0] : null;
+    data.currentIndex = versionIndices.length > 0 ? versionIndices[0] as number : null;
   }
   await writeSiteMetadata(domain, data);
   return true;
@@ -198,6 +198,9 @@ export async function extractFiles(domain: string, files: Record<string, Uint8Ar
     const paths = Object.keys(files);
     if (paths.length > 0) {
       const firstPath = paths[0];
+      if (!firstPath) {
+        return;
+      }
       const firstSlashIndex = firstPath.indexOf('/');
       if (firstSlashIndex !== -1) {
         const commonRoot = firstPath.substring(0, firstSlashIndex + 1);

@@ -1,5 +1,17 @@
 import { SLOT_MS } from './types.ts';
 
+const BAR_COUNT = 60; // Fixed number of bars to show
+
+export function getGroupMinutes(): number {
+  // No backend grouping - return raw slots
+  return 1;
+}
+
+export function getSlotsForRange(range: number): number {
+  // range = minutes per bar, so total slots = barCount × range
+  return BAR_COUNT * range;
+}
+
 export function relativeTime(ts: number): string {
   const diff = Date.now() - ts;
   if (diff < 60_000) return 'just now';

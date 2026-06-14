@@ -1,8 +1,8 @@
 import { SITES_DIR } from '../../shared/paths.ts';
 
 export const SLOT_MS = 60 * 1000;
-export const STATS_SLOTS = 60;
-export const UPTIME_SLOTS = 1440;
+export const STATS_SLOTS = 43200; // 30 days of data (43200 minutes)
+export const UPTIME_SLOTS = 43200; // 30 days of data (43200 minutes)
 export const MAX_VISITORS_PER_DOMAIN = 500;
 
 const ANALYTICS_PATH = `${SITES_DIR}/analytics.json`;
@@ -132,13 +132,39 @@ function buildStatSlot(
   return { slot, count: domainData.get(slot) ?? 0 };
 }
 
-export function getStats(domain: string, slots = STATS_SLOTS): { slot: number; count: number }[] {
+export function getStats(domain: string, slots = STATS_SLOTS, groupMinutes = 1): { slot: number; count: number }[] {
   const now = Math.floor(Date.now() / SLOT_MS);
   const d = hits.get(domain) ?? new Map<number, number>();
-  const count = Math.min(slots, STATS_SLOTS);
-  const result = Array.from({ length: count }, (_, i) => {
-    return buildStatSlot(d, now, count, i);
-  });
+  const count = slots;
+  const groupSize = groupMinutes;
+
+  if (groupSize === 1) {
+    // No grouping, return as-is
+    const result = Array.from({ length: count }, (_, i) => {
+      return buildStatSlot(d, now, count, i);
+    });
+    return result;
+  }
+
+  // Group data - ensure all group slots are represented
+  const grouped: Map<number, number> = new Map();
+  const groupSlots = new Set<number>();
+
+  for (let i = 0; i < count; i++) {
+    const slot = now - (count - 1 - i);
+    const groupSlot = Math.floor(slot / groupSize) * groupSize;
+    groupSlots.add(groupSlot);
+    const slotCount = d.get(slot) ?? 0;
+    const existing = grouped.get(groupSlot) ?? 0;
+    grouped.set(groupSlot, existing + slotCount);
+  }
+
+  // Convert to array, ensuring all group slots are present
+  const sortedGroupSlots = Array.from(groupSlots).sort((a, b) => a - b);
+  const result = sortedGroupSlots.map((slot) => ({
+    slot,
+    count: grouped.get(slot) ?? 0,
+  }));
   return result;
 }
 
@@ -171,13 +197,46 @@ function buildUptimeSlot(
   return { slot, up };
 }
 
-export function getUptime(domain: string, slots = 60): { slot: number; up: boolean | undefined }[] {
+export function getUptime(domain: string, slots = 60, groupMinutes = 1): { slot: number; up: boolean | undefined }[] {
   const now = Math.floor(Date.now() / SLOT_MS);
   const d = uptime.get(domain);
-  const count = Math.min(slots, UPTIME_SLOTS);
-  const result = Array.from({ length: count }, (_, i) => {
-    return buildUptimeSlot(d, now, count, i);
-  });
+  const count = slots;
+  const groupSize = groupMinutes;
+
+  if (groupSize === 1) {
+    // No grouping, return as-is
+    const result = Array.from({ length: count }, (_, i) => {
+      return buildUptimeSlot(d, now, count, i);
+    });
+    return result;
+  }
+
+  // Group data - for uptime, we use "up if any slot in group is up"
+  const grouped: Map<number, boolean | undefined> = new Map();
+  const groupSlots = new Set<number>();
+
+  for (let i = 0; i < count; i++) {
+    const slot = now - (count - 1 - i);
+    const groupSlot = Math.floor(slot / groupSize) * groupSize;
+    groupSlots.add(groupSlot);
+    const slotUp = d?.has(slot) ? d.get(slot) : undefined;
+    const existing = grouped.get(groupSlot);
+
+    if (existing === undefined) {
+      grouped.set(groupSlot, slotUp);
+    } else if (slotUp === true) {
+      // If any slot in group is up, the group is up
+      grouped.set(groupSlot, true);
+    }
+    // If existing is false and slotUp is false/undefined, keep false
+  }
+
+  // Convert to array, ensuring all group slots are present
+  const sortedGroupSlots = Array.from(groupSlots).sort((a, b) => a - b);
+  const result = sortedGroupSlots.map((slot) => ({
+    slot,
+    up: grouped.get(slot),
+  }));
   return result;
 }
 

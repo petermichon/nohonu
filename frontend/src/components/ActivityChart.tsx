@@ -1,9 +1,16 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Eye, RefreshCw, Globe } from 'lucide-react';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { relativeTime } from '../lib/utils.ts';
-import { ViewsTooltip } from './ChartTooltip.tsx';
 import { SLOT_MS } from '../lib/types.ts';
 import type { Slot, Visitor, TimeRange } from '../lib/types.ts';
+
+const RANGE_LABELS: Record<TimeRange, string> = {
+  1: '1m',
+  30: '30m',
+  60: '1h',
+  1440: '1D',
+};
 
 interface ActivityChartProps {
   stats: Slot[];
@@ -12,14 +19,68 @@ interface ActivityChartProps {
   reloading: boolean;
   range: TimeRange;
   onRangeChange: (r: TimeRange) => void;
+  now: number;
 }
 
-export function ActivityChart({ stats, visitors, onReload, reloading, range, onRangeChange }: ActivityChartProps) {
-  const [hovered, setHovered] = useState<Slot | null>(null);
-  const [now] = useState(() => Math.floor(Date.now() / SLOT_MS));
-  const max = Math.max(...stats.map((s) => s.count), 1);
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: { count: number; time: string } }>;
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md whitespace-nowrap">
+        <p className="flex items-center gap-1 text-xs font-semibold text-stone-900 dark:text-stone-100">
+          <Eye className="w-3 h-3 text-stone-400 dark:text-stone-500" />
+          {data.count} <span className="font-normal text-stone-400 dark:text-stone-500">views</span>
+        </p>
+        <p className="text-[10px] text-stone-400 dark:text-stone-500">{data.time}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+export function ActivityChart({ stats, visitors, onReload, reloading, range, onRangeChange, now }: ActivityChartProps) {
   const total = stats.reduce((a, b) => a + b.count, 0);
   const sortedVisitors = [...visitors].sort((a, b) => b.last - a.last);
+
+  const chartData = useMemo(() => {
+    // Group stats into exactly 60 bars
+    const BAR_COUNT = 60;
+    if (stats.length === 0) return [];
+
+    const groupSize = range; // range = minutes per bar
+    const grouped: Map<number, number> = new Map();
+    const groupSlots = new Set<number>();
+
+    for (const s of stats) {
+      const groupSlot = Math.floor(s.slot / groupSize) * groupSize;
+      groupSlots.add(groupSlot);
+      const existing = grouped.get(groupSlot) ?? 0;
+      grouped.set(groupSlot, existing + s.count);
+    }
+
+    // Get the last 60 group slots, padding if needed
+    const sortedGroupSlots = Array.from(groupSlots).sort((a, b) => a - b);
+    const lastSlot = sortedGroupSlots[sortedGroupSlots.length - 1] ?? now;
+
+    // Generate 60 slots ending at lastSlot
+    const result = [];
+    for (let i = BAR_COUNT - 1; i >= 0; i--) {
+      const slot = lastSlot - i * groupSize;
+      result.push({
+        slot,
+        count: grouped.get(slot) ?? 0,
+        time: new Date(slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isCurrent: slot === now,
+      });
+    }
+
+    return result;
+  }, [stats, range, now]);
 
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 mt-3">
@@ -33,7 +94,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5">
-            {([15, 60] as TimeRange[]).map((r) => (
+            {([1, 30, 60, 1440] as TimeRange[]).map((r) => (
               <button
                 type="button"
                 key={r}
@@ -44,7 +105,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
                     : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
                 }`}
               >
-                {r}m
+                {RANGE_LABELS[r]}
               </button>
             ))}
           </div>
@@ -58,48 +119,29 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
           </button>
         </div>
       </div>
-      <div
-        className="flex items-end gap-0.5 h-14 relative overflow-x-scroll overflow-y-visible chart-scrollbar"
-        style={{
-          scrollbarColor: 'rgb(214 211 209) transparent',
-          scrollbarWidth: 'thin',
-        }}
-        onMouseLeave={() => setHovered(null)}
-      >
-        {stats.map((s) => {
-          const barH = s.count === 0 ? 2 : Math.max(4, Math.round((s.count / max) * 56));
-          const isCurrentSlot = s.slot === now;
-          const isHovered = hovered?.slot === s.slot;
-          return (
-            <div
-              key={s.slot}
-              className="relative shrink-0 flex items-end h-full cursor-default"
-              style={{ width: '10px' }}
-              onMouseEnter={() => setHovered(s)}
-            >
-              <ViewsTooltip
-                count={s.count}
-                time={new Date(s.slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                visible={isHovered}
-              />
-              <div
-                style={{ height: barH }}
-                className={`w-full rounded-sm ${
-                  isHovered
-                    ? 'bg-stone-500 dark:bg-stone-300'
-                    : isCurrentSlot
-                      ? 'bg-stone-600 dark:bg-stone-400'
-                      : s.count === 0
-                        ? 'bg-stone-100 dark:bg-stone-800'
-                        : 'bg-stone-300 dark:bg-stone-600'
-                }`}
-              />
-            </div>
-          );
-        })}
+      <div className="h-14">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barCategoryGap={2}>
+            <XAxis dataKey="slot" hide />
+            <Tooltip content={<CustomTooltip />} cursor={false} />
+            <Bar dataKey="count" minPointSize={2}>
+              {chartData.map((entry, index) => {
+                const count = entry.count;
+                const isCurrent = entry.isCurrent;
+                return (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={isCurrent ? '#57534e' : count === 0 ? '#f5f5f4' : '#d6d3d1'}
+                    fillOpacity={isCurrent ? 1 : count === 0 ? 1 : 1}
+                  />
+                );
+              })}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
       <div className="flex justify-between mt-2">
-        <span className="text-xs text-stone-400 dark:text-stone-500">{range}m ago</span>
+        <span className="text-xs text-stone-400 dark:text-stone-500">{RANGE_LABELS[range]}/bar</span>
         <span className="text-xs text-stone-400 dark:text-stone-500">now</span>
       </div>
 

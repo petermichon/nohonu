@@ -34,5 +34,5 @@ export interface UptimeSlot {
   up: boolean | null;
 }
 
-export type TimeRange = 15 | 60;
-export type UptimeRange = 60 | 720 | 1440;
+export type TimeRange = 1 | 30 | 60 | 1440;
+export type UptimeRange = 1 | 30 | 60 | 1440;

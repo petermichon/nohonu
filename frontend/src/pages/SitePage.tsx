@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
@@ -17,6 +17,7 @@ import { AccentSection } from '../components/AccentSection.tsx';
 import { OverviewSection } from '../components/OverviewSection.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 import { useSiteData } from '../hooks/useSiteData.ts';
+import { SLOT_MS, type TimeRange } from '../lib/types.ts';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
@@ -33,13 +34,11 @@ function SitePage() {
     notFound,
     stats,
     statsLoading,
-    statsRange,
     setStatsRange,
     visitors,
     uptimeData,
     uptimeAllData,
     uptimeLoading,
-    uptimeRange,
     setUptimeRange,
     accent,
     saveAccent,
@@ -62,6 +61,21 @@ function SitePage() {
     label: string;
   } | null>(null);
   const [iconError, setIconError] = useState(false);
+  const [now, setNow] = useState(() => Math.floor(Date.now() / SLOT_MS));
+  const [globalRange, setGlobalRange] = useState<TimeRange>(1);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(Math.floor(Date.now() / SLOT_MS));
+    }, SLOT_MS);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sync global range to both charts
+  useEffect(() => {
+    setStatsRange(globalRange);
+    setUptimeRange(globalRange);
+  }, [globalRange, setStatsRange, setUptimeRange]);
 
   const handleConfirm = async () => {
     if (!confirmAction || !site) return;
@@ -207,10 +221,11 @@ function SitePage() {
           <ActivityChart
             stats={stats}
             visitors={visitors}
-            onReload={loadStats}
+            onReload={() => loadStats(globalRange)}
             reloading={statsLoading}
-            range={statsRange}
-            onRangeChange={setStatsRange}
+            range={globalRange}
+            onRangeChange={setGlobalRange}
+            now={now}
           />
         </Section>
 
@@ -218,11 +233,12 @@ function SitePage() {
           <UptimeChart
             uptime={uptimeData}
             allUptime={uptimeAllData}
-            range={uptimeRange}
-            onRangeChange={setUptimeRange}
-            onReload={() => loadUptime(uptimeRange)}
+            range={globalRange}
+            onRangeChange={setGlobalRange}
+            onReload={() => loadUptime(globalRange)}
             reloading={uptimeLoading}
             accent={accent}
+            now={now}
           />
         </Section>
 

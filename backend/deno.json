@@ -1,23 +1,44 @@
 {
   "compilerOptions": {
     "lib": ["deno.window"],
-    "strict": true
+    "strict": true,
+    "noUncheckedIndexedAccess": true
   },
   "lint": {
     "include": ["./"],
     "rules": {
       "tags": ["recommended"],
-      "include": ["explicit-function-return-type", "explicit-module-boundary-types", "eqeqeq"]
+      "include": [
+        "explicit-function-return-type",
+        "explicit-module-boundary-types",
+        "eqeqeq",
+        "no-non-null-assertion",
+        "no-throw-literal",
+        "camelcase"
+      ]
     }
   },
   "fmt": {
     "include": ["./"]
   },
   "tasks": {
-    "dev": "deno run --watch --allow-net --allow-env --allow-read=./data --allow-write=./data --no-prompt main.ts",
-    "start": "deno run --allow-net --allow-env --allow-read=./data --allow-write=./data --no-prompt main.ts",
+    "dev": "deno run --watch -P=dev --no-prompt main.ts",
+    "start": "deno run -P=dev --no-prompt main.ts",
     "format": "deno run -A npm:prettier --write .",
     "format:check": "deno run -A npm:prettier --check .",
-    "test": "deno test --allow-read --allow-write=/tmp --allow-env"
+    "test": "deno test -P=test"
+  },
+  "permissions": {
+    "dev": {
+      "net": true,
+      "env": true,
+      "read": ["./data"],
+      "write": ["./data"]
+    },
+    "test": {
+      "read": true,
+      "write": ["/tmp"],
+      "env": true
+    }
   }
 }

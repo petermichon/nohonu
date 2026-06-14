@@ -12,10 +12,10 @@ These constructs are never used; treat them as if they don't exist in the langua
 - Never use arrow functions for function declarations (`const foo = () => {}`) — always use the `function` keyword for
   named functions; arrow functions are only for anonymous callbacks
 - Never use promise chaining (`.then()`/`.catch()`) — use `async/await` with `try/catch`
-- Never use single-line `if` without braces — always use `{}`
-- Never use the `throw` keyword in your own code — return `undefined` to indicate failure; `try/catch` is only for
-  external APIs; callers must always check the return value for `undefined` before using it
-- Never use the `++` and `--` operators — use `+= 1` and `-= 1` instead; they have confusing pre/post increment behavior
+- Never use single-line `if` without braces — always use `{}` strictly, even for early returns and logging
+- Never use the non-null assertion operator (`!`); if a value might be missing, use optional chaining (`?.`) or an
+  explicit `if` check
+- Never declare a variable in an inner scope that has the same name as a variable in an outer scope (variable shadowing)
 
 ### Restricted Patterns
 
@@ -24,23 +24,28 @@ These constructs exist but are restricted to specific use cases:
 - Do not use ternary operators (`? :`) for anything other than a simple value assignment — both branches must be
   literals or single identifiers, the condition must be a single boolean expression, and nesting is never allowed; use
   `if/else` for anything more complex
-- Arrow functions for anonymous callbacks are allowed but must have braces (e.g.,
-  `arr.find((x) => { return x.id === 1; })`); never use the `function` keyword for anonymous callbacks
-- Do not nest **any** function calls or constructor calls inside function arguments — this includes calling a method and
-  passing its result as an argument to another call (e.g., `foo(bar())`), and calling functions inside object literals
-  that are passed as arguments (e.g., `foo({ x: bar() })`); assign intermediate results to named variables first
-- Do not define function declarations or expressions inside function call arguments; define them separately before the
-  call
+- The `++` and `--` operators are only allowed as standalone statements (e.g., `count++;`) and within `for` loop
+  declarations; they are banned inline within complex expressions
+- Do not nest function calls or constructor calls inside function arguments (e.g., `foo(bar())`); the only exceptions
+  are built-in type casts (`Number()`, `String()`, `Boolean()`) and property accessors. For all other operations, assign
+  intermediate results to named variables first
+- Function definitions inside call arguments are only allowed if they are single-line arrow functions with an implicit
+  return (e.g., `.map(x => x.id)`); multi-line functions or those requiring braces and explicit `return` statements must
+  be defined separately before the call
 - Do not use `||` for fallback values — use `??`; if you need `||` behavior (treating `0`, `""`, `false`, `NaN` as
   missing), use an explicit `if` check
-- **Never use `null`** — never assign `null`, never return `null`, never accept `null` as a parameter; use `undefined`
-  instead. You may check for `null` from external APIs, but never assign it in your own code
-- Use a separate `try/catch` for each operation that can fail independently; avoid wrapping unrelated operations in a
-  single `try/catch`. Operations that cannot fail (e.g., simple value construction, variable assignments, returns) may
-  appear inside `try` blocks if they are part of the same logical operation, but should otherwise stay outside; `catch`
-  blocks may contain any code including assignments and returns
-- A `return` statement must fit on a single line; this applies strictly — including inline object literals and
-  multi-line constructor calls; if the value does not fit on one line, assign it to a variable first and return that
+- Avoid using `null` in your own code — use `undefined` instead. You may use `null` when it is strictly required by
+  external APIs, third-party libraries, or databases
+- A `try` block must contain exactly one operation that can throw. You may `return` directly from the `try` block. If
+  you need the result of the operation later in the function, you must declare a `let` variable outside the `try` and
+  assign it inside. Do not wrap multiple operations that can throw (e.g., `fetch()` and `.json()`) in the same `try`
+  block
+- Do not use type assertions (`as Type`) to bypass the compiler. Either type the variable explicitly
+  (`const x: Type = {}`) or use type guards/validation. The only allowed use of `as` is `as const` for literal inference
+- Never access an array by index (`arr[0]`) without bounds checking or handling `undefined`. Prefer `.find()`, `.at()`,
+  or array destructuring with defaults. (Ensure `noUncheckedIndexedAccess` is enabled in your Deno/TypeScript config)
+- Do not combine more than two boolean conditions in a single `if` statement; extract complex logic into well-named
+  boolean variables first
 
 ## Examples
 
@@ -50,14 +55,20 @@ These constructs exist but are restricted to specific use cases:
 // bad
 fetch(url)
   .then((r) => r.json())
-  .catch(() => null);
+  .catch(() => new Error('Failed'));
 
 // good
+let res: Response;
 try {
-  const res = await fetch(url);
+  res = await fetch(url);
+} catch {
+  return new Error('Network failed');
+}
+
+try {
   return await res.json();
 } catch {
-  return null;
+  return new Error('Parse failed');
 }
 ```
 
@@ -71,21 +82,6 @@ const greet = (name: string) => `Hello ${name}`;
 function greet(name: string): string {
   return `Hello ${name}`;
 }
-```
-
-**Restricted: Arrow functions for anonymous callbacks must have braces**
-
-```ts
-// bad — arrow callback without braces
-const route = GET_ROUTES.find(([action]) => action === compareAction);
-
-// good — arrow callback with braces
-const route = GET_ROUTES.find(([action]) => {
-  return action === compareAction;
-});
-const doubled = numbers.map((n) => {
-  return n * 2;
-});
 ```
 
 **Banned: Single-line `if` without braces**
@@ -124,32 +120,41 @@ if (enabled) {
 }
 ```
 
-**Restricted: Separate `try/catch` per operation**
+**Restricted: One throwing operation per `try/catch`**
 
 ```ts
-// bad
+// bad — mixes file read error with email send error
 try {
   const data = await readFile(path);
   await sendEmail(data);
 } catch {
-  // unclear which operation failed
+  return new Error('Failed');
 }
 
-// good
+// bad — declaring const inside try makes it unavailable outside
+try {
+  const data = await readFile(path);
+} catch {
+  return new Error('Read failed');
+}
+await sendEmail(data); // Error: data is not defined
+
+// good — exact failure isolation, variables declared outside
 let data: string;
 try {
   data = await readFile(path);
 } catch {
-  return error('Failed to read file');
+  return new Error('Failed to read file');
 }
+
 try {
   await sendEmail(data);
 } catch {
-  return error('Failed to send email');
+  return new Error('Failed to send email');
 }
 ```
 
-**Restricted: No nested calls in function arguments**
+**Restricted: No complex nested calls in function arguments**
 
 ```ts
 // bad — nested call inside function argument
@@ -166,43 +171,36 @@ await save(new Uint8Array(buffer));
 const sitePromises = entries.map(buildEntry);
 const sites = await Promise.all(sitePromises);
 
-// bad — function call inside object literal passed as argument
-return json({ domain, visitors: getVisitors(domain) });
+// bad — complex function call inside object literal passed as argument
+return json({ domain, visitors: getVisitors(domain, { active: true }) });
 
 // good — split into separate lines
-const visitors = getVisitors(domain);
+const visitors = getVisitors(domain, { active: true });
 return json({ domain, visitors });
+
+// good — built-in type casts are allowed
+await save(Number(id));
 ```
 
-**Restricted: No function definitions inside call arguments**
+**Restricted: Function definitions inside call arguments**
 
 ```ts
-// bad — named function expression inside find()
-const route = GET_ROUTES.find(function matchesAction([routeAction]): boolean {
-  return routeAction === compareAction;
+// bad — multi-line function expression inside find()
+const route = GET_ROUTES.find((route) => {
+  const isMatch = route.action === compareAction;
+  return isMatch && isValid;
 });
 
-// good — arrow function callback with braces
-const route = GET_ROUTES.find(([routeAction]) => {
-  return routeAction === compareAction;
-});
-
-// good — named function defined separately, referenced by name
+// good — multi-line function defined separately
 function matchesAction(route: Route): boolean {
-  return route.action === compareAction;
+  const isMatch = route.action === compareAction;
+  return isMatch && isValid;
 }
 const route = GET_ROUTES.find(matchesAction);
-```
 
-**Restricted: No chained operations**
-
-```ts
-// bad (also: chained operations)
-const host = (url.searchParams.get('domain') ?? '').replace(/\.example\.com$/, '');
-
-// good
-const rawDomain = url.searchParams.get('domain') ?? '';
-const host = rawDomain.replace(/\.example\.com$/, '');
+// good — single-line arrow function with implicit return is allowed
+const ids = items.map((x) => x.id);
+const active = users.filter((u) => u.isActive);
 ```
 
 **Restricted: Use `??` not `||` for fallbacks**
@@ -224,96 +222,134 @@ if (config.timeout !== undefined && config.timeout !== 0) {
 }
 ```
 
-**Restricted: Use `undefined` not `null`**
+**Restricted: Avoid `null` (use `undefined`)**
 
 ```ts
-// bad — never define null yourself
+// bad — never define null yourself if not required
 let result: string | null = null;
 return null;
 
-// good — use undefined
+// good — use undefined for your own code
 let result: string | undefined;
 return undefined; // or just: return;
 
-// accept null from boundaries, convert to undefined
-const param = url.searchParams.get('key'); // returns string | null
-const value = param ?? undefined; // normalize before using internally
+// good — using null is allowed when required by external APIs
+const param = url.searchParams.get('key'); // external API returns string | null
 ```
 
-**Restricted: Single-line returns**
+**Restricted: The `++` and `--` operators**
 
 ```ts
-// bad — multi-line computation in return
-return Array.from({ length: count }, (_, i) => {
-  const slot = now - (count - 1 - i);
-  let up: boolean | undefined;
-  if (d?.has(slot)) {
-    up = d.get(slot) ?? false;
-  } else {
-    up = undefined;
-  }
-  return { slot, up };
-});
+// bad — inline within a complex expression
+const nextId = currentId++;
+const value = array[--index];
 
-// good — extract to separate function
-function buildUptimeSlot(...): { slot: number; up: boolean | undefined } {
-  // ...computation...
-  return { slot, up };
-}
-return Array.from({ length: count }, (_, i) => {
-  return buildUptimeSlot(d, now, count, i);
-});
+// good — standalone statement
+let count = 0;
+count++;
 
-// good — compute before returning
-const total = computeTotal();
-return total;
-```
-
-**Banned: Use `+= 1` not `++`**
-
-```ts
-// bad — confusing pre/post increment behavior
+// good — in for loop declarations
 for (let i = 0; i < n; i++) {
   /* ... */
 }
-count++;
-
-// good — explicit addition
-for (let i = 0; i < n; i += 1) {
-  /* ... */
-}
-count += 1;
-
-// note: `++x` (pre-increment) is a drop-in replacement with `+= 1`
-// but `x++` (post-increment) requires code adaptation because it
-// returns the old value, not the new one
 ```
 
-**Banned: The `throw` keyword (return values instead)**
+**Banned: Non-null assertions (`!`)**
+
+```ts
+// bad
+const url = req.url!;
+const name = user!.name;
+
+// good
+if (!req.url) return new Error('Missing URL');
+const url = req.url;
+const name = user?.name;
+```
+
+**Banned: Variable shadowing**
+
+```ts
+// bad
+const route = getRoute();
+const active = users.filter((route) => route.isActive); // shadows outer 'route'
+
+// good
+const active = users.filter((user) => user.isActive);
+```
+
+**Restricted: Type assertions (`as`)**
+
+```ts
+// bad — suppresses missing properties
+const user = { name: 'Alice' } as User;
+
+// good — compiler enforces shape
+const user: User = { name: 'Alice', id: 1 };
+
+// good — literal inference is allowed
+const method = 'GET' as const;
+```
+
+**Restricted: Array index access**
+
+```ts
+// bad — crashes if records is empty
+const first = records[0];
+return first.value;
+
+// good — explicitly handle the potential undefined
+const first = records.at(0);
+if (!first) return new Error('empty records');
+return first.value;
+```
+
+**Restricted: Complex boolean conditions**
+
+```ts
+// bad
+if (user.isActive && !user.isBanned && (user.role === 'admin' || user.role === 'editor')) {
+  /* ... */
+}
+
+// good
+const isEligible = user.isActive && !user.isBanned;
+const hasPrivileges = user.role === 'admin' || user.role === 'editor';
+if (isEligible && hasPrivileges) {
+  /* ... */
+}
+```
+
+**Banned: The `throw` keyword (return `Error` objects instead)**
 
 ```ts
 // bad — throwing in your own code
 function parseData(input: string): Data {
-  if (!valid(input)) throw new Error('invalid');  // never throw
-  return { ... };
+  if (!valid(input)) throw new Error('invalid format'); // never throw
+  return {
+    /* ... */
+  };
 }
 
-// good — return undefined, let caller handle it
-function parseData(input: string): Data | undefined {
-  if (!valid(input)) return undefined;
-  return { ... };
+// good — return Data | Error, let caller handle it
+function parseData(input: string): Data | Error {
+  if (!valid(input)) return new Error('invalid format');
+  return {
+    /* ... */
+  };
 }
+
 const data = parseData(input);
-if (data === undefined) {
-  return error('Parse failed');
+if (data instanceof Error) {
+  return data; // bubble up the error
 }
 use(data);
 
 // good — try/catch is OK for external APIs that may throw
 let content: string;
 try {
-  content = await Deno.readTextFile(path);  // external API
-} catch {
-  return undefined;
+  content = await Deno.readTextFile(path); // external API
+} catch (e) {
+  return new Error('Failed to read text file');
 }
 ```

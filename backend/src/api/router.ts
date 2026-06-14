@@ -1,4 +1,4 @@
-import { CORS, requireAuth, error, ensureDomain, delay } from '../shared/http.ts';
+import { CORS, requireAuth, error, ensureDomain } from '../shared/http.ts';
 import { health } from './endpoints/health-get.ts';
 import { auth } from './endpoints/auth-get.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
@@ -73,7 +73,11 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
   const subAction = parts[3];
   const customDomain = parts[3];
   const verifyAction = parts[4];
-  const timestamp = parseInt(parts[3], 10);
+  const timestamp = parseInt(parts[3] || '', 10);
+
+  if (!domain) {
+    return error('Domain is required', 400);
+  }
 
   const domainCheck = ensureDomain(domain);
   if (domainCheck instanceof Response) {

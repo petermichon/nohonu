@@ -35,7 +35,7 @@ export function validateDomain(domain: unknown): domain is string {
 export function extractClientIp(req: Request, remoteAddr: Deno.NetAddr): string {
   const forwarded = req.headers.get('x-forwarded-for');
   const realIp = req.headers.get('x-real-ip');
-  if (forwarded) return forwarded.split(',')[0].trim();
+  if (forwarded) return forwarded.split(',')[0]?.trim() ?? 'unknown';
   if (realIp) return realIp;
   if (remoteAddr?.hostname) return remoteAddr.hostname;
   return 'unknown';
