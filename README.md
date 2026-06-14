@@ -25,10 +25,10 @@ nohonu-vibe/
 ### Backend
 
 - **Deno** 2.x - JavaScript/TypeScript runtime and HTTP server
+- **Docker** - Containerization
 
 ### Deployment
 
-- **Docker** - Containerization
 - **Docker Compose** - Multi-container orchestration
 - **Caddy** - Reverse proxy with automatic HTTPS
 
