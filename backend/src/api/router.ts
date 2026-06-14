@@ -27,6 +27,7 @@ import { addCustomDomain } from './endpoints/sites-custom-domains-post.ts';
 import { deleteCustomDomain } from './endpoints/sites-custom-domains-delete.ts';
 import { verifyCustomDomain } from './endpoints/sites-custom-domains-verify-post.ts';
 import { getVerificationToken } from './endpoints/sites-custom-domains-token-get.ts';
+import { getAllCustomDomains } from './endpoints/custom-domains-all-get.ts';
 import type { CtxRouteHandler, RouteContext } from './endpoints/sites-types.ts';
 
 type Endpoint = {
@@ -39,6 +40,7 @@ const routes: Record<string, Endpoint> = {
   '/auth': { handler: auth },
   '/check-domain': { handler: checkDomain },
   '/check-custom-domain': { handler: checkCustomDomain },
+  '/custom-domains': { handler: getAllCustomDomains, auth: true },
 };
 
 const SITE_GET_ROUTES: [string, CtxRouteHandler][] = [

@@ -157,6 +157,26 @@ export async function getCustomDomains(domain: string): Promise<{ domain: string
   return data.customDomains ?? [];
 }
 
+export async function getAllCustomDomains(): Promise<{ siteDomain: string; customDomain: string; verified: boolean }[]> {
+  const domains = await storage.listDomains();
+  const allCustomDomains: { siteDomain: string; customDomain: string; verified: boolean }[] = [];
+
+  for (const domain of domains) {
+    const data = await storage.readSiteMetadata(domain);
+    if (data?.customDomains) {
+      for (const entry of data.customDomains) {
+        allCustomDomains.push({
+          siteDomain: domain,
+          customDomain: entry.domain,
+          verified: entry.verified,
+        });
+      }
+    }
+  }
+
+  return allCustomDomains;
+}
+
 export async function addCustomDomain(domain: string, customDomain: string): Promise<UsecaseResult<void>> {
   const data = await storage.readSiteMetadata(domain);
   if (!data) {
