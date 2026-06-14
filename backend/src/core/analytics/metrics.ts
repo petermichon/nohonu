@@ -1,8 +1,8 @@
 import { SITES_DIR } from '../../shared/paths.ts';
 
 export const SLOT_MS = 60 * 1000;
-export const STATS_SLOTS = 43200; // 30 days of data (43200 minutes)
-export const UPTIME_SLOTS = 43200; // 30 days of data (43200 minutes)
+export const STATS_SLOTS = 86400; // 60 days of data (86400 minutes)
+export const UPTIME_SLOTS = 86400; // 60 days of data (86400 minutes)
 export const MAX_VISITORS_PER_DOMAIN = 500;
 
 const ANALYTICS_PATH = `${SITES_DIR}/analytics.json`;

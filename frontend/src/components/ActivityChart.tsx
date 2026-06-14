@@ -6,10 +6,10 @@ import { SLOT_MS } from '../lib/types.ts';
 import type { Slot, Visitor, TimeRange } from '../lib/types.ts';
 
 const RANGE_LABELS: Record<TimeRange, string> = {
-  1: '1m',
-  30: '30m',
-  60: '1h',
-  1440: '1D',
+  1: '1 min',
+  30: '30 min',
+  60: '1 hour',
+  1440: '1 day',
 };
 
 interface ActivityChartProps {
@@ -48,34 +48,38 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
   const sortedVisitors = [...visitors].sort((a, b) => b.last - a.last);
 
   const chartData = useMemo(() => {
-    // Group stats into exactly 60 bars
     const BAR_COUNT = 60;
-    if (stats.length === 0) return [];
-
-    const groupSize = range; // range = minutes per bar
+    const groupSize = range;
     const grouped: Map<number, number> = new Map();
-    const groupSlots = new Set<number>();
 
     for (const s of stats) {
-      const groupSlot = Math.floor(s.slot / groupSize) * groupSize;
-      groupSlots.add(groupSlot);
-      const existing = grouped.get(groupSlot) ?? 0;
-      grouped.set(groupSlot, existing + s.count);
+      const offset = now - s.slot;
+      if (offset < 0) continue;
+      const barIndex = Math.floor(offset / groupSize);
+      if (barIndex >= BAR_COUNT) continue;
+
+      const barSlot = now - barIndex * groupSize;
+      grouped.set(barSlot, (grouped.get(barSlot) ?? 0) + s.count);
     }
 
-    // Get the last 60 group slots, padding if needed
-    const sortedGroupSlots = Array.from(groupSlots).sort((a, b) => a - b);
-    const lastSlot = sortedGroupSlots[sortedGroupSlots.length - 1] ?? now;
-
-    // Generate 60 slots ending at lastSlot
     const result = [];
     for (let i = BAR_COUNT - 1; i >= 0; i--) {
-      const slot = lastSlot - i * groupSize;
+      const slot = now - i * groupSize;
+      const date = new Date(slot * SLOT_MS);
+      let timeStr: string;
+      if (range >= 1440) {
+        timeStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      } else if (range >= 30) {
+        timeStr = date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } else {
+        timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
       result.push({
         slot,
         count: grouped.get(slot) ?? 0,
-        time: new Date(slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isCurrent: slot === now,
+        time: timeStr,
+        isCurrent: i === 0,
       });
     }
 

@@ -26,8 +26,8 @@ export interface SiteDataReturn {
   versionsLoading: boolean;
   currentVersion: number | null;
   loadSite: () => Promise<void>;
-  loadStats: (slots?: number) => Promise<void>;
-  loadUptime: (slots: number) => Promise<void>;
+  loadStats: () => Promise<void>;
+  loadUptime: () => Promise<void>;
   loadVersions: () => Promise<void>;
 }
 
@@ -67,23 +67,20 @@ export function useSiteData(domain: string): SiteDataReturn {
     }
   }, [domain, apiFetch]);
 
-  const loadStats = useCallback(
-    async (slots?: number) => {
-      setStatsLoading(true);
-      try {
-        const slotsToFetch = slots ?? getSlotsForRange(statsRange);
-        const group = getGroupMinutes();
-        const res = await apiFetch(`/sites/${domain}/stats?slots=${slotsToFetch}&group=${group}`);
-        const data = await res.json();
-        setStats((data.stats as Slot[]) ?? []);
-      } catch {
-        // non-critical
-      } finally {
-        setStatsLoading(false);
-      }
-    },
-    [domain, statsRange, apiFetch]
-  );
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true);
+    try {
+      const slotsToFetch = getSlotsForRange(statsRange);
+      const group = getGroupMinutes();
+      const res = await apiFetch(`/sites/${domain}/stats?slots=${slotsToFetch}&group=${group}`);
+      const data = await res.json();
+      setStats((data.stats as Slot[]) ?? []);
+    } catch {
+      // non-critical
+    } finally {
+      setStatsLoading(false);
+    }
+  }, [domain, statsRange, apiFetch]);
 
   const loadVisitors = useCallback(async () => {
     try {
@@ -153,23 +150,20 @@ export function useSiteData(domain: string): SiteDataReturn {
     }
   };
 
-  const loadUptime = useCallback(
-    async (slots: number) => {
-      setUptimeLoading(true);
-      try {
-        const slotsToFetch = slots ?? getSlotsForRange(uptimeRange);
-        const group = getGroupMinutes();
-        const res = await apiFetch(`/sites/${domain}/uptime?slots=${slotsToFetch}&group=${group}`);
-        const data = await res.json();
-        setUptimeData((data.uptime as UptimeSlot[]) ?? []);
-      } catch {
-        // non-critical
-      } finally {
-        setUptimeLoading(false);
-      }
-    },
-    [domain, uptimeRange, apiFetch]
-  );
+  const loadUptime = useCallback(async () => {
+    setUptimeLoading(true);
+    try {
+      const slotsToFetch = getSlotsForRange(uptimeRange);
+      const group = getGroupMinutes();
+      const res = await apiFetch(`/sites/${domain}/uptime?slots=${slotsToFetch}&group=${group}`);
+      const data = await res.json();
+      setUptimeData((data.uptime as UptimeSlot[]) ?? []);
+    } catch {
+      // non-critical
+    } finally {
+      setUptimeLoading(false);
+    }
+  }, [domain, uptimeRange, apiFetch]);
 
   const loadUptimeAll = useCallback(async () => {
     try {
@@ -198,7 +192,7 @@ export function useSiteData(domain: string): SiteDataReturn {
       uptimeMountedRef.current = true;
       return;
     }
-    loadUptime(uptimeRange);
+    loadUptime();
   }, [loadUptime, uptimeRange]);
 
   // Reload stats immediately when range selector changes (not on initial mount — usePollData handles that)
@@ -207,15 +201,15 @@ export function useSiteData(domain: string): SiteDataReturn {
       statsMountedRef.current = true;
       return;
     }
-    loadStats(statsRange);
+    loadStats();
   }, [loadStats, statsRange]);
 
   // Poll stats and visitors every minute
   usePollData(
     () => {
-      loadStats(statsRange);
+      loadStats();
       loadVisitors();
-      loadUptime(uptimeRange);
+      loadUptime();
       loadUptimeAll();
     },
     SLOT_MS,

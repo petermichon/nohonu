@@ -6,10 +6,10 @@ import type { UptimeSlot, UptimeRange } from '../lib/types.ts';
 import { getAccentStyle, calcUptimePct } from '../lib/utils.ts';
 
 const RANGE_LABELS: Record<UptimeRange, string> = {
-  1: '1m',
-  30: '30m',
-  60: '1h',
-  1440: '1D',
+  1: '1 min',
+  30: '30 min',
+  60: '1 hour',
+  1440: '1 day',
 };
 
 interface UptimeChartProps {
@@ -68,40 +68,44 @@ export function UptimeChart({
   const accentStyle = useMemo(() => getAccentStyle(accent, true), [accent]);
 
   const chartData = useMemo(() => {
-    // Group uptime into exactly 60 bars
     const BAR_COUNT = 60;
-    if (uptime.length === 0) return [];
-
-    const groupSize = range; // range = minutes per bar
+    const groupSize = range;
     const grouped: Map<number, boolean | undefined> = new Map();
-    const groupSlots = new Set<number>();
 
     for (const s of uptime) {
-      const groupSlot = Math.floor(s.slot / groupSize) * groupSize;
-      groupSlots.add(groupSlot);
-      const existing = grouped.get(groupSlot);
+      const offset = now - s.slot;
+      if (offset < 0) continue;
+      const barIndex = Math.floor(offset / groupSize);
+      if (barIndex >= BAR_COUNT) continue;
+
+      const barSlot = now - barIndex * groupSize;
+      const existing = grouped.get(barSlot);
       if (existing === undefined) {
-        grouped.set(groupSlot, s.up === null ? undefined : s.up);
+        grouped.set(barSlot, s.up === null ? undefined : s.up);
       } else if (s.up === true) {
-        // If any slot in group is up, the group is up
-        grouped.set(groupSlot, true);
+        grouped.set(barSlot, true);
       }
     }
 
-    // Get the last 60 group slots, padding if needed
-    const sortedGroupSlots = Array.from(groupSlots).sort((a, b) => a - b);
-    const lastSlot = sortedGroupSlots[sortedGroupSlots.length - 1] ?? now;
-
-    // Generate 60 slots ending at lastSlot
     const result = [];
     for (let i = BAR_COUNT - 1; i >= 0; i--) {
-      const slot = lastSlot - i * groupSize;
+      const slot = now - i * groupSize;
+      const date = new Date(slot * SLOT_MS);
+      let timeStr: string;
+      if (range >= 1440) {
+        timeStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      } else if (range >= 30) {
+        timeStr = date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } else {
+        timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
       result.push({
         slot,
         up: grouped.get(slot),
-        value: 1, // Constant height for all bars
-        time: new Date(slot * SLOT_MS).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isCurrent: slot === now,
+        value: 1,
+        time: timeStr,
+        isCurrent: i === 0,
       });
     }
 

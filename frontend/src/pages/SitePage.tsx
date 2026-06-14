@@ -221,7 +221,7 @@ function SitePage() {
           <ActivityChart
             stats={stats}
             visitors={visitors}
-            onReload={() => loadStats(globalRange)}
+            onReload={() => loadStats()}
             reloading={statsLoading}
             range={globalRange}
             onRangeChange={setGlobalRange}
@@ -235,7 +235,7 @@ function SitePage() {
             allUptime={uptimeAllData}
             range={globalRange}
             onRangeChange={setGlobalRange}
-            onReload={() => loadUptime(globalRange)}
+            onReload={() => loadUptime()}
             reloading={uptimeLoading}
             accent={accent}
             now={now}
