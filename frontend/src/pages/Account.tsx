@@ -4,9 +4,11 @@ import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useState, useEffect } from 'react';
 
 export default function Account() {
-  const { apiBase, apiKey, setApiBase, setApiKey } = useConnection();
+  const { apiBase, apiKey, username, setApiBase, setApiKey, setUsername } = useConnection();
   const [url, setUrl] = useState(apiBase);
   const [key, setKey] = useState(apiKey);
+  const [localUsername, setLocalUsername] = useState(username);
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'saved'>('idle');
   const [urlStatus, setUrlStatus] = useState<'idle' | 'checking' | 'valid' | 'unreachable'>('idle');
   const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'open'>('idle');
   const [isServerOpen, setIsServerOpen] = useState(false);
@@ -25,6 +27,17 @@ export default function Account() {
     };
     checkServerSecurity();
   }, [apiBase, apiKey]);
+
+  const saveUsername = () => {
+    const trimmed = localUsername
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '');
+    setLocalUsername(trimmed);
+    setUsername(trimmed);
+    setUsernameStatus('saved');
+    setTimeout(() => setUsernameStatus('idle'), 800);
+  };
 
   const saveUrl = async () => {
     setUrlStatus('checking');
@@ -95,7 +108,42 @@ export default function Account() {
       <h1 className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mb-6">Account</h1>
 
       <Section id="profile" icon={User} title="Profile">
-        <p className="text-sm text-stone-500 dark:text-stone-400">Account management is not yet available.</p>
+        <div className="grid gap-4 max-w-md">
+          <div>
+            <label htmlFor="username" className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">
+              Username
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={localUsername}
+                onChange={(e) => {
+                  setLocalUsername(e.target.value);
+                  setUsernameStatus('idle');
+                }}
+                placeholder="your-username"
+                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+              />
+              <button
+                type="button"
+                onClick={saveUsername}
+                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-stone-900 font-medium rounded-lg cursor-pointer"
+              >
+                {usernameStatus === 'saved' ? 'Saved' : 'Save'}
+              </button>
+            </div>
+            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+              Used to identify your sites. Lowercase letters, numbers, hyphens and underscores only.
+            </p>
+            {localUsername && (
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                Your page: <span className="font-mono">/@{localUsername}</span>
+              </p>
+            )}
+          </div>
+        </div>
       </Section>
 
       <Section id="security" icon={Key} title="Security">

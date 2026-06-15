@@ -34,7 +34,7 @@ export async function getCustomDomainCache(): Promise<Map<string, string>> {
   return customDomainCache as Map<string, string>;
 }
 
-export async function listSites(): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string }>> {
+export async function listSites(): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }>> {
   const domains = await storage.listDomains();
   return Promise.all(
     domains.map(async (domain) => {
@@ -45,9 +45,17 @@ export async function listSites(): Promise<Array<{ domain: string; enabled: bool
         hits: analytics.getTotalHits(domain),
         uptime: analytics.getUptimePct(domain),
         accent: data?.accent,
+        account: data?.account,
       };
     })
   );
+}
+
+export async function setSiteAccount(domain: string, account: string): Promise<void> {
+  const data = await storage.readSiteMetadata(domain);
+  if (!data) return;
+  data.account = account || undefined;
+  await storage.writeSiteMetadata(domain, data);
 }
 
 export async function checkSite(domain: string): Promise<{ exists: boolean; enabled: boolean }> {

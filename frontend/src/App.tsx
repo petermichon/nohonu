@@ -21,6 +21,7 @@ import TermsOfService from './pages/TermsOfService.tsx';
 import Legal from './pages/Legal.tsx';
 import CopyrightPolicy from './pages/CopyrightPolicy.tsx';
 import MentionsLegales from './pages/MentionsLegales.tsx';
+import UserPage from './pages/UserPage.tsx';
 
 function SidebarContent({
   isCollapsed,
@@ -104,6 +105,7 @@ function AppContent() {
                 <Route path="/legal/terms-of-service" element={<TermsOfService />} />
                 <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
                 <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
+                <Route path="/@:username" element={<UserPage />} />
               </Routes>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useApi } from '../lib/api.ts';
 import { getAccentStyle } from '../lib/utils.ts';
 import type { Site } from '../lib/types.ts';
@@ -9,6 +10,7 @@ interface HomeSiteCardProps {
 
 export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const { host, protocol } = useApi();
+  const navigate = useNavigate();
   const siteUrl = `${site.domain}.${host}`;
   const accentStyle = getAccentStyle(site.accent, site.enabled);
 
@@ -49,12 +51,15 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
         {/* Row 2: account chip */}
         <button
           type="button"
-          onClick={() => {}}
-          title="User page coming soon"
-          className="flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 cursor-pointer"
+          onClick={() => {
+            if (site.account) navigate(`/@${site.account}`);
+          }}
+          disabled={!site.account}
+          title={site.account ? `View @${site.account}'s sites` : 'No account'}
+          className={`flex items-center gap-1 text-xs ${site.account ? 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 cursor-pointer' : 'text-stone-300 dark:text-stone-700 cursor-default'}`}
         >
           <User className="w-3 h-3" />
-          <span>Guest</span>
+          <span>{site.account ?? 'Guest'}</span>
         </button>
       </div>
     </div>

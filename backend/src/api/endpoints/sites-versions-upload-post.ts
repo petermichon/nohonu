@@ -19,5 +19,11 @@ export async function upload(req: Request, { domain }: RouteContext): Promise<Re
   const zipData = new Uint8Array(buffer);
 
   const result = await sites.uploadVersion(domain, zipData);
+
+  const account = req.headers.get('X-Account');
+  if (account) {
+    await sites.setSiteAccount(domain, account);
+  }
+
   return json({ success: true, domain, index: result.index });
 }

@@ -56,6 +56,13 @@ export const MOBILE_NAV_ITEMS: NavItemConfig[] = [
 
 export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
   {
+    path: '/@',
+    matchPrefix: true,
+    backTo: '/',
+    backLabel: 'Home',
+    currentLabel: 'User',
+  },
+  {
     path: '/legal/privacy-policy',
     backTo: '/legal',
     backLabel: 'Legal',

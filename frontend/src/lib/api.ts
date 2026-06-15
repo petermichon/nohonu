@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useConnection } from './ConnectionProvider.tsx';
 
 export function useApi() {
-  const { apiBase, apiKey } = useConnection();
+  const { apiBase, apiKey, username } = useConnection();
   let host = '';
   let protocol = 'http:';
   try {
@@ -14,10 +14,13 @@ export function useApi() {
   }
   const apiFetch = useCallback(
     (path: string, init?: RequestInit) => {
-      const headers: HeadersInit = apiKey ? { 'X-Api-Key': apiKey } : {};
+      const headers: HeadersInit = {
+        ...(apiKey ? { 'X-Api-Key': apiKey } : {}),
+        ...(username ? { 'X-Account': username } : {}),
+      };
       return fetch(`${apiBase}${path}`, { ...init, headers: { ...headers, ...init?.headers } });
     },
-    [apiBase, apiKey]
+    [apiBase, apiKey, username]
   );
-  return { apiBase, apiKey, host, protocol, apiFetch };
+  return { apiBase, apiKey, username, host, protocol, apiFetch };
 }

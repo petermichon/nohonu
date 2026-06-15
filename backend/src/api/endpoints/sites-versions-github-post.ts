@@ -22,6 +22,12 @@ export async function fetchGithub(req: Request, { domain }: RouteContext): Promi
 
   try {
     const result = await sites.deployFromGithub(domain, repo, ref);
+
+    const account = req.headers.get('X-Account');
+    if (account) {
+      await sites.setSiteAccount(domain, account);
+    }
+
     return json({ domain, index: result.index, repo: result.repo, branch: result.branch });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to deploy from GitHub';

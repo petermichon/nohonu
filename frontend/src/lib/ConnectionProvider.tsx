@@ -3,26 +3,31 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 interface Connection {
   apiBase: string;
   apiKey: string;
+  username: string;
 }
 
 interface ConnectionContextType extends Connection {
   setConnection: (c: Connection) => void;
   setApiBase: (url: string) => void;
   setApiKey: (key: string) => void;
+  setUsername: (username: string) => void;
 }
 
 const DEFAULT: Connection = {
   apiBase: 'https://nohonu.com/api',
   apiKey: '',
+  username: '',
 };
 
 function load(): Connection {
   try {
     const apiBase = localStorage.getItem('apiBase');
     const apiKey = localStorage.getItem('apiKey');
+    const username = localStorage.getItem('username');
     return {
       apiBase: apiBase ?? DEFAULT.apiBase,
       apiKey: apiKey ?? DEFAULT.apiKey,
+      username: username ?? DEFAULT.username,
     };
   } catch {
     /* ignore */
@@ -51,8 +56,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, apiKey: key }));
   };
 
+  const setUsername = (u: string) => {
+    localStorage.setItem('username', u);
+    setConnectionState((prev) => ({ ...prev, username: u }));
+  };
+
   return (
-    <ConnectionContext.Provider value={{ ...connection, setConnection, setApiBase, setApiKey }}>
+    <ConnectionContext.Provider value={{ ...connection, setConnection, setApiBase, setApiKey, setUsername }}>
       {children}
     </ConnectionContext.Provider>
   );
