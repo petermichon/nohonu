@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import { Rocket, Globe, Server, ChevronRight, Eye } from 'lucide-react';
+import { Eye, AlertCircle } from 'lucide-react';
 import { useSites } from '../lib/SitesProvider.tsx';
 import { formatHits } from '../lib/utils.ts';
+import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 
 function Home() {
   const { sites, loading, error } = useSites();
@@ -50,58 +50,61 @@ function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Sites Card */}
-        <Link
-          to="/sites"
-          className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 hover:border-stone-300 dark:hover:border-stone-700 group"
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <Rocket className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            </div>
-            <ChevronRight className="w-4 h-4 text-stone-400 dark:text-stone-600 group-hover:text-stone-600 dark:group-hover:text-stone-400" />
+      {/* Error state */}
+      {error && (
+        <div className="text-center py-16">
+          <div className="w-12 h-12 bg-purple-200 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+            <AlertCircle className="w-6 h-6 text-purple-500 dark:text-purple-400" />
           </div>
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Sites</h2>
-          <p className="text-sm text-stone-500 dark:text-stone-400">
-            {loading
-              ? 'Manage your monitored sites'
-              : sites.length > 0
-                ? `${sites.length} site${sites.length === 1 ? '' : 's'}`
-                : 'Manage your monitored sites'}
-          </p>
-        </Link>
+          {error === 'unauthorized' ? (
+            <>
+              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Invalid API key</p>
+              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">
+                Update your API key in connection settings
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
+              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
+            </>
+          )}
+        </div>
+      )}
 
-        {/* Domains Card */}
-        <Link
-          to="/domains"
-          className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 hover:border-stone-300 dark:hover:border-stone-700 group"
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      {/* Loading state */}
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden"
+            >
+              <div className="w-full h-32 bg-stone-100 dark:bg-stone-800 animate-pulse" />
+              <div className="p-3 space-y-2">
+                <div className="h-4 w-24 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+                <div className="h-3 w-16 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+              </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-stone-400 dark:text-stone-600 group-hover:text-stone-600 dark:group-hover:text-stone-400" />
-          </div>
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Domains</h2>
-          <p className="text-sm text-stone-500 dark:text-stone-400">Configure your domains</p>
-        </Link>
+          ))}
+        </div>
+      )}
 
-        {/* Servers Card */}
-        <Link
-          to="/servers"
-          className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 hover:border-stone-300 dark:hover:border-stone-700 group"
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <Server className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-            <ChevronRight className="w-4 h-4 text-stone-400 dark:text-stone-600 group-hover:text-stone-600 dark:group-hover:text-stone-400" />
-          </div>
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1">Servers</h2>
-          <p className="text-sm text-stone-500 dark:text-stone-400">Manage your servers</p>
-        </Link>
-      </div>
+      {/* Empty state */}
+      {!loading && !error && sites.length === 0 && (
+        <div className="text-center py-16">
+          <p className="text-sm text-stone-500 dark:text-stone-400">No sites deployed yet</p>
+        </div>
+      )}
+
+      {/* Sites grid */}
+      {!loading && !error && sites.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sites.map((site) => (
+            <HomeSiteCard key={site.domain} site={site} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
