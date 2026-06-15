@@ -46,6 +46,17 @@
 @import '@fontsource/cinzel/400.css';
 @import '@fontsource/cinzel/500.css';
 @import '@fontsource/cinzel/700.css';
+@import '@fontsource/atkinson-hyperlegible/400.css';
+@import '@fontsource/atkinson-hyperlegible/700.css';
+@import '@fontsource/iceland/400.css';
+@import '@fontsource/figtree/400.css';
+@import '@fontsource/figtree/500.css';
+@import '@fontsource/figtree/600.css';
+@import '@fontsource/figtree/700.css';
+@import '@fontsource/expletus-sans/400.css';
+@import '@fontsource/expletus-sans/500.css';
+@import '@fontsource/expletus-sans/600.css';
+@import '@fontsource/expletus-sans/700.css';
 
 @variant dark (&:where(.dark, .dark *));
 

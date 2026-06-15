@@ -35,7 +35,11 @@ export type Font =
   | 'rubik'
   | 'cinzel'
   | 'mona-sans'
-  | 'noto-sans-mono';
+  | 'noto-sans-mono'
+  | 'atkinson'
+  | 'iceland'
+  | 'figtree'
+  | 'expletus-sans';
 
 export const fontNames: Partial<Record<Font, string>> = {
   'noto-sans': 'Noto Sans',
@@ -54,6 +58,10 @@ export const fontNames: Partial<Record<Font, string>> = {
   cinzel: 'Cinzel',
   'mona-sans': 'Mona Sans',
   'noto-sans-mono': 'Noto Sans Mono',
+  atkinson: 'Atkinson Hyperlegible',
+  iceland: 'Iceland',
+  figtree: 'Figtree',
+  'expletus-sans': 'Expletus Sans',
 };
 
 const fontFamilies: Record<Font, string> = {
@@ -88,6 +96,10 @@ const fontFamilies: Record<Font, string> = {
   cinzel: "'Cinzel'",
   'mona-sans': "'Mona Sans'",
   'noto-sans-mono': "'Noto Sans Mono'",
+  atkinson: "'Atkinson Hyperlegible'",
+  iceland: "'Iceland'",
+  figtree: "'Figtree'",
+  'expletus-sans': "'Expletus Sans'",
   'sans-serif': 'sans-serif',
   serif: 'serif',
   cursive: 'cursive',
