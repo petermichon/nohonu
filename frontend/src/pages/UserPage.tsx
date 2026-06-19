@@ -1,19 +1,48 @@
-import { useParams } from 'react-router-dom';
-import { User, AlertCircle } from 'lucide-react';
+import { useParams, Link, useLocation } from 'react-router-dom';
+import { User, AlertCircle, Globe, Server } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
 
 export default function UserPage() {
   const { username } = useParams<{ username: string }>();
+  const location = useLocation();
   const { sites, loading, error } = useSites();
 
   const userSites = sites.filter((s) => s.account === username);
+
+  const tabs = [
+    { to: `/u/${username}`, label: 'Sites', icon: null },
+    { to: `/u/${username}/domains`, label: 'Domains', icon: Globe },
+    { to: `/u/${username}/servers`, label: 'Servers', icon: Server },
+  ];
 
   return (
     <section className="mb-12">
       <div className="mb-5">
         <BackButton to="/" label="Home" />
+      </div>
+
+      {/* Tab navigation */}
+      <div className="flex gap-1 mb-6">
+        {tabs.map((tab) => {
+          const isActive =
+            location.pathname === tab.to || (tab.to !== `/u/${username}` && location.pathname.startsWith(tab.to));
+          return (
+            <Link
+              key={tab.to}
+              to={tab.to}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                isActive
+                  ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900'
+                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              {tab.icon && <tab.icon className="w-4 h-4" />}
+              {tab.label}
+            </Link>
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-3 mb-6">

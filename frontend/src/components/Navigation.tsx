@@ -3,6 +3,7 @@ import { Rocket, ChevronRight } from 'lucide-react';
 import { useState, useLayoutEffect, useRef } from 'react';
 import { useApi } from '../lib/api.ts';
 import { useSites } from '../lib/SitesProvider.tsx';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { SectionNav } from './SectionNav.tsx';
 import { NavButton } from './NavButton.tsx';
 import { SidebarView } from './SidebarView.tsx';
@@ -11,7 +12,10 @@ import { SIDEBAR_ROUTES, MAIN_NAV_ITEMS, MOBILE_NAV_ITEMS, type SidebarRouteConf
 
 function useIsActive() {
   const location = useLocation();
-  return (path: string) => location.pathname === path || (path === '/sites' && location.pathname.startsWith('/sites/'));
+  return (path: string) =>
+    location.pathname === path ||
+    (path === '/sites' && location.pathname.startsWith('/sites/')) ||
+    (path.startsWith('/u/') && location.pathname.startsWith(path));
 }
 
 export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boolean }) {
@@ -19,6 +23,7 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
   const isActive = useIsActive();
   const { apiBase } = useApi();
   const { sites, loading } = useSites();
+  const { username } = useConnection();
   const [iconErrors, setIconErrors] = useState<Set<string>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
   const [animationDirection, setAnimationDirection] = useState<'left' | 'right'>('right');
@@ -93,25 +98,28 @@ export function DesktopNavigation({ isCollapsed = false }: { isCollapsed?: boole
         >
           <NavItems>
             <NavButton
-              to="/sites"
+              to={username ? `/u/${username}` : '/sites'}
               icon={Rocket}
               label="Sites"
-              isActive={isActive('/sites')}
+              isActive={isActive(username ? `/u/${username}` : '/sites')}
               rightIcon={ChevronRight}
               isCollapsed={isCollapsed}
             />
 
-            {MAIN_NAV_ITEMS.map(({ to, label, icon }) => (
-              <NavButton
-                key={to}
-                to={to}
-                icon={icon}
-                label={label}
-                isActive={isActive(to)}
-                rightIcon={ChevronRight}
-                isCollapsed={isCollapsed}
-              />
-            ))}
+            {MAIN_NAV_ITEMS.map(({ to, label, icon }) => {
+              const targetPath = username ? `/u/${username}${to}` : to;
+              return (
+                <NavButton
+                  key={to}
+                  to={targetPath}
+                  icon={icon}
+                  label={label}
+                  isActive={isActive(targetPath)}
+                  rightIcon={ChevronRight}
+                  isCollapsed={isCollapsed}
+                />
+              );
+            })}
           </NavItems>
         </SidebarView>
       </>

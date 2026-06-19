@@ -18,6 +18,7 @@ import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
 import { useFont, getFontFamily, type Font } from '../lib/FontProvider.tsx';
 import { useSidebar } from '../lib/SidebarProvider.tsx';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useState } from 'react';
 
 interface MenuSectionProps {
@@ -79,9 +80,8 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
 export function TopBar() {
   const location = useLocation();
   const { isMobileOpen, toggleMobileSidebar } = useSidebar();
-  // TODO: Replace with real auth state when authentication is implemented
-  const isConnected = false;
-  const userName = isConnected ? 'User Name' : 'Guest';
+  const { displayName } = useConnection();
+  const userName = displayName || 'Guest';
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuView, setMenuView] = useState<'main' | 'theme' | 'language' | 'font'>('main');
@@ -131,12 +131,7 @@ export function TopBar() {
 
   const browserTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-  const profileOptions = isConnected
-    ? [
-        { to: '/account', label: 'Profile' },
-        { to: '/account', label: 'Security' },
-      ]
-    : [{ to: '/account', label: 'Account' }];
+  const profileOptions = [{ to: '/account', label: 'Account' }];
 
   const themeOptions = [
     {
@@ -403,13 +398,7 @@ export function TopBar() {
                       type="button"
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer"
                     >
-                      {isConnected ? (
-                        'Sign out'
-                      ) : (
-                        <>
-                          <LogIn className="w-4 h-4" /> <span>Sign in</span>
-                        </>
-                      )}
+                      <LogIn className="w-4 h-4" /> <span>Sign in</span>
                     </button>
                   </div>
                 </>

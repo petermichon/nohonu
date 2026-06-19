@@ -22,7 +22,8 @@ import { SLOT_MS, type TimeRange } from '../lib/types.ts';
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SitePage() {
-  const { domain } = useParams<{ domain: string }>();
+  const { domain, sitename } = useParams<{ domain?: string; sitename?: string }>();
+  const actualDomain = sitename || domain;
   const { apiFetch, apiBase, host, protocol } = useApi();
   const { refreshSites } = useSites();
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ function SitePage() {
     loadStats,
     loadUptime,
     loadVersions,
-  } = useSiteData(domain!);
+  } = useSiteData(actualDomain!);
 
   const [actionLoading, setActionLoading] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'delete' | 'enable' | 'disable' | null>(null);

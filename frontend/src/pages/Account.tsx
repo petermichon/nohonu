@@ -4,11 +4,14 @@ import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useState, useEffect } from 'react';
 
 export default function Account() {
-  const { apiBase, apiKey, username, setApiBase, setApiKey, setUsername } = useConnection();
+  const { apiBase, apiKey, username, displayName, setApiBase, setApiKey, setUsername, setDisplayName } =
+    useConnection();
   const [url, setUrl] = useState(apiBase);
   const [key, setKey] = useState(apiKey);
   const [localUsername, setLocalUsername] = useState(username);
+  const [localDisplayName, setLocalDisplayName] = useState(displayName);
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'saved'>('idle');
+  const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved'>('idle');
   const [urlStatus, setUrlStatus] = useState<'idle' | 'checking' | 'valid' | 'unreachable'>('idle');
   const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'open'>('idle');
   const [isServerOpen, setIsServerOpen] = useState(false);
@@ -27,6 +30,14 @@ export default function Account() {
     };
     checkServerSecurity();
   }, [apiBase, apiKey]);
+
+  const saveDisplayName = () => {
+    const trimmed = localDisplayName.trim();
+    setLocalDisplayName(trimmed);
+    setDisplayName(trimmed);
+    setDisplayNameStatus('saved');
+    setTimeout(() => setDisplayNameStatus('idle'), 800);
+  };
 
   const saveUsername = () => {
     const trimmed = localUsername
@@ -110,6 +121,33 @@ export default function Account() {
       <Section id="profile" icon={User} title="Profile">
         <div className="grid gap-4 max-w-md">
           <div>
+            <label htmlFor="displayName" className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">
+              Display Name
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                id="displayName"
+                name="displayName"
+                value={localDisplayName}
+                onChange={(e) => {
+                  setLocalDisplayName(e.target.value);
+                  setDisplayNameStatus('idle');
+                }}
+                placeholder="John Doe"
+                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+              />
+              <button
+                type="button"
+                onClick={saveDisplayName}
+                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-stone-900 font-medium rounded-lg cursor-pointer"
+              >
+                {displayNameStatus === 'saved' ? 'Saved' : 'Save'}
+              </button>
+            </div>
+            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Your public name (e.g., John Doe)</p>
+          </div>
+          <div>
             <label htmlFor="username" className="text-sm text-stone-600 dark:text-stone-400 mb-1.5 block">
               Username
             </label>
@@ -139,7 +177,7 @@ export default function Account() {
             </p>
             {localUsername && (
               <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                Your page: <span className="font-mono">/@{localUsername}</span>
+                Your page: <span className="font-mono">/u/{localUsername}</span>
               </p>
             )}
           </div>

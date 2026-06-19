@@ -56,11 +56,24 @@ export const MOBILE_NAV_ITEMS: NavItemConfig[] = [
 
 export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
   {
-    path: '/@',
+    path: '/u',
     matchPrefix: true,
     backTo: '/',
     backLabel: 'Home',
     currentLabel: 'User',
+  },
+  {
+    path: '/u/:username/domains',
+    backTo: '/u/:username',
+    backLabel: 'User',
+    currentLabel: 'Domains',
+    children: [{ to: '/u/:username/domains/explore', label: 'Explore', icon: Search, rightIcon: ChevronRight }],
+  },
+  {
+    path: '/u/:username/servers',
+    backTo: '/u/:username',
+    backLabel: 'User',
+    currentLabel: 'Servers',
   },
   {
     path: '/legal/privacy-policy',

@@ -1,6 +1,5 @@
 import { User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useApi } from '../lib/api.ts';
 import { getAccentStyle } from '../lib/utils.ts';
 import type { Site } from '../lib/types.ts';
 
@@ -9,9 +8,7 @@ interface HomeSiteCardProps {
 }
 
 export function HomeSiteCard({ site }: HomeSiteCardProps) {
-  const { host, protocol } = useApi();
   const navigate = useNavigate();
-  const siteUrl = `${site.domain}.${host}`;
   const accentStyle = getAccentStyle(site.accent, site.enabled);
 
   const badgeClass = !site.enabled
@@ -23,14 +20,16 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const badgeStyle = accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined;
 
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-sm dark:hover:shadow-stone-900/50 overflow-hidden">
+    <div
+      onClick={() => {
+        const targetPath = site.account ? `/u/${site.account}/${site.domain}` : `/sites/${site.domain}`;
+        navigate(targetPath);
+      }}
+      className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-sm dark:hover:shadow-stone-900/50 overflow-hidden cursor-pointer"
+    >
       {/* Preview area */}
-      <a
-        href={`${protocol}//${siteUrl}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => !site.enabled && e.preventDefault()}
-        className={`block w-full h-32 bg-stone-100 dark:bg-stone-800 rounded-t-xl overflow-hidden ${!site.enabled ? 'opacity-50' : ''}`}
+      <div
+        className={`w-full h-32 bg-stone-100 dark:bg-stone-800 rounded-t-xl overflow-hidden ${!site.enabled ? 'opacity-50' : ''}`}
       />
 
       {/* Card footer */}
@@ -51,8 +50,9 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
         {/* Row 2: account chip */}
         <button
           type="button"
-          onClick={() => {
-            if (site.account) navigate(`/@${site.account}`);
+          onClick={(e) => {
+            e.stopPropagation();
+            if (site.account) navigate(`/u/${site.account}`);
           }}
           disabled={!site.account}
           title={site.account ? `View @${site.account}'s sites` : 'No account'}

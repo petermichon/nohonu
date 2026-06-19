@@ -4,6 +4,7 @@ interface Connection {
   apiBase: string;
   apiKey: string;
   username: string;
+  displayName: string;
 }
 
 interface ConnectionContextType extends Connection {
@@ -11,12 +12,14 @@ interface ConnectionContextType extends Connection {
   setApiBase: (url: string) => void;
   setApiKey: (key: string) => void;
   setUsername: (username: string) => void;
+  setDisplayName: (displayName: string) => void;
 }
 
 const DEFAULT: Connection = {
   apiBase: 'https://nohonu.com/api',
   apiKey: '',
   username: '',
+  displayName: '',
 };
 
 function load(): Connection {
@@ -24,10 +27,12 @@ function load(): Connection {
     const apiBase = localStorage.getItem('apiBase');
     const apiKey = localStorage.getItem('apiKey');
     const username = localStorage.getItem('username');
+    const displayName = localStorage.getItem('displayName');
     return {
       apiBase: apiBase ?? DEFAULT.apiBase,
       apiKey: apiKey ?? DEFAULT.apiKey,
       username: username ?? DEFAULT.username,
+      displayName: displayName ?? DEFAULT.displayName,
     };
   } catch {
     /* ignore */
@@ -61,8 +66,15 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, username: u }));
   };
 
+  const setDisplayName = (d: string) => {
+    localStorage.setItem('displayName', d);
+    setConnectionState((prev) => ({ ...prev, displayName: d }));
+  };
+
   return (
-    <ConnectionContext.Provider value={{ ...connection, setConnection, setApiBase, setApiKey, setUsername }}>
+    <ConnectionContext.Provider
+      value={{ ...connection, setConnection, setApiBase, setApiKey, setUsername, setDisplayName }}
+    >
       {children}
     </ConnectionContext.Provider>
   );

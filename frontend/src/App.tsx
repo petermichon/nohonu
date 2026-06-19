@@ -96,6 +96,10 @@ function AppContent() {
                 <Route path="/" element={<Home />} />
                 <Route path="/sites" element={<Sites />} />
                 <Route path="/sites/:domain" element={<SitePage />} />
+                <Route path="/u/:username/:sitename" element={<SitePage />} />
+                <Route path="/u/:username/domains" element={<Domains />} />
+                <Route path="/u/:username/domains/explore" element={<DomainExplore />} />
+                <Route path="/u/:username/servers" element={<Servers />} />
                 <Route path="/domains" element={<Domains />} />
                 <Route path="/domains/explore" element={<DomainExplore />} />
                 <Route path="/servers" element={<Servers />} />
@@ -105,7 +109,7 @@ function AppContent() {
                 <Route path="/legal/terms-of-service" element={<TermsOfService />} />
                 <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
                 <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
-                <Route path="/@:username" element={<UserPage />} />
+                <Route path="/u/:username" element={<UserPage />} />
               </Routes>
             </div>
           </div>
