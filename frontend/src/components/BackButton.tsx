@@ -22,9 +22,9 @@ export function BackButton({
 
   if (isCollapsed && variant === 'sidebar') {
     const baseClassName = 'flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-medium gap-1';
-    const hoverClasses = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100';
-    const disabledClass = `${baseClassName} text-stone-400 dark:text-stone-600 opacity-50`;
-    const enabledClass = `${baseClassName} text-stone-600 dark:text-stone-400 ${hoverClasses}`;
+    const hoverClasses = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100';
+    const disabledClass = `${baseClassName} text-zinc-400 dark:text-zinc-600 opacity-50`;
+    const enabledClass = `${baseClassName} text-zinc-600 dark:text-zinc-400 ${hoverClasses}`;
     const className = disabled ? disabledClass : enabledClass;
 
     if (disabled) {
@@ -47,14 +47,14 @@ export function BackButton({
   const baseClassName =
     variant === 'sidebar'
       ? 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium'
-      : 'inline-flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer';
+      : 'inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer';
 
   if (disabled) {
     return (
       <div className={baseClassName}>
-        <ChevronLeft className="w-4 h-4 shrink-0 text-stone-400 dark:text-stone-600 opacity-50" />
+        <ChevronLeft className="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-600 opacity-50" />
         {variant === 'sidebar' ? (
-          <span className="flex-1 text-center text-stone-600 dark:text-stone-400">{displayLabel}</span>
+          <span className="flex-1 text-center text-zinc-600 dark:text-zinc-400">{displayLabel}</span>
         ) : (
           displayLabel
         )}
@@ -63,9 +63,9 @@ export function BackButton({
     );
   }
 
-  const sidebarHover = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100';
+  const sidebarHover = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100';
   const interactiveClassName =
-    variant === 'sidebar' ? `${baseClassName} text-stone-600 dark:text-stone-400 ${sidebarHover}` : baseClassName;
+    variant === 'sidebar' ? `${baseClassName} text-zinc-600 dark:text-zinc-400 ${sidebarHover}` : baseClassName;
 
   return (
     <Link to={to} className={interactiveClassName}>

@@ -11,8 +11,8 @@ function DomainExplore() {
         <BackButton to="/domains" label="Domains" />
       </div>
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6">
-        <h2 className="text-lg font-medium text-stone-900 dark:text-stone-100 mb-1">Explore Domains</h2>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Search and register new domains</p>
+        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Explore Domains</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Search and register new domains</p>
 
         <div className="mb-6">
           <div className="flex gap-2 mb-3">
@@ -21,7 +21,7 @@ function DomainExplore() {
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               placeholder="example.com"
-              className="flex-1 px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600"
+              className="flex-1 px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-zinc-900 dark:text-zinc-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600"
             />
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -81,7 +81,7 @@ function DomainExplore() {
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-lg bg-[#0FFE9C] hover:bg-[#0DDB7A] text-stone-900 font-medium flex items-center justify-center gap-2 cursor-pointer no-underline"
+              className="px-4 py-2 rounded-lg bg-[#0FFE9C] hover:bg-[#0DDB7A] text-zinc-900 font-medium flex items-center justify-center gap-2 cursor-pointer no-underline"
             >
               <ExternalLink className="w-4 h-4" />
               Search on Gandi
@@ -89,7 +89,7 @@ function DomainExplore() {
           </div>
         </div>
 
-        <p className="text-xs text-stone-400 dark:text-stone-500">
+        <p className="text-xs text-zinc-400 dark:text-zinc-500">
           You will be redirected to the provider's domain search to check availability and register your domain.
         </p>
       </div>

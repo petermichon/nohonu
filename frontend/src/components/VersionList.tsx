@@ -55,12 +55,12 @@ export function VersionList({
                   style={accentStyle ? { color: accentStyle.color } : undefined}
                 />
               ) : (
-                <Clock className="w-4 h-4 shrink-0 text-stone-300 dark:text-stone-600" />
+                <Clock className="w-4 h-4 shrink-0 text-zinc-300 dark:text-zinc-600" />
               )}
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p
-                    className={`text-sm ${isCurrent ? 'font-medium text-stone-800 dark:text-stone-200' : 'text-stone-600 dark:text-stone-400'}`}
+                    className={`text-sm ${isCurrent ? 'font-medium text-zinc-800 dark:text-zinc-200' : 'text-zinc-600 dark:text-zinc-400'}`}
                   >
                     {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -81,14 +81,14 @@ export function VersionList({
                     </Tooltip>
                   ) : v.source?.type === 'upload' ? (
                     <Tooltip content="File upload">
-                      <span className="shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
+                      <span className="shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400">
                         <FileUp className="w-3 h-3" />
                         Upload
                       </span>
                     </Tooltip>
                   ) : null}
                 </div>
-                <span className="text-xs text-stone-400 dark:text-stone-500">
+                <span className="text-xs text-zinc-400 dark:text-zinc-500">
                   {(v.size / 1024).toFixed(1)} KB · {relativeTime(v.createdAt)}
                 </span>
               </div>
@@ -98,7 +98,7 @@ export function VersionList({
                 <button
                   type="button"
                   onClick={() => onDownload(v.index)}
-                  className="p-1.5 text-stone-700 dark:text-stone-300 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
+                  className="p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                 </button>
@@ -108,7 +108,7 @@ export function VersionList({
                   type="button"
                   onClick={() => onDelete(v.index)}
                   disabled={isDeleting || isCurrent}
-                  className={`p-1.5 text-stone-700 dark:text-stone-300 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto disabled:hover:bg-transparent dark:disabled:hover:bg-transparent disabled:hover:text-stone-700 dark:disabled:hover:text-stone-300 ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
+                  className={`p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto disabled:hover:bg-transparent dark:disabled:hover:bg-transparent disabled:hover:text-zinc-700 dark:disabled:hover:text-zinc-300 ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
                 >
                   {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </button>
@@ -118,7 +118,7 @@ export function VersionList({
                   type="button"
                   onClick={() => onActivate(v.index)}
                   disabled={isActivating || isCurrent}
-                  className="ml-1 flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800"
+                  className="ml-1 flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto bg-stone-100 dark:bg-stone-800 text-zinc-700 dark:text-zinc-300 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800"
                 >
                   {isActivating ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

@@ -61,9 +61,9 @@ export function OverviewSection({
           const initial = site.domain[0].toUpperCase();
           const accentStyle = getAccentStyle(accent, site.enabled);
           const baseIconClasses =
-            'shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold select-none overflow-hidden';
-          const enabledIconClasses = 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300';
-          const disabledIconClasses = 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-600';
+            'shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-semibold select-none overflow-hidden';
+          const enabledIconClasses = 'bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-300';
+          const disabledIconClasses = 'bg-stone-100 dark:bg-stone-800 text-zinc-400 dark:text-zinc-600';
           const iconStateClasses = site.enabled ? enabledIconClasses : disabledIconClasses;
           return (
             <div className="flex items-start justify-between gap-4">
@@ -82,11 +82,11 @@ export function OverviewSection({
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100 truncate">{site.domain}</h1>
+                    <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 truncate">{site.domain}</h1>
                     <span
                       className={`shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                         !site.enabled
-                          ? 'bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400'
+                          ? 'bg-stone-200 dark:bg-stone-700 text-zinc-500 dark:text-zinc-400'
                           : accentStyle
                             ? ''
                             : 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300'
@@ -108,15 +108,15 @@ export function OverviewSection({
                       onClick={(e) => !site.enabled && e.preventDefault()}
                       className={`flex items-center gap-1 text-xs ${
                         site.enabled
-                          ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
-                          : 'text-stone-300 dark:text-stone-600 pointer-events-none'
+                          ? 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                          : 'text-zinc-300 dark:text-zinc-600 pointer-events-none'
                       }`}
                     >
                       {site.domain}.{host}
                       {site.enabled && <ExternalLink className="w-3 h-3" />}
                     </a>
                     {totalHits > 0 && (
-                      <span className="flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500">
+                      <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500">
                         <Eye className="w-3 h-3" />
                         {totalHits.toLocaleString()} views
                       </span>
@@ -125,7 +125,7 @@ export function OverviewSection({
                       <span
                         className={`text-xs font-medium ${
                           uptimePct < 90
-                            ? 'text-stone-400 dark:text-stone-500'
+                            ? 'text-zinc-400 dark:text-zinc-500'
                             : accentStyle
                               ? ''
                               : 'text-purple-400 dark:text-purple-300'
@@ -144,7 +144,7 @@ export function OverviewSection({
                   type="button"
                   onClick={onToggle}
                   disabled={actionLoading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 w-24 justify-center bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 w-24 justify-center bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700"
                 >
                   <Power className="w-3.5 h-3.5 shrink-0" />
                   <span className="w-14 text-center">{site.enabled ? 'Disable' : 'Enable'}</span>

@@ -1,21 +1,14 @@
-import { useParams, Link, useLocation } from 'react-router-dom';
-import { User, AlertCircle, Globe, Server } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { User, AlertCircle } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
 
 export default function UserPage() {
   const { username } = useParams<{ username: string }>();
-  const location = useLocation();
   const { sites, loading, error } = useSites();
 
   const userSites = sites.filter((s) => s.account === username);
-
-  const tabs = [
-    { to: `/u/${username}`, label: 'Sites', icon: null },
-    { to: `/u/${username}/domains`, label: 'Domains', icon: Globe },
-    { to: `/u/${username}/servers`, label: 'Servers', icon: Server },
-  ];
 
   return (
     <section className="mb-12">
@@ -23,36 +16,14 @@ export default function UserPage() {
         <BackButton to="/" label="Home" />
       </div>
 
-      {/* Tab navigation */}
-      <div className="flex gap-1 mb-6">
-        {tabs.map((tab) => {
-          const isActive =
-            location.pathname === tab.to || (tab.to !== `/u/${username}` && location.pathname.startsWith(tab.to));
-          return (
-            <Link
-              key={tab.to}
-              to={tab.to}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`}
-            >
-              {tab.icon && <tab.icon className="w-4 h-4" />}
-              {tab.label}
-            </Link>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-2 mb-6">
         <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
-          <User className="w-5 h-5 text-stone-500 dark:text-stone-400" />
+          <User className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
         </div>
         <div>
-          <h1 className="text-base font-semibold text-stone-900 dark:text-stone-100">@{username}</h1>
+          <h1 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">@{username}</h1>
           {!loading && !error && (
-            <p className="text-xs text-stone-500 dark:text-stone-400">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 -mt-1">
               {userSites.length === 1 ? '1 site' : `${userSites.length} sites`}
             </p>
           )}
@@ -68,14 +39,14 @@ export default function UserPage() {
           {error === 'unauthorized' ? (
             <>
               <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Invalid API key</p>
-              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">
+              <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
                 Update your API key in connection settings
               </p>
             </>
           ) : (
             <>
               <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
-              <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
+              <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">Please check if the server is running</p>
             </>
           )}
         </div>
@@ -102,7 +73,7 @@ export default function UserPage() {
       {/* Empty state */}
       {!loading && !error && userSites.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-sm text-stone-500 dark:text-stone-400">No sites published by @{username}</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">No sites published by @{username}</p>
         </div>
       )}
 

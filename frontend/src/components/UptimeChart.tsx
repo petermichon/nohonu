@@ -35,10 +35,10 @@ const CustomTooltip = ({ active, payload, accentStyle }: TooltipProps) => {
     const status = data.up === null ? 'No data' : data.up ? 'Up' : 'Down';
     const statusColor =
       data.up === null
-        ? 'text-stone-400 dark:text-stone-500'
+        ? 'text-zinc-400 dark:text-zinc-500'
         : data.up
           ? accentStyle?.color || 'text-purple-400 dark:text-purple-300'
-          : 'text-stone-600 dark:text-stone-400';
+          : 'text-zinc-600 dark:text-zinc-400';
     return (
       <div className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md whitespace-nowrap">
         <p
@@ -47,7 +47,7 @@ const CustomTooltip = ({ active, payload, accentStyle }: TooltipProps) => {
         >
           {status}
         </p>
-        <p className="text-[10px] text-stone-400 dark:text-stone-500">{data.time}</p>
+        <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{data.time}</p>
       </div>
     );
   }
@@ -126,7 +126,7 @@ export function UptimeChart({
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 mt-3">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-medium text-stone-700 dark:text-stone-300">Uptime</h2>
+          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Uptime</h2>
           {pct !== null && (
             <span
               className={`text-xs font-medium px-2 py-0.5 rounded-full ${accentStyle ? '' : 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300'}`}
@@ -145,8 +145,8 @@ export function UptimeChart({
                 onClick={() => onRangeChange(r)}
                 className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
                   range === r
-                    ? 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 shadow-sm'
-                    : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400'
+                    ? 'bg-white dark:bg-stone-700 text-zinc-700 dark:text-zinc-200 shadow-sm'
+                    : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-400'
                 }`}
               >
                 {RANGE_LABELS[r]}
@@ -157,7 +157,7 @@ export function UptimeChart({
             type="button"
             onClick={onReload}
             disabled={reloading}
-            className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50"
+            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${reloading ? 'animate-spin' : ''}`} />
           </button>
@@ -177,8 +177,8 @@ export function UptimeChart({
         </ResponsiveContainer>
       </div>
       <div className="flex justify-between mt-2">
-        <span className="text-xs text-stone-400 dark:text-stone-500">{RANGE_LABELS[range]}/bar</span>
-        <span className="text-xs text-stone-400 dark:text-stone-500">now</span>
+        <span className="text-xs text-zinc-400 dark:text-zinc-500">{RANGE_LABELS[range]}/bar</span>
+        <span className="text-xs text-zinc-400 dark:text-zinc-500">now</span>
       </div>
     </div>
   );

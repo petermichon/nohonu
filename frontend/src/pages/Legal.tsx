@@ -39,8 +39,8 @@ export default function Legal() {
       <BackButton to="/" label="Home" variant="inline" />
 
       <div>
-        <h1 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">Legal</h1>
-        <p className="text-sm text-stone-500 dark:text-stone-400">
+        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Legal</h1>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Review our policies and terms governing the use of Nohonu.
         </p>
       </div>
@@ -53,17 +53,17 @@ export default function Legal() {
             className="flex items-start gap-4 p-5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl hover:border-stone-300 dark:hover:border-stone-700"
           >
             <div className="shrink-0 w-10 h-10 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-stone-500 dark:text-stone-400" />
+              <Icon className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100 mb-1">{label}</h2>
-              <p className="text-xs text-stone-500 dark:text-stone-400">{description}</p>
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{label}</h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
             </div>
           </Link>
         ))}
       </div>
 
-      <div className="text-center text-xs text-stone-400 dark:text-stone-500 py-8">
+      <div className="text-center text-xs text-zinc-400 dark:text-zinc-500 py-8">
         &copy; {new Date().getFullYear()} Nohonu. All rights reserved.
       </div>
 

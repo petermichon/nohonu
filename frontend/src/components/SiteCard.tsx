@@ -48,8 +48,8 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
     : 'bg-stone-50/70 dark:bg-stone-900/40 border-stone-200/60 dark:border-stone-800/40';
 
   const iconBgClass = site.enabled
-    ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
-    : 'bg-stone-100 dark:bg-stone-800/60 text-stone-400 dark:text-stone-600';
+    ? 'bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-300'
+    : 'bg-stone-100 dark:bg-stone-800/60 text-zinc-400 dark:text-zinc-600';
 
   const handleCardClick = (e: { target: EventTarget | null }) => {
     if (!(e.target as HTMLElement).closest('button, a')) navigate(`/sites/${site.domain}`);
@@ -90,7 +90,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <h3
             className={`text-sm font-semibold truncate ${
-              site.enabled ? 'text-stone-900 dark:text-stone-100' : 'text-stone-500 dark:text-stone-400'
+              site.enabled ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'
             }`}
           >
             {site.domain}
@@ -98,7 +98,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
           <span
             className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full tracking-wide ${
               !site.enabled
-                ? 'bg-stone-200 dark:bg-stone-800 text-stone-500'
+                ? 'bg-stone-200 dark:bg-stone-800 text-zinc-500'
                 : accentStyle
                   ? ''
                   : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300'
@@ -115,8 +115,8 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
           onClick={(e) => !site.enabled && e.preventDefault()}
           className={`text-xs truncate block ${
             site.enabled
-              ? 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
-              : 'text-stone-400/60 dark:text-stone-600 pointer-events-none'
+              ? 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'
+              : 'text-zinc-400/60 dark:text-zinc-600 pointer-events-none'
           }`}
         >
           {siteUrl}
@@ -126,7 +126,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
       {/* Stats */}
       <div className="hidden sm:flex items-center gap-4 shrink-0">
         {site.hits > 0 && (
-          <span className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
+          <span className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
             <Eye className="w-3.5 h-3.5" />
             {formatHits(site.hits)}
           </span>
@@ -166,8 +166,8 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
             onClick={(e) => !site.enabled && e.preventDefault()}
             className={`p-1.5 rounded-lg ${
               site.enabled
-                ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
-                : 'text-stone-300 dark:text-stone-700'
+                ? 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-stone-100 dark:hover:bg-stone-800'
+                : 'text-zinc-300 dark:text-zinc-700'
             }`}
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -176,7 +176,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
 
         {isLoading ? (
           <div className="p-1.5">
-            <Loader2 className="w-3.5 h-3.5 text-stone-400 animate-spin" />
+            <Loader2 className="w-3.5 h-3.5 text-zinc-400 animate-spin" />
           </div>
         ) : (
           <Tooltip content={site.enabled ? 'Disable site' : 'Enable site'}>
@@ -188,8 +188,8 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
               }}
               className={`p-1.5 rounded-lg cursor-pointer ${
                 site.enabled
-                  ? 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
-                  : 'text-stone-400 dark:text-stone-600 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  ? 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  : 'text-zinc-400 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
               <Power className="w-3.5 h-3.5" />

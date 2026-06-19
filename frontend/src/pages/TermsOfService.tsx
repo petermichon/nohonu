@@ -6,13 +6,13 @@ export default function TermsOfService() {
       <BackButton to="/legal" label="Legal" variant="inline" />
 
       <div>
-        <h1 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">Terms of Service</h1>
-        <p className="text-sm text-stone-400 dark:text-stone-500">Last updated: June 3, 2026</p>
+        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Terms of Service</h1>
+        <p className="text-sm text-zinc-400 dark:text-zinc-500">Last updated: June 3, 2026</p>
       </div>
 
-      <div className="space-y-8 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+      <div className="space-y-8 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
         <section id="acceptance">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">1. Acceptance of Terms</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">1. Acceptance of Terms</h2>
           <p>
             By accessing or using the Nohonu platform ("Service"), you agree to be bound by these Terms of Service
             ("Terms"). If you do not agree to these Terms, you may not use the Service.
@@ -20,7 +20,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="description">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">2. Description of Service</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">2. Description of Service</h2>
           <p>
             Nohonu provides a web deployment and hosting platform that allows users to deploy, manage, and monitor
             websites and web applications. We reserve the right to modify, suspend, or discontinue any part of the
@@ -29,7 +29,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="accounts">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">3. User Accounts</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">3. User Accounts</h2>
           <p className="mb-3">
             You must be at least 13 years old to use the Service. By creating an account, you represent that you meet
             this age requirement and agree to:
@@ -43,7 +43,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="acceptable-use">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">4. Acceptable Use</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">4. Acceptable Use</h2>
           <p className="mb-3">You agree not to use the Service to:</p>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>Violate any applicable laws or regulations.</li>
@@ -59,7 +59,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="content">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">5. Your Content</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">5. Your Content</h2>
           <p>
             You retain ownership of all content you upload or deploy through the Service. By using the Service, you
             grant us a limited license to host, store, and serve your content as necessary to provide the Service. You
@@ -69,7 +69,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="payment">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">6. Payment and Billing</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">6. Payment and Billing</h2>
           <p>
             Certain features of the Service may require payment. By selecting a paid plan, you agree to pay all
             applicable fees. Fees are non-refundable unless otherwise stated. We may change pricing with reasonable
@@ -78,7 +78,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="availability">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">7. Service Availability</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">7. Service Availability</h2>
           <p>
             We strive to maintain high availability but do not guarantee uninterrupted access to the Service. We may
             perform scheduled or emergency maintenance that temporarily affects availability. We are not liable for any
@@ -87,7 +87,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="liability">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">8. Limitation of Liability</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">8. Limitation of Liability</h2>
           <p>
             To the maximum extent permitted by law, Nohonu shall not be liable for any indirect, incidental, special,
             consequential, or punitive damages, including but not limited to loss of profits, data, or business
@@ -97,7 +97,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="indemnification">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">9. Indemnification</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">9. Indemnification</h2>
           <p>
             You agree to indemnify and hold harmless Nohonu, its officers, employees, and agents from any claims,
             damages, losses, or expenses (including legal fees) arising from your use of the Service, your content, or
@@ -106,7 +106,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="termination">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">10. Termination</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">10. Termination</h2>
           <p>
             Either party may terminate this agreement at any time. You may close your account through the account
             settings. We may suspend or terminate your account if you violate these Terms. Upon termination, your right
@@ -116,7 +116,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="changes">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">11. Changes to These Terms</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">11. Changes to These Terms</h2>
           <p>
             We may update these Terms from time to time. We will notify you of material changes by posting the revised
             Terms on this page and updating the "Last updated" date. Continued use of the Service after changes
@@ -125,7 +125,7 @@ export default function TermsOfService() {
         </section>
 
         <section id="governing-law">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">12. Governing Law</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">12. Governing Law</h2>
           <p>
             These Terms shall be governed by and construed in accordance with the laws of France. Any disputes arising
             from these Terms shall be subject to the exclusive jurisdiction of the competent courts of France.
@@ -133,12 +133,12 @@ export default function TermsOfService() {
         </section>
 
         <section id="contact">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3">13. Contact Us</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">13. Contact Us</h2>
           <p>
             If you have any questions about these Terms, please contact us at{' '}
             <a
               href="mailto:legal@nohonu.com"
-              className="text-stone-900 dark:text-stone-100 underline underline-offset-2 hover:text-stone-700 dark:hover:text-stone-300"
+              className="text-zinc-900 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               legal@nohonu.com
             </a>

@@ -29,8 +29,8 @@ export function NavButton({
 }: NavButtonProps) {
   const className = `flex items-center justify-between gap-3 px-3 rounded-lg text-sm font-medium cursor-pointer ${
     isActive
-      ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'
-      : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
+      ? 'bg-stone-100 dark:bg-stone-800 text-zinc-900 dark:text-zinc-100'
+      : 'text-zinc-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100'
   } ${isCollapsed ? 'flex-col justify-center py-3 gap-1' : ''}`;
 
   const renderIcon = () => {
@@ -45,7 +45,7 @@ export function NavButton({
           {!hasIconError ? (
             <img src={iconUrl} alt="" className="w-3 h-3 object-contain" onError={onIconError} />
           ) : (
-            <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">{initial}</span>
+            <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">{initial}</span>
           )}
         </div>
       );

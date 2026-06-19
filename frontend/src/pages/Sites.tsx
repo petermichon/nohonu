@@ -61,18 +61,18 @@ function Sites() {
           <BackButton to="/" label="Home" />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h1 className="text-base font-semibold text-stone-900 dark:text-stone-100">Sites</h1>
+              <h1 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Sites</h1>
               <div className="flex items-center gap-1.5">
                 {error || sites.length === 0 ? (
                   <div className="w-12 h-5" />
                 ) : (
                   <>
-                    <span className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
+                    <span className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block" />
                       {stats.enabled}
                     </span>
                     {stats.disabled > 0 && (
-                      <span className="flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500">
+                      <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500">
                         <span className="w-1.5 h-1.5 rounded-full bg-stone-400 dark:bg-stone-600 inline-block" />
                         {stats.disabled}
                       </span>
@@ -84,7 +84,7 @@ function Sites() {
 
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
                 <input
                   type="text"
                   id="siteSearch"
@@ -93,7 +93,7 @@ function Sites() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter..."
                   disabled={loading || !!error || sites.length === 0}
-                  className="w-32 sm:w-40 pl-8 pr-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600 disabled:opacity-50"
+                  className="w-32 sm:w-40 pl-8 pr-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -109,18 +109,18 @@ function Sites() {
             {error === 'unauthorized' ? (
               <>
                 <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Invalid API key</p>
-                <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">
+                <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
                   Update your API key in connection settings
                 </p>
               </>
             ) : (
               <>
                 <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
-                <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Please check if the server is running</p>
+                <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">Please check if the server is running</p>
                 <button
                   type="button"
                   onClick={refreshSites}
-                  className="mt-3 px-3 py-1.5 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-lg hover:bg-stone-700 dark:hover:bg-stone-300"
+                  className="mt-3 px-3 py-1.5 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-zinc-900 rounded-lg hover:bg-stone-700 dark:hover:bg-stone-300"
                 >
                   Retry
                 </button>
@@ -196,11 +196,11 @@ function Sites() {
             {/* Empty state for search */}
             {!loading && filteredSites.length === 0 && searchQuery && (
               <div className="text-center py-12 mt-4">
-                <p className="text-sm text-stone-500 dark:text-stone-400">No sites match "{searchQuery}"</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">No sites match "{searchQuery}"</p>
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 mt-1"
+                  className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 mt-1"
                 >
                   Clear filter
                 </button>

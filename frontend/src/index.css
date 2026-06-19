@@ -5,6 +5,9 @@
 @import '@fontsource/noto-sans-mono/400.css';
 @import '@fontsource/noto-sans-mono/500.css';
 @import '@fontsource/noto-sans-mono/700.css';
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/500.css';
+@import '@fontsource/outfit/700.css';
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
@@ -53,6 +56,9 @@
 @import '@fontsource/figtree/500.css';
 @import '@fontsource/figtree/600.css';
 @import '@fontsource/figtree/700.css';
+@import '@fontsource/geist/400.css';
+@import '@fontsource/geist/500.css';
+@import '@fontsource/geist/700.css';
 @import '@fontsource/expletus-sans/400.css';
 @import '@fontsource/expletus-sans/500.css';
 @import '@fontsource/expletus-sans/600.css';
@@ -195,6 +201,22 @@ html.dark {
 .dark .sidebar-animate-right:not(.animation-complete) button,
 .dark .sidebar-animate-left:not(.animation-complete) button {
   color: #a8a29e !important;
+}
+
+/* Dropdown animation */
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-animate {
+  animation: dropdownFadeIn 0.1s ease-out;
 }
 
 .chart-scrollbar::-webkit-scrollbar {

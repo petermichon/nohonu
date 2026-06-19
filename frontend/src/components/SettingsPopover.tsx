@@ -110,19 +110,19 @@ export function SettingsPopover() {
           setKeyStatus('idle');
           setOpen((o) => !o);
         }}
-        className="p-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
+        className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
         title="Connection settings"
       >
         <Settings className="w-5 h-5" />
       </button>
       {open && (
         <div className="absolute right-0 top-10 w-80 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl shadow-lg p-4 z-50">
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
             Connection
           </p>
           <div className="grid gap-3">
             <div>
-              <label htmlFor="popoverApiUrl" className="text-xs text-stone-500 dark:text-stone-400 mb-1 block">
+              <label htmlFor="popoverApiUrl" className="text-xs text-zinc-500 dark:text-zinc-400 mb-1 block">
                 API URL
               </label>
               <div className="flex gap-2">
@@ -136,13 +136,13 @@ export function SettingsPopover() {
                     setUrlStatus('idle');
                   }}
                   placeholder="https://localhost/api"
-                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
                 />
                 <button
                   type="button"
                   onClick={saveUrl}
                   disabled={urlStatus === 'checking'}
-                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-stone-900 rounded-lg cursor-pointer disabled:cursor-auto"
+                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-900 rounded-lg cursor-pointer disabled:cursor-auto"
                 >
                   {urlStatus === 'checking' ? '…' : urlStatus === 'valid' ? '✓' : 'Save'}
                 </button>
@@ -152,7 +152,7 @@ export function SettingsPopover() {
               )}
             </div>
             <div>
-              <label htmlFor="popoverApiKey" className="text-xs text-stone-500 dark:text-stone-400 mb-1 block">
+              <label htmlFor="popoverApiKey" className="text-xs text-zinc-500 dark:text-zinc-400 mb-1 block">
                 API Key
               </label>
               <div className="flex gap-2">
@@ -167,13 +167,13 @@ export function SettingsPopover() {
                     setKeyStatus('idle');
                   }}
                   placeholder="Leave empty if not set"
-                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
                 />
                 <button
                   type="button"
                   onClick={saveKey}
                   disabled={keyStatus === 'checking'}
-                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-stone-900 rounded-lg cursor-pointer disabled:cursor-auto"
+                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-900 rounded-lg cursor-pointer disabled:cursor-auto"
                 >
                   {keyStatus === 'checking' ? '…' : keyStatus === 'valid' || keyStatus === 'open' ? '✓' : 'Save'}
                 </button>
@@ -182,10 +182,10 @@ export function SettingsPopover() {
                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">{keyStatusMsg[keyStatus]}</p>
               )}
               {isServerOpen && (
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Server has no API key — open access</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no API key — open access</p>
               )}
               {!isServerOpen && apiBase && (
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Server requires an API key</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires an API key</p>
               )}
             </div>
           </div>

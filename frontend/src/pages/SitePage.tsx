@@ -166,10 +166,10 @@ function SitePage() {
         <div className="w-12 h-12 bg-purple-200 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
           <AlertCircle className="w-6 h-6 text-purple-500 dark:text-purple-400" />
         </div>
-        <p className="text-stone-700 dark:text-stone-300 text-sm font-medium">Site not found</p>
+        <p className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Site not found</p>
         <Link
           to="/sites"
-          className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 mt-2 inline-block"
+          className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 mt-2 inline-block"
         >
           Back to sites
         </Link>

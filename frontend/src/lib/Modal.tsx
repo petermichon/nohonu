@@ -30,11 +30,11 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className={modalClasses} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium text-stone-900 dark:text-stone-100">{title}</h2>
+          <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
+            className="p-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-stone-200 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

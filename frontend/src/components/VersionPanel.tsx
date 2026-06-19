@@ -117,17 +117,17 @@ export function VersionPanel({
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 mt-3">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
+        <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
           Versions
           {versions.length > 0 && (
-            <span className="flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400">
+            <span className="flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-zinc-500 dark:text-zinc-400">
               <History className="w-3 h-3" />
               {versions.length} versions
             </span>
           )}
         </h2>
         <div className="flex items-center gap-2">
-          {versionsLoading && <Loader2 className="w-3 h-3 text-stone-400 animate-spin" />}
+          {versionsLoading && <Loader2 className="w-3 h-3 text-zinc-400 animate-spin" />}
           <button
             type="button"
             onClick={() => {
@@ -140,7 +140,7 @@ export function VersionPanel({
                 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto';
               const activeClasses = 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300';
               const inactiveClasses =
-                'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800';
+                'bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800';
               const stateClasses = showGithubFetch ? activeClasses : inactiveClasses;
               return `${baseClasses} ${stateClasses} disabled:opacity-50`;
             })()}
@@ -151,8 +151,8 @@ export function VersionPanel({
           <label
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer ${
               uploading
-                ? 'text-stone-400 dark:text-stone-500'
-                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800'
+                ? 'text-zinc-400 dark:text-zinc-500'
+                : 'bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800'
             }`}
           >
             {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
@@ -186,11 +186,11 @@ export function VersionPanel({
                 onChange={(e) => setGithubRepo(e.target.value)}
                 onFocus={() => repoHistory.length > 0 && setShowRepoDropdown(true)}
                 placeholder="owner/repo"
-                className="w-full px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                className="w-full px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
               />
               {showRepoDropdown && repoHistory.length > 0 && (
                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg py-1 max-h-48 overflow-auto">
-                  <div className="px-3 py-1.5 text-xs text-stone-400 dark:text-stone-500 border-b border-stone-100 dark:border-stone-700">
+                  <div className="px-3 py-1.5 text-xs text-zinc-400 dark:text-zinc-500 border-b border-stone-100 dark:border-stone-700">
                     Recent
                   </div>
                   {repoHistory.map((entry, i) => (
@@ -204,11 +204,11 @@ export function VersionPanel({
                       }}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-stone-100 dark:hover:bg-stone-700 flex items-center justify-between"
                     >
-                      <span className="text-stone-900 dark:text-stone-100">
+                      <span className="text-zinc-900 dark:text-zinc-100">
                         {entry.repo}
-                        <span className="text-stone-400 dark:text-stone-500 ml-2">@{entry.branch}</span>
+                        <span className="text-zinc-400 dark:text-zinc-500 ml-2">@{entry.branch}</span>
                       </span>
-                      <span className="text-xs text-stone-400">{new Date(entry.lastUsed).toLocaleDateString()}</span>
+                      <span className="text-xs text-zinc-400">{new Date(entry.lastUsed).toLocaleDateString()}</span>
                     </button>
                   ))}
                 </div>
@@ -221,7 +221,7 @@ export function VersionPanel({
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
-              className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
+              className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
             />
             <button
               type="button"
@@ -241,7 +241,7 @@ export function VersionPanel({
         <div className="absolute inset-0 overflow-y-auto">
           {versions.length === 0 ? (
             <div className="h-full flex items-center justify-center">
-              <p className="text-sm text-stone-400 dark:text-stone-500">No versions yet</p>
+              <p className="text-sm text-zinc-400 dark:text-zinc-500">No versions yet</p>
             </div>
           ) : (
             <VersionList

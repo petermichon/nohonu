@@ -25,6 +25,7 @@ export type Font =
   | 'courier-new'
   | 'consolas'
   | 'oswald'
+  | 'outfit'
   | 'times-new-roman'
   | 'pt-sans'
   | 'raleway'
@@ -39,6 +40,7 @@ export type Font =
   | 'atkinson'
   | 'iceland'
   | 'figtree'
+  | 'geist'
   | 'expletus-sans';
 
 export const fontNames: Partial<Record<Font, string>> = {
@@ -61,6 +63,7 @@ export const fontNames: Partial<Record<Font, string>> = {
   atkinson: 'Atkinson Hyperlegible',
   iceland: 'Iceland',
   figtree: 'Figtree',
+  geist: 'Geist',
   'expletus-sans': 'Expletus Sans',
 };
 
@@ -85,6 +88,7 @@ const fontFamilies: Record<Font, string> = {
   'courier-new': "'Courier New'",
   consolas: "'Consolas'",
   oswald: "'Oswald'",
+  outfit: "'Outfit'",
   'times-new-roman': "'Times New Roman'",
   'pt-sans': "'PT Sans'",
   raleway: "'Raleway'",
@@ -99,6 +103,7 @@ const fontFamilies: Record<Font, string> = {
   atkinson: "'Atkinson Hyperlegible'",
   iceland: "'Iceland'",
   figtree: "'Figtree'",
+  geist: "'Geist'",
   'expletus-sans': "'Expletus Sans'",
   'sans-serif': 'sans-serif',
   serif: 'serif',

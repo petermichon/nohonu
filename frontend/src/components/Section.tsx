@@ -18,10 +18,10 @@ export function Section({ id, icon: Icon, title, children, container = true, dan
     <div id={id} className="mt-6">
       <div className="flex items-center gap-2 mb-3">
         <Icon
-          className={`w-4 h-4 ${danger ? 'text-red-500 dark:text-red-400' : 'text-stone-500 dark:text-stone-400'}`}
+          className={`w-4 h-4 ${danger ? 'text-red-500 dark:text-red-400' : 'text-zinc-500 dark:text-zinc-400'}`}
         />
         <h2
-          className={`text-sm font-medium ${danger ? 'text-red-900 dark:text-red-100' : 'text-stone-700 dark:text-stone-300'}`}
+          className={`text-sm font-medium ${danger ? 'text-red-900 dark:text-red-100' : 'text-zinc-700 dark:text-zinc-300'}`}
         >
           {title}
         </h2>

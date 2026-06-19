@@ -18,14 +18,14 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
   return (
     <Section id="actions" icon={SECTION_MAP['actions'].icon} title={SECTION_MAP['actions'].label} danger>
       <div>
-        <div className="text-xs text-stone-700 dark:text-stone-300 flex items-center justify-between">
+        <div className="text-xs text-zinc-700 dark:text-zinc-300 flex items-center justify-between">
           <span>
             {site?.enabled
               ? 'You must disable the site before deleting it.'
               : 'Enable the toggle to access deletion options.'}
           </span>
           <label htmlFor="allowDeletion" className="flex items-center gap-2 cursor-pointer">
-            <span className="text-xs text-stone-700 dark:text-stone-300">Enable</span>
+            <span className="text-xs text-zinc-700 dark:text-zinc-300">Enable</span>
             <div className="relative">
               <input
                 type="checkbox"
@@ -46,7 +46,7 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
       >
         <div>
           <div className="flex items-center justify-between gap-4">
-            <p className="text-xs text-stone-700 dark:text-stone-300">
+            <p className="text-xs text-zinc-700 dark:text-zinc-300">
               Deleting a site is permanent and cannot be undone. All data, including versions and statistics, will be
               permanently removed.
             </p>
@@ -61,7 +61,7 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
             </button>
           </div>
           {site?.enabled && (
-            <p className="text-xs text-stone-700 dark:text-stone-300 mt-2">Site must be disabled first</p>
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 mt-2">Site must be disabled first</p>
           )}
         </div>
       </div>

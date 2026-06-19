@@ -12,7 +12,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const accentStyle = getAccentStyle(site.accent, site.enabled);
 
   const badgeClass = !site.enabled
-    ? 'bg-stone-200 dark:bg-stone-800 text-stone-500'
+    ? 'bg-stone-200 dark:bg-stone-800 text-zinc-500'
     : accentStyle
       ? ''
       : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300';
@@ -36,7 +36,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
       <div className="p-3 space-y-2">
         {/* Row 1: domain + badge */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate flex-1">
+          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate flex-1">
             {site.domain}
           </span>
           <span
@@ -56,7 +56,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
           }}
           disabled={!site.account}
           title={site.account ? `View @${site.account}'s sites` : 'No account'}
-          className={`flex items-center gap-1 text-xs ${site.account ? 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 cursor-pointer' : 'text-stone-300 dark:text-stone-700 cursor-default'}`}
+          className={`flex items-center gap-1 text-xs ${site.account ? 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer' : 'text-zinc-300 dark:text-zinc-700 cursor-default'}`}
         >
           <User className="w-3 h-3" />
           <span>{site.account ?? 'Guest'}</span>

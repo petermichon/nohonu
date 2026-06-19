@@ -130,25 +130,25 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
               onClick={() => setShowDnsInstructions(!showDnsInstructions)}
               className="flex items-center justify-between w-full text-left"
             >
-              <span className="text-xs font-medium text-stone-700 dark:text-stone-300">DNS Setup Instructions</span>
-              <span className="text-xs text-stone-400 dark:text-stone-500">
+              <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">DNS Setup Instructions</span>
+              <span className="text-xs text-zinc-400 dark:text-zinc-500">
                 {showDnsInstructions ? 'Hide' : 'Show'}
               </span>
             </button>
             {showDnsInstructions && (
               <div className="mt-3 space-y-2 text-xs">
                 <div className="p-2 rounded bg-stone-100 dark:bg-stone-800">
-                  <p className="font-medium text-stone-700 dark:text-stone-300 mb-1">TXT Record (for verification):</p>
-                  <code className="block text-stone-600 dark:text-stone-400 break-all">
+                  <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">TXT Record (for verification):</p>
+                  <code className="block text-zinc-600 dark:text-zinc-400 break-all">
                     _nohonu.{newCustomDomain || 'example.com'} → {verificationToken}
                   </code>
                 </div>
                 <div className="p-2 rounded bg-stone-100 dark:bg-stone-800">
-                  <p className="font-medium text-stone-700 dark:text-stone-300 mb-1">CNAME Record (or A Record):</p>
-                  <code className="block text-stone-600 dark:text-stone-400">
+                  <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">CNAME Record (or A Record):</p>
+                  <code className="block text-zinc-600 dark:text-zinc-400">
                     {newCustomDomain || 'example.com'} → {host}
                   </code>
-                  <p className="mt-1 text-stone-500 dark:text-stone-500">Or A record to your server IP</p>
+                  <p className="mt-1 text-zinc-500 dark:text-zinc-500">Or A record to your server IP</p>
                 </div>
               </div>
             )}
@@ -162,14 +162,14 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             value={newCustomDomain}
             onChange={(e) => setNewCustomDomain(e.target.value)}
             placeholder="example.com"
-            className="flex-1 px-3 py-2 rounded-lg text-sm bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="flex-1 px-3 py-2 rounded-lg text-sm bg-stone-100 dark:bg-stone-800 text-zinc-900 dark:text-zinc-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
             disabled={addingCustomDomain}
           />
           <button
             type="button"
             onClick={addCustomDomain}
             disabled={addingCustomDomain || !newCustomDomain.trim()}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700"
           >
             <Plus className="w-3.5 h-3.5" />
             Add
@@ -183,7 +183,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             <div className="h-10 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
           </div>
         ) : customDomains.length === 0 ? (
-          <p className="text-xs text-stone-400 dark:text-stone-500">No custom domains configured</p>
+          <p className="text-xs text-zinc-400 dark:text-zinc-500">No custom domains configured</p>
         ) : (
           <div className="space-y-2">
             {customDomains.map((cd) => (
@@ -192,7 +192,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
                 className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-stone-50 dark:bg-stone-900/50"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm text-stone-700 dark:text-stone-300 truncate">{cd.domain}</span>
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300 truncate">{cd.domain}</span>
                   <span
                     className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                       cd.verified
@@ -209,7 +209,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
                       type="button"
                       onClick={() => verifyCustomDomain(cd.domain)}
                       disabled={verifyingDomain === cd.domain}
-                      className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-50"
+                      className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-50"
                       title="Verify domain"
                     >
                       <Check className="w-3.5 h-3.5" />
@@ -219,7 +219,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
                     type="button"
                     onClick={() => deleteCustomDomain(cd.domain)}
                     disabled={deletingDomain === cd.domain}
-                    className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
+                    className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
                     title="Remove domain"
                   >
                     <X className="w-3.5 h-3.5" />
