@@ -40,6 +40,7 @@ export type Font =
   | 'atkinson'
   | 'iceland'
   | 'figtree'
+  | 'epilogue'
   | 'geist'
   | 'expletus-sans';
 
@@ -63,6 +64,7 @@ export const fontNames: Partial<Record<Font, string>> = {
   atkinson: 'Atkinson Hyperlegible',
   iceland: 'Iceland',
   figtree: 'Figtree',
+  epilogue: 'Epilogue',
   geist: 'Geist',
   'expletus-sans': 'Expletus Sans',
 };
@@ -103,6 +105,7 @@ const fontFamilies: Record<Font, string> = {
   atkinson: "'Atkinson Hyperlegible'",
   iceland: "'Iceland'",
   figtree: "'Figtree'",
+  epilogue: "'Epilogue'",
   geist: "'Geist'",
   'expletus-sans': "'Expletus Sans'",
   'sans-serif': 'sans-serif',

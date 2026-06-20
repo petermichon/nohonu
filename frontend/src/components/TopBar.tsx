@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, MoreVertical, Sun, Moon, Languages, Check, ChevronLeft, LogIn, Type, Scale, Info } from 'lucide-react';
+import { User, MoreVertical, Sun, Moon, Languages, Check, ChevronLeft, Type, Scale, Info } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
@@ -172,6 +172,7 @@ export function TopBar() {
       { value: 'atkinson', label: 'Atkinson Hyperlegible' },
       { value: 'iceland', label: 'Iceland' },
       { value: 'figtree', label: 'Figtree' },
+      { value: 'epilogue', label: 'Epilogue' },
       { value: 'geist', label: 'Geist' },
       { value: 'expletus-sans', label: 'Expletus Sans' },
       { value: 'jetbrains-mono', label: 'JetBrains Mono', divider: true },
@@ -196,7 +197,7 @@ export function TopBar() {
   }));
 
   return (
-    <header className="h-16 shrink-0 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50 dark:bg-zinc-950 backdrop-blur-md sticky top-0 z-30">
+    <header className="h-16 shrink-0 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
       <div className="h-full flex items-center justify-between gap-2 max-w-7xl mx-auto px-3 sm:px-6">
         <div className="flex items-center">
           <Link to="/" className="flex items-center gap-2">
@@ -231,6 +232,12 @@ export function TopBar() {
               className={`flex items-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/servers') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
               Servers
+            </Link>
+            <Link
+              to="/docs"
+              className={`flex items-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${location.pathname === '/docs' ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+            >
+              Docs
             </Link>
           </div>
         </div>
@@ -347,67 +354,60 @@ export function TopBar() {
               </div>
             )}
           </div>
-          <div className="relative" ref={profileRef}>
-            <div
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0 cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors select-none"
-            >
-              <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-            </div>
-            {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto dropdown-animate">
-                <div className="flex items-start gap-2 px-3 py-2 mb-1">
-                  <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{userName}</span>
-                    {username && <span className="text-sm text-zinc-500 dark:text-zinc-400 -mt-1">{username}</span>}
-                  </div>
-                </div>
-                <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
-                <div className="flex flex-col gap-0.5">
-                  {profileOptions.map(({ to, label }) => (
-                    <Link
-                      key={to}
-                      to={to}
-                      onClick={() => {
-                        setIsProfileOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50"
-                    >
-                      {label === 'Account' && <User className="w-4 h-4" />}
-                      <span>{label}</span>
-                    </Link>
-                  ))}
-                </div>
-                <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
-                <Link
-                  to="/account"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50 cursor-pointer"
-                >
-                  <LogIn className="w-4 h-4" /> <span>Sign in</span>
-                </Link>
+          {username ? (
+            <div className="relative" ref={profileRef}>
+              <div
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0 cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors select-none"
+              >
+                <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
               </div>
-            )}
-          </div>
-          <div className="flex items-center gap-3 h-9 hidden sm:flex">
-            <Link
-              to="/account"
-              className="px-4 h-full rounded-full text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
-            >
-              Log in
-            </Link>
-            <button
-              type="button"
-              className="px-4 h-full rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap"
-            >
-              Deploy
-            </button>
-          </div>
+              {isProfileOpen && (
+                <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto dropdown-animate">
+                  <div className="flex items-start gap-2 px-3 py-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{userName}</span>
+                      {username && <span className="text-sm text-zinc-500 dark:text-zinc-400 -mt-1">{username}</span>}
+                    </div>
+                  </div>
+                  <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
+                  <div className="flex flex-col gap-0.5">
+                    {profileOptions.map(({ to, label }) => (
+                      <Link
+                        key={to}
+                        to={to}
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50"
+                      >
+                        {label === 'Account' && <User className="w-4 h-4" />}
+                        <span>{label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 h-9 hidden sm:flex">
+              <Link
+                to="/account"
+                className="px-4 h-full rounded-full text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
+              >
+                Log in
+              </Link>
+              <button
+                type="button"
+                className="px-4 h-full rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap"
+              >
+                Deploy
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

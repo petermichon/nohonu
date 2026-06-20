@@ -2,7 +2,7 @@ import { BackButton } from '../components/BackButton.tsx';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-6">
       <BackButton to="/legal" label="Legal" variant="inline" />
 
       <div>
@@ -36,8 +36,8 @@ export default function PrivacyPolicy() {
               operating system, and device information collected automatically.
             </li>
             <li>
-              <strong className="text-zinc-700 dark:text-zinc-300">Deployed Content</strong> — files and data you
-              upload or deploy through our platform.
+              <strong className="text-zinc-700 dark:text-zinc-300">Deployed Content</strong> — files and data you upload
+              or deploy through our platform.
             </li>
           </ul>
         </section>

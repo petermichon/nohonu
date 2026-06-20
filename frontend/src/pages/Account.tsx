@@ -115,7 +115,7 @@ export default function Account() {
   };
 
   return (
-    <div>
+    <div className="px-6">
       <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Account</h1>
 
       <Section id="profile" icon={User} title="Profile">

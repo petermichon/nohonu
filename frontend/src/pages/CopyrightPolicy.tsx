@@ -2,7 +2,7 @@ import { BackButton } from '../components/BackButton.tsx';
 
 export default function CopyrightPolicy() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-6">
       <BackButton to="/legal" label="Legal" variant="inline" />
 
       <div>

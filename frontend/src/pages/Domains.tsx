@@ -82,7 +82,7 @@ function Domains() {
   };
 
   return (
-    <section className="mb-12">
+    <section className="mb-12 px-6">
       <div className="mb-5">
         <BackButton to={isUserScoped ? `/u/${username}` : '/'} label={isUserScoped ? 'User' : 'Home'} />
       </div>

@@ -35,7 +35,7 @@ export default function Legal() {
   const LEGAL_PAGES = getLegalPages(resolvedLanguage);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-6">
       <BackButton to="/" label="Home" variant="inline" />
 
       <div>

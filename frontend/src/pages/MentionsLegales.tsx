@@ -5,7 +5,7 @@ export default function MentionsLegales() {
   const { resolvedLanguage } = useLanguage();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-6">
       <BackButton to="/legal" label="Legal" variant="inline" />
 
       <div>
