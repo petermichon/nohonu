@@ -223,6 +223,26 @@ html.dark {
   animation: dropdownFadeIn 0.1s ease-out;
 }
 
+/* Fade-in animation for hero title */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-fade-in-delayed {
+  animation: fadeIn 0.2s ease-out 0.15s both;
+}
+
 .chart-scrollbar::-webkit-scrollbar {
   height: 8px;
 }

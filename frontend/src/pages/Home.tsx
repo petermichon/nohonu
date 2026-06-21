@@ -7,11 +7,12 @@ function Home() {
   const { font } = useFont();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
   const cursorPosRef = useRef<{ x: number; y: number } | null>(null);
-  const dotPosRef = useRef<{ x: number; y: number } | null>({ x: 75, y: 50 }); // Start at center of right side
-  const originalDotPos = { x: 75, y: 50 }; // Original position to return to
-  const cursorOnCanvasRef = useRef(false); // Track if cursor is on canvas
-  const dotVelocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 }); // Track dot velocity
-  const particleCount = 1100;
+  const dotPosRef = useRef<{ x: number; y: number } | null>(null); // Start hidden
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const circleEnabledRef = useRef(false); // Circle only enabled after 1 second delay
+  const circleOpacityRef = useRef(0); // Circle opacity for fade-in effect
+  const particlesOpacityRef = useRef(0); // Particles opacity for delayed fade-in
+  const particleCount = 2100;
   // Use typed arrays for better performance
   const particlesRef = useRef<{
     x: Float32Array;
@@ -39,8 +40,8 @@ function Home() {
     for (let i = 0; i < particleCount; i++) {
       group[i] = i < 100 ? 0 : 1; // First 100 = normal, rest = circle-only
 
-      // Circle-only particles are only small (max 3px)
-      const maxSize = group[i] === 1 ? 3 : 9;
+      // Circle-only particles are only small (max 2px)
+      const maxSize = group[i] === 1 ? 2 : 9;
       const s = Math.pow(Math.random(), 8) * maxSize + 1;
       size[i] = s;
       x[i] = Math.random() * 100;
@@ -56,8 +57,32 @@ function Home() {
     }
   }, []);
 
+  // Track cursor position globally
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        cursorPosRef.current = {
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100,
+        };
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [canvasRef]);
+
+  // Enable circle after 2 second delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      circleEnabledRef.current = true;
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const animationRef = useRef<number | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,36 +106,24 @@ function Home() {
 
     const animate = () => {
       const startTime = performance.now();
-      // Smoothly move dot toward cursor or slow down and return to original position
-      if (cursorPosRef.current !== null && cursorOnCanvasRef.current) {
+      // Smoothly move dot toward cursor (only after 1 second delay)
+      if (cursorPosRef.current !== null && circleEnabledRef.current) {
         if (dotPosRef.current === null) {
           dotPosRef.current = { ...cursorPosRef.current };
         } else {
-          const lerpFactor = 0.1;
-          const prevX = dotPosRef.current.x;
-          const prevY = dotPosRef.current.y;
+          const lerpFactor = 0.2;
           dotPosRef.current.x += (cursorPosRef.current.x - dotPosRef.current.x) * lerpFactor;
           dotPosRef.current.y += (cursorPosRef.current.y - dotPosRef.current.y) * lerpFactor;
-          // Track velocity
-          dotVelocityRef.current.x = dotPosRef.current.x - prevX;
-          dotVelocityRef.current.y = dotPosRef.current.y - prevY;
         }
-      } else if (dotPosRef.current !== null) {
-        // Slow down with friction when cursor is off canvas
-        dotPosRef.current.x += dotVelocityRef.current.x;
-        dotPosRef.current.y += dotVelocityRef.current.y;
-        // Apply high friction for quick deceleration
-        dotVelocityRef.current.x *= 0.8;
-        dotVelocityRef.current.y *= 0.8;
-        // Stop when very slow
-        if (Math.abs(dotVelocityRef.current.x) < 0.01) dotVelocityRef.current.x = 0;
-        if (Math.abs(dotVelocityRef.current.y) < 0.01) dotVelocityRef.current.y = 0;
-
-        // After slowing down, return to original position
-        if (Math.abs(dotVelocityRef.current.x) < 0.01 && Math.abs(dotVelocityRef.current.y) < 0.01) {
-          const lerpFactor = 0.05;
-          dotPosRef.current.x += (originalDotPos.x - dotPosRef.current.x) * lerpFactor;
-          dotPosRef.current.y += (originalDotPos.y - dotPosRef.current.y) * lerpFactor;
+        // Fade in circle opacity
+        if (circleOpacityRef.current < 1) {
+          circleOpacityRef.current += 0.01;
+          if (circleOpacityRef.current > 1) circleOpacityRef.current = 1;
+        }
+        // Fade in particles simultaneously (same speed)
+        if (particlesOpacityRef.current < 1) {
+          particlesOpacityRef.current += 0.01;
+          if (particlesOpacityRef.current > 1) particlesOpacityRef.current = 1;
         }
       }
 
@@ -150,6 +163,13 @@ function Home() {
               speed[i] = -baseSpeed[i]; // Hide circle-only particles
             }
           }
+        } else {
+          // No circle: circle-only particles always hidden, normal particles always visible
+          if (group[i] === 1) {
+            speed[i] = -baseSpeed[i]; // Hide circle-only particles
+          } else {
+            speed[i] = baseSpeed[i]; // Show normal particles
+          }
         }
 
         let newAngle = angle[i] + angleChange;
@@ -183,7 +203,7 @@ function Home() {
       ctx.clearRect(0, 0, rect.width, rect.height);
 
       // Draw interaction radius circle (scaled down for visibility)
-      if (dotPosRef.current !== null) {
+      if (dotPosRef.current !== null && circleEnabledRef.current) {
         const cursorX = (dotPosRef.current.x / 100) * rect.width;
         const cursorY = (dotPosRef.current.y / 100) * rect.height;
         const visualRadius = 25; // Visual only, actual interaction is 200
@@ -192,17 +212,21 @@ function Home() {
         const radiusY = (visualRadius / 100) * rect.height;
         ctx.beginPath();
         ctx.ellipse(cursorX, cursorY, radiusX, radiusY, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+        ctx.strokeStyle = `rgba(99, 102, 241, ${0.4 * circleOpacityRef.current})`;
         ctx.lineWidth = 2;
         ctx.stroke();
       }
 
       // Batch draw by color for better performance using typed arrays
       const colors = ['#6366f1', '#818cf8', '#a5b4fc'];
+      const isParticlesFadingIn = circleEnabledRef.current && particlesOpacityRef.current < 1;
+
       for (let c = 0; c < 3; c++) {
         ctx.fillStyle = colors[c];
         ctx.beginPath();
         for (let i = 0; i < particleCount; i++) {
+          // Skip circle-only particles during fade-in (they'll be drawn separately)
+          if (isParticlesFadingIn && group[i] === 1) continue;
           if (color[i] === c && speed[i] > 0) {
             // Only draw visible particles
             const px = (x[i] / 100) * rect.width;
@@ -212,6 +236,26 @@ function Home() {
           }
         }
         ctx.fill();
+      }
+
+      // Draw circle-only particles with fade-in opacity
+      if (isParticlesFadingIn) {
+        for (let c = 0; c < 3; c++) {
+          ctx.fillStyle = colors[c];
+          ctx.globalAlpha = particlesOpacityRef.current;
+          ctx.beginPath();
+          for (let i = 0; i < particleCount; i++) {
+            if (color[i] === c && group[i] === 1 && speed[i] > 0) {
+              // Only draw circle-only particles with fade-in
+              const px = (x[i] / 100) * rect.width;
+              const py = (y[i] / 100) * rect.height;
+              ctx.moveTo(px + size[i] / 2, py);
+              ctx.arc(px, py, size[i] / 2, 0, Math.PI * 2);
+            }
+          }
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
       }
 
       const endTime = performance.now();
@@ -238,19 +282,12 @@ function Home() {
       {/* Hero Header */}
       <header
         className="relative max-w-7xl mx-auto px-6 pt-24 pb-24"
-        onMouseEnter={() => {
-          cursorOnCanvasRef.current = true;
-        }}
         onMouseMove={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
           cursorPosRef.current = {
             x: ((e.clientX - rect.left) / rect.width) * 100,
             y: ((e.clientY - rect.top) / rect.height) * 100,
           };
-        }}
-        onMouseLeave={() => {
-          cursorOnCanvasRef.current = false;
-          cursorPosRef.current = null;
         }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -259,12 +296,12 @@ function Home() {
         <div className="relative flex items-center gap-12">
           <div className="max-w-2xl">
             <h1
-              className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-[1.05] text-balance text-zinc-900 dark:text-zinc-50"
+              className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-[1.05] text-balance text-zinc-900 dark:text-zinc-50 animate-fade-in"
               style={{ fontFamily: getFontFamily(font) }}
             >
               The home for <span className="text-indigo-500">creative</span> static sites.
             </h1>
-            <div className="flex items-center gap-3 mt-8">
+            <div className="flex items-center gap-3 mt-8 animate-fade-in-delayed">
               <button
                 type="button"
                 className="px-4 h-[46px] rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap"
