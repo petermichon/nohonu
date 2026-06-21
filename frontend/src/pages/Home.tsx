@@ -1,70 +1,262 @@
 import { Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { GitBranch, Upload, Globe as GlobeIcon, User, Monitor, ArrowRight, ArrowLeft } from 'lucide-react';
 
 function Home() {
   const { font } = useFont();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
-  const particleCount = 30;
-  const particles = useMemo(() => {
-    const seededRandom = (seed: number) => {
-      const x = Math.sin(seed) * 10000;
-      return x - Math.floor(x);
+  const cursorPosRef = useRef<{ x: number; y: number } | null>(null);
+  const dotPosRef = useRef<{ x: number; y: number } | null>({ x: 75, y: 50 }); // Start at center of right side
+  const originalDotPos = { x: 75, y: 50 }; // Original position to return to
+  const cursorOnCanvasRef = useRef(false); // Track if cursor is on canvas
+  const dotVelocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 }); // Track dot velocity
+  const particleCount = 1100;
+  // Use typed arrays for better performance
+  const particlesRef = useRef<{
+    x: Float32Array;
+    y: Float32Array;
+    size: Float32Array;
+    angle: Float32Array;
+    speed: Float32Array;
+    baseSpeed: Float32Array; // Store original speed to avoid jitter
+    color: Uint8Array; // 0, 1, 2 for the 3 colors
+    group: Uint8Array; // 0 = normal (visible outside circle), 1 = circle-only (visible inside circle)
+  }>({
+    x: new Float32Array(particleCount),
+    y: new Float32Array(particleCount),
+    size: new Float32Array(particleCount),
+    angle: new Float32Array(particleCount),
+    speed: new Float32Array(particleCount),
+    baseSpeed: new Float32Array(particleCount),
+    color: new Uint8Array(particleCount),
+    group: new Uint8Array(particleCount),
+  });
+
+  // Initialize particles once
+  useEffect(() => {
+    const { x, y, size, angle, speed, baseSpeed, color, group } = particlesRef.current;
+    for (let i = 0; i < particleCount; i++) {
+      group[i] = i < 100 ? 0 : 1; // First 100 = normal, rest = circle-only
+
+      // Circle-only particles are only small (max 3px)
+      const maxSize = group[i] === 1 ? 3 : 9;
+      const s = Math.pow(Math.random(), 8) * maxSize + 1;
+      size[i] = s;
+      x[i] = Math.random() * 100;
+      y[i] = Math.random() * 100;
+      angle[i] = Math.PI / 8 + (Math.random() - 0.5) * 0.125; // Add slight random variation to initial angle
+
+      // Circle-only particles move slower
+      const baseMultiplier = group[i] === 1 ? 0.1 : 1;
+      const base = (0.1 + (s / 9) * 0.4) * (0.125 + Math.random() * 0.875) * baseMultiplier;
+      speed[i] = base;
+      baseSpeed[i] = base;
+      color[i] = Math.floor(Math.random() * 3);
+    }
+  }, []);
+
+  const animationRef = useRef<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let cachedRect: DOMRect | null = null;
+    let cachedAspectRatio = 1;
+    let cachedDpr = window.devicePixelRatio || 1;
+    let frameCount = 0;
+    let lastTime = performance.now();
+
+    // Pre-calculate constants
+    const PI = Math.PI;
+    const TWO_PI = PI * 2;
+    const TARGET_ANGLE = PI / 8;
+    const DRIFT_STRENGTH = 0.001;
+    const INTERACTION_DISTANCE_SQ = 25 * 25; // Avoid sqrt
+
+    const animate = () => {
+      const startTime = performance.now();
+      // Smoothly move dot toward cursor or slow down and return to original position
+      if (cursorPosRef.current !== null && cursorOnCanvasRef.current) {
+        if (dotPosRef.current === null) {
+          dotPosRef.current = { ...cursorPosRef.current };
+        } else {
+          const lerpFactor = 0.1;
+          const prevX = dotPosRef.current.x;
+          const prevY = dotPosRef.current.y;
+          dotPosRef.current.x += (cursorPosRef.current.x - dotPosRef.current.x) * lerpFactor;
+          dotPosRef.current.y += (cursorPosRef.current.y - dotPosRef.current.y) * lerpFactor;
+          // Track velocity
+          dotVelocityRef.current.x = dotPosRef.current.x - prevX;
+          dotVelocityRef.current.y = dotPosRef.current.y - prevY;
+        }
+      } else if (dotPosRef.current !== null) {
+        // Slow down with friction when cursor is off canvas
+        dotPosRef.current.x += dotVelocityRef.current.x;
+        dotPosRef.current.y += dotVelocityRef.current.y;
+        // Apply high friction for quick deceleration
+        dotVelocityRef.current.x *= 0.8;
+        dotVelocityRef.current.y *= 0.8;
+        // Stop when very slow
+        if (Math.abs(dotVelocityRef.current.x) < 0.01) dotVelocityRef.current.x = 0;
+        if (Math.abs(dotVelocityRef.current.y) < 0.01) dotVelocityRef.current.y = 0;
+
+        // After slowing down, return to original position
+        if (Math.abs(dotVelocityRef.current.x) < 0.01 && Math.abs(dotVelocityRef.current.y) < 0.01) {
+          const lerpFactor = 0.05;
+          dotPosRef.current.x += (originalDotPos.x - dotPosRef.current.x) * lerpFactor;
+          dotPosRef.current.y += (originalDotPos.y - dotPosRef.current.y) * lerpFactor;
+        }
+      }
+
+      // Update particle physics using typed arrays
+      const { x, y, size, angle, speed, baseSpeed, color, group } = particlesRef.current;
+      const dotX = dotPosRef.current?.x;
+      const dotY = dotPosRef.current?.y;
+
+      for (let i = 0; i < particleCount; i++) {
+        let angleChange = 0;
+
+        // Slowly drift towards bottom-right (π/8 for more right)
+        let angleDiff = TARGET_ANGLE - angle[i];
+        while (angleDiff > PI) angleDiff -= TWO_PI;
+        while (angleDiff < -PI) angleDiff += TWO_PI;
+        angleChange += angleDiff * DRIFT_STRENGTH;
+
+        // Only apply cursor influence if dot has moved
+        if (dotX !== undefined && dotY !== undefined) {
+          const dx = x[i] - dotX;
+          const dy = y[i] - dotY;
+          const normalizedDx = dx * cachedAspectRatio;
+          const distanceSq = normalizedDx * normalizedDx + dy * dy;
+
+          if (distanceSq < INTERACTION_DISTANCE_SQ) {
+            // Inside circle: normal particles hidden, circle-only particles visible
+            if (group[i] === 0) {
+              speed[i] = -baseSpeed[i]; // Hide normal particles
+            } else {
+              speed[i] = baseSpeed[i]; // Show circle-only particles
+            }
+          } else {
+            // Outside circle: normal particles visible, circle-only particles hidden
+            if (group[i] === 0) {
+              speed[i] = baseSpeed[i]; // Show normal particles
+            } else {
+              speed[i] = -baseSpeed[i]; // Hide circle-only particles
+            }
+          }
+        }
+
+        let newAngle = angle[i] + angleChange;
+
+        while (newAngle > PI) newAngle -= TWO_PI;
+        while (newAngle < -PI) newAngle += TWO_PI;
+
+        const newX = x[i] + Math.cos(newAngle) * Math.abs(speed[i]);
+        const newY = y[i] + Math.sin(newAngle) * Math.abs(speed[i]);
+
+        x[i] = ((newX % 100) + 100) % 100;
+        y[i] = ((newY % 100) + 100) % 100;
+        angle[i] = newAngle;
+      }
+
+      // Check if canvas needs resize
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const needsResize =
+        !cachedRect || cachedRect.width !== rect.width || cachedRect.height !== rect.height || cachedDpr !== dpr;
+
+      if (needsResize) {
+        cachedRect = rect;
+        cachedAspectRatio = rect.width / rect.height;
+        cachedDpr = dpr;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+      }
+
+      ctx.clearRect(0, 0, rect.width, rect.height);
+
+      // Draw interaction radius circle (scaled down for visibility)
+      if (dotPosRef.current !== null) {
+        const cursorX = (dotPosRef.current.x / 100) * rect.width;
+        const cursorY = (dotPosRef.current.y / 100) * rect.height;
+        const visualRadius = 25; // Visual only, actual interaction is 200
+        // Account for aspect ratio to make the visual circle match the actual circular interaction
+        const radiusX = ((visualRadius / 100) * rect.width) / cachedAspectRatio;
+        const radiusY = (visualRadius / 100) * rect.height;
+        ctx.beginPath();
+        ctx.ellipse(cursorX, cursorY, radiusX, radiusY, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Batch draw by color for better performance using typed arrays
+      const colors = ['#6366f1', '#818cf8', '#a5b4fc'];
+      for (let c = 0; c < 3; c++) {
+        ctx.fillStyle = colors[c];
+        ctx.beginPath();
+        for (let i = 0; i < particleCount; i++) {
+          if (color[i] === c && speed[i] > 0) {
+            // Only draw visible particles
+            const px = (x[i] / 100) * rect.width;
+            const py = (y[i] / 100) * rect.height;
+            ctx.moveTo(px + size[i] / 2, py);
+            ctx.arc(px, py, size[i] / 2, 0, Math.PI * 2);
+          }
+        }
+        ctx.fill();
+      }
+
+      const endTime = performance.now();
+      frameCount++;
+      if (endTime - lastTime >= 1000) {
+        console.log(`FPS: ${frameCount}, Frame time: ${(endTime - startTime).toFixed(2)}ms`);
+        frameCount = 0;
+        lastTime = endTime;
+      }
+
+      animationRef.current = requestAnimationFrame(animate);
     };
-    return Array.from({ length: particleCount }, (_, i) => {
-      const size = seededRandom(i) * 4 + 2;
-      const top = seededRandom(i + 100) * 100;
-      const left = seededRandom(i + 200) * 100;
-      const color = ['bg-indigo-500', 'bg-indigo-400', 'bg-indigo-300'][Math.floor(seededRandom(i + 300) * 3)];
-      const delay = (i * 0.2) % 5;
-      return {
-        id: i,
-        size,
-        top,
-        left,
-        color,
-        delay,
-        floatDelay: seededRandom(i + 400) * 2,
-      };
-    });
-  }, [particleCount]);
+
+    animationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
 
   return (
     <section className="mb-12">
-      <style>{`
-        @keyframes float {
-          0% {
-            transform: translateY(0px);
-          }
-          100% {
-            transform: translateY(100px);
-          }
-        }
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-        @keyframes fadeOut {
-          0% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-          }
-        }
-        .dot {
-          animation: float 10s linear infinite, fadeIn 0.5s ease-out infinite, fadeOut 0.5s ease-in infinite;
-          opacity: 0;
-        }
-      `}</style>
       {/* Hero Header */}
-      <header className="max-w-7xl mx-auto px-6 pt-24 pb-16">
-        <div className="flex items-center gap-12">
+      <header
+        className="relative max-w-7xl mx-auto px-6 pt-24 pb-24"
+        onMouseEnter={() => {
+          cursorOnCanvasRef.current = true;
+        }}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          cursorPosRef.current = {
+            x: ((e.clientX - rect.left) / rect.width) * 100,
+            y: ((e.clientY - rect.top) / rect.height) * 100,
+          };
+        }}
+        onMouseLeave={() => {
+          cursorOnCanvasRef.current = false;
+          cursorPosRef.current = null;
+        }}
+      >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+        </div>
+        <div className="relative flex items-center gap-12">
           <div className="max-w-2xl">
             <h1
               className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-[1.05] text-balance text-zinc-900 dark:text-zinc-50"
@@ -91,23 +283,6 @@ function Home() {
               >
                 Documentation
               </Link>
-            </div>
-          </div>
-          <div className="hidden lg:flex flex-1 justify-center">
-            <div className="relative w-64 h-64">
-              {particles.map((particle) => (
-                <div
-                  key={particle.id}
-                  className={`dot absolute ${particle.color} rounded-full`}
-                  style={{
-                    width: `${particle.size}px`,
-                    height: `${particle.size}px`,
-                    top: `${particle.top}%`,
-                    left: `${particle.left}%`,
-                    animationDelay: `${particle.floatDelay}s, ${particle.delay}s, ${particle.delay + 4}s`,
-                  }}
-                />
-              ))}
             </div>
           </div>
         </div>
@@ -687,16 +862,22 @@ function Home() {
                 href="https://github.com/nohonu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                className="flex items-center gap-2 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
               >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                </svg>
                 GitHub
               </a>
               <a
                 href="https://opencollective.com/nohonu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                className="flex items-center gap-2 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
               >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12c2.54 0 4.894-.79 6.834-2.135l-3.107-3.109a7.715 7.715 0 1 1 0-13.512l3.107-3.109A11.943 11.943 0 0 0 12 0zm9.865 5.166l-3.109 3.107A7.67 7.67 0 0 1 19.715 12a7.682 7.682 0 0 1-.959 3.727l3.109 3.107A11.943 11.943 0 0 0 24 12c0-2.54-.79-4.894-2.135-6.834z" />
+                </svg>
                 Open Collective
               </a>
             </div>
