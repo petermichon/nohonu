@@ -440,17 +440,17 @@ export function TopBar() {
           ) : (
             <div className="flex items-center gap-3 h-9 hidden sm:flex">
               <Link
-                to="/account"
+                to="/login"
                 className="px-4 h-full rounded-full text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
               >
                 Log in
               </Link>
-              <button
-                type="button"
-                className="px-4 h-full rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap"
+              <Link
+                to="/signup"
+                className="px-4 h-full rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap flex items-center justify-center"
               >
-                Deploy
-              </button>
+                Sign up
+              </Link>
             </div>
           )}
         </div>

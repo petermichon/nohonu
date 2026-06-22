@@ -302,12 +302,12 @@ function Home() {
               The home for <span className="text-indigo-500">creative</span> static sites.
             </h1>
             <div className="flex items-center gap-3 mt-8 animate-fade-in-delayed">
-              <button
-                type="button"
-                className="px-4 h-[46px] rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap"
+              <Link
+                to="/login"
+                className="px-4 h-[46px] rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap flex items-center justify-center"
               >
                 Get Started
-              </button>
+              </Link>
               <Link
                 to="/explore"
                 className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
