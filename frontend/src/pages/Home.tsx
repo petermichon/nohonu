@@ -42,7 +42,7 @@ function Home() {
 
       // Circle-only particles are only small (max 2px)
       const maxSize = group[i] === 1 ? 2 : 9;
-      const s = Math.pow(Math.random(), 8) * maxSize + 1;
+      const s = Math.pow(Math.random(), 12) * maxSize + 1;
       size[i] = s;
       x[i] = Math.random() * 100;
       y[i] = Math.random() * 100;

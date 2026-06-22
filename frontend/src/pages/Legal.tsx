@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { FileText, Scale, Shield, Info } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
+import { Footer } from '../components/Footer.tsx';
 
 const getLegalPages = (resolvedLanguage: 'en' | 'fr') => [
   {
@@ -35,8 +36,10 @@ export default function Legal() {
   const LEGAL_PAGES = getLegalPages(resolvedLanguage);
 
   return (
-    <div className="space-y-8 px-6">
-      <BackButton to="/" label="Home" variant="inline" />
+    <div className="space-y-8 px-6 pt-12">
+      <div className="mb-5">
+        <BackButton to="/" label="Home" />
+      </div>
 
       <div>
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Legal</h1>
@@ -68,6 +71,7 @@ export default function Legal() {
       </div>
 
       <div className="min-h-[50vh]" />
+      <Footer />
     </div>
   );
 }

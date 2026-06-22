@@ -1,9 +1,12 @@
 import { BackButton } from '../components/BackButton.tsx';
+import { Footer } from '../components/Footer.tsx';
 
 export default function CopyrightPolicy() {
   return (
-    <div className="space-y-8 px-6">
-      <BackButton to="/legal" label="Legal" variant="inline" />
+    <div className="space-y-8 px-6 pt-12">
+      <div className="mb-5">
+        <BackButton to="/legal" label="Legal" />
+      </div>
 
       <div>
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Copyright Policy</h1>
@@ -117,6 +120,7 @@ export default function CopyrightPolicy() {
       </div>
 
       <div className="min-h-[30vh]" />
+      <Footer />
     </div>
   );
 }

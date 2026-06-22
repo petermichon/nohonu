@@ -18,6 +18,7 @@ import { OverviewSection } from '../components/OverviewSection.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 import { useSiteData } from '../hooks/useSiteData.ts';
 import { SLOT_MS, type TimeRange } from '../lib/types.ts';
+import { Footer } from '../components/Footer.tsx';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
@@ -181,7 +182,7 @@ function SitePage() {
   const uptimePct = calcUptimePct(uptimeData);
 
   return (
-    <section className="flex gap-6 relative">
+    <section className="flex gap-6 relative pt-12">
       <div className="flex-1 min-w-0">
         <div className="mb-5">
           <BackButton to="/sites" label="Sites" />
@@ -316,6 +317,7 @@ function SitePage() {
           loading={!!deletingVersion}
         />
       </div>
+      <Footer />
     </section>
   );
 }

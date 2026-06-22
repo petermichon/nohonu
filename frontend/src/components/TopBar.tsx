@@ -211,33 +211,78 @@ export function TopBar() {
           <div className="hidden sm:flex items-center ml-5">
             <Link
               to="/explore"
-              className={`flex items-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/explore') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/explore') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
-              Explore
+              <span className="font-semibold invisible">Explore</span>
+              <span
+                className={
+                  isActive('/explore')
+                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
+                    : 'absolute inset-0 flex items-center justify-center'
+                }
+              >
+                Explore
+              </span>
             </Link>
             <Link
               to={username ? `/u/${username}` : '/sites'}
-              className={`flex items-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/sites') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/sites') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
-              Sites
+              <span className="font-semibold invisible">Sites</span>
+              <span
+                className={
+                  isActive('/sites')
+                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
+                    : 'absolute inset-0 flex items-center justify-center'
+                }
+              >
+                Sites
+              </span>
             </Link>
             <Link
               to={username ? `/u/${username}/domains` : '/domains'}
-              className={`flex items-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/domains') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/domains') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
-              Domains
+              <span className="font-semibold invisible">Domains</span>
+              <span
+                className={
+                  isActive('/domains')
+                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
+                    : 'absolute inset-0 flex items-center justify-center'
+                }
+              >
+                Domains
+              </span>
             </Link>
             <Link
               to={username ? `/u/${username}/servers` : '/servers'}
-              className={`flex items-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/servers') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/servers') ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
-              Servers
+              <span className="font-semibold invisible">Servers</span>
+              <span
+                className={
+                  isActive('/servers')
+                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
+                    : 'absolute inset-0 flex items-center justify-center'
+                }
+              >
+                Servers
+              </span>
             </Link>
             <Link
               to="/docs"
-              className={`flex items-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${location.pathname === '/docs' ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${location.pathname === '/docs' ? 'text-zinc-900 dark:text-zinc-50 font-semibold' : 'text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
-              Docs
+              <span className="font-semibold invisible">Docs</span>
+              <span
+                className={
+                  location.pathname === '/docs'
+                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
+                    : 'absolute inset-0 flex items-center justify-center'
+                }
+              >
+                Docs
+              </span>
             </Link>
           </div>
         </div>

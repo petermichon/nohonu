@@ -3,6 +3,7 @@ import { User, AlertCircle } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
+import { Footer } from '../components/Footer.tsx';
 
 export default function UserPage() {
   const { username } = useParams<{ username: string }>();
@@ -11,7 +12,7 @@ export default function UserPage() {
   const userSites = sites.filter((s) => s.account === username);
 
   return (
-    <section className="mb-12">
+    <section className="mb-12 pt-12">
       <div className="mb-5">
         <BackButton to="/" label="Home" />
       </div>
@@ -85,6 +86,7 @@ export default function UserPage() {
           ))}
         </div>
       )}
+      <Footer />
     </section>
   );
 }

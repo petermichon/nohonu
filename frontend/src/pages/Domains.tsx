@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Globe, Check, X } from 'lucide-react';
-import { BackButton } from '../components/BackButton.tsx';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
+import { Footer } from '../components/Footer.tsx';
 
 interface CustomDomainEntry {
   siteDomain: string;
@@ -14,13 +14,10 @@ interface CustomDomainEntry {
 function Domains() {
   const { apiFetch } = useApi();
   const { showToast } = useToast();
-  const { username } = useParams<{ username?: string }>();
   const [allDomains, setAllDomains] = useState<CustomDomainEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
-
-  const isUserScoped = !!username;
 
   const loadDomains = useCallback(async () => {
     setLoading(true);
@@ -82,11 +79,7 @@ function Domains() {
   };
 
   return (
-    <section className="mb-12 px-6">
-      <div className="mb-5">
-        <BackButton to={isUserScoped ? `/u/${username}` : '/'} label={isUserScoped ? 'User' : 'Home'} />
-      </div>
-
+    <section className="mb-12 px-6 pt-12">
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6">
         <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Domains</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Manage your custom domains</p>
@@ -172,6 +165,7 @@ function Domains() {
           Explore new domains
         </Link>
       </div>
+      <Footer />
     </section>
   );
 }

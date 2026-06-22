@@ -19,6 +19,7 @@ import Legal from './pages/Legal.tsx';
 import CopyrightPolicy from './pages/CopyrightPolicy.tsx';
 import MentionsLegales from './pages/MentionsLegales.tsx';
 import UserPage from './pages/UserPage.tsx';
+import Docs from './pages/Docs.tsx';
 
 function AppContent() {
   return (
@@ -34,10 +35,39 @@ function AppContent() {
             <div className="max-w-7xl mx-auto">
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/explore" element={<Explore />} />
-                <Route path="/sites" element={<Sites />} />
-                <Route path="/sites/:domain" element={<SitePage />} />
-                <Route path="/u/:username/:sitename" element={<SitePage />} />
+                <Route path="/docs" element={<Docs />} />
+                <Route
+                  path="/explore"
+                  element={
+                    <SitesProvider>
+                      <Explore />
+                    </SitesProvider>
+                  }
+                />
+                <Route
+                  path="/sites"
+                  element={
+                    <SitesProvider>
+                      <Sites />
+                    </SitesProvider>
+                  }
+                />
+                <Route
+                  path="/sites/:domain"
+                  element={
+                    <SitesProvider>
+                      <SitePage />
+                    </SitesProvider>
+                  }
+                />
+                <Route
+                  path="/u/:username/:sitename"
+                  element={
+                    <SitesProvider>
+                      <SitePage />
+                    </SitesProvider>
+                  }
+                />
                 <Route path="/u/:username/domains" element={<Domains />} />
                 <Route path="/u/:username/domains/explore" element={<DomainExplore />} />
                 <Route path="/u/:username/servers" element={<Servers />} />
@@ -50,7 +80,14 @@ function AppContent() {
                 <Route path="/legal/terms-of-service" element={<TermsOfService />} />
                 <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
                 <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
-                <Route path="/u/:username" element={<UserPage />} />
+                <Route
+                  path="/u/:username"
+                  element={
+                    <SitesProvider>
+                      <UserPage />
+                    </SitesProvider>
+                  }
+                />
               </Routes>
             </div>
           </div>
@@ -65,11 +102,9 @@ function App() {
   return (
     <LanguageProvider>
       <FontProvider>
-        <SitesProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
-        </SitesProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
       </FontProvider>
     </LanguageProvider>
   );
