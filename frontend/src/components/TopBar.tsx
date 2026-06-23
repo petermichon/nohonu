@@ -215,35 +215,35 @@ export function TopBar() {
         <div className="flex items-center">
           <Link to="/" className="flex items-center gap-2 relative group">
             <div
-              className="absolute top-1 left-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-3"
+              className="absolute top-1 left-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:-translate-y-3"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <div
-              className="absolute top-0 left-6 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-2"
+              className="absolute top-0 left-6 w-1 h-1 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:-translate-y-2"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <div
-              className="absolute top-1 right-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-3"
+              className="absolute top-1 right-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:-translate-y-3"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <div
-              className="absolute top-2 left-2 w-0.75 h-0.75 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-2"
+              className="absolute top-2 left-2 w-0.75 h-0.75 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:-translate-y-2"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <div
-              className="absolute top-2 right-2 w-0.75 h-0.75 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-4"
+              className="absolute top-2 right-2 w-0.75 h-0.75 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:translate-y-4"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <div
-              className="absolute bottom-1 left-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-2"
+              className="absolute bottom-1 left-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:translate-y-2"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <div
-              className="absolute bottom-1 right-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-2"
+              className="absolute bottom-1 right-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:translate-y-2"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <div
-              className="absolute top-1.5 left-7 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-6"
+              className="absolute top-1.5 left-7 w-1 h-1 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:translate-y-6"
               style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
             />
             <span
@@ -500,7 +500,7 @@ export function TopBar() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-3 h-9 hidden sm:flex">
+            <div className="items-center gap-3 h-9 hidden sm:flex">
               <Link
                 to="/login"
                 className="px-4 h-full rounded-full text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"

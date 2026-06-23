@@ -204,7 +204,10 @@ function DomainExplore() {
             value={domain}
             onChange={(e) => setDomain(e.target.value)}
             placeholder="Search for a domain..."
-            className={`w-full px-6 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 ${accentColorValues.focus} focus:border-transparent text-lg`}
+            className={`w-full px-6 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-700
+              bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100
+              placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2
+              ${accentColorValues.focus} focus:border-transparent text-lg`}
           />
         </div>
       </div>

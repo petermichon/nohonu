@@ -38,7 +38,8 @@ export default function UserPage() {
       {error && (
         <div className="text-center py-16">
           <div
-            className={`w-12 h-12 ${accentColorValues.bgLight} rounded-full flex items-center justify-center mx-auto mb-3`}
+            className={`w-12 h-12 ${accentColorValues.bgLight} rounded-full flex items-center
+              justify-center mx-auto mb-3`}
           >
             <AlertCircle className={`w-6 h-6 ${accentColorValues.textDark}`} />
           </div>

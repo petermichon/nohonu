@@ -104,7 +104,6 @@ function Home() {
     let cachedRect: DOMRect | null = null;
     let cachedAspectRatio = 1;
     let cachedDpr = window.devicePixelRatio || 1;
-    let frameCount = 0;
     let lastTime = performance.now();
 
     // Pre-calculate constants
@@ -115,7 +114,6 @@ function Home() {
     const INTERACTION_DISTANCE_SQ = 25 * 25; // Avoid sqrt
 
     const animate = () => {
-      const startTime = performance.now();
       // Smoothly move dot toward cursor (only after 1 second delay)
       if (cursorPosRef.current !== null && circleEnabledRef.current) {
         if (dotPosRef.current === null) {
@@ -270,9 +268,7 @@ function Home() {
       }
 
       const endTime = performance.now();
-      frameCount++;
       if (endTime - lastTime >= 1000) {
-        frameCount = 0;
         lastTime = endTime;
       }
 
@@ -314,7 +310,8 @@ function Home() {
             <div className="flex items-center gap-3 mt-8 animate-fade-in-delayed">
               <Link
                 to="/signup"
-                className={`px-4 h-[46px] rounded-full text-sm font-medium text-white cursor-pointer transition-colors whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+                className={`px-4 h-[46px] rounded-full text-sm font-medium text-white cursor-pointer
+                  transition-colors whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
               >
                 Get Started
               </Link>
@@ -354,7 +351,7 @@ function Home() {
           ].map((site, i) => (
             <div key={i} className="cursor-pointer flex flex-col gap-4">
               <div className="rounded-3xl overflow-hidden relative group">
-                <img src={`/showcase-${i + 1}.jpg`} alt={site.name} className="w-full aspect-[4/3] object-cover" />
+                <img src={`/showcase-${i + 1}.jpg`} alt={site.name} className="w-full aspect-4/3 object-cover" />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-start p-4">
                   <span className="text-white text-sm font-medium">View deployment</span>
                 </div>
@@ -406,11 +403,13 @@ function Home() {
             {/* Step 1 */}
             <div className="flex items-start gap-6 w-full pl-20 relative">
               <div
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center z-10`}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl
+                  ${accentColorValues.bgLight} flex items-center justify-center z-10`}
               >
                 <GitBranch className={`w-10 h-10 ${accentColorValues.textDark}`} />
                 <div
-                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white flex items-center justify-center text-sm font-bold`}
+                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white
+                    flex items-center justify-center text-sm font-bold`}
                 >
                   1
                 </div>
@@ -432,11 +431,13 @@ function Home() {
             {/* Step 2 */}
             <div className="flex items-start gap-6 w-full pl-20 relative">
               <div
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center z-10`}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl
+                  ${accentColorValues.bgLight} flex items-center justify-center z-10`}
               >
                 <Upload className={`w-10 h-10 ${accentColorValues.textDark}`} />
                 <div
-                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white flex items-center justify-center text-sm font-bold`}
+                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white
+                    flex items-center justify-center text-sm font-bold`}
                 >
                   2
                 </div>
@@ -458,11 +459,13 @@ function Home() {
             {/* Step 3 */}
             <div className="flex items-start gap-6 w-full pl-20 relative">
               <div
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center z-10`}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl
+                  ${accentColorValues.bgLight} flex items-center justify-center z-10`}
               >
                 <GlobeIcon className={`w-10 h-10 ${accentColorValues.textDark}`} />
                 <div
-                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white flex items-center justify-center text-sm font-bold`}
+                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white
+                    flex items-center justify-center text-sm font-bold`}
                 >
                   3
                 </div>
@@ -590,7 +593,8 @@ function Home() {
                 <div className="flex items-center w-full gap-1">
                   <div className={`flex-1 h-px ${accentColorValues.line} relative overflow-hidden rounded-full`}>
                     <div
-                      className={`flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-${accentColorValues.gradient} to-transparent`}
+                      className={`flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-linear-to-r
+                        from-transparent via-${accentColorValues.gradient} to-transparent`}
                     />
                   </div>
                   <ArrowRight className={`w-3.5 h-3.5 ${accentColorValues.textLight} shrink-0`} />
@@ -651,7 +655,8 @@ function Home() {
                 <div className="flex items-center w-full gap-1">
                   <div className={`flex-1 h-px ${accentColorValues.line} relative overflow-hidden rounded-full`}>
                     <div
-                      className={`flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-${accentColorValues.gradient} to-transparent`}
+                      className={`flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-linear-to-r
+                        from-transparent via-${accentColorValues.gradient} to-transparent`}
                       style={{ animationDelay: '1.1s' }}
                     />
                   </div>
@@ -715,7 +720,8 @@ function Home() {
           {/* YOU node */}
           <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex items-center gap-5">
             <div
-              className={`w-14 h-14 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center shrink-0`}
+              className={`w-14 h-14 rounded-xl ${accentColorValues.bgLighter} flex items-center
+                justify-center shrink-0`}
             >
               <User className={`w-7 h-7 ${accentColorValues.text}`} />
             </div>
@@ -734,7 +740,8 @@ function Home() {
           <div className="flex flex-col items-center gap-0.5 py-3">
             <div className={`h-8 w-px ${accentColorValues.line} relative overflow-hidden`}>
               <div
-                className={`flow-packet-down absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent via-${accentColorValues.gradient} to-transparent`}
+                className={`flow-packet-down absolute top-0 left-0 w-full h-1/2 bg-linear-to-b
+                  from-transparent via-${accentColorValues.gradient} to-transparent`}
               />
             </div>
             <span className={`text-[11px] font-medium ${accentColorValues.textLightOnly} tracking-wide uppercase`}>
@@ -745,7 +752,8 @@ function Home() {
           {/* NOHONU node */}
           <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex items-center gap-5">
             <div
-              className={`w-14 h-14 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center shrink-0`}
+              className={`w-14 h-14 rounded-xl ${accentColorValues.bgLighter} flex items-center
+                justify-center shrink-0`}
             >
               <span
                 className={`text-2xl font-bold ${accentColorValues.text}`}
@@ -769,7 +777,7 @@ function Home() {
           <div className="flex flex-col items-center gap-0.5 py-3">
             <div className="h-8 w-px bg-emerald-200 dark:bg-emerald-800 relative overflow-hidden">
               <div
-                className="flow-packet-down absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent via-emerald-500 to-transparent"
+                className="flow-packet-down absolute top-0 left-0 w-full h-1/2 bg-linear-to-b from-transparent via-emerald-500 to-transparent"
                 style={{ animationDelay: '1.1s' }}
               />
             </div>
