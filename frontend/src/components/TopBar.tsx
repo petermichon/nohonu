@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, MoreVertical, Sun, Moon, Languages, Check, ChevronLeft, Type, Scale, Info } from 'lucide-react';
+import { User, MoreVertical, Sun, Moon, Languages, Check, ChevronLeft, Type, Scale, Info, Palette } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
 import { useFont, getFontFamily, type Font } from '../lib/FontProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
+import { useAccentColor, type AccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useState } from 'react';
 
 interface MenuSectionProps {
@@ -69,10 +70,15 @@ export function TopBar() {
   const userName = displayName || 'Guest';
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [menuView, setMenuView] = useState<'main' | 'theme' | 'language' | 'font'>('main');
+  const [menuView, setMenuView] = useState<'main' | 'theme' | 'language' | 'font' | 'accent'>('main');
   const { theme, setTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
   const { font, setFont } = useFont();
+  const { accentColor, setAccentColor, getAccentColorValues } = useAccentColor();
+
+  const accentColorValues = getAccentColorValues();
+  const buttonBaseClass =
+    'px-4 h-full rounded-full text-sm font-medium text-white cursor-pointer flex items-center justify-center whitespace-nowrap transition-colors';
 
   const menuRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -196,11 +202,50 @@ export function TopBar() {
     style: { fontFamily: getFontFamily(opt.value) },
   }));
 
+  const accentColorOptions = (Object.keys(ACCENT_COLORS) as AccentColor[]).map((color) => ({
+    value: color,
+    icon: null,
+    label: color.charAt(0).toUpperCase() + color.slice(1),
+    className: ACCENT_COLORS[color].text,
+  }));
+
   return (
     <header className="h-16 shrink-0 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
       <div className="h-full flex items-center justify-between gap-2 max-w-7xl mx-auto px-3 sm:px-6">
         <div className="flex items-center">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 relative group">
+            <div
+              className="absolute top-1 left-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-3"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
+            <div
+              className="absolute top-0 left-6 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-2"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
+            <div
+              className="absolute top-1 right-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-3"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
+            <div
+              className="absolute top-2 left-2 w-0.75 h-0.75 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:-translate-y-2"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
+            <div
+              className="absolute top-2 right-2 w-0.75 h-0.75 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-4"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
+            <div
+              className="absolute bottom-1 left-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-2"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
+            <div
+              className="absolute bottom-1 right-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-2"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
+            <div
+              className="absolute top-1.5 left-7 w-1 h-1 rounded-full opacity-0 transition-transform duration-150 group-hover:opacity-100 group-hover:translate-y-6"
+              style={{ backgroundColor: `rgb(${accentColorValues.rgb})` }}
+            />
             <span
               className="font-semibold text-xl text-zinc-900 dark:text-zinc-50 tracking-tight"
               style={{ fontFamily: "'Outfit', sans-serif" }}
@@ -343,6 +388,14 @@ export function TopBar() {
                         <Type className="w-4 h-4" />
                         <span>Font</span>
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setMenuView('accent')}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50"
+                      >
+                        <Palette className="w-4 h-4" />
+                        <span>Accent Color</span>
+                      </button>
                       <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
                       <Link
                         to="/legal"
@@ -395,6 +448,15 @@ export function TopBar() {
                       onSelect={(value) => setFont(value as Font)}
                     />
                   )}
+                  {menuView === 'accent' && (
+                    <MenuSection
+                      onBack={() => setMenuView('main')}
+                      backLabel="Accent Color"
+                      options={accentColorOptions}
+                      currentValue={accentColor}
+                      onSelect={(value) => setAccentColor(value as AccentColor)}
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -445,10 +507,7 @@ export function TopBar() {
               >
                 Log in
               </Link>
-              <Link
-                to="/signup"
-                className="px-4 h-full rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap flex items-center justify-center"
-              >
+              <Link to="/signup" className={`${buttonBaseClass} ${accentColorValues.bg}`}>
                 Sign up
               </Link>
             </div>

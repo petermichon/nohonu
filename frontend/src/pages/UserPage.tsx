@@ -3,9 +3,12 @@ import { User, AlertCircle } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { Footer } from '../components/Footer.tsx';
 
 export default function UserPage() {
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const { username } = useParams<{ username: string }>();
   const { sites, loading, error } = useSites();
 
@@ -34,19 +37,21 @@ export default function UserPage() {
       {/* Error state */}
       {error && (
         <div className="text-center py-16">
-          <div className="w-12 h-12 bg-purple-200 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
-            <AlertCircle className="w-6 h-6 text-purple-500 dark:text-purple-400" />
+          <div
+            className={`w-12 h-12 ${accentColorValues.bgLight} rounded-full flex items-center justify-center mx-auto mb-3`}
+          >
+            <AlertCircle className={`w-6 h-6 ${accentColorValues.textDark}`} />
           </div>
           {error === 'unauthorized' ? (
             <>
-              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Invalid API key</p>
+              <p className={`${accentColorValues.text} text-sm font-medium`}>Invalid API key</p>
               <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
                 Update your API key in connection settings
               </p>
             </>
           ) : (
             <>
-              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
+              <p className={`${accentColorValues.text} text-sm font-medium`}>Can't connect to server</p>
               <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">Please check if the server is running</p>
             </>
           )}

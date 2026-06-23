@@ -6,9 +6,12 @@ import { ConfirmModal } from '../lib/ConfirmModal.tsx';
 import { useApi } from '../lib/api.ts';
 import { useSites } from '../lib/SitesProvider.tsx';
 import { useToast } from '../lib/ToastContext.tsx';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { Footer } from '../components/Footer.tsx';
 
 function Sites() {
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const { apiFetch } = useApi();
   const { sites, loading, error, refreshSites } = useSites();
   const { showToast } = useToast();
@@ -101,19 +104,21 @@ function Sites() {
           {/* Content */}
           {error ? (
             <div className="text-center py-16">
-              <div className="w-12 h-12 bg-purple-200 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <AlertCircle className="w-6 h-6 text-purple-500 dark:text-purple-400" />
+              <div
+                className={`w-12 h-12 ${accentColorValues.bgLight} rounded-full flex items-center justify-center mx-auto mb-3`}
+              >
+                <AlertCircle className={`w-6 h-6 ${accentColorValues.textDark}`} />
               </div>
               {error === 'unauthorized' ? (
                 <>
-                  <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Invalid API key</p>
+                  <p className={`${accentColorValues.text} text-sm font-medium`}>Invalid API key</p>
                   <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
                     Update your API key in connection settings
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Can't connect to server</p>
+                  <p className={`${accentColorValues.text} text-sm font-medium`}>Can't connect to server</p>
                   <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">Please check if the server is running</p>
                   <button
                     type="button"

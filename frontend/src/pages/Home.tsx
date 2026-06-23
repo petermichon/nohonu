@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
+import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { GitBranch, Upload, Globe as GlobeIcon, User, Monitor, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Footer } from '../components/Footer.tsx';
 
 function Home() {
   const { font } = useFont();
+  const { accentColor, getAccentColorValues } = useAccentColor();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
+
+  const accentColorValues = getAccentColorValues();
+  const accentColorRef = useRef(accentColor);
   const cursorPosRef = useRef<{ x: number; y: number } | null>(null);
   const dotPosRef = useRef<{ x: number; y: number } | null>(null); // Start hidden
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -81,6 +87,10 @@ function Home() {
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    accentColorRef.current = accentColor;
+  }, [accentColor]);
 
   const animationRef = useRef<number | null>(null);
 
@@ -212,13 +222,14 @@ function Home() {
         const radiusY = (visualRadius / 100) * rect.height;
         ctx.beginPath();
         ctx.ellipse(cursorX, cursorY, radiusX, radiusY, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(99, 102, 241, ${0.4 * circleOpacityRef.current})`;
+        const circleColor = ACCENT_COLORS[accentColorRef.current].rgb;
+        ctx.strokeStyle = `rgba(${circleColor}, ${0.4 * circleOpacityRef.current})`;
         ctx.lineWidth = 2;
         ctx.stroke();
       }
 
       // Batch draw by color for better performance using typed arrays
-      const colors = ['#6366f1', '#818cf8', '#a5b4fc'];
+      const colors = ACCENT_COLORS[accentColorRef.current].particles;
       const isParticlesFadingIn = circleEnabledRef.current && particlesOpacityRef.current < 1;
 
       for (let c = 0; c < 3; c++) {
@@ -261,7 +272,6 @@ function Home() {
       const endTime = performance.now();
       frameCount++;
       if (endTime - lastTime >= 1000) {
-        console.log(`FPS: ${frameCount}, Frame time: ${(endTime - startTime).toFixed(2)}ms`);
         frameCount = 0;
         lastTime = endTime;
       }
@@ -299,12 +309,12 @@ function Home() {
               className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-[1.05] text-balance text-zinc-900 dark:text-zinc-50 animate-fade-in"
               style={{ fontFamily: getFontFamily(font) }}
             >
-              The home for <span className="text-indigo-500">creative</span> static sites.
+              The home for <span className={accentColorValues.text}>creative</span> static sites.
             </h1>
             <div className="flex items-center gap-3 mt-8 animate-fade-in-delayed">
               <Link
-                to="/login"
-                className="px-4 h-[46px] rounded-full text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-500/90 cursor-pointer transition-colors whitespace-nowrap flex items-center justify-center"
+                to="/signup"
+                className={`px-4 h-[46px] rounded-full text-sm font-medium text-white cursor-pointer transition-colors whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
               >
                 Get Started
               </Link>
@@ -395,9 +405,13 @@ function Home() {
 
             {/* Step 1 */}
             <div className="flex items-start gap-6 w-full pl-20 relative">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center z-10">
-                <GitBranch className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-bold">
+              <div
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center z-10`}
+              >
+                <GitBranch className={`w-10 h-10 ${accentColorValues.textDark}`} />
+                <div
+                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white flex items-center justify-center text-sm font-bold`}
+                >
                   1
                 </div>
               </div>
@@ -417,9 +431,13 @@ function Home() {
 
             {/* Step 2 */}
             <div className="flex items-start gap-6 w-full pl-20 relative">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center z-10">
-                <Upload className="w-10 h-10 text-green-600 dark:text-green-400" />
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">
+              <div
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center z-10`}
+              >
+                <Upload className={`w-10 h-10 ${accentColorValues.textDark}`} />
+                <div
+                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white flex items-center justify-center text-sm font-bold`}
+                >
                   2
                 </div>
               </div>
@@ -439,9 +457,13 @@ function Home() {
 
             {/* Step 3 */}
             <div className="flex items-start gap-6 w-full pl-20 relative">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center z-10">
-                <GlobeIcon className="w-10 h-10 text-purple-600 dark:text-purple-400" />
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-bold">
+              <div
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-20 h-20 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center z-10`}
+              >
+                <GlobeIcon className={`w-10 h-10 ${accentColorValues.textDark}`} />
+                <div
+                  className={`absolute -top-2 -right-2 w-8 h-8 rounded-full ${accentColorValues.bg} text-white flex items-center justify-center text-sm font-bold`}
+                >
                   3
                 </div>
               </div>
@@ -530,8 +552,10 @@ function Home() {
             {/* YOU node */}
             <div className="flex flex-col items-center z-10">
               <div className="node-glow w-48 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col items-center gap-3">
-                <div className="w-18 h-18 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center p-4">
-                  <User className="w-9 h-9 text-indigo-500 dark:text-indigo-400" />
+                <div
+                  className={`w-18 h-18 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center p-4`}
+                >
+                  <User className={`w-9 h-9 ${accentColorValues.text}`} />
                 </div>
                 <div className="text-center">
                   <div
@@ -544,15 +568,15 @@ function Home() {
                 </div>
                 <div className="w-full space-y-1.5 mt-1">
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Upload files
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Manage domains
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Monitor traffic
                   </div>
                 </div>
@@ -564,12 +588,14 @@ function Home() {
               <div className="relative w-full flex flex-col items-center gap-1">
                 {/* Upload arrow */}
                 <div className="flex items-center w-full gap-1">
-                  <div className="flex-1 h-px bg-indigo-200 dark:bg-indigo-800 relative overflow-hidden rounded-full">
-                    <div className="flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+                  <div className={`flex-1 h-px ${accentColorValues.line} relative overflow-hidden rounded-full`}>
+                    <div
+                      className={`flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-${accentColorValues.gradient} to-transparent`}
+                    />
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-indigo-400 dark:text-indigo-500 shrink-0" />
+                  <ArrowRight className={`w-3.5 h-3.5 ${accentColorValues.textLight} shrink-0`} />
                 </div>
-                <span className="text-[11px] font-medium text-indigo-400 dark:text-indigo-500 tracking-wide uppercase">
+                <span className={`text-[11px] font-medium ${accentColorValues.textLight} tracking-wide uppercase`}>
                   deploy
                 </span>
               </div>
@@ -578,9 +604,11 @@ function Home() {
             {/* NOHONU node */}
             <div className="flex flex-col items-center z-10">
               <div className="w-56 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col items-center gap-3">
-                <div className="w-18 h-18 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center p-4">
+                <div
+                  className={`w-18 h-18 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center p-4`}
+                >
                   <span
-                    className="text-3xl font-bold text-indigo-500 dark:text-indigo-400"
+                    className={`text-3xl font-bold ${accentColorValues.text}`}
                     style={{ fontFamily: "'Outfit', sans-serif" }}
                   >
                     N
@@ -597,19 +625,19 @@ function Home() {
                 </div>
                 <div className="w-full space-y-1.5 mt-1">
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Stores your site
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     SSL termination
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Global CDN delivery
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     DDoS protection
                   </div>
                 </div>
@@ -621,15 +649,15 @@ function Home() {
               <div className="relative w-full flex flex-col items-center gap-1">
                 {/* Serve arrow */}
                 <div className="flex items-center w-full gap-1">
-                  <div className="flex-1 h-px bg-emerald-200 dark:bg-emerald-800 relative overflow-hidden rounded-full">
+                  <div className={`flex-1 h-px ${accentColorValues.line} relative overflow-hidden rounded-full`}>
                     <div
-                      className="flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"
+                      className={`flow-packet-right absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-${accentColorValues.gradient} to-transparent`}
                       style={{ animationDelay: '1.1s' }}
                     />
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-500 shrink-0" />
+                  <ArrowRight className={`w-3.5 h-3.5 ${accentColorValues.textLight} shrink-0`} />
                 </div>
-                <span className="text-[11px] font-medium text-emerald-400 dark:text-emerald-500 tracking-wide uppercase">
+                <span className={`text-[11px] font-medium ${accentColorValues.textLight} tracking-wide uppercase`}>
                   serve
                 </span>
               </div>
@@ -638,8 +666,10 @@ function Home() {
             {/* VISITORS node */}
             <div className="flex flex-col items-center z-10">
               <div className="w-48 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col items-center gap-3">
-                <div className="w-18 h-18 rounded-xl bg-emerald-50 dark:bg-emerald-900/40 flex items-center justify-center p-4">
-                  <Monitor className="w-9 h-9 text-emerald-500 dark:text-emerald-400" />
+                <div
+                  className={`w-18 h-18 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center p-4`}
+                >
+                  <Monitor className={`w-9 h-9 ${accentColorValues.text}`} />
                 </div>
                 <div className="text-center">
                   <div
@@ -652,15 +682,15 @@ function Home() {
                 </div>
                 <div className="w-full space-y-1.5 mt-1">
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Instant load
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Any device
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <div className={`w-1.5 h-1.5 rounded-full ${accentColorValues.dot} shrink-0`} />
                     Anywhere on earth
                   </div>
                 </div>
@@ -684,8 +714,10 @@ function Home() {
         <div className="flex md:hidden flex-col items-center gap-0">
           {/* YOU node */}
           <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center shrink-0">
-              <User className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
+            <div
+              className={`w-14 h-14 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center shrink-0`}
+            >
+              <User className={`w-7 h-7 ${accentColorValues.text}`} />
             </div>
             <div>
               <div
@@ -700,17 +732,23 @@ function Home() {
 
           {/* Connector down */}
           <div className="flex flex-col items-center gap-0.5 py-3">
-            <div className="h-8 w-px bg-indigo-200 dark:bg-indigo-800 relative overflow-hidden">
-              <div className="flow-packet-down absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent via-indigo-500 to-transparent" />
+            <div className={`h-8 w-px ${accentColorValues.line} relative overflow-hidden`}>
+              <div
+                className={`flow-packet-down absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent via-${accentColorValues.gradient} to-transparent`}
+              />
             </div>
-            <span className="text-[11px] font-medium text-indigo-400 tracking-wide uppercase">deploy</span>
+            <span className={`text-[11px] font-medium ${accentColorValues.textLightOnly} tracking-wide uppercase`}>
+              deploy
+            </span>
           </div>
 
           {/* NOHONU node */}
           <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center shrink-0">
+            <div
+              className={`w-14 h-14 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center shrink-0`}
+            >
               <span
-                className="text-2xl font-bold text-indigo-500 dark:text-indigo-400"
+                className={`text-2xl font-bold ${accentColorValues.text}`}
                 style={{ fontFamily: "'Outfit', sans-serif" }}
               >
                 N
@@ -798,40 +836,89 @@ function Home() {
         </h2>
 
         <div className="flex flex-wrap justify-center gap-2">
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            style={{ '--hover-bg': `rgb(${accentColorValues.rgb})` } as React.CSSProperties}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Automatic SSL certificates</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Custom domains</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">DDoS protection</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Automated deployment</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Real-time analytics</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Uptime monitoring</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">File upload</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Domain search</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Version management</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Self-hosting</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Git integration</p>
           </div>
-          <div className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer hover:bg-indigo-600">
+          <div
+            className="px-3 py-2 rounded-md bg-zinc-900 text-center cursor-pointer"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `rgb(${accentColorValues.rgb})`)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+          >
             <p className="text-zinc-900 dark:text-zinc-50 text-sm">Free subdomains</p>
           </div>
         </div>
@@ -845,13 +932,13 @@ function Home() {
         </div>
       </section>
 
-      {/* Hosted in France */}
+      {/* Hosted in Europe */}
       <section className="max-w-7xl mx-auto px-6 py-16">
         <h2
           className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-4 text-center"
           style={{ fontFamily: getFontFamily(font) }}
         >
-          Hosted in France
+          Hosted in Europe
         </h2>
         <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm max-w-md mx-auto">
           Your data stays within European borders. GDPR compliant infrastructure.
@@ -884,44 +971,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-            <div className="flex items-center gap-6 text-sm text-zinc-600 dark:text-zinc-400">
-              <Link to="/about" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                About
-              </Link>
-              <Link to="/legal" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                Legal
-              </Link>
-              <a
-                href="https://github.com/nohonu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                </svg>
-                GitHub
-              </a>
-              <a
-                href="https://opencollective.com/nohonu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12c2.54 0 4.894-.79 6.834-2.135l-3.107-3.109a7.715 7.715 0 1 1 0-13.512l3.107-3.109A11.943 11.943 0 0 0 12 0zm9.865 5.166l-3.109 3.107A7.67 7.67 0 0 1 19.715 12a7.682 7.682 0 0 1-.959 3.727l3.109 3.107A11.943 11.943 0 0 0 24 12c0-2.54-.79-4.894-2.135-6.834z" />
-                </svg>
-                Open Collective
-              </a>
-            </div>
-            <div className="text-sm text-zinc-500 dark:text-zinc-500">© 2026 Nohonu</div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </section>
   );
 }

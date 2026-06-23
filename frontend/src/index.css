@@ -75,6 +75,17 @@ html {
   overflow-y: scroll;
 }
 
+/* Text selection color */
+::selection {
+  background-color: #6366f1;
+  color: white;
+}
+
+::-moz-selection {
+  background-color: #6366f1;
+  color: white;
+}
+
 #root {
   -webkit-font-smoothing: antialiased;
   font-family:

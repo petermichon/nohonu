@@ -4,6 +4,7 @@ import './index.css';
 import App from './App.tsx';
 import { ThemeProvider } from './lib/ThemeProvider.tsx';
 import { ConnectionProvider } from './lib/ConnectionProvider.tsx';
+import { AccentColorProvider } from './lib/AccentColorProvider.tsx';
 import { applyFont, validFonts, waitForFont, type Font } from './lib/FontProvider.tsx';
 
 const savedFont = localStorage.getItem('font');
@@ -15,7 +16,9 @@ waitForFont(font).then(() => {
     <StrictMode>
       <ConnectionProvider>
         <ThemeProvider>
-          <App />
+          <AccentColorProvider>
+            <App />
+          </AccentColorProvider>
         </ThemeProvider>
       </ConnectionProvider>
     </StrictMode>

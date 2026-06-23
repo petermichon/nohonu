@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { Footer } from '../components/Footer.tsx';
 
 const providers = [
@@ -169,6 +170,8 @@ function getProviderUrl(provider: (typeof providers)[0], domain: string): string
 }
 
 function DomainExplore() {
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const [domain, setDomain] = useState('');
   const [sortBy, setSortBy] = useState<'price' | 'name'>('price');
 
@@ -201,7 +204,7 @@ function DomainExplore() {
             value={domain}
             onChange={(e) => setDomain(e.target.value)}
             placeholder="Search for a domain..."
-            className="w-full px-6 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent text-lg"
+            className={`w-full px-6 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 ${accentColorValues.focus} focus:border-transparent text-lg`}
           />
         </div>
       </div>
@@ -215,7 +218,7 @@ function DomainExplore() {
               onClick={() => setSortBy('price')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
                 sortBy === 'price'
-                  ? 'bg-indigo-500 text-white'
+                  ? `${accentColorValues.bg} text-white`
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
@@ -225,7 +228,7 @@ function DomainExplore() {
               onClick={() => setSortBy('name')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
                 sortBy === 'name'
-                  ? 'bg-indigo-500 text-white'
+                  ? `${accentColorValues.bg} text-white`
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
@@ -244,7 +247,7 @@ function DomainExplore() {
               href={getProviderUrl(provider, domain)}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg no-underline"
+              className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 hover:shadow-lg no-underline"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -272,7 +275,9 @@ function DomainExplore() {
                 <span className="text-sm text-zinc-500 dark:text-zinc-400">
                   {provider.supportsDomain && domain ? `Search for "${domain}"` : 'View pricing'}
                 </span>
-                <ExternalLink className="w-4 h-4 text-zinc-400 group-hover:text-indigo-500 transition-colors" />
+                <ExternalLink
+                  className={`w-4 h-4 text-zinc-400 group-hover:${accentColorValues.text} transition-colors`}
+                />
               </div>
             </a>
           ))}

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { TopBar } from './components/TopBar.tsx';
 import { ToastProvider } from './lib/ToastContext.tsx';
 import { GlobalToast } from './components/GlobalToast.tsx';
@@ -23,29 +23,6 @@ import Docs from './pages/Docs.tsx';
 import Login from './pages/Login.tsx';
 import Signup from './pages/Signup.tsx';
 
-function AuthHeader({ currentPath }: { currentPath: string }) {
-  return (
-    <header className="h-16 shrink-0 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
-      <div className="h-full flex items-center justify-between gap-2 max-w-7xl mx-auto px-3 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <span
-            className="font-semibold text-xl text-zinc-900 dark:text-zinc-50 tracking-tight"
-            style={{ fontFamily: "'Outfit', sans-serif" }}
-          >
-            nohonu
-          </span>
-        </Link>
-        <Link
-          to={currentPath === '/login' ? '/signup' : '/login'}
-          className="px-4 h-9 rounded-full text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
-        >
-          {currentPath === '/login' ? 'Sign up' : 'Log in'}
-        </Link>
-      </div>
-    </header>
-  );
-}
-
 function AppInner() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
@@ -53,11 +30,11 @@ function AppInner() {
   return (
     <>
       {/* Top Bar */}
-      {isAuthPage ? <AuthHeader currentPath={location.pathname} /> : <TopBar />}
+      {isAuthPage ? null : <TopBar />}
 
       {/* Page Content */}
       <div className="flex-1">
-        <div className="max-w-7xl mx-auto">
+        <div className={isAuthPage ? '' : 'max-w-7xl mx-auto'}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/docs" element={<Docs />} />
