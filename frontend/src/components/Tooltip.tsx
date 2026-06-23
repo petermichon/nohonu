@@ -65,7 +65,7 @@ export function Tooltip({ content, children, position = 'top' }: TooltipProps) {
       {visible &&
         (() => {
           const baseClasses =
-            'fixed z-50 px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md text-zinc-900 dark:text-zinc-100 text-xs rounded-lg whitespace-nowrap pointer-events-none';
+            'fixed z-50 px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md text-zinc-950 dark:text-zinc-100 text-xs rounded-lg whitespace-nowrap pointer-events-none';
           return (
             <div
               className={`${baseClasses} ${transformClasses[position]}`}

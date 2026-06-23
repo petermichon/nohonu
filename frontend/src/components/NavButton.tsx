@@ -29,8 +29,8 @@ export function NavButton({
 }: NavButtonProps) {
   const className = `flex items-center justify-between gap-3 px-3 rounded-lg text-sm font-medium cursor-pointer ${
     isActive
-      ? 'bg-stone-100 dark:bg-stone-800 text-zinc-900 dark:text-zinc-100'
-      : 'text-zinc-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100'
+      ? 'bg-stone-100 dark:bg-stone-800 text-zinc-950 dark:text-zinc-100'
+      : 'text-zinc-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-950 dark:hover:text-zinc-100'
   } ${isCollapsed ? 'flex-col justify-center py-3 gap-1' : ''}`;
 
   const renderIcon = () => {

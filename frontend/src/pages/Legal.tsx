@@ -42,7 +42,7 @@ export default function Legal() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Legal</h1>
+        <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">Legal</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Review our policies and terms governing the use of Nohonu.
         </p>
@@ -59,7 +59,7 @@ export default function Legal() {
               <Icon className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{label}</h2>
+              <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-100 mb-1">{label}</h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
             </div>
           </Link>

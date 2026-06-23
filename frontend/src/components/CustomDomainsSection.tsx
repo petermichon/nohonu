@@ -131,9 +131,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
               className="flex items-center justify-between w-full text-left"
             >
               <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">DNS Setup Instructions</span>
-              <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                {showDnsInstructions ? 'Hide' : 'Show'}
-              </span>
+              <span className="text-xs text-zinc-400 dark:text-zinc-500">{showDnsInstructions ? 'Hide' : 'Show'}</span>
             </button>
             {showDnsInstructions && (
               <div className="mt-3 space-y-2 text-xs">
@@ -162,7 +160,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             value={newCustomDomain}
             onChange={(e) => setNewCustomDomain(e.target.value)}
             placeholder="example.com"
-            className="flex-1 px-3 py-2 rounded-lg text-sm bg-stone-100 dark:bg-stone-800 text-zinc-900 dark:text-zinc-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="flex-1 px-3 py-2 rounded-lg text-sm bg-stone-100 dark:bg-stone-800 text-zinc-950 dark:text-zinc-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
             disabled={addingCustomDomain}
           />
           <button

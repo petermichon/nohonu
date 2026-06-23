@@ -82,7 +82,7 @@ export function OverviewSection({
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 truncate">{site.domain}</h1>
+                    <h1 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 truncate">{site.domain}</h1>
                     <span
                       className={`shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                         !site.enabled

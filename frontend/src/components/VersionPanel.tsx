@@ -186,7 +186,7 @@ export function VersionPanel({
                 onChange={(e) => setGithubRepo(e.target.value)}
                 onFocus={() => repoHistory.length > 0 && setShowRepoDropdown(true)}
                 placeholder="owner/repo"
-                className="w-full px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                className="w-full px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
               />
               {showRepoDropdown && repoHistory.length > 0 && (
                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg py-1 max-h-48 overflow-auto">
@@ -204,7 +204,7 @@ export function VersionPanel({
                       }}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-stone-100 dark:hover:bg-stone-700 flex items-center justify-between"
                     >
-                      <span className="text-zinc-900 dark:text-zinc-100">
+                      <span className="text-zinc-950 dark:text-zinc-100">
                         {entry.repo}
                         <span className="text-zinc-400 dark:text-zinc-500 ml-2">@{entry.branch}</span>
                       </span>
@@ -221,7 +221,7 @@ export function VersionPanel({
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
-              className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
+              className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
             />
             <button
               type="button"

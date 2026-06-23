@@ -15,9 +15,14 @@ function Login() {
 
   const accentColorValues = getAccentColorValues();
   const inputBaseClass =
-    'w-full px-4 h-[46px] rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:border-transparent';
-  const buttonBaseClass =
-    'w-full h-[46px] rounded-full text-sm font-medium text-white cursor-pointer transition-colors';
+    'w-full px-4 h-[46px] rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:border-transparent';
+  const buttonBaseClass = `w-full h-[46px] rounded-full text-sm font-medium ${
+    accentColorValues.textColor === 'light'
+      ? 'text-white'
+      : accentColorValues.textColor === 'inverted'
+        ? 'text-zinc-100 dark:text-zinc-950'
+        : 'text-zinc-950'
+  } cursor-pointer transition-colors`;
   const accentColorRef = useRef(accentColor);
   const particlesRef = useRef<{
     x: Float32Array;
@@ -164,7 +169,7 @@ function Login() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1
-              className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2"
+              className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-2"
               style={{ fontFamily: getFontFamily(font) }}
             >
               Welcome back
@@ -182,6 +187,7 @@ function Login() {
                 className={`${inputBaseClass} ${accentColorValues.focus}`}
                 placeholder="Email Address"
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -194,6 +200,7 @@ function Login() {
                 className={`${inputBaseClass} pr-12 ${accentColorValues.focus}`}
                 placeholder="Password"
                 required
+                autoComplete="current-password"
               />
               <button
                 type="button"
@@ -241,11 +248,22 @@ function Login() {
                     className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
                       rememberMe
                         ? `${accentColorValues.bg} border-${accentColorValues.gradient}`
-                        : 'bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-600'
+                        : 'bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-600'
                     }`}
                   >
                     {rememberMe && (
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className={`w-3 h-3 ${
+                          accentColorValues.textColor === 'light'
+                            ? 'text-white'
+                            : accentColorValues.textColor === 'inverted'
+                              ? 'text-zinc-100 dark:text-zinc-950'
+                              : 'text-zinc-950'
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}

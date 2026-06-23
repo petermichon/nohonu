@@ -22,7 +22,7 @@ export function BackButton({
 
   if (isCollapsed && variant === 'sidebar') {
     const baseClassName = 'flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-medium gap-1';
-    const hoverClasses = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100';
+    const hoverClasses = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-950 dark:hover:text-zinc-100';
     const disabledClass = `${baseClassName} text-zinc-400 dark:text-zinc-600 opacity-50`;
     const enabledClass = `${baseClassName} text-zinc-600 dark:text-zinc-400 ${hoverClasses}`;
     const className = disabled ? disabledClass : enabledClass;
@@ -47,7 +47,7 @@ export function BackButton({
   const baseClassName =
     variant === 'sidebar'
       ? 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium'
-      : 'inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer';
+      : 'inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 cursor-pointer';
 
   if (disabled) {
     return (
@@ -63,7 +63,7 @@ export function BackButton({
     );
   }
 
-  const sidebarHover = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100';
+  const sidebarHover = 'hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-950 dark:hover:text-zinc-100';
   const interactiveClassName =
     variant === 'sidebar' ? `${baseClassName} text-zinc-600 dark:text-zinc-400 ${sidebarHover}` : baseClassName;
 

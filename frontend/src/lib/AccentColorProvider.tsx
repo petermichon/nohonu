@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 export type AccentColor =
+  | 'default'
   | 'red'
   | 'orange'
   | 'amber'
@@ -22,6 +23,24 @@ export type AccentColor =
 
 // Centralized accent color configuration
 export const ACCENT_COLORS = {
+  default: {
+    bg: 'bg-zinc-950 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200',
+    bgLight: 'bg-zinc-50 dark:bg-zinc-800',
+    bgLighter: 'bg-zinc-50 dark:bg-zinc-950',
+    dot: 'bg-zinc-950 dark:bg-zinc-100',
+    line: 'bg-zinc-200 dark:bg-zinc-700',
+    text: 'text-zinc-950 dark:text-zinc-100',
+    textDark: 'text-zinc-800 dark:text-zinc-200',
+    textLight: 'text-zinc-600 dark:text-zinc-400',
+    textLightOnly: 'text-zinc-500',
+    focus: 'focus:ring-zinc-500',
+    link: 'text-zinc-950 dark:text-zinc-100 hover:text-zinc-700 dark:hover:text-zinc-300',
+    rgb: '250, 250, 250',
+    particles: ['#fafafa', '#f4f4f5', '#e4e4e7'],
+    gradient: 'zinc-950',
+    textColor: 'inverted',
+    selectionTextColor: '9, 9, 11',
+  },
   red: {
     bg: 'bg-red-500 hover:bg-red-500/90',
     bgLight: 'bg-red-100 dark:bg-red-900/30',
@@ -37,6 +56,8 @@ export const ACCENT_COLORS = {
     rgb: '239, 68, 68',
     particles: ['#ef4444', '#f87171', '#fca5a5'],
     gradient: 'red-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   orange: {
     bg: 'bg-orange-500 hover:bg-orange-500/90',
@@ -53,6 +74,8 @@ export const ACCENT_COLORS = {
     rgb: '249, 115, 22',
     particles: ['#f97316', '#fb923c', '#fdba74'],
     gradient: 'orange-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   amber: {
     bg: 'bg-amber-500 hover:bg-amber-500/90',
@@ -69,6 +92,8 @@ export const ACCENT_COLORS = {
     rgb: '245, 158, 11',
     particles: ['#f59e0b', '#fbbf24', '#fcd34d'],
     gradient: 'amber-500',
+    textColor: 'dark',
+    selectionTextColor: '9, 9, 11',
   },
   yellow: {
     bg: 'bg-yellow-500 hover:bg-yellow-500/90',
@@ -85,6 +110,8 @@ export const ACCENT_COLORS = {
     rgb: '234, 179, 8',
     particles: ['#eab308', '#facc15', '#fde047'],
     gradient: 'yellow-500',
+    textColor: 'dark',
+    selectionTextColor: '9, 9, 11',
   },
   lime: {
     bg: 'bg-lime-500 hover:bg-lime-500/90',
@@ -101,6 +128,8 @@ export const ACCENT_COLORS = {
     rgb: '132, 204, 22',
     particles: ['#84cc16', '#a3e635', '#bef264'],
     gradient: 'lime-500',
+    textColor: 'dark',
+    selectionTextColor: '9, 9, 11',
   },
   green: {
     bg: 'bg-green-500 hover:bg-green-500/90',
@@ -117,6 +146,8 @@ export const ACCENT_COLORS = {
     rgb: '34, 197, 94',
     particles: ['#22c55e', '#4ade80', '#86efac'],
     gradient: 'green-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   emerald: {
     bg: 'bg-emerald-500 hover:bg-emerald-500/90',
@@ -133,6 +164,8 @@ export const ACCENT_COLORS = {
     rgb: '16, 185, 129',
     particles: ['#10b981', '#34d399', '#6ee7b7'],
     gradient: 'emerald-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   teal: {
     bg: 'bg-teal-500 hover:bg-teal-500/90',
@@ -149,6 +182,8 @@ export const ACCENT_COLORS = {
     rgb: '20, 184, 166',
     particles: ['#14b8a6', '#2dd4bf', '#5eead4'],
     gradient: 'teal-500',
+    textColor: 'dark',
+    selectionTextColor: '9, 9, 11',
   },
   cyan: {
     bg: 'bg-cyan-500 hover:bg-cyan-500/90',
@@ -165,6 +200,8 @@ export const ACCENT_COLORS = {
     rgb: '6, 182, 212',
     particles: ['#06b6d4', '#22d3ee', '#67e8f9'],
     gradient: 'cyan-500',
+    textColor: 'dark',
+    selectionTextColor: '9, 9, 11',
   },
   sky: {
     bg: 'bg-sky-500 hover:bg-sky-500/90',
@@ -181,6 +218,8 @@ export const ACCENT_COLORS = {
     rgb: '14, 165, 233',
     particles: ['#0ea5e9', '#38bdf8', '#7dd3fc'],
     gradient: 'sky-500',
+    textColor: 'dark',
+    selectionTextColor: '9, 9, 11',
   },
   blue: {
     bg: 'bg-blue-500 hover:bg-blue-500/90',
@@ -197,6 +236,8 @@ export const ACCENT_COLORS = {
     rgb: '59, 130, 246',
     particles: ['#3b82f6', '#60a5fa', '#93c5fd'],
     gradient: 'blue-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   indigo: {
     bg: 'bg-indigo-500 hover:bg-indigo-500/90',
@@ -213,6 +254,8 @@ export const ACCENT_COLORS = {
     rgb: '99, 102, 241',
     particles: ['#6366f1', '#818cf8', '#a5b4fc'],
     gradient: 'indigo-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   violet: {
     bg: 'bg-violet-500 hover:bg-violet-500/90',
@@ -229,6 +272,8 @@ export const ACCENT_COLORS = {
     rgb: '139, 92, 246',
     particles: ['#8b5cf6', '#a78bfa', '#c4b5fd'],
     gradient: 'violet-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   purple: {
     bg: 'bg-purple-500 hover:bg-purple-500/90',
@@ -245,6 +290,8 @@ export const ACCENT_COLORS = {
     rgb: '168, 85, 247',
     particles: ['#a855f7', '#c084fc', '#d8b4fe'],
     gradient: 'purple-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   fuchsia: {
     bg: 'bg-fuchsia-500 hover:bg-fuchsia-500/90',
@@ -261,6 +308,8 @@ export const ACCENT_COLORS = {
     rgb: '217, 70, 239',
     particles: ['#d946ef', '#e879f9', '#f0abfc'],
     gradient: 'fuchsia-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   pink: {
     bg: 'bg-pink-500 hover:bg-pink-500/90',
@@ -277,6 +326,8 @@ export const ACCENT_COLORS = {
     rgb: '236, 72, 153',
     particles: ['#ec4899', '#f472b6', '#f9a8d4'],
     gradient: 'pink-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
   rose: {
     bg: 'bg-rose-500 hover:bg-rose-500/90',
@@ -293,6 +344,8 @@ export const ACCENT_COLORS = {
     rgb: '244, 63, 94',
     particles: ['#f43f5e', '#fb7185', '#fda4af'],
     gradient: 'rose-500',
+    textColor: 'light',
+    selectionTextColor: '250, 250, 250',
   },
 } as const;
 
@@ -309,6 +362,7 @@ export function AccentColorProvider({ children }: { children: ReactNode }) {
   const [accentColor, setAccentColorState] = useState<AccentColor>(() => {
     const saved = localStorage.getItem('accentColor');
     const validColors: AccentColor[] = [
+      'default',
       'red',
       'orange',
       'amber',
@@ -330,11 +384,16 @@ export function AccentColorProvider({ children }: { children: ReactNode }) {
     if (saved && validColors.includes(saved as AccentColor)) {
       return saved as AccentColor;
     }
-    return 'indigo';
+    return 'default';
   });
 
   useEffect(() => {
     localStorage.setItem('accentColor', accentColor);
+    // Update CSS variable for text selection color
+    const rgb = ACCENT_COLORS[accentColor].rgb;
+    const selectionTextColor = ACCENT_COLORS[accentColor].selectionTextColor || '255, 255, 255';
+    document.documentElement.style.setProperty('--selection-color', `rgb(${rgb})`);
+    document.documentElement.style.setProperty('--selection-text-color', `rgb(${selectionTextColor})`);
   }, [accentColor]);
 
   const setAccentColor = (color: AccentColor) => {

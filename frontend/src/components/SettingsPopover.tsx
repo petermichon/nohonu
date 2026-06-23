@@ -110,7 +110,7 @@ export function SettingsPopover() {
           setKeyStatus('idle');
           setOpen((o) => !o);
         }}
-        className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
+        className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
         title="Connection settings"
       >
         <Settings className="w-5 h-5" />
@@ -136,13 +136,13 @@ export function SettingsPopover() {
                     setUrlStatus('idle');
                   }}
                   placeholder="https://localhost/api"
-                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
                 />
                 <button
                   type="button"
                   onClick={saveUrl}
                   disabled={urlStatus === 'checking'}
-                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-900 rounded-lg cursor-pointer disabled:cursor-auto"
+                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-950 rounded-lg cursor-pointer disabled:cursor-auto"
                 >
                   {urlStatus === 'checking' ? '…' : urlStatus === 'valid' ? '✓' : 'Save'}
                 </button>
@@ -167,13 +167,13 @@ export function SettingsPopover() {
                     setKeyStatus('idle');
                   }}
                   placeholder="Leave empty if not set"
-                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
                 />
                 <button
                   type="button"
                   onClick={saveKey}
                   disabled={keyStatus === 'checking'}
-                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-900 rounded-lg cursor-pointer disabled:cursor-auto"
+                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-950 rounded-lg cursor-pointer disabled:cursor-auto"
                 >
                   {keyStatus === 'checking' ? '…' : keyStatus === 'valid' || keyStatus === 'open' ? '✓' : 'Save'}
                 </button>

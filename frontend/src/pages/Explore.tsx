@@ -17,7 +17,7 @@ function Explore() {
     <section className="mb-12">
       <header className="max-w-7xl mx-auto px-6 pt-24 pb-8">
         <h1
-          className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-[1.05] text-balance text-zinc-900 dark:text-zinc-50"
+          className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50"
           style={{ fontFamily: "'Outfit', sans-serif" }}
         >
           Explore

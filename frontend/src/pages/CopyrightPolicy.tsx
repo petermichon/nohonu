@@ -9,13 +9,13 @@ export default function CopyrightPolicy() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Copyright Policy</h1>
+        <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">Copyright Policy</h1>
         <p className="text-sm text-zinc-400 dark:text-zinc-500">Last updated: June 3, 2026</p>
       </div>
 
       <div className="space-y-8 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
         <section id="overview">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">1. Overview</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">1. Overview</h2>
           <p>
             Nohonu respects the intellectual property rights of others and expects its users to do the same. In
             accordance with the Digital Millennium Copyright Act (DMCA) and other applicable laws, we will respond to
@@ -24,7 +24,7 @@ export default function CopyrightPolicy() {
         </section>
 
         <section id="reporting">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">2. Reporting Infringement</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">2. Reporting Infringement</h2>
           <p className="mb-3">
             If you believe that content hosted on Nohonu infringes your copyright, please submit a written notice
             containing the following information:
@@ -47,7 +47,7 @@ export default function CopyrightPolicy() {
             Send your notice to{' '}
             <a
               href="mailto:dmca@nohonu.com"
-              className="text-zinc-900 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
+              className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               dmca@nohonu.com
             </a>
@@ -56,7 +56,7 @@ export default function CopyrightPolicy() {
         </section>
 
         <section id="our-response">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">3. Our Response</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">3. Our Response</h2>
           <p className="mb-3">Upon receiving a valid DMCA notice, we may:</p>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>Remove or disable access to the allegedly infringing content.</li>
@@ -66,7 +66,7 @@ export default function CopyrightPolicy() {
         </section>
 
         <section id="counter-notice">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">4. Counter-Notice</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">4. Counter-Notice</h2>
           <p className="mb-3">
             If you believe your content was removed in error, you may submit a counter-notice containing:
           </p>
@@ -87,7 +87,7 @@ export default function CopyrightPolicy() {
             Send counter-notices to{' '}
             <a
               href="mailto:dmca@nohonu.com"
-              className="text-zinc-900 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
+              className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               dmca@nohonu.com
             </a>
@@ -97,7 +97,7 @@ export default function CopyrightPolicy() {
         </section>
 
         <section id="repeat-infringers">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">5. Repeat Infringers</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">5. Repeat Infringers</h2>
           <p>
             Nohonu will, in appropriate circumstances, disable or terminate the accounts of users who are repeat
             copyright infringers.
@@ -105,12 +105,12 @@ export default function CopyrightPolicy() {
         </section>
 
         <section id="contact">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">6. Contact</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">6. Contact</h2>
           <p>
             For copyright-related inquiries, contact our designated agent at{' '}
             <a
               href="mailto:dmca@nohonu.com"
-              className="text-zinc-900 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
+              className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               dmca@nohonu.com
             </a>

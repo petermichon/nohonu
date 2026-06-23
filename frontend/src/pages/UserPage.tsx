@@ -25,7 +25,7 @@ export default function UserPage() {
           <User className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
         </div>
         <div>
-          <h1 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">@{username}</h1>
+          <h1 className="text-base font-semibold text-zinc-950 dark:text-zinc-100">@{username}</h1>
           {!loading && !error && (
             <p className="text-xs text-zinc-500 dark:text-zinc-400 -mt-1">
               {userSites.length === 1 ? '1 site' : `${userSites.length} sites`}

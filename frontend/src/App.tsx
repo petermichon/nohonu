@@ -22,19 +22,45 @@ import UserPage from './pages/UserPage.tsx';
 import Docs from './pages/Docs.tsx';
 import Login from './pages/Login.tsx';
 import Signup from './pages/Signup.tsx';
+import { useState } from 'react';
+
+function useScrollbarWidth() {
+  const getScrollbarWidth = () => {
+    const outer = document.createElement('div');
+    outer.style.visibility = 'hidden';
+    outer.style.overflow = 'scroll';
+    document.body.appendChild(outer);
+
+    const inner = document.createElement('div');
+    outer.appendChild(inner);
+
+    const width = outer.offsetWidth - inner.offsetWidth;
+    document.body.removeChild(outer);
+
+    return width;
+  };
+
+  const [scrollbarWidth] = useState(() => getScrollbarWidth());
+  return scrollbarWidth;
+}
 
 function AppInner() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const scrollbarWidth = useScrollbarWidth();
 
   return (
-    <>
-      {/* Top Bar */}
-      {isAuthPage ? null : <TopBar />}
+    <div className="relative flex-1 flex flex-col min-h-0">
+      {/* Top Bar - absolute positioned to sit on top of scrolling content */}
+      {isAuthPage ? null : (
+        <div className="absolute top-0 left-0 z-50" style={{ right: `${scrollbarWidth}px` }}>
+          <TopBar />
+        </div>
+      )}
 
       {/* Page Content */}
-      <div className="flex-1">
-        <div className={isAuthPage ? '' : 'max-w-7xl mx-auto'}>
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className={isAuthPage ? '' : 'max-w-7xl mx-auto pt-20'}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/docs" element={<Docs />} />
@@ -95,16 +121,16 @@ function AppInner() {
           </Routes>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
 function AppContent() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
+      <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <AppInner />
         </div>
       </div>

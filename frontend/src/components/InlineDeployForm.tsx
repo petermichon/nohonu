@@ -123,7 +123,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Deploy New Site</h3>
+        <h3 className="text-sm font-semibold text-zinc-950 dark:text-zinc-100">Deploy New Site</h3>
         <button
           type="button"
           onClick={reset}
@@ -141,7 +141,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             onClick={() => setUploadMode('file')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer ${
               uploadMode === 'file'
-                ? 'bg-white dark:bg-stone-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                ? 'bg-white dark:bg-stone-700 text-zinc-950 dark:text-zinc-100 shadow-sm'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
@@ -153,7 +153,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             onClick={() => setUploadMode('github')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer ${
               uploadMode === 'github'
-                ? 'bg-white dark:bg-stone-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                ? 'bg-white dark:bg-stone-700 text-zinc-950 dark:text-zinc-100 shadow-sm'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
@@ -173,7 +173,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               value={newDomain}
               onChange={(e) => setNewDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
               placeholder="subdomain"
-              className="w-full pl-9 pr-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
+              className="w-full pl-9 pr-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
               autoFocus
             />
           </div>
@@ -190,7 +190,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               value={githubRepo}
               onChange={(e) => setGithubRepo(e.target.value)}
               placeholder="owner/repo"
-              className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
+              className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
             />
             <input
               type="text"
@@ -199,7 +199,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
-              className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
+              className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
             />
           </div>
         ) : (
@@ -242,7 +242,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                   <div className="flex items-center gap-2 w-full">
                     <FileArchive className="w-5 h-5 text-zinc-500 dark:text-zinc-400 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                      <p className="text-xs font-medium text-zinc-950 dark:text-zinc-100 truncate">
                         {selectedFile.name}
                       </p>
                       <p className="text-[11px] text-zinc-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
@@ -286,7 +286,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           type="button"
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={uploading || (uploadMode === 'github' ? !githubRepo || !newDomain : !selectedFile || !newDomain)}
-          className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 text-white dark:text-zinc-900 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
+          className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 text-white dark:text-zinc-950 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
         >
           {uploading ? (
             <>

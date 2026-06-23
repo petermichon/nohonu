@@ -116,7 +116,7 @@ export default function Account() {
 
   return (
     <div className="px-6">
-      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Account</h1>
+      <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-6">Account</h1>
 
       <Section id="profile" icon={User} title="Profile">
         <div className="grid gap-4 max-w-md">
@@ -135,12 +135,12 @@ export default function Account() {
                   setDisplayNameStatus('idle');
                 }}
                 placeholder="John Doe"
-                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
               />
               <button
                 type="button"
                 onClick={saveDisplayName}
-                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-zinc-900 font-medium rounded-lg cursor-pointer"
+                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer"
               >
                 {displayNameStatus === 'saved' ? 'Saved' : 'Save'}
               </button>
@@ -162,12 +162,12 @@ export default function Account() {
                   setUsernameStatus('idle');
                 }}
                 placeholder="your-username"
-                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
               />
               <button
                 type="button"
                 onClick={saveUsername}
-                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-zinc-900 font-medium rounded-lg cursor-pointer"
+                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer"
               >
                 {usernameStatus === 'saved' ? 'Saved' : 'Save'}
               </button>
@@ -205,13 +205,13 @@ export default function Account() {
                   setUrlStatus('idle');
                 }}
                 placeholder="https://localhost/api"
-                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
               />
               <button
                 type="button"
                 onClick={saveUrl}
                 disabled={urlStatus === 'checking'}
-                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-900 font-medium rounded-lg cursor-pointer disabled:cursor-auto"
+                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer disabled:cursor-auto"
               >
                 {urlStatus === 'checking' ? 'Checking…' : urlStatus === 'valid' ? 'Saved' : 'Save'}
               </button>
@@ -268,13 +268,13 @@ export default function Account() {
                   setKeyStatus('idle');
                 }}
                 placeholder="Leave empty if not set"
-                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
               />
               <button
                 type="button"
                 onClick={saveKey}
                 disabled={keyStatus === 'checking'}
-                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-900 font-medium rounded-lg cursor-pointer disabled:cursor-auto"
+                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer disabled:cursor-auto"
               >
                 {keyStatus === 'checking'
                   ? 'Checking…'

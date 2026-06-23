@@ -92,7 +92,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
         <Icon className={`w-5 h-5 ${iconClass} ${loading ? 'animate-spin' : ''}`} />
       </div>
       <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{message}</p>
-      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-stone-100 dark:bg-stone-800 px-3 py-2 rounded-lg mb-6 font-mono">
+      <p className="text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-stone-100 dark:bg-stone-800 px-3 py-2 rounded-lg mb-6 font-mono">
         {domain}
       </p>
       <div className="flex gap-3">

@@ -32,7 +32,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
     const data = payload[0].payload;
     return (
       <div className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md whitespace-nowrap">
-        <p className="flex items-center gap-1 text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+        <p className="flex items-center gap-1 text-xs font-semibold text-zinc-950 dark:text-zinc-100">
           <Eye className="w-3 h-3 text-zinc-400 dark:text-zinc-500" />
           {data.count} <span className="font-normal text-zinc-400 dark:text-zinc-500">views</span>
         </p>

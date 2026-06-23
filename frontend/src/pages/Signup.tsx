@@ -14,9 +14,14 @@ function Signup() {
 
   const accentColorValues = getAccentColorValues();
   const inputBaseClass =
-    'w-full px-4 h-[46px] rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:border-transparent';
-  const buttonBaseClass =
-    'w-full h-[46px] rounded-full text-sm font-medium text-white cursor-pointer transition-colors';
+    'w-full px-4 h-[46px] rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:border-transparent';
+  const buttonBaseClass = `w-full h-[46px] rounded-full text-sm font-medium ${
+    accentColorValues.textColor === 'light'
+      ? 'text-white'
+      : accentColorValues.textColor === 'inverted'
+        ? 'text-zinc-100 dark:text-zinc-950'
+        : 'text-zinc-950'
+  } cursor-pointer transition-colors`;
   const accentColorRef = useRef(accentColor);
   const particlesRef = useRef<{
     x: Float32Array;
@@ -163,7 +168,7 @@ function Signup() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1
-              className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2"
+              className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-2"
               style={{ fontFamily: getFontFamily(font) }}
             >
               Create an account
@@ -181,6 +186,7 @@ function Signup() {
                 className={`${inputBaseClass} ${accentColorValues.focus}`}
                 placeholder="Email Address"
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -193,6 +199,7 @@ function Signup() {
                 className={`${inputBaseClass} pr-12 ${accentColorValues.focus}`}
                 placeholder="Password"
                 required
+                autoComplete="new-password"
               />
               <button
                 type="button"

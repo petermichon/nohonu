@@ -81,7 +81,7 @@ function Domains() {
   return (
     <section className="mb-12 px-6 pt-12">
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6">
-        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Domains</h2>
+        <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-1">Domains</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Manage your custom domains</p>
 
         {loading ? (
@@ -98,7 +98,7 @@ function Domains() {
             <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-1">Add a custom domain to your sites</p>
             <Link
               to="/domains/explore"
-              className="inline-block mt-4 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 underline"
+              className="inline-block mt-4 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-200 underline"
             >
               Explore new domains
             </Link>
@@ -155,7 +155,7 @@ function Domains() {
 
       {/* Explore Domains Section */}
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 mt-6">
-        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Explore Domains</h2>
+        <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-1">Explore Domains</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Search and register new domains</p>
 
         <Link

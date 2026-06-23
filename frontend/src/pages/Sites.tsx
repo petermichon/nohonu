@@ -63,7 +63,7 @@ function Sites() {
           {/* Page header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h1 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Sites</h1>
+              <h1 className="text-base font-semibold text-zinc-950 dark:text-zinc-100">Sites</h1>
               <div className="flex items-center gap-1.5">
                 {error || sites.length === 0 ? (
                   <div className="w-12 h-5" />
@@ -95,7 +95,7 @@ function Sites() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter..."
                   disabled={loading || !!error || sites.length === 0}
-                  className="w-32 sm:w-40 pl-8 pr-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600 disabled:opacity-50"
+                  className="w-32 sm:w-40 pl-8 pr-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -124,7 +124,7 @@ function Sites() {
                   <button
                     type="button"
                     onClick={refreshSites}
-                    className="mt-3 px-3 py-1.5 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-zinc-900 rounded-lg hover:bg-stone-700 dark:hover:bg-stone-300"
+                    className="mt-3 px-3 py-1.5 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-zinc-950 rounded-lg hover:bg-stone-700 dark:hover:bg-stone-300"
                   >
                     Retry
                   </button>

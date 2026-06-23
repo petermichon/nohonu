@@ -11,7 +11,7 @@ export function Toast({ message, visible, onClose, success = true }: ToastProps)
   if (!visible) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 bg-stone-100 dark:bg-stone-900 text-zinc-900 dark:text-zinc-100 rounded-lg shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
+    <div className="fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 bg-stone-100 dark:bg-stone-900 text-zinc-950 dark:text-zinc-100 rounded-lg shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
       {success ? (
         <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
       ) : (

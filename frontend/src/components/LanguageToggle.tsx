@@ -19,7 +19,7 @@ export function LanguageToggle() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-950 dark:hover:text-zinc-100 cursor-pointer"
       >
         <Languages className="w-4 h-4" />
         <span className="hidden sm:inline">{currentOption?.label}</span>
@@ -32,9 +32,9 @@ export function LanguageToggle() {
               {options.map(({ value, label }) => {
                 const baseClasses =
                   'w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer';
-                const activeClasses = 'bg-stone-100 dark:bg-stone-800 text-zinc-900 dark:text-zinc-100';
+                const activeClasses = 'bg-stone-100 dark:bg-stone-800 text-zinc-950 dark:text-zinc-100';
                 const inactiveClasses =
-                  'text-zinc-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-900 dark:hover:text-zinc-100';
+                  'text-zinc-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-zinc-950 dark:hover:text-zinc-100';
                 const stateClasses = language === value ? activeClasses : inactiveClasses;
                 return (
                   <button
@@ -47,7 +47,7 @@ export function LanguageToggle() {
                   >
                     <span>{label}</span>
                     <Check
-                      className={`w-4 h-4 ml-2 transition-opacity ${language === value ? 'opacity-100 text-zinc-900 dark:text-zinc-100' : 'opacity-0'}`}
+                      className={`w-4 h-4 ml-2 transition-opacity ${language === value ? 'opacity-100 text-zinc-950 dark:text-zinc-100' : 'opacity-0'}`}
                     />
                   </button>
                 );

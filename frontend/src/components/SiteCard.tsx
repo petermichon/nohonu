@@ -90,7 +90,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <h3
             className={`text-sm font-semibold truncate ${
-              site.enabled ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'
+              site.enabled ? 'text-zinc-950 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'
             }`}
           >
             {site.domain}

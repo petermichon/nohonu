@@ -47,7 +47,7 @@ const providers = [
     price: 31.98,
     supportsDomain: true,
     domainParam: 'search',
-    textColor: 'text-zinc-900',
+    textColor: 'text-zinc-950',
   },
   {
     name: 'Hetzner',
@@ -186,7 +186,7 @@ function DomainExplore() {
     <section className="mb-12 max-w-7xl mx-auto px-6 pt-12">
       {/* Header */}
       <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4 text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4 text-zinc-950 dark:text-zinc-50">
           Domain Registrars
         </h1>
         <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl">
@@ -205,7 +205,7 @@ function DomainExplore() {
             onChange={(e) => setDomain(e.target.value)}
             placeholder="Search for a domain..."
             className={`w-full px-6 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-700
-              bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100
+              bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-100
               placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2
               ${accentColorValues.focus} focus:border-transparent text-lg`}
           />
@@ -221,7 +221,13 @@ function DomainExplore() {
               onClick={() => setSortBy('price')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
                 sortBy === 'price'
-                  ? `${accentColorValues.bg} text-white`
+                  ? `${accentColorValues.bg} ${
+                      accentColorValues.textColor === 'light'
+                        ? 'text-white'
+                        : accentColorValues.textColor === 'inverted'
+                          ? 'text-zinc-100 dark:text-zinc-950'
+                          : 'text-zinc-950'
+                    }`
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
@@ -231,7 +237,13 @@ function DomainExplore() {
               onClick={() => setSortBy('name')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
                 sortBy === 'name'
-                  ? `${accentColorValues.bg} text-white`
+                  ? `${accentColorValues.bg} ${
+                      accentColorValues.textColor === 'light'
+                        ? 'text-white'
+                        : accentColorValues.textColor === 'inverted'
+                          ? 'text-zinc-100 dark:text-zinc-950'
+                          : 'text-zinc-950'
+                    }`
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
@@ -250,7 +262,7 @@ function DomainExplore() {
               href={getProviderUrl(provider, domain)}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 hover:shadow-lg no-underline"
+              className="group relative bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 hover:shadow-lg no-underline"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -261,14 +273,14 @@ function DomainExplore() {
                     <div className="w-6 h-6 rounded-md" style={{ backgroundColor: provider.color }} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-lg">{provider.name}</h3>
+                    <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 text-lg">{provider.name}</h3>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {provider.supportsDomain ? 'Direct search' : 'Visit site'}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                  <div className="text-2xl font-bold text-zinc-950 dark:text-zinc-100">
                     €{provider.price.toFixed(2)}
                   </div>
                   <div className="text-xs text-zinc-500 dark:text-zinc-400">/year</div>

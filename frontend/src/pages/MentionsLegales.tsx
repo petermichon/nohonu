@@ -12,7 +12,7 @@ export default function MentionsLegales() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+        <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">
           {resolvedLanguage === 'fr' ? 'Mentions légales' : 'Legal notice'}
         </h1>
         <p className="text-sm text-zinc-400 dark:text-zinc-500">
@@ -22,7 +22,7 @@ export default function MentionsLegales() {
 
       <div className="space-y-8 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
         <section id="editeur">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Éditeur du site</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">Éditeur du site</h2>
           <p className="mb-2">
             <strong>Nohonu</strong>
           </p>
@@ -50,14 +50,14 @@ export default function MentionsLegales() {
         </section>
 
         <section id="directeur">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Directeur de la publication</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">Directeur de la publication</h2>
           <p>
             <strong>Nom :</strong> [À compléter : nom du directeur de la publication]
           </p>
         </section>
 
         <section id="hebergement">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Hébergement</h2>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">Hébergement</h2>
           <p className="mb-2">
             <strong>Prestataire :</strong> [À compléter : nom de l'hébergeur, ex: OVH, AWS, Scaleway, etc.]
           </p>

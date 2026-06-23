@@ -36,9 +36,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
       <div className="p-3 space-y-2">
         {/* Row 1: domain + badge */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate flex-1">
-            {site.domain}
-          </span>
+          <span className="text-sm font-semibold text-zinc-950 dark:text-zinc-100 truncate flex-1">{site.domain}</span>
           <span
             className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full tracking-wide ${badgeClass}`}
             style={badgeStyle}
