@@ -8,7 +8,7 @@ import { AccentColorProvider } from './lib/AccentColorProvider.tsx';
 import { applyFont, validFonts, waitForFont, type Font } from './lib/FontProvider.tsx';
 
 const savedFont = localStorage.getItem('font');
-const font = savedFont && validFonts.includes(savedFont as Font) ? (savedFont as Font) : 'system';
+const font = savedFont && validFonts.includes(savedFont as Font) ? (savedFont as Font) : 'outfit';
 
 applyFont(font);
 waitForFont(font).then(() => {

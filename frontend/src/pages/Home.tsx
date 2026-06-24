@@ -39,11 +39,12 @@ import { Footer } from '../components/Footer.tsx';
 function Home() {
   const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
-  const { theme } = useTheme();
+  const { theme, resolvedTheme } = useTheme();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
 
   const accentColorValues = getAccentColorValues();
   const accentColorRef = useRef(accentColor);
+  const themeRef = useRef(resolvedTheme);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particleCount = 100;
   // Use typed arrays for better performance
@@ -81,6 +82,10 @@ function Home() {
   useEffect(() => {
     accentColorRef.current = accentColor;
   }, [accentColor]);
+
+  useEffect(() => {
+    themeRef.current = resolvedTheme;
+  }, [resolvedTheme]);
 
   const animationRef = useRef<number | null>(null);
 
@@ -144,7 +149,8 @@ function Home() {
       ctx.clearRect(0, 0, rect.width, rect.height);
 
       // Batch draw by color for better performance using typed arrays
-      const colors = ACCENT_COLORS[accentColorRef.current].particles;
+      const particleConfig = ACCENT_COLORS[accentColorRef.current].particles;
+      const colors = typeof particleConfig === 'object' ? particleConfig[themeRef.current] : particleConfig;
 
       for (let c = 0; c < 3; c++) {
         ctx.fillStyle = colors[c];
@@ -200,20 +206,19 @@ function Home() {
                     : accentColorValues.textColor === 'inverted'
                       ? 'text-zinc-100 dark:text-zinc-950'
                       : 'text-zinc-950'
-                } cursor-pointer
-                  transition-colors whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+                } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
               >
                 Get Started
               </Link>
               <Link
                 to="/explore"
-                className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
+                className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
               >
                 Explore
               </Link>
               <Link
                 to="/docs"
-                className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
+                className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
               >
                 Documentation
               </Link>

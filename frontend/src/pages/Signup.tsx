@@ -2,11 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
+import { useTheme } from '../lib/ThemeProvider.tsx';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
 
 function Signup() {
   const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
-  const [email, setEmail] = useState('');
+  const { resolvedTheme } = useTheme();
+  const { setEmail } = useConnection();
+  const [email, setEmailState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,6 +27,7 @@ function Signup() {
         : 'text-zinc-950'
   } cursor-pointer transition-colors`;
   const accentColorRef = useRef(accentColor);
+  const themeRef = useRef(resolvedTheme);
   const particlesRef = useRef<{
     x: Float32Array;
     y: Float32Array;
@@ -64,6 +69,10 @@ function Signup() {
   useEffect(() => {
     accentColorRef.current = accentColor;
   }, [accentColor]);
+
+  useEffect(() => {
+    themeRef.current = resolvedTheme;
+  }, [resolvedTheme]);
 
   const animationRef = useRef<number | null>(null);
 
@@ -125,7 +134,8 @@ function Signup() {
 
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      const colors = ACCENT_COLORS[accentColorRef.current].particles;
+      const particleConfig = ACCENT_COLORS[accentColorRef.current].particles;
+      const colors = typeof particleConfig === 'object' ? particleConfig[themeRef.current] : particleConfig;
 
       for (let c = 0; c < 3; c++) {
         ctx.fillStyle = colors[c];
@@ -154,6 +164,7 @@ function Signup() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setEmail(email);
   };
 
   return (
@@ -182,7 +193,7 @@ function Signup() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmailState(e.target.value)}
                 className={`${inputBaseClass} ${accentColorValues.focus}`}
                 placeholder="Email Address"
                 required

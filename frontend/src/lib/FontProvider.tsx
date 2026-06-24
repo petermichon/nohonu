@@ -142,7 +142,7 @@ export function FontProvider({ children }: { children: ReactNode }) {
   const [font, setFontState] = useState<Font>(() => {
     const saved = localStorage.getItem('font') as Font | null;
     if (saved && validFonts.includes(saved as Font)) return saved as Font;
-    return 'system';
+    return 'outfit';
   });
 
   const setFont = async (newFont: Font) => {

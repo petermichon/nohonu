@@ -5,6 +5,7 @@ interface Connection {
   apiKey: string;
   username: string;
   displayName: string;
+  email: string;
 }
 
 interface ConnectionContextType extends Connection {
@@ -13,6 +14,8 @@ interface ConnectionContextType extends Connection {
   setApiKey: (key: string) => void;
   setUsername: (username: string) => void;
   setDisplayName: (displayName: string) => void;
+  setEmail: (email: string) => void;
+  disconnect: () => void;
 }
 
 const DEFAULT: Connection = {
@@ -20,6 +23,7 @@ const DEFAULT: Connection = {
   apiKey: '',
   username: '',
   displayName: '',
+  email: '',
 };
 
 function load(): Connection {
@@ -28,11 +32,13 @@ function load(): Connection {
     const apiKey = localStorage.getItem('apiKey');
     const username = localStorage.getItem('username');
     const displayName = localStorage.getItem('displayName');
+    const email = localStorage.getItem('email');
     return {
       apiBase: apiBase ?? DEFAULT.apiBase,
       apiKey: apiKey ?? DEFAULT.apiKey,
       username: username ?? DEFAULT.username,
       displayName: displayName ?? DEFAULT.displayName,
+      email: email ?? DEFAULT.email,
     };
   } catch {
     /* ignore */
@@ -71,9 +77,22 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, displayName: d }));
   };
 
+  const setEmail = (e: string) => {
+    localStorage.setItem('email', e);
+    setConnectionState((prev) => ({ ...prev, email: e }));
+  };
+
+  const disconnect = () => {
+    localStorage.removeItem('apiKey');
+    localStorage.removeItem('username');
+    localStorage.removeItem('displayName');
+    localStorage.removeItem('email');
+    setConnectionState((prev) => ({ ...prev, apiKey: '', username: '', displayName: '', email: '' }));
+  };
+
   return (
     <ConnectionContext.Provider
-      value={{ ...connection, setConnection, setApiBase, setApiKey, setUsername, setDisplayName }}
+      value={{ ...connection, setConnection, setApiBase, setApiKey, setUsername, setDisplayName, setEmail, disconnect }}
     >
       {children}
     </ConnectionContext.Provider>

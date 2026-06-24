@@ -1,5 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, MoreVertical, Sun, Moon, Languages, Check, ChevronLeft, Type, Scale, Info, Palette } from 'lucide-react';
+import {
+  User,
+  MoreVertical,
+  Sun,
+  Moon,
+  Languages,
+  Check,
+  ChevronLeft,
+  Type,
+  Scale,
+  Info,
+  Palette,
+  LogIn,
+} from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
@@ -22,6 +35,26 @@ interface MenuSectionProps {
   currentValue: string;
   onSelect: (value: string) => void;
   children?: React.ReactNode;
+}
+
+interface NavButtonProps {
+  to: string;
+  label: string;
+  isActive: boolean;
+}
+
+function NavButton({ to, label, isActive: active }: NavButtonProps) {
+  return (
+    <div className="h-full flex items-center group cursor-pointer group-hover:bg-zinc-100 dark:group-hover:bg-zinc-800">
+      <Link
+        to={to}
+        className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal ${active ? 'text-zinc-950 dark:text-zinc-50 group-hover:bg-zinc-100 dark:group-hover:bg-zinc-800' : 'text-zinc-950 dark:text-zinc-50 group-hover:bg-zinc-100 dark:group-hover:bg-zinc-800'}`}
+      >
+        <span className="invisible">{label}</span>
+        <span className="absolute inset-0 flex items-center justify-center">{label}</span>
+      </Link>
+    </div>
+  );
 }
 
 function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: MenuSectionProps) {
@@ -65,9 +98,9 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
 }
 
 export function TopBar() {
-  const { displayName, username } = useConnection();
+  const { displayName, username, disconnect } = useConnection();
   const location = useLocation();
-  const userName = displayName || 'Guest';
+  const userName = displayName || 'Connect';
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuView, setMenuView] = useState<'main' | 'theme' | 'language' | 'font' | 'accent'>('main');
@@ -83,7 +116,7 @@ export function TopBar() {
       : accentColorValues.textColor === 'inverted'
         ? 'text-zinc-100 dark:text-zinc-950'
         : 'text-zinc-950'
-  } cursor-pointer flex items-center justify-center whitespace-nowrap transition-colors`;
+  } cursor-pointer flex items-center justify-center whitespace-nowrap`;
 
   const menuRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -212,21 +245,23 @@ export function TopBar() {
     icon: null,
     label: color === 'default' ? 'None' : color.charAt(0).toUpperCase() + color.slice(1),
     className: ACCENT_COLORS[color].text,
-    separator: color === 'default',
+    divider: color === 'default',
   }));
 
   return (
     <header className="h-16 shrink-0 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
       <div className="h-full flex items-center justify-between gap-2 max-w-7xl mx-auto px-3 sm:px-6">
-        <div className="flex items-center">
+        <div className="flex items-center h-full">
           <Link to="/" className="flex items-center gap-2 relative group">
             <div
               className="absolute top-1 left-4 w-1 h-1 rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 group-hover:-translate-y-3"
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <div
@@ -234,8 +269,10 @@ export function TopBar() {
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <div
@@ -243,8 +280,10 @@ export function TopBar() {
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <div
@@ -252,8 +291,10 @@ export function TopBar() {
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <div
@@ -261,8 +302,10 @@ export function TopBar() {
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <div
@@ -270,8 +313,10 @@ export function TopBar() {
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <div
@@ -279,8 +324,10 @@ export function TopBar() {
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <div
@@ -288,8 +335,10 @@ export function TopBar() {
               style={{
                 backgroundColor:
                   accentColor === 'default' && theme === 'light'
-                    ? 'rgb(250, 250, 250)'
-                    : `rgb(${accentColorValues.rgb})`,
+                    ? 'rgb(9, 9, 11)'
+                    : accentColor === 'default' && theme === 'dark'
+                      ? 'rgb(250, 250, 250)'
+                      : `rgb(${accentColorValues.rgb})`,
               }}
             />
             <span
@@ -299,82 +348,20 @@ export function TopBar() {
               nohonu
             </span>
           </Link>
-          <div className="hidden sm:flex items-center ml-5">
-            <Link
-              to="/explore"
-              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/explore') ? 'text-zinc-950 dark:text-zinc-50 font-semibold' : 'text-zinc-950 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-            >
-              <span className="font-semibold invisible">Explore</span>
-              <span
-                className={
-                  isActive('/explore')
-                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
-                    : 'absolute inset-0 flex items-center justify-center'
-                }
-              >
-                Explore
-              </span>
-            </Link>
-            <Link
-              to={username ? `/u/${username}` : '/sites'}
-              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/sites') ? 'text-zinc-950 dark:text-zinc-50 font-semibold' : 'text-zinc-950 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-            >
-              <span className="font-semibold invisible">Sites</span>
-              <span
-                className={
-                  isActive('/sites')
-                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
-                    : 'absolute inset-0 flex items-center justify-center'
-                }
-              >
-                Sites
-              </span>
-            </Link>
-            <Link
+          <div className="hidden sm:flex items-center h-full ml-5">
+            <NavButton to="/explore" label="Explore" isActive={isActive('/explore')} />
+            <NavButton to={username ? `/u/${username}` : '/sites'} label="Sites" isActive={isActive('/sites')} />
+            <NavButton
               to={username ? `/u/${username}/domains` : '/domains'}
-              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/domains') ? 'text-zinc-950 dark:text-zinc-50 font-semibold' : 'text-zinc-950 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-            >
-              <span className="font-semibold invisible">Domains</span>
-              <span
-                className={
-                  isActive('/domains')
-                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
-                    : 'absolute inset-0 flex items-center justify-center'
-                }
-              >
-                Domains
-              </span>
-            </Link>
-            <Link
+              label="Domains"
+              isActive={isActive('/domains')}
+            />
+            <NavButton
               to={username ? `/u/${username}/servers` : '/servers'}
-              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${isActive('/servers') ? 'text-zinc-950 dark:text-zinc-50 font-semibold' : 'text-zinc-950 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-            >
-              <span className="font-semibold invisible">Servers</span>
-              <span
-                className={
-                  isActive('/servers')
-                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
-                    : 'absolute inset-0 flex items-center justify-center'
-                }
-              >
-                Servers
-              </span>
-            </Link>
-            <Link
-              to="/docs"
-              className={`relative flex items-center justify-center gap-2 px-3 h-8 rounded-lg text-sm font-normal transition-colors ${location.pathname === '/docs' ? 'text-zinc-950 dark:text-zinc-50 font-semibold' : 'text-zinc-950 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-            >
-              <span className="font-semibold invisible">Docs</span>
-              <span
-                className={
-                  location.pathname === '/docs'
-                    ? 'font-semibold absolute inset-0 flex items-center justify-center'
-                    : 'absolute inset-0 flex items-center justify-center'
-                }
-              >
-                Docs
-              </span>
-            </Link>
+              label="Servers"
+              isActive={isActive('/servers')}
+            />
+            <NavButton to="/docs" label="Docs" isActive={location.pathname === '/docs'} />
           </div>
         </div>
         <div className="flex items-center gap-2 h-full">
@@ -507,49 +494,11 @@ export function TopBar() {
               </div>
             )}
           </div>
-          {username ? (
-            <div className="relative" ref={profileRef}>
-              <div
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0 cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors select-none"
-              >
-                <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-              </div>
-              {isProfileOpen && (
-                <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto dropdown-animate">
-                  <div className="flex items-start gap-2 px-3 py-2 mb-1">
-                    <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">{userName}</span>
-                      {username && <span className="text-sm text-zinc-500 dark:text-zinc-400 -mt-1">{username}</span>}
-                    </div>
-                  </div>
-                  <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
-                  <div className="flex flex-col gap-0.5">
-                    {profileOptions.map(({ to, label }) => (
-                      <Link
-                        key={to}
-                        to={to}
-                        onClick={() => {
-                          setIsProfileOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
-                      >
-                        {label === 'Account' && <User className="w-4 h-4" />}
-                        <span>{label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
+          {!username && (
             <div className="items-center gap-3 h-9 hidden sm:flex">
               <Link
                 to="/login"
-                className="px-4 h-full rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
+                className="px-4 h-full rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
               >
                 Log in
               </Link>
@@ -558,6 +507,73 @@ export function TopBar() {
               </Link>
             </div>
           )}
+          <div className="relative" ref={profileRef}>
+            <div
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0 cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 select-none"
+            >
+              <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+            </div>
+            {isProfileOpen && (
+              <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto dropdown-animate">
+                {!username ? (
+                  <Link
+                    to="/login"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>Log in</span>
+                  </Link>
+                ) : (
+                  <>
+                    <div className="flex items-start gap-2 px-3 py-2 mb-1">
+                      <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                        <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">{userName}</span>
+                        {username && <span className="text-sm text-zinc-500 dark:text-zinc-400 -mt-1">{username}</span>}
+                      </div>
+                    </div>
+                    <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
+                  </>
+                )}
+                <div className="flex flex-col gap-0.5">
+                  {profileOptions.map(({ to, label }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                    >
+                      {label === 'Account' && <User className="w-4 h-4" />}
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                  {username && (
+                    <>
+                      <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          disconnect();
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+                      >
+                        <span>Disconnect</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

@@ -36,7 +36,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-zinc-500',
     link: 'text-zinc-950 dark:text-zinc-100 hover:text-zinc-700 dark:hover:text-zinc-300',
     rgb: '250, 250, 250',
-    particles: ['#fafafa', '#f4f4f5', '#e4e4e7'],
+    particles: {
+      light: ['#09090b', '#18181b', '#27272a'],
+      dark: ['#fafafa', '#fafafa', '#fafafa'],
+    },
     gradient: 'zinc-950',
     textColor: 'inverted',
     selectionTextColor: '9, 9, 11',
@@ -54,7 +57,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-red-500',
     link: 'text-red-500 hover:text-red-600 dark:hover:text-red-400',
     rgb: '239, 68, 68',
-    particles: ['#ef4444', '#f87171', '#fca5a5'],
+    particles: {
+      light: ['#7f1d1d', '#991b1b', '#b91c1c'],
+      dark: ['#ef4444', '#f87171', '#fca5a5'],
+    },
     gradient: 'red-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -72,7 +78,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-orange-500',
     link: 'text-orange-500 hover:text-orange-600 dark:hover:text-orange-400',
     rgb: '249, 115, 22',
-    particles: ['#f97316', '#fb923c', '#fdba74'],
+    particles: {
+      light: ['#7c2d12', '#9a3412', '#c2410c'],
+      dark: ['#f97316', '#fb923c', '#fdba74'],
+    },
     gradient: 'orange-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -90,7 +99,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-amber-500',
     link: 'text-amber-500 hover:text-amber-600 dark:hover:text-amber-400',
     rgb: '245, 158, 11',
-    particles: ['#f59e0b', '#fbbf24', '#fcd34d'],
+    particles: {
+      light: ['#78350f', '#92400e', '#b45309'],
+      dark: ['#f59e0b', '#fbbf24', '#fcd34d'],
+    },
     gradient: 'amber-500',
     textColor: 'dark',
     selectionTextColor: '9, 9, 11',
@@ -108,7 +120,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-yellow-500',
     link: 'text-yellow-500 hover:text-yellow-600 dark:hover:text-yellow-400',
     rgb: '234, 179, 8',
-    particles: ['#eab308', '#facc15', '#fde047'],
+    particles: {
+      light: ['#713f12', '#854d0e', '#a16207'],
+      dark: ['#eab308', '#facc15', '#fde047'],
+    },
     gradient: 'yellow-500',
     textColor: 'dark',
     selectionTextColor: '9, 9, 11',
@@ -126,7 +141,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-lime-500',
     link: 'text-lime-500 hover:text-lime-600 dark:hover:text-lime-400',
     rgb: '132, 204, 22',
-    particles: ['#84cc16', '#a3e635', '#bef264'],
+    particles: {
+      light: ['#365314', '#3f6212', '#4d7c0f'],
+      dark: ['#84cc16', '#a3e635', '#bef264'],
+    },
     gradient: 'lime-500',
     textColor: 'dark',
     selectionTextColor: '9, 9, 11',
@@ -144,7 +162,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-green-500',
     link: 'text-green-500 hover:text-green-600 dark:hover:text-green-400',
     rgb: '34, 197, 94',
-    particles: ['#22c55e', '#4ade80', '#86efac'],
+    particles: {
+      light: ['#14532d', '#166534', '#15803d'],
+      dark: ['#22c55e', '#4ade80', '#86efac'],
+    },
     gradient: 'green-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -162,7 +183,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-emerald-500',
     link: 'text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400',
     rgb: '16, 185, 129',
-    particles: ['#10b981', '#34d399', '#6ee7b7'],
+    particles: {
+      light: ['#064e3b', '#065f46', '#047857'],
+      dark: ['#10b981', '#34d399', '#6ee7b7'],
+    },
     gradient: 'emerald-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -180,7 +204,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-teal-500',
     link: 'text-teal-500 hover:text-teal-600 dark:hover:text-teal-400',
     rgb: '20, 184, 166',
-    particles: ['#14b8a6', '#2dd4bf', '#5eead4'],
+    particles: {
+      light: ['#134e4a', '#115e59', '#0f766e'],
+      dark: ['#14b8a6', '#2dd4bf', '#5eead4'],
+    },
     gradient: 'teal-500',
     textColor: 'dark',
     selectionTextColor: '9, 9, 11',
@@ -198,7 +225,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-cyan-500',
     link: 'text-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400',
     rgb: '6, 182, 212',
-    particles: ['#06b6d4', '#22d3ee', '#67e8f9'],
+    particles: {
+      light: ['#164e63', '#155e75', '#0e7490'],
+      dark: ['#06b6d4', '#22d3ee', '#67e8f9'],
+    },
     gradient: 'cyan-500',
     textColor: 'dark',
     selectionTextColor: '9, 9, 11',
@@ -216,7 +246,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-sky-500',
     link: 'text-sky-500 hover:text-sky-600 dark:hover:text-sky-400',
     rgb: '14, 165, 233',
-    particles: ['#0ea5e9', '#38bdf8', '#7dd3fc'],
+    particles: {
+      light: ['#0c4a6e', '#075985', '#0369a1'],
+      dark: ['#0ea5e9', '#38bdf8', '#7dd3fc'],
+    },
     gradient: 'sky-500',
     textColor: 'dark',
     selectionTextColor: '9, 9, 11',
@@ -234,7 +267,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-blue-500',
     link: 'text-blue-500 hover:text-blue-600 dark:hover:text-blue-400',
     rgb: '59, 130, 246',
-    particles: ['#3b82f6', '#60a5fa', '#93c5fd'],
+    particles: {
+      light: ['#1e3a8a', '#1e40af', '#1d4ed8'],
+      dark: ['#3b82f6', '#60a5fa', '#93c5fd'],
+    },
     gradient: 'blue-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -252,7 +288,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-indigo-500',
     link: 'text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400',
     rgb: '99, 102, 241',
-    particles: ['#6366f1', '#818cf8', '#a5b4fc'],
+    particles: {
+      light: ['#312e81', '#3730a3', '#4338ca'],
+      dark: ['#6366f1', '#818cf8', '#a5b4fc'],
+    },
     gradient: 'indigo-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -270,7 +309,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-violet-500',
     link: 'text-violet-500 hover:text-violet-600 dark:hover:text-violet-400',
     rgb: '139, 92, 246',
-    particles: ['#8b5cf6', '#a78bfa', '#c4b5fd'],
+    particles: {
+      light: ['#5b21b6', '#6d28d9', '#7c3aed'],
+      dark: ['#8b5cf6', '#a78bfa', '#c4b5fd'],
+    },
     gradient: 'violet-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -288,7 +330,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-purple-500',
     link: 'text-purple-500 hover:text-purple-600 dark:hover:text-purple-400',
     rgb: '168, 85, 247',
-    particles: ['#a855f7', '#c084fc', '#d8b4fe'],
+    particles: {
+      light: ['#581c87', '#6b21a8', '#7e22ce'],
+      dark: ['#a855f7', '#c084fc', '#d8b4fe'],
+    },
     gradient: 'purple-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -306,7 +351,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-fuchsia-500',
     link: 'text-fuchsia-500 hover:text-fuchsia-600 dark:hover:text-fuchsia-400',
     rgb: '217, 70, 239',
-    particles: ['#d946ef', '#e879f9', '#f0abfc'],
+    particles: {
+      light: ['#701a75', '#86198f', '#a21caf'],
+      dark: ['#d946ef', '#e879f9', '#f0abfc'],
+    },
     gradient: 'fuchsia-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -324,7 +372,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-pink-500',
     link: 'text-pink-500 hover:text-pink-600 dark:hover:text-pink-400',
     rgb: '236, 72, 153',
-    particles: ['#ec4899', '#f472b6', '#f9a8d4'],
+    particles: {
+      light: ['#831843', '#9d174d', '#be185d'],
+      dark: ['#ec4899', '#f472b6', '#f9a8d4'],
+    },
     gradient: 'pink-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -342,7 +393,10 @@ export const ACCENT_COLORS = {
     focus: 'focus:ring-rose-500',
     link: 'text-rose-500 hover:text-rose-600 dark:hover:text-rose-400',
     rgb: '244, 63, 94',
-    particles: ['#f43f5e', '#fb7185', '#fda4af'],
+    particles: {
+      light: ['#881337', '#9f1239', '#be123c'],
+      dark: ['#f43f5e', '#fb7185', '#fda4af'],
+    },
     gradient: 'rose-500',
     textColor: 'light',
     selectionTextColor: '250, 250, 250',
@@ -384,7 +438,7 @@ export function AccentColorProvider({ children }: { children: ReactNode }) {
     if (saved && validColors.includes(saved as AccentColor)) {
       return saved as AccentColor;
     }
-    return 'default';
+    return 'indigo';
   });
 
   useEffect(() => {
