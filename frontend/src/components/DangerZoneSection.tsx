@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { Section } from './Section.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 import type { Site } from '../lib/types.ts';
 
@@ -16,7 +15,8 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
   const [allowDeletion, setAllowDeletion] = useState(false);
 
   return (
-    <Section id="actions" icon={SECTION_MAP['actions'].icon} title={SECTION_MAP['actions'].label} danger>
+    <div className="mt-6">
+      <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">{SECTION_MAP['actions'].label}</h2>
       <div>
         <div className="text-xs text-zinc-700 dark:text-zinc-300 flex items-center justify-between">
           <span>
@@ -42,7 +42,7 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
       </div>
 
       <div
-        className={`border-t border-stone-200 dark:border-stone-800 pt-4 mt-4 ${!allowDeletion ? 'opacity-50 pointer-events-none' : ''}`}
+        className={`border-t border-zinc-200 dark:border-zinc-800 pt-4 mt-4 ${!allowDeletion ? 'opacity-50 pointer-events-none' : ''}`}
       >
         <div>
           <div className="flex items-center justify-between gap-4">
@@ -54,7 +54,7 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
               type="button"
               onClick={onRequestDelete}
               disabled={actionLoading || !site || site.enabled || !allowDeletion}
-              className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-stone-100 dark:bg-stone-800 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-white shrink-0"
+              className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-white shrink-0"
             >
               <Trash2 className="w-4 h-4" />
               Delete Site Permanently
@@ -65,6 +65,6 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
           )}
         </div>
       </div>
-    </Section>
+    </div>
   );
 }

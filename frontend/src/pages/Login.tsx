@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
@@ -9,7 +9,8 @@ function Login() {
   const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setEmail } = useConnection();
+  const { setEmail, username } = useConnection();
+  const navigate = useNavigate();
   const [email, setEmailState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -166,6 +167,7 @@ function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setEmail(email);
+    navigate(username ? `/u/${username}` : '/');
   };
 
   return (

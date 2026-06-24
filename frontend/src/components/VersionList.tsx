@@ -1,6 +1,7 @@
 import { CheckCircle2, Clock, Trash2, ArrowUp, Download, Loader2, GitBranch, FileUp } from 'lucide-react';
 import { relativeTime } from '../lib/utils.ts';
 import { Tooltip } from './Tooltip.tsx';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { Version } from '../lib/types.ts';
 
 interface VersionListProps {
@@ -24,7 +25,11 @@ export function VersionList({
   onDownload,
   accent,
 }: VersionListProps) {
-  const accentStyle = accent ? { bg: `${accent}22`, color: accent, border: `${accent}33` } : null;
+  const { accentColor: globalAccentColor } = useAccentColor();
+  const effectiveAccent = accent || globalAccentColor;
+  const accentStyle = effectiveAccent
+    ? { bg: `${effectiveAccent}22`, color: effectiveAccent, border: `${effectiveAccent}33` }
+    : null;
   return (
     <div className="space-y-1">
       {versions.map((v) => {
@@ -39,8 +44,8 @@ export function VersionList({
               isCurrent
                 ? accentStyle
                   ? ''
-                  : 'border-purple-200 dark:border-purple-800/50 bg-purple-50/50 dark:bg-purple-900/10'
-                : 'border-stone-100 dark:border-stone-800 hover:border-stone-200 dark:hover:border-stone-700'
+                  : 'border-green-200 dark:border-green-800/50 bg-green-50/50 dark:bg-green-900/10'
+                : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700'
             }`}
             style={
               isCurrent && accentStyle
@@ -51,7 +56,7 @@ export function VersionList({
             <div className="flex items-center gap-3 min-w-0">
               {isCurrent ? (
                 <CheckCircle2
-                  className={`w-4 h-4 shrink-0 ${accentStyle ? '' : 'text-purple-400 dark:text-purple-300'}`}
+                  className={`w-4 h-4 shrink-0 ${accentStyle ? '' : 'text-green-400 dark:text-green-300'}`}
                   style={accentStyle ? { color: accentStyle.color } : undefined}
                 />
               ) : (
@@ -66,7 +71,7 @@ export function VersionList({
                   </p>
                   {isCurrent && (
                     <span
-                      className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${accentStyle ? '' : 'bg-purple-200 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300'}`}
+                      className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${accentStyle ? '' : 'bg-green-200 dark:bg-green-900/40 text-green-600 dark:text-green-300'}`}
                       style={accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined}
                     >
                       Online
@@ -81,7 +86,7 @@ export function VersionList({
                     </Tooltip>
                   ) : v.source?.type === 'upload' ? (
                     <Tooltip content="File upload">
-                      <span className="shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400">
+                      <span className="shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
                         <FileUp className="w-3 h-3" />
                         Upload
                       </span>
@@ -98,7 +103,7 @@ export function VersionList({
                 <button
                   type="button"
                   onClick={() => onDownload(v.index)}
-                  className="p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
+                  className="p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                 </button>
@@ -108,7 +113,7 @@ export function VersionList({
                   type="button"
                   onClick={() => onDelete(v.index)}
                   disabled={isDeleting || isCurrent}
-                  className={`p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto disabled:hover:bg-transparent dark:disabled:hover:bg-transparent disabled:hover:text-zinc-700 dark:disabled:hover:text-zinc-300 ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
+                  className={`p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto disabled:hover:bg-transparent dark:disabled:hover:bg-transparent disabled:hover:text-zinc-700 dark:disabled:hover:text-zinc-300 ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
                 >
                   {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </button>
@@ -118,7 +123,7 @@ export function VersionList({
                   type="button"
                   onClick={() => onActivate(v.index)}
                   disabled={isActivating || isCurrent}
-                  className="ml-1 flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto bg-stone-100 dark:bg-stone-800 text-zinc-700 dark:text-zinc-300 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800"
+                  className="ml-1 flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800"
                 >
                   {isActivating ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

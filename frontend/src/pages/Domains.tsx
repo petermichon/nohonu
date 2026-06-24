@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Globe, Check, X } from 'lucide-react';
+import { Globe, Check, X, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { Footer } from '../components/Footer.tsx';
 
 interface CustomDomainEntry {
@@ -14,10 +16,14 @@ interface CustomDomainEntry {
 function Domains() {
   const { apiFetch } = useApi();
   const { showToast } = useToast();
+  const { font } = useFont();
+  const { getAccentColorValues } = useAccentColor();
   const [allDomains, setAllDomains] = useState<CustomDomainEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
+
+  const accentColorValues = getAccentColorValues();
 
   const loadDomains = useCallback(async () => {
     setLoading(true);
@@ -79,62 +85,121 @@ function Domains() {
   };
 
   return (
-    <section className="mb-12 px-6 pt-12">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6">
-        <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-1">Domains</h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Manage your custom domains</p>
+    <section className="mb-12">
+      {/* Dashboard Header */}
+      <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1
+              className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1"
+              style={{ fontFamily: getFontFamily(font) }}
+            >
+              Domains
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {allDomains.length} {allDomains.length === 1 ? 'domain' : 'domains'} configured
+            </p>
+          </div>
+          <Link
+            to="/domains/explore"
+            className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
+              accentColorValues.textColor === 'light'
+                ? 'text-white'
+                : accentColorValues.textColor === 'inverted'
+                  ? 'text-zinc-100 dark:text-zinc-950'
+                  : 'text-zinc-950'
+            } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+          >
+            <Plus className="w-4 h-4" />
+            Connect domain
+          </Link>
+        </div>
+      </header>
 
+      {/* Custom Domains Grid */}
+      <section className="max-w-7xl mx-auto px-6 py-4">
         {loading ? (
-          <div className="space-y-2">
-            <div className="h-10 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
-            <div className="h-10 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-2xl bg-zinc-100 dark:bg-zinc-800 aspect-4/3 animate-pulse" />
+            ))}
           </div>
         ) : allDomains.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-12 h-12 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Globe className="w-6 h-6 text-zinc-400 dark:text-zinc-500" />
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Globe className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
             </div>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm">No custom domains configured</p>
-            <p className="text-zinc-400 dark:text-zinc-500 text-xs mt-1">Add a custom domain to your sites</p>
+            <h3
+              className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2"
+              style={{ fontFamily: getFontFamily(font) }}
+            >
+              No custom domains
+            </h3>
+            <p className="text-zinc-500 dark:text-zinc-400 mb-6 max-w-sm mx-auto">
+              Connect a custom domain to your site to use your own brand.
+            </p>
             <Link
               to="/domains/explore"
-              className="inline-block mt-4 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-200 underline"
+              className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
+                accentColorValues.textColor === 'light'
+                  ? 'text-white'
+                  : accentColorValues.textColor === 'inverted'
+                    ? 'text-zinc-100 dark:text-zinc-950'
+                    : 'text-zinc-950'
+              } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
             >
-              Explore new domains
+              <Plus className="w-4 h-4" />
+              Register your first domain
             </Link>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {allDomains.map((cd) => (
               <div
                 key={cd.customDomain}
-                className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-stone-50 dark:bg-stone-900/50"
+                className="flex flex-col gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 hover:shadow-md transition-shadow"
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 truncate">{cd.customDomain}</span>
-                    <span className="text-xs text-zinc-400 dark:text-zinc-500 truncate">Site: {cd.siteDomain}</span>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                      <Globe className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3
+                        className="font-medium text-zinc-950 dark:text-zinc-100 mb-0.5 truncate text-sm"
+                        style={{ fontFamily: getFontFamily(font) }}
+                      >
+                        {cd.customDomain}
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{cd.siteDomain}</p>
+                    </div>
                   </div>
                   <span
-                    className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                    className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full ${
                       cd.verified
-                        ? 'bg-green-200 dark:bg-green-900/30 text-green-600 dark:text-green-300'
-                        : 'bg-amber-200 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300'
+                        : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300'
                     }`}
                   >
                     {cd.verified ? 'Verified' : 'Unverified'}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-2 mt-auto">
                   {!cd.verified && (
                     <button
                       type="button"
                       onClick={() => verifyCustomDomain(cd.siteDomain, cd.customDomain)}
                       disabled={verifyingDomain === cd.customDomain}
-                      className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-50"
-                      title="Verify domain"
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                        accentColorValues.textColor === 'light'
+                          ? 'text-white'
+                          : accentColorValues.textColor === 'inverted'
+                            ? 'text-zinc-100 dark:text-zinc-950'
+                            : 'text-zinc-950'
+                      } disabled:opacity-50 ${accentColorValues.bg}`}
                     >
                       <Check className="w-3.5 h-3.5" />
+                      {verifyingDomain === cd.customDomain ? 'Verifying...' : 'Verify'}
                     </button>
                   )}
                   <button
@@ -151,20 +216,7 @@ function Domains() {
             ))}
           </div>
         )}
-      </div>
-
-      {/* Explore Domains Section */}
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 mt-6">
-        <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-1">Explore Domains</h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Search and register new domains</p>
-
-        <Link
-          to="/domains/explore"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-zinc-700 dark:text-zinc-300 hover:bg-stone-200 dark:hover:bg-stone-700 font-medium cursor-pointer no-underline"
-        >
-          Explore new domains
-        </Link>
-      </div>
+      </section>
       <Footer />
     </section>
   );

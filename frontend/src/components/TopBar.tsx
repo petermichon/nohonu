@@ -100,7 +100,7 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
 export function TopBar() {
   const { displayName, username, disconnect } = useConnection();
   const location = useLocation();
-  const userName = displayName || 'Connect';
+  const userName = displayName || username || 'Connect';
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuView, setMenuView] = useState<'main' | 'theme' | 'language' | 'font' | 'accent'>('main');

@@ -115,12 +115,12 @@ export function VersionPanel({
   };
 
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 mt-3">
+    <div>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
           Versions
           {versions.length > 0 && (
-            <span className="flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-zinc-500 dark:text-zinc-400">
+            <span className="flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
               <History className="w-3 h-3" />
               {versions.length} versions
             </span>
@@ -140,7 +140,7 @@ export function VersionPanel({
                 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto';
               const activeClasses = 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300';
               const inactiveClasses =
-                'bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800';
+                'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800';
               const stateClasses = showGithubFetch ? activeClasses : inactiveClasses;
               return `${baseClasses} ${stateClasses} disabled:opacity-50`;
             })()}
@@ -152,7 +152,7 @@ export function VersionPanel({
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer ${
               uploading
                 ? 'text-zinc-400 dark:text-zinc-500'
-                : 'bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:hover:bg-stone-100 dark:disabled:hover:bg-stone-800'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800'
             }`}
           >
             {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
@@ -175,7 +175,7 @@ export function VersionPanel({
       </div>
 
       {showGithubFetch && (
-        <div className="mb-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-200 dark:border-stone-800">
+        <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
           <div className="flex flex-col sm:flex-row gap-3">
             <div ref={repoDropdownRef} className="flex-1 relative">
               <input
@@ -186,11 +186,11 @@ export function VersionPanel({
                 onChange={(e) => setGithubRepo(e.target.value)}
                 onFocus={() => repoHistory.length > 0 && setShowRepoDropdown(true)}
                 placeholder="owner/repo"
-                className="w-full px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
               />
               {showRepoDropdown && repoHistory.length > 0 && (
-                <div className="absolute z-10 mt-1 w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg py-1 max-h-48 overflow-auto">
-                  <div className="px-3 py-1.5 text-xs text-zinc-400 dark:text-zinc-500 border-b border-stone-100 dark:border-stone-700">
+                <div className="absolute z-10 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg py-1 max-h-48 overflow-auto">
+                  <div className="px-3 py-1.5 text-xs text-zinc-400 dark:text-zinc-500 border-b border-zinc-100 dark:border-zinc-700">
                     Recent
                   </div>
                   {repoHistory.map((entry, i) => (
@@ -202,7 +202,7 @@ export function VersionPanel({
                         setGithubBranch(entry.branch);
                         setShowRepoDropdown(false);
                       }}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-stone-100 dark:hover:bg-stone-700 flex items-center justify-between"
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700 flex items-center justify-between"
                     >
                       <span className="text-zinc-950 dark:text-zinc-100">
                         {entry.repo}
@@ -221,13 +221,13 @@ export function VersionPanel({
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
-              className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-500"
+              className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
             />
             <button
               type="button"
               onClick={handleFetchGithub}
               disabled={uploading || !githubRepo}
-              className="px-4 py-2 bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-800 disabled:hover:bg-stone-300 dark:disabled:hover:bg-stone-800 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
+              className="px-4 py-2 bg-zinc-900 dark:bg-zinc-700 hover:bg-zinc-800 dark:hover:bg-zinc-600 disabled:bg-zinc-300 dark:disabled:bg-zinc-800 disabled:hover:bg-zinc-300 dark:disabled:hover:bg-zinc-800 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
             >
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GitBranch className="w-4 h-4" />}
               {uploading ? 'Fetching...' : 'Fetch & Add'}

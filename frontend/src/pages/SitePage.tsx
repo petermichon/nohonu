@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
 import { useApi } from '../lib/api.ts';
 import { useSites } from '../lib/SitesProvider.tsx';
 import { calcUptimePct } from '../lib/utils.ts';
 import { useToast } from '../lib/ToastContext.tsx';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { UptimeChart } from '../components/UptimeChart.tsx';
 import { ActivityChart } from '../components/ActivityChart.tsx';
 import { VersionPanel } from '../components/VersionPanel.tsx';
-import { BackButton } from '../components/BackButton.tsx';
-import { Section } from '../components/Section.tsx';
 import { CustomDomainsSection } from '../components/CustomDomainsSection.tsx';
 import { DangerZoneSection } from '../components/DangerZoneSection.tsx';
 import { AccentSection } from '../components/AccentSection.tsx';
@@ -23,12 +23,18 @@ import { Footer } from '../components/Footer.tsx';
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SitePage() {
-  const { domain, sitename } = useParams<{ domain?: string; sitename?: string }>();
+  const { domain, sitename, username } = useParams<{ domain?: string; sitename?: string; username?: string }>();
   const actualDomain = sitename || domain;
   const { apiFetch, apiBase, host, protocol } = useApi();
   const { refreshSites } = useSites();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { getAccentColorValues } = useAccentColor();
+  const { font } = useFont();
+  const accentColorValues = getAccentColorValues();
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'domains' | 'versions' | 'settings'>(
+    'overview'
+  );
 
   const {
     site,
@@ -182,44 +188,133 @@ function SitePage() {
   const uptimePct = calcUptimePct(uptimeData);
 
   return (
-    <section className="flex gap-6 relative pt-12">
-      <div className="flex-1 min-w-0">
-        <div className="mb-5">
-          <BackButton to="/sites" label="Sites" />
+    <section className="mb-12">
+      {/* Header */}
+      <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div
+            className={`w-16 h-16 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center shrink-0`}
+          >
+            <Layout className={`w-8 h-8 ${accentColorValues.textDark}`} />
+          </div>
+          <div>
+            <h1
+              className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1"
+              style={{ fontFamily: getFontFamily(font) }}
+            >
+              {site?.domain}
+            </h1>
+            {username ? (
+              <Link
+                to={`/u/${username}`}
+                className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+              >
+                @{username}
+              </Link>
+            ) : (
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">Your site</p>
+            )}
+          </div>
         </div>
 
-        <OverviewSection
-          site={site}
-          siteLoading={siteLoading}
-          actionLoading={actionLoading}
-          accent={accent}
-          iconError={iconError}
-          onIconError={() => setIconError(true)}
-          onToggle={() => setConfirmAction(site?.enabled ? 'disable' : 'enable')}
-          siteUrl={siteUrl}
-          host={host}
-          apiBase={apiBase}
-          totalHits={totalHits}
-          uptimePct={uptimePct}
-        />
+        {/* Navigation tabs */}
+        <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
+          <button
+            type="button"
+            onClick={() => setActiveTab('overview')}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              activeTab === 'overview'
+                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <Layout className="w-4 h-4" />
+            Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('analytics')}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              activeTab === 'analytics'
+                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            Analytics
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('domains')}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              activeTab === 'domains'
+                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <Globe className="w-4 h-4" />
+            Domains
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('versions')}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              activeTab === 'versions'
+                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            Versions
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              activeTab === 'settings'
+                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            Settings
+          </button>
+        </nav>
+      </header>
 
-        <AccentSection
-          accent={accent}
-          siteLoading={siteLoading}
-          onSaveAccent={(color) => {
-            saveAccent(color);
-            showToast('Accent color updated', true);
-          }}
-        />
+      {/* Tab content */}
+      {activeTab === 'overview' && (
+        <section className="max-w-7xl mx-auto px-6 py-8">
+          <OverviewSection
+            site={site}
+            siteLoading={siteLoading}
+            actionLoading={actionLoading}
+            accent={accent}
+            iconError={iconError}
+            onIconError={() => setIconError(true)}
+            onToggle={() => setConfirmAction(site?.enabled ? 'disable' : 'enable')}
+            siteUrl={siteUrl}
+            host={host}
+            apiBase={apiBase}
+            totalHits={totalHits}
+            uptimePct={uptimePct}
+          />
+          <AccentSection
+            accent={accent}
+            siteLoading={siteLoading}
+            onSaveAccent={(color) => {
+              saveAccent(color);
+              showToast('Accent color updated', true);
+            }}
+          />
+        </section>
+      )}
 
-        <CustomDomainsSection domain={domain!} />
-
-        <Section
-          id="activity"
-          icon={SECTION_MAP['activity'].icon}
-          title={SECTION_MAP['activity'].label}
-          container={false}
-        >
+      {activeTab === 'analytics' && (
+        <section className="max-w-7xl mx-auto px-6 py-8">
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">
+            {SECTION_MAP['activity'].label}
+          </h2>
           <ActivityChart
             stats={stats}
             visitors={visitors}
@@ -229,9 +324,9 @@ function SitePage() {
             onRangeChange={setGlobalRange}
             now={now}
           />
-        </Section>
-
-        <Section id="uptime" icon={SECTION_MAP['uptime'].icon} title={SECTION_MAP['uptime'].label} container={false}>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3 mt-8">
+            {SECTION_MAP['uptime'].label}
+          </h2>
           <UptimeChart
             uptime={uptimeData}
             allUptime={uptimeAllData}
@@ -242,14 +337,20 @@ function SitePage() {
             accent={accent}
             now={now}
           />
-        </Section>
+        </section>
+      )}
 
-        <Section
-          id="versions"
-          icon={SECTION_MAP['versions'].icon}
-          title={SECTION_MAP['versions'].label}
-          container={false}
-        >
+      {activeTab === 'domains' && (
+        <section className="max-w-7xl mx-auto px-6 py-8">
+          <CustomDomainsSection domain={domain!} />
+        </section>
+      )}
+
+      {activeTab === 'versions' && (
+        <section className="max-w-7xl mx-auto px-6 py-8">
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">
+            {SECTION_MAP['versions'].label}
+          </h2>
           <VersionPanel
             domain={site?.domain ?? ''}
             versions={versions}
@@ -284,39 +385,43 @@ function SitePage() {
               showToast(message, success);
             }}
           />
-        </Section>
+        </section>
+      )}
 
-        <DangerZoneSection
-          site={site}
-          actionLoading={actionLoading}
-          onRequestDelete={() => setConfirmAction('delete')}
-        />
+      {activeTab === 'settings' && (
+        <section className="max-w-7xl mx-auto px-6 py-8">
+          <DangerZoneSection
+            site={site}
+            actionLoading={actionLoading}
+            onRequestDelete={() => setConfirmAction('delete')}
+          />
+        </section>
+      )}
 
-        <ConfirmModal
-          isOpen={!!confirmAction}
-          onClose={() => setConfirmAction(null)}
-          onConfirm={handleConfirm}
-          action={confirmAction ?? 'delete'}
-          domain={site?.domain ?? ''}
-          loading={actionLoading}
-        />
-        <ConfirmModal
-          isOpen={versionModal?.type === 'activate'}
-          onClose={() => setVersionModal(null)}
-          onConfirm={handleActivate}
-          action="activate-version"
-          domain={versionModal?.label ?? ''}
-          loading={!!activating}
-        />
-        <ConfirmModal
-          isOpen={versionModal?.type === 'delete'}
-          onClose={() => setVersionModal(null)}
-          onConfirm={handleDeleteVersion}
-          action="delete-version"
-          domain={versionModal?.label ?? ''}
-          loading={!!deletingVersion}
-        />
-      </div>
+      <ConfirmModal
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={handleConfirm}
+        action={confirmAction ?? 'delete'}
+        domain={site?.domain ?? ''}
+        loading={actionLoading}
+      />
+      <ConfirmModal
+        isOpen={versionModal?.type === 'activate'}
+        onClose={() => setVersionModal(null)}
+        onConfirm={handleActivate}
+        action="activate-version"
+        domain={versionModal?.label ?? ''}
+        loading={!!activating}
+      />
+      <ConfirmModal
+        isOpen={versionModal?.type === 'delete'}
+        onClose={() => setVersionModal(null)}
+        onConfirm={handleDeleteVersion}
+        action="delete-version"
+        domain={versionModal?.label ?? ''}
+        loading={!!deletingVersion}
+      />
       <Footer />
     </section>
   );

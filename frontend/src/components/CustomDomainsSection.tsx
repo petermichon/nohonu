@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Plus, Check, X } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
-import { Section } from './Section.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
@@ -120,11 +119,14 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
   };
 
   return (
-    <Section id="custom-domains" icon={SECTION_MAP['custom-domains'].icon} title={SECTION_MAP['custom-domains'].label}>
+    <div className="mt-6">
+      <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">
+        {SECTION_MAP['custom-domains'].label}
+      </h2>
       <div className="space-y-4">
         {/* DNS Instructions */}
         {verificationToken && (
-          <div className="p-3 rounded-lg bg-stone-50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-800">
+          <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
             <button
               type="button"
               onClick={() => setShowDnsInstructions(!showDnsInstructions)}
@@ -135,13 +137,13 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             </button>
             {showDnsInstructions && (
               <div className="mt-3 space-y-2 text-xs">
-                <div className="p-2 rounded bg-stone-100 dark:bg-stone-800">
+                <div className="p-2 rounded bg-zinc-100 dark:bg-zinc-800">
                   <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">TXT Record (for verification):</p>
                   <code className="block text-zinc-600 dark:text-zinc-400 break-all">
                     _nohonu.{newCustomDomain || 'example.com'} → {verificationToken}
                   </code>
                 </div>
-                <div className="p-2 rounded bg-stone-100 dark:bg-stone-800">
+                <div className="p-2 rounded bg-zinc-100 dark:bg-zinc-800">
                   <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">CNAME Record (or A Record):</p>
                   <code className="block text-zinc-600 dark:text-zinc-400">
                     {newCustomDomain || 'example.com'} → {host}
@@ -160,14 +162,14 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             value={newCustomDomain}
             onChange={(e) => setNewCustomDomain(e.target.value)}
             placeholder="example.com"
-            className="flex-1 px-3 py-2 rounded-lg text-sm bg-stone-100 dark:bg-stone-800 text-zinc-950 dark:text-zinc-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="flex-1 px-3 py-2 rounded-lg text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
             disabled={addingCustomDomain}
           />
           <button
             type="button"
             onClick={addCustomDomain}
             disabled={addingCustomDomain || !newCustomDomain.trim()}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-stone-100 dark:bg-stone-800 text-zinc-600 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
           >
             <Plus className="w-3.5 h-3.5" />
             Add
@@ -177,8 +179,8 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
         {/* Custom domains list */}
         {customDomainsLoading ? (
           <div className="space-y-2">
-            <div className="h-10 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
-            <div className="h-10 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
+            <div className="h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+            <div className="h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
           </div>
         ) : customDomains.length === 0 ? (
           <p className="text-xs text-zinc-400 dark:text-zinc-500">No custom domains configured</p>
@@ -187,7 +189,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             {customDomains.map((cd) => (
               <div
                 key={cd.domain}
-                className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-stone-50 dark:bg-stone-900/50"
+                className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900/50"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-sm text-zinc-700 dark:text-zinc-300 truncate">{cd.domain}</span>
@@ -207,7 +209,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
                       type="button"
                       onClick={() => verifyCustomDomain(cd.domain)}
                       disabled={verifyingDomain === cd.domain}
-                      className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-50"
+                      className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50"
                       title="Verify domain"
                     >
                       <Check className="w-3.5 h-3.5" />
@@ -228,6 +230,6 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
           </div>
         )}
       </div>
-    </Section>
+    </div>
   );
 }

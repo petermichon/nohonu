@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
+import { useApi } from '../lib/api.ts';
 
 function Signup() {
   const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setEmail } = useConnection();
+  const { setEmail, setUsername } = useConnection();
+  const { apiFetch } = useApi();
+  const navigate = useNavigate();
   const [email, setEmailState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -162,9 +165,42 @@ function Signup() {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const generateUsername = async (email: string): Promise<string> => {
+    const base = email
+      .split('@')[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+    let username = base;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      try {
+        const res = await apiFetch(`/users/${username}`);
+        if (!res.ok) {
+          // Username doesn't exist, we can use it
+          return username;
+        }
+        // Username exists, try with random number
+        const randomNum = Math.floor(Math.random() * 1000);
+        username = `${base}${randomNum}`;
+        attempts++;
+      } catch {
+        // If API fails, assume username is available
+        return username;
+      }
+    }
+
+    // If all attempts failed, return with a larger random number
+    return `${base}${Math.floor(Math.random() * 10000)}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmail(email);
+    const username = await generateUsername(email);
+    setUsername(username);
+    navigate(`/u/${username}`);
   };
 
   return (
