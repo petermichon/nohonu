@@ -1,5 +1,5 @@
 import { type ComponentType } from 'react';
-import { Rocket, Globe, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info, Search } from 'lucide-react';
+import { Rocket, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info, Search } from 'lucide-react';
 import { SECTIONS, type SectionConfig } from './sectionsConfig.ts';
 
 // Shared numbered-icon factory — replaces 3 local `numIcon` copies + 11 inline closures
@@ -43,16 +43,9 @@ export interface SidebarRouteConfig {
   renderSiteList?: boolean;
 }
 
-export const MAIN_NAV_ITEMS: NavItemConfig[] = [
-  { to: '/domains', label: 'Domains', icon: Globe },
-  { to: '/servers', label: 'Servers', icon: Server },
-];
+export const MAIN_NAV_ITEMS: NavItemConfig[] = [];
 
-export const MOBILE_NAV_ITEMS: NavItemConfig[] = [
-  { to: '/sites', label: 'Sites', icon: Rocket },
-  { to: '/domains', label: 'Domains', icon: Globe },
-  { to: '/servers', label: 'Servers', icon: Server },
-];
+export const MOBILE_NAV_ITEMS: NavItemConfig[] = [{ to: '/sites', label: 'Sites', icon: Rocket }];
 
 export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
   {
@@ -63,16 +56,28 @@ export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
     currentLabel: 'User',
   },
   {
+    path: '/u/:username',
+    backTo: '/',
+    backLabel: 'Home',
+    currentLabel: 'Overview',
+  },
+  {
+    path: '/u/:username/sites',
+    backTo: '/u/:username',
+    backLabel: 'Overview',
+    currentLabel: 'Sites',
+  },
+  {
     path: '/u/:username/domains',
     backTo: '/u/:username',
-    backLabel: 'User',
+    backLabel: 'Overview',
     currentLabel: 'Domains',
     children: [{ to: '/u/:username/domains/explore', label: 'Explore', icon: Search, rightIcon: ChevronRight }],
   },
   {
     path: '/u/:username/servers',
     backTo: '/u/:username',
-    backLabel: 'User',
+    backLabel: 'Overview',
     currentLabel: 'Servers',
   },
   {
@@ -151,25 +156,6 @@ export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
       { to: '/legal/copyright-policy', label: 'Copyright Policy', icon: Shield, rightIcon: ChevronRight },
       { to: '/legal/mentions-legales', label: 'Mentions légales', icon: Info, rightIcon: ChevronRight },
     ],
-  },
-  {
-    path: '/domains/explore',
-    backTo: '/domains',
-    backLabel: 'Domains',
-    currentLabel: 'Explore',
-  },
-  {
-    path: '/domains',
-    backTo: '/',
-    backLabel: 'Home',
-    currentLabel: 'Domains',
-    children: [{ to: '/domains/explore', label: 'Explore', icon: Search, rightIcon: ChevronRight }],
-  },
-  {
-    path: '/servers',
-    backTo: '/',
-    backLabel: 'Home',
-    currentLabel: 'Servers',
   },
   {
     path: '/account',

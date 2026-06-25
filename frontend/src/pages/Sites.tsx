@@ -57,7 +57,7 @@ function Sites() {
   );
 
   return (
-    <section className="px-6 pt-12">
+    <section className="mb-12 px-6 pt-12">
       <div className="flex gap-6 relative">
         <div className="flex-1 min-w-0">
           {/* Page header */}

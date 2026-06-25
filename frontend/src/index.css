@@ -231,7 +231,7 @@ html.dark {
 }
 
 .dropdown-animate {
-  animation: dropdownFadeIn 0.1s ease-out;
+  animation: dropdownFadeIn 0.05s ease-out;
 }
 
 /* Fade-in animation for hero title */

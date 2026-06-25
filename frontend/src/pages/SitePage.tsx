@@ -340,7 +340,7 @@ function SitePage() {
 
       {activeTab === 'domains' && (
         <section className="max-w-7xl mx-auto px-6 py-8">
-          <CustomDomainsSection domain={domain!} />
+          <CustomDomainsSection domain={actualDomain!} />
         </section>
       )}
 

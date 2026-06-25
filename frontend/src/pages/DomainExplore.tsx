@@ -1,6 +1,6 @@
-import { ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useLanguage } from '../lib/LanguageProvider.tsx';
 import { Footer } from '../components/Footer.tsx';
 
 const providers = [
@@ -171,6 +171,7 @@ function getProviderUrl(provider: (typeof providers)[0], domain: string): string
 
 function DomainExplore() {
   const { getAccentColorValues } = useAccentColor();
+  const { resolvedLanguage } = useLanguage();
   const accentColorValues = getAccentColorValues();
   const [domain, setDomain] = useState('');
   const [sortBy, setSortBy] = useState<'price' | 'name'>('price');
@@ -255,44 +256,30 @@ function DomainExplore() {
 
       {/* Provider Grid */}
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {sortedProviders.map((provider) => (
             <a
               key={provider.name}
               href={getProviderUrl(provider, domain)}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 hover:shadow-lg no-underline"
+              className="group relative p-4 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:shadow-sm no-underline"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: `${provider.color}15` }}
-                  >
-                    <div className="w-6 h-6 rounded-md" style={{ backgroundColor: provider.color }} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 text-lg">{provider.name}</h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {provider.supportsDomain ? 'Direct search' : 'Visit site'}
+              <div className="flex items-center justify-between min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-md shrink-0" style={{ backgroundColor: provider.color }} />
+                  <div className="min-w-0">
+                    <h3 className="font-medium text-zinc-950 dark:text-zinc-100 truncate">{provider.name}</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                      {new URL(provider.url).hostname}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-zinc-950 dark:text-zinc-100">
-                    €{provider.price.toFixed(2)}
+                <div className="text-right shrink-0">
+                  <div className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">
+                    {resolvedLanguage === 'fr' ? `${provider.price.toFixed(2)} €` : `€${provider.price.toFixed(2)}`}
                   </div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400">/year</div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {provider.supportsDomain && domain ? `Search for "${domain}"` : 'View pricing'}
-                </span>
-                <ExternalLink
-                  className={`w-4 h-4 text-zinc-400 group-hover:${accentColorValues.text} transition-colors`}
-                />
               </div>
             </a>
           ))}
@@ -300,10 +287,10 @@ function DomainExplore() {
       </div>
 
       {/* Footer Note */}
-      <div className="mt-8 text-center">
+      <div className="mt-12 mb-8 text-center">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Prices shown are yearly renewal rates excluding VAT where applicable. You will be redirected to the provider's
-          site to complete your registration.
+          Prices shown are yearly .com renewal rates excluding VAT where applicable. Not affiliated with any listed
+          providers.
         </p>
       </div>
       <Footer />

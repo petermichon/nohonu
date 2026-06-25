@@ -3,6 +3,7 @@ import { useSites } from '../lib/SitesProvider.tsx';
 import { formatHits } from '../lib/utils.ts';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { Footer } from '../components/Footer.tsx';
 
 function Explore() {
   const { getAccentColorValues } = useAccentColor();
@@ -121,6 +122,7 @@ function Explore() {
           ))}
         </div>
       )}
+      <Footer />
     </section>
   );
 }

@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   User,
-  UserCircle,
   MoreVertical,
   Sun,
   Moon,
@@ -14,6 +13,7 @@ import {
   Palette,
   LogIn,
   LogOut,
+  Settings,
 } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
@@ -144,19 +144,16 @@ export function TopBar() {
     if (path === '/explore' && location.pathname === '/explore') {
       return true;
     }
-    if (path === '/sites' && (location.pathname === '/sites' || (username && location.pathname === `/u/${username}`))) {
-      return true;
-    }
     if (
-      path === '/domains' &&
-      (location.pathname === '/domains' || (username && location.pathname === `/u/${username}/domains`))
+      path === '/sites' &&
+      (location.pathname === '/sites' || (username && location.pathname === `/u/${username}/sites`))
     ) {
       return true;
     }
-    if (
-      path === '/servers' &&
-      (location.pathname === '/servers' || (username && location.pathname === `/u/${username}/servers`))
-    ) {
+    if (path === '/domains' && username && location.pathname === `/u/${username}/domains`) {
+      return true;
+    }
+    if (path === '/servers' && username && location.pathname === `/u/${username}/servers`) {
       return true;
     }
     return false;
@@ -164,10 +161,10 @@ export function TopBar() {
 
   const profileOptions = username
     ? [
-        { to: `/u/${username}`, label: 'Profile' },
-        { to: '/account', label: 'Account' },
+        { to: `/u/${username}`, label: 'Overview', divider: true },
+        { to: '/account', label: 'Settings' },
       ]
-    : [{ to: '/account', label: 'Account' }];
+    : [{ to: '/account', label: 'Settings' }];
 
   const themeOptions = [
     {
@@ -352,9 +349,17 @@ export function TopBar() {
           </Link>
           <div className="hidden sm:flex items-center h-full ml-5">
             <NavButton to="/explore" label="Explore" isActive={isActive('/explore')} />
-            <NavButton to={username ? `/u/${username}` : '/sites'} label="Sites" isActive={isActive('/sites')} />
-            <NavButton to="/domains" label="Domains" isActive={isActive('/domains')} />
-            <NavButton to="/servers" label="Servers" isActive={isActive('/servers')} />
+            <NavButton to={username ? `/u/${username}/sites` : '/sites'} label="Sites" isActive={isActive('/sites')} />
+            <NavButton
+              to={username ? `/u/${username}/domains` : '/domains'}
+              label="Domains"
+              isActive={isActive('/domains')}
+            />
+            <NavButton
+              to={username ? `/u/${username}/servers` : '/servers'}
+              label="Servers"
+              isActive={isActive('/servers')}
+            />
             <NavButton to="/docs" label="Docs" isActive={location.pathname === '/docs'} />
           </div>
         </div>
@@ -518,26 +523,30 @@ export function TopBar() {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-zinc-950 dark:text-zinc-50">{userName}</span>
-                        {username && <span className="text-sm text-zinc-500 dark:text-zinc-400 -mt-1">{username}</span>}
+                        {username && (
+                          <span className="text-sm text-zinc-500 dark:text-zinc-400 -mt-1">@{username}</span>
+                        )}
                       </div>
                     </div>
                     <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
                   </>
                 )}
                 <div className="flex flex-col gap-0.5">
-                  {profileOptions.map(({ to, label }) => (
-                    <Link
-                      key={to}
-                      to={to}
-                      onClick={() => {
-                        setIsProfileOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
-                    >
-                      {label === 'Profile' && <UserCircle className="w-4 h-4" />}
-                      {label === 'Account' && <User className="w-4 h-4" />}
-                      <span>{label}</span>
-                    </Link>
+                  {profileOptions.map(({ to, label, divider }) => (
+                    <React.Fragment key={to}>
+                      <Link
+                        to={to}
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                      >
+                        {label === 'Profile' && <User className="w-4 h-4" />}
+                        {label === 'Settings' && <Settings className="w-4 h-4" />}
+                        <span>{label}</span>
+                      </Link>
+                      {divider && <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />}
+                    </React.Fragment>
                   ))}
                   {username ? (
                     <>

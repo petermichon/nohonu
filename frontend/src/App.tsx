@@ -8,9 +8,7 @@ import { SitesProvider } from './lib/SitesProvider.tsx';
 import Home from './pages/Home.tsx';
 import Explore from './pages/Explore.tsx';
 import Sites from './pages/Sites.tsx';
-import Domains from './pages/Domains.tsx';
 import DomainExplore from './pages/DomainExplore.tsx';
-import Servers from './pages/Servers.tsx';
 import SitePage from './pages/SitePage.tsx';
 import AccountPage from './pages/Account.tsx';
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx';
@@ -55,8 +53,6 @@ function AppInner() {
       if (path === '/') return 'Nohonu - Open hosting for developers';
       if (path === '/explore') return 'Explore | Nohonu';
       if (path === '/sites') return 'Sites | Nohonu';
-      if (path === '/domains') return 'Domains | Nohonu';
-      if (path === '/servers') return 'Servers | Nohonu';
       if (path === '/docs') return 'Docs | Nohonu';
       if (path === '/login') return 'Log in | Nohonu';
       if (path === '/signup') return 'Sign up | Nohonu';
@@ -115,6 +111,14 @@ function AppInner() {
               }
             />
             <Route
+              path="/u/:username/sites"
+              element={
+                <SitesProvider>
+                  <UserPage />
+                </SitesProvider>
+              }
+            />
+            <Route
               path="/u/:username/domains"
               element={
                 <SitesProvider>
@@ -147,9 +151,6 @@ function AppInner() {
               }
             />
             <Route path="/u/:username/domains/explore" element={<DomainExplore />} />
-            <Route path="/domains" element={<Domains />} />
-            <Route path="/domains/explore" element={<DomainExplore />} />
-            <Route path="/servers" element={<Servers />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/legal" element={<Legal />} />
             <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
