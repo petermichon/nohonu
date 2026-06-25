@@ -23,7 +23,12 @@ import { Footer } from '../components/Footer.tsx';
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SitePage() {
-  const { domain, sitename, username } = useParams<{ domain?: string; sitename?: string; username?: string }>();
+  const { domain, sitename, username, section } = useParams<{
+    domain?: string;
+    sitename?: string;
+    username?: string;
+    section?: string;
+  }>();
   const actualDomain = sitename || domain;
   const { apiFetch, apiBase, host, protocol } = useApi();
   const { refreshSites } = useSites();
@@ -32,9 +37,7 @@ function SitePage() {
   const { getAccentColorValues } = useAccentColor();
   const { font } = useFont();
   const accentColorValues = getAccentColorValues();
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'domains' | 'versions' | 'settings'>(
-    'overview'
-  );
+  const activeTab = (section || 'overview') as 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
 
   const {
     site,
@@ -219,9 +222,8 @@ function SitePage() {
 
         {/* Navigation tabs */}
         <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
-          <button
-            type="button"
-            onClick={() => setActiveTab('overview')}
+          <Link
+            to={username ? `/u/${username}/${actualDomain}` : `/sites/${actualDomain}`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'overview'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -230,10 +232,9 @@ function SitePage() {
           >
             <Layout className="w-4 h-4" />
             Overview
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('analytics')}
+          </Link>
+          <Link
+            to={username ? `/u/${username}/${actualDomain}/analytics` : `/sites/${actualDomain}/analytics`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'analytics'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -242,10 +243,9 @@ function SitePage() {
           >
             <BarChart3 className="w-4 h-4" />
             Analytics
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('domains')}
+          </Link>
+          <Link
+            to={username ? `/u/${username}/${actualDomain}/domains` : `/sites/${actualDomain}/domains`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'domains'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -254,10 +254,9 @@ function SitePage() {
           >
             <Globe className="w-4 h-4" />
             Domains
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('versions')}
+          </Link>
+          <Link
+            to={username ? `/u/${username}/${actualDomain}/versions` : `/sites/${actualDomain}/versions`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'versions'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -266,10 +265,9 @@ function SitePage() {
           >
             <Layers className="w-4 h-4" />
             Versions
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('settings')}
+          </Link>
+          <Link
+            to={username ? `/u/${username}/${actualDomain}/settings` : `/sites/${actualDomain}/settings`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'settings'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -278,7 +276,7 @@ function SitePage() {
           >
             <Settings className="w-4 h-4" />
             Settings
-          </button>
+          </Link>
         </nav>
       </header>
 

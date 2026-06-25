@@ -22,7 +22,7 @@ import UserPage from './pages/UserPage.tsx';
 import Docs from './pages/Docs.tsx';
 import Login from './pages/Login.tsx';
 import Signup from './pages/Signup.tsx';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function useScrollbarWidth() {
   const getScrollbarWidth = () => {
@@ -49,6 +49,30 @@ function AppInner() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
   const scrollbarWidth = useScrollbarWidth();
 
+  useEffect(() => {
+    const getTitle = () => {
+      const path = location.pathname;
+      if (path === '/') return 'Nohonu - Open hosting for developers';
+      if (path === '/explore') return 'Explore | Nohonu';
+      if (path === '/sites') return 'Sites | Nohonu';
+      if (path === '/domains') return 'Domains | Nohonu';
+      if (path === '/servers') return 'Servers | Nohonu';
+      if (path === '/docs') return 'Docs | Nohonu';
+      if (path === '/login') return 'Log in | Nohonu';
+      if (path === '/signup') return 'Sign up | Nohonu';
+      if (path === '/account') return 'Account | Nohonu';
+      if (path === '/legal') return 'Legal | Nohonu';
+      if (path.startsWith('/u/')) {
+        const parts = path.split('/').filter(Boolean);
+        if (parts.length === 2) return `@${parts[1]} | Nohonu`;
+        if (parts.length === 3) return `${parts[2]} | Nohonu`;
+        if (parts.length === 4) return `${parts[2]} | Nohonu`;
+      }
+      return 'Nohonu';
+    };
+    document.title = getTitle();
+  }, [location.pathname]);
+
   return (
     <div className="relative flex-1 flex flex-col min-h-0">
       {/* Top Bar - absolute positioned to sit on top of scrolling content */}
@@ -59,7 +83,7 @@ function AppInner() {
       )}
 
       {/* Page Content */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-scroll min-h-0">
         <div className={isAuthPage ? '' : 'max-w-7xl mx-auto pt-20'}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -83,7 +107,7 @@ function AppInner() {
               }
             />
             <Route
-              path="/sites/:domain"
+              path="/sites/:domain/:section?"
               element={
                 <SitesProvider>
                   <SitePage />
@@ -91,16 +115,38 @@ function AppInner() {
               }
             />
             <Route
-              path="/u/:username/:sitename"
+              path="/u/:username/domains"
+              element={
+                <SitesProvider>
+                  <UserPage />
+                </SitesProvider>
+              }
+            />
+            <Route
+              path="/u/:username/servers"
+              element={
+                <SitesProvider>
+                  <UserPage />
+                </SitesProvider>
+              }
+            />
+            <Route
+              path="/u/:username"
+              element={
+                <SitesProvider>
+                  <UserPage />
+                </SitesProvider>
+              }
+            />
+            <Route
+              path="/u/:username/:sitename/:section?"
               element={
                 <SitesProvider>
                   <SitePage />
                 </SitesProvider>
               }
             />
-            <Route path="/u/:username/domains" element={<Domains />} />
             <Route path="/u/:username/domains/explore" element={<DomainExplore />} />
-            <Route path="/u/:username/servers" element={<Servers />} />
             <Route path="/domains" element={<Domains />} />
             <Route path="/domains/explore" element={<DomainExplore />} />
             <Route path="/servers" element={<Servers />} />
@@ -110,14 +156,6 @@ function AppInner() {
             <Route path="/legal/terms-of-service" element={<TermsOfService />} />
             <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
             <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
-            <Route
-              path="/u/:username"
-              element={
-                <SitesProvider>
-                  <UserPage />
-                </SitesProvider>
-              }
-            />
           </Routes>
         </div>
       </div>

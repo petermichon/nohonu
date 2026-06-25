@@ -192,12 +192,12 @@ function Home() {
         <div className="relative flex items-center gap-12">
           <div className="max-w-2xl">
             <h1
-              className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50 animate-fade-in"
+              className="text-5xl md:text-7xl font-semibold tracking-tight mb-8 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50 animate-fade-in"
               style={{ fontFamily: getFontFamily(font) }}
             >
-              The home for <span className={accentColorValues.text}>creative</span> static sites.
+              Deploy where <span className={accentColorValues.text}>creators</span> meet.
             </h1>
-            <div className="flex items-center gap-3 mt-8 animate-fade-in-delayed">
+            <div className="flex items-center gap-3 animate-fade-in-delayed">
               <Link
                 to="/signup"
                 className={`px-4 h-[46px] rounded-full text-sm font-medium ${
@@ -208,7 +208,7 @@ function Home() {
                       : 'text-zinc-950'
                 } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
               >
-                Get Started
+                Deploy for free
               </Link>
               <Link
                 to="/explore"
@@ -289,6 +289,72 @@ function Home() {
           >
             Explore all sites
           </Link>
+        </div>
+      </section>
+
+      {/* Platform Section */}
+      <section className="max-w-7xl mx-auto px-6 py-12 text-center">
+        <h2
+          className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4"
+          style={{ fontFamily: getFontFamily(font) }}
+        >
+          The open hosting platform
+        </h2>
+        <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8">
+          Free forever, open by design, built for the modern web.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-8">
+          <div className="text-left">
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Free Access</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              No barriers to entry. Deploy your sites without cost or hidden fees.
+            </p>
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Open Standards</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Git-based deployment. No vendor lock-in. Easy migration.
+            </p>
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Community-First</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Built by developers, for developers. Open and transparent.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Developer Section */}
+      <section className="max-w-7xl mx-auto px-6 py-12 text-center">
+        <h2
+          className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4"
+          style={{ fontFamily: getFontFamily(font) }}
+        >
+          Designed for developers
+        </h2>
+        <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8">
+          Deploy your static sites with ease. Git push to deploy, automatic SSL, global CDN.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-8">
+          <div className="text-left">
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Git-Based</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Push to deploy. Automatic builds. Zero configuration.
+            </p>
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Global CDN</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Fast loading worldwide. Edge caching. Instant updates.
+            </p>
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Automatic SSL</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              HTTPS by default. Auto-renewing certificates. Secure.
+            </p>
+          </div>
         </div>
       </section>
 

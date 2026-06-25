@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   User,
+  UserCircle,
   MoreVertical,
   Sun,
   Moon,
@@ -12,6 +13,7 @@ import {
   Info,
   Palette,
   LogIn,
+  LogOut,
 } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
@@ -351,16 +353,8 @@ export function TopBar() {
           <div className="hidden sm:flex items-center h-full ml-5">
             <NavButton to="/explore" label="Explore" isActive={isActive('/explore')} />
             <NavButton to={username ? `/u/${username}` : '/sites'} label="Sites" isActive={isActive('/sites')} />
-            <NavButton
-              to={username ? `/u/${username}/domains` : '/domains'}
-              label="Domains"
-              isActive={isActive('/domains')}
-            />
-            <NavButton
-              to={username ? `/u/${username}/servers` : '/servers'}
-              label="Servers"
-              isActive={isActive('/servers')}
-            />
+            <NavButton to="/domains" label="Domains" isActive={isActive('/domains')} />
+            <NavButton to="/servers" label="Servers" isActive={isActive('/servers')} />
             <NavButton to="/docs" label="Docs" isActive={location.pathname === '/docs'} />
           </div>
         </div>
@@ -516,18 +510,7 @@ export function TopBar() {
             </div>
             {isProfileOpen && (
               <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto dropdown-animate">
-                {!username ? (
-                  <Link
-                    to="/login"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    <span>Log in</span>
-                  </Link>
-                ) : (
+                {username && (
                   <>
                     <div className="flex items-start gap-2 px-3 py-2 mb-1">
                       <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
@@ -551,11 +534,12 @@ export function TopBar() {
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                     >
+                      {label === 'Profile' && <UserCircle className="w-4 h-4" />}
                       {label === 'Account' && <User className="w-4 h-4" />}
                       <span>{label}</span>
                     </Link>
                   ))}
-                  {username && (
+                  {username ? (
                     <>
                       <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
                       <button
@@ -566,8 +550,23 @@ export function TopBar() {
                         }}
                         className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
                       >
-                        <span>Disconnect</span>
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign out</span>
                       </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
+                      <Link
+                        to="/login"
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                      >
+                        <LogIn className="w-4 h-4" />
+                        <span>Log in</span>
+                      </Link>
                     </>
                   )}
                 </div>

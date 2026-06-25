@@ -9,7 +9,7 @@ function Login() {
   const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setEmail, username } = useConnection();
+  const { setEmail, setUsername } = useConnection();
   const navigate = useNavigate();
   const [email, setEmailState] = useState('');
   const [password, setPassword] = useState('');
@@ -166,8 +166,10 @@ function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const extractedUsername = email.split('@')[0];
     setEmail(email);
-    navigate(username ? `/u/${username}` : '/');
+    setUsername(extractedUsername);
+    navigate(`/u/${extractedUsername}`);
   };
 
   return (

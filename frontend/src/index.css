@@ -101,7 +101,7 @@ html {
 
 /* Window scrollbar styling */
 ::-webkit-scrollbar-track {
-  background: white;
+  background: #fafaf9; /* zinc-50 */
 }
 
 ::-webkit-scrollbar-thumb {
@@ -128,7 +128,7 @@ html {
 /* Firefox scrollbar styling */
 html {
   scrollbar-width: scroll;
-  scrollbar-color: #d6d3d1 white;
+  scrollbar-color: #d6d3d1 #fafaf9;
 }
 
 html.dark {
@@ -141,7 +141,7 @@ html.dark {
 }
 
 .themed-scroll::-webkit-scrollbar-track {
-  background: white;
+  background: #fafaf9; /* zinc-50 */
 }
 
 .themed-scroll::-webkit-scrollbar-thumb {

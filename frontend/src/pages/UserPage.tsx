@@ -1,5 +1,4 @@
-import { useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { User, AlertCircle, Layout, Globe, Server } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
@@ -13,9 +12,12 @@ export default function UserPage() {
   const accentColorValues = getAccentColorValues();
   const { font } = useFont();
   const { username } = useParams<{ username: string }>();
+  const location = useLocation();
   const { displayName } = useConnection();
   const { sites, loading, error } = useSites();
-  const [activeTab, setActiveTab] = useState<'sites' | 'domains' | 'servers'>('sites');
+  const activeTab = (
+    location.pathname.endsWith('/domains') ? 'domains' : location.pathname.endsWith('/servers') ? 'servers' : 'sites'
+  ) as 'sites' | 'domains' | 'servers';
 
   const userSites = sites.filter((s) => s.account === username);
 
@@ -42,9 +44,8 @@ export default function UserPage() {
 
         {/* Navigation tabs */}
         <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
-          <button
-            type="button"
-            onClick={() => setActiveTab('sites')}
+          <Link
+            to={`/u/${username}`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'sites'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -53,10 +54,9 @@ export default function UserPage() {
           >
             <Layout className="w-4 h-4" />
             Sites
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('domains')}
+          </Link>
+          <Link
+            to={`/u/${username}/domains`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'domains'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -65,10 +65,9 @@ export default function UserPage() {
           >
             <Globe className="w-4 h-4" />
             Domains
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('servers')}
+          </Link>
+          <Link
+            to={`/u/${username}/servers`}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'servers'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -77,7 +76,7 @@ export default function UserPage() {
           >
             <Server className="w-4 h-4" />
             Servers
-          </button>
+          </Link>
         </nav>
       </header>
 
