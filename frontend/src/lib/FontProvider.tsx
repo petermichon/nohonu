@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode, startTransition } from 'react';
 
 export type Font =
   | 'system'
@@ -45,37 +45,38 @@ export type Font =
   | 'expletus-sans';
 
 export const fontNames: Partial<Record<Font, string>> = {
-  'noto-sans': 'Noto Sans',
-  inter: 'Inter',
-  roboto: 'Roboto',
-  'open-sans': 'Open Sans',
+  'noto-sans': 'Noto Sans Variable',
+  inter: 'Inter Variable',
+  roboto: 'Roboto Variable',
+  'open-sans': 'Open Sans Variable',
   lato: 'Lato',
-  oswald: 'Oswald',
+  oswald: 'Oswald Variable',
+  outfit: 'Outfit Variable',
   'pt-sans': 'PT Sans',
-  raleway: 'Raleway',
-  'jetbrains-mono': 'JetBrains Mono',
-  montserrat: 'Montserrat',
-  exo: 'Exo',
-  'exo-2': 'Exo 2',
-  rubik: 'Rubik',
-  cinzel: 'Cinzel',
-  'mona-sans': 'Mona Sans',
-  'noto-sans-mono': 'Noto Sans Mono',
+  raleway: 'Raleway Variable',
+  'jetbrains-mono': 'JetBrains Mono Variable',
+  montserrat: 'Montserrat Variable',
+  exo: 'Exo Variable',
+  'exo-2': 'Exo 2 Variable',
+  rubik: 'Rubik Variable',
+  cinzel: 'Cinzel Variable',
+  'mona-sans': 'Mona Sans Variable',
+  'noto-sans-mono': 'Noto Sans Mono Variable',
   atkinson: 'Atkinson Hyperlegible',
   iceland: 'Iceland',
-  figtree: 'Figtree',
-  epilogue: 'Epilogue',
-  geist: 'Geist',
-  'expletus-sans': 'Expletus Sans',
+  figtree: 'Figtree Variable',
+  epilogue: 'Epilogue Variable',
+  geist: 'Geist Variable',
+  'expletus-sans': 'Expletus Sans Variable',
 };
 
 const fontFamilies: Record<Font, string> = {
   system: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   'system-ui': 'system-ui',
-  'noto-sans': "'Noto Sans'",
-  inter: "'Inter'",
-  roboto: "'Roboto'",
-  'open-sans': "'Open Sans'",
+  'noto-sans': "'Noto Sans Variable'",
+  inter: "'Inter Variable'",
+  roboto: "'Roboto Variable'",
+  'open-sans': "'Open Sans Variable'",
   arial: "'Arial'",
   verdana: "'Verdana'",
   'helvetica-neue': "'Helvetica Neue'",
@@ -89,25 +90,25 @@ const fontFamilies: Record<Font, string> = {
   lato: "'Lato'",
   'courier-new': "'Courier New'",
   consolas: "'Consolas'",
-  oswald: "'Oswald'",
-  outfit: "'Outfit'",
+  oswald: "'Oswald Variable'",
+  outfit: "'Outfit Variable'",
   'times-new-roman': "'Times New Roman'",
   'pt-sans': "'PT Sans'",
-  raleway: "'Raleway'",
-  'jetbrains-mono': "'JetBrains Mono'",
-  montserrat: "'Montserrat'",
-  exo: "'Exo'",
-  'exo-2': "'Exo 2'",
-  rubik: "'Rubik'",
-  cinzel: "'Cinzel'",
-  'mona-sans': "'Mona Sans'",
-  'noto-sans-mono': "'Noto Sans Mono'",
+  raleway: "'Raleway Variable'",
+  'jetbrains-mono': "'JetBrains Mono Variable'",
+  montserrat: "'Montserrat Variable'",
+  exo: "'Exo Variable'",
+  'exo-2': "'Exo 2 Variable'",
+  rubik: "'Rubik Variable'",
+  cinzel: "'Cinzel Variable'",
+  'mona-sans': "'Mona Sans Variable'",
+  'noto-sans-mono': "'Noto Sans Mono Variable'",
   atkinson: "'Atkinson Hyperlegible'",
   iceland: "'Iceland'",
-  figtree: "'Figtree'",
-  epilogue: "'Epilogue'",
-  geist: "'Geist'",
-  'expletus-sans': "'Expletus Sans'",
+  figtree: "'Figtree Variable'",
+  epilogue: "'Epilogue Variable'",
+  geist: "'Geist Variable'",
+  'expletus-sans': "'Expletus Sans Variable'",
   'sans-serif': 'sans-serif',
   serif: 'serif',
   cursive: 'cursive',
@@ -121,14 +122,15 @@ export function getFontFamily(font: Font): string {
 }
 
 export function applyFont(font: Font): void {
-  document.getElementById('root')!.style.fontFamily = getFontFamily(font);
+  document.getElementById('root')!.style.setProperty('--font-family', getFontFamily(font));
 }
 
 export async function waitForFont(font: Font): Promise<void> {
   const fontName = fontNames[font];
   if (!fontName) return;
-  await document.fonts.load(`400 16px "${fontName}"`);
-  await document.fonts.ready;
+  const spec = `400 16px "${fontName}"`;
+  if (document.fonts.check(spec)) return;
+  await document.fonts.load(spec);
 }
 
 interface FontContextType {
@@ -145,11 +147,13 @@ export function FontProvider({ children }: { children: ReactNode }) {
     return 'outfit';
   });
 
-  const setFont = async (newFont: Font) => {
+  const setFont = (newFont: Font) => {
     localStorage.setItem('font', newFont);
-    await waitForFont(newFont);
-    applyFont(newFont);
-    setFontState(newFont);
+    startTransition(async () => {
+      await waitForFont(newFont);
+      applyFont(newFont);
+      setFontState(newFont);
+    });
   };
 
   return <FontContext.Provider value={{ font, setFont }}>{children}</FontContext.Provider>;

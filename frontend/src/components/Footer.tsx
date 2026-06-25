@@ -116,8 +116,8 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <span
-              className="font-semibold text-[18px] text-zinc-950 dark:text-zinc-50 tracking-tight"
-              style={{ fontFamily: "'Outfit', sans-serif" }}
+              className="font-bold text-[18px] text-zinc-950 dark:text-zinc-50 tracking-tight"
+              style={{ fontFamily: "'Outfit Variable', sans-serif" }}
             >
               nohonu
             </span>

@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
 
 function Signup() {
-  const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
   const { setEmail, setUsername } = useConnection();
@@ -214,12 +212,7 @@ function Signup() {
       <div className="relative flex-1 flex items-center justify-center">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1
-              className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-2"
-              style={{ fontFamily: getFontFamily(font) }}
-            >
-              Create an account
-            </h1>
+            <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Create an account</h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">Start building your static sites on Nohonu</p>
           </div>
 

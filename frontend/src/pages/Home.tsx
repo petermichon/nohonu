@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { GitBranch, Upload, Globe as GlobeIcon, User, Monitor, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -35,7 +34,6 @@ function FeatureBadge({
 }
 
 function Home() {
-  const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { theme, resolvedTheme } = useTheme();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
@@ -96,8 +94,24 @@ function Home() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let cachedRect: DOMRect | null = null;
-    let cachedDpr = window.devicePixelRatio || 1;
+    let rect = canvas.getBoundingClientRect();
+    let dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    // Use ResizeObserver to detect size changes without forced reflow
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        rect = entry.contentRect;
+        dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+      }
+    });
+    resizeObserver.observe(canvas);
+
     let lastTime = performance.now();
 
     // Pre-calculate constants
@@ -130,20 +144,6 @@ function Home() {
         x[i] = ((newX % 100) + 100) % 100;
         y[i] = ((newY % 100) + 100) % 100;
         angle[i] = newAngle;
-      }
-
-      // Check if canvas needs resize
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const needsResize =
-        !cachedRect || cachedRect.width !== rect.width || cachedRect.height !== rect.height || cachedDpr !== dpr;
-
-      if (needsResize) {
-        cachedRect = rect;
-        cachedDpr = dpr;
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
       }
 
       ctx.clearRect(0, 0, rect.width, rect.height);
@@ -179,6 +179,7 @@ function Home() {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      resizeObserver.disconnect();
     };
   }, []);
 
@@ -192,10 +193,7 @@ function Home() {
           </div>
           <div className="relative flex items-center gap-12">
             <div className="max-w-2xl">
-              <h1
-                className="text-5xl md:text-7xl font-semibold tracking-tight mb-8 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50 animate-fade-in"
-                style={{ fontFamily: getFontFamily(font) }}
-              >
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50 animate-fade-in">
                 Deploy where <span className={accentColorValues.text}>creators</span> meet.
               </h1>
               <div className="flex items-center gap-3 animate-fade-in-delayed">
@@ -231,10 +229,7 @@ function Home() {
         {/* Featured Sites */}
         <section className="max-w-7xl mx-auto px-6 py-16">
           <div className="flex items-center justify-between mb-8">
-            <h2
-              className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50"
-              style={{ fontFamily: getFontFamily(font) }}
-            >
+            <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50">
               What's being built on Nohonu
             </h2>
             <div className="flex items-center gap-2">
@@ -282,12 +277,7 @@ function Home() {
                       </span>
                     </div>
                     <div>
-                      <h3
-                        className="font-semibold text-zinc-950 dark:text-zinc-100 mb-0.5"
-                        style={{ fontFamily: getFontFamily(font) }}
-                      >
-                        {site.name}
-                      </h3>
+                      <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 mb-0.5">{site.name}</h3>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">by @{site.author}</p>
                     </div>
                   </div>
@@ -317,10 +307,7 @@ function Home() {
 
         {/* Platform Section */}
         <section className="max-w-7xl mx-auto px-6 py-12 text-center">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4">
             The open hosting platform
           </h2>
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8">
@@ -350,10 +337,7 @@ function Home() {
 
         {/* Developer Section */}
         <section className="max-w-7xl mx-auto px-6 py-12 text-center">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4">
             Designed for developers
           </h2>
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8">
@@ -493,10 +477,7 @@ function Home() {
 
         {/* Technologies */}
         <section className="max-w-7xl mx-auto px-6 py-16">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-8 text-center"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-8 text-center">
             Built for the modern web
           </h2>
           <p className="text-center text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl mx-auto">
@@ -599,10 +580,7 @@ function Home() {
 
         {/* How it works */}
         <section className="max-w-7xl mx-auto px-6 py-16">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-12 text-center"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-12 text-center">
             How it works
           </h2>
 
@@ -634,12 +612,7 @@ function Home() {
                 </div>
                 <div className="absolute left-10 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-600 border-2 border-white dark:border-zinc-950 z-20" />
                 <div className="ml-10">
-                  <h3
-                    className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2"
-                    style={{ fontFamily: getFontFamily(font) }}
-                  >
-                    Connect
-                  </h3>
+                  <h3 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">Connect</h3>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     Link your Git repository or upload your static files. We support GitHub, GitLab, and direct uploads.
                   </p>
@@ -668,12 +641,7 @@ function Home() {
                 </div>
                 <div className="absolute left-10 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-600 border-2 border-white dark:border-zinc-950 z-20" />
                 <div className="ml-10">
-                  <h3
-                    className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2"
-                    style={{ fontFamily: getFontFamily(font) }}
-                  >
-                    Deploy
-                  </h3>
+                  <h3 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">Deploy</h3>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     Push your code and we automatically build and deploy your site. Zero configuration required.
                   </p>
@@ -702,12 +670,7 @@ function Home() {
                 </div>
                 <div className="absolute left-10 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-600 border-2 border-white dark:border-zinc-950 z-20" />
                 <div className="ml-10">
-                  <h3
-                    className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2"
-                    style={{ fontFamily: getFontFamily(font) }}
-                  >
-                    Go Live
-                  </h3>
+                  <h3 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">Go Live</h3>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     Your site is instantly available on our global edge network with SSL and DDoS protection.
                   </p>
@@ -769,12 +732,7 @@ function Home() {
             animation: glowPulse 3s ease-in-out infinite;
           }
         `}</style>
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
-            The Flow
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center">The Flow</h2>
           <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm mb-14 max-w-md mx-auto">
             You connect once. Nohonu handles the rest — hosting, SSL, and delivering your site to every visitor,
             globally.
@@ -795,12 +753,7 @@ function Home() {
                     <User className={`w-9 h-9 ${accentColorValues.text}`} />
                   </div>
                   <div className="text-center">
-                    <div
-                      className="text-sm font-semibold text-zinc-950 dark:text-zinc-100"
-                      style={{ fontFamily: getFontFamily(font) }}
-                    >
-                      You
-                    </div>
+                    <div className="text-sm font-semibold text-zinc-950 dark:text-zinc-100">You</div>
                     <div className="text-[14px] text-zinc-400 dark:text-zinc-500 mt-0.5">the reader</div>
                   </div>
                   <div className="w-full space-y-1.5 mt-1">
@@ -847,18 +800,13 @@ function Home() {
                   >
                     <span
                       className={`text-3xl font-bold ${accentColorValues.text}`}
-                      style={{ fontFamily: "'Outfit', sans-serif" }}
+                      style={{ fontFamily: "'Outfit Variable', sans-serif" }}
                     >
                       N
                     </span>
                   </div>
                   <div className="text-center">
-                    <div
-                      className="text-sm font-bold text-zinc-950 dark:text-zinc-100"
-                      style={{ fontFamily: getFontFamily(font) }}
-                    >
-                      Nohonu
-                    </div>
+                    <div className="text-sm font-bold text-zinc-950 dark:text-zinc-100">Nohonu</div>
                     <div className="text-[14px] text-zinc-400 dark:text-zinc-500 mt-0.5">edge hosting platform</div>
                   </div>
                   <div className="w-full space-y-1.5 mt-1">
@@ -911,12 +859,7 @@ function Home() {
                     <Monitor className={`w-9 h-9 ${accentColorValues.text}`} />
                   </div>
                   <div className="text-center">
-                    <div
-                      className="text-sm font-semibold text-zinc-950 dark:text-zinc-100"
-                      style={{ fontFamily: getFontFamily(font) }}
-                    >
-                      Visitors
-                    </div>
+                    <div className="text-sm font-semibold text-zinc-950 dark:text-zinc-100">Visitors</div>
                     <div className="text-[14px] text-zinc-400 dark:text-zinc-500 mt-0.5">your audience</div>
                   </div>
                   <div className="w-full space-y-1.5 mt-1">
@@ -960,12 +903,7 @@ function Home() {
                 <User className={`w-7 h-7 ${accentColorValues.text}`} />
               </div>
               <div>
-                <div
-                  className="text-sm font-semibold text-zinc-950 dark:text-zinc-100"
-                  style={{ fontFamily: getFontFamily(font) }}
-                >
-                  You
-                </div>
+                <div className="text-sm font-semibold text-zinc-950 dark:text-zinc-100">You</div>
                 <div className="text-[14px] text-zinc-400 dark:text-zinc-500">Upload files · Manage domains</div>
               </div>
             </div>
@@ -991,18 +929,13 @@ function Home() {
               >
                 <span
                   className={`text-2xl font-bold ${accentColorValues.text}`}
-                  style={{ fontFamily: "'Outfit', sans-serif" }}
+                  style={{ fontFamily: "'Outfit Variable', sans-serif" }}
                 >
                   N
                 </span>
               </div>
               <div>
-                <div
-                  className="text-sm font-bold text-zinc-950 dark:text-zinc-100"
-                  style={{ fontFamily: getFontFamily(font) }}
-                >
-                  Nohonu
-                </div>
+                <div className="text-sm font-bold text-zinc-950 dark:text-zinc-100">Nohonu</div>
                 <div className="text-[14px] text-zinc-400 dark:text-zinc-500">SSL · CDN · DDoS protection</div>
               </div>
             </div>
@@ -1024,12 +957,7 @@ function Home() {
                 <Monitor className="w-7 h-7 text-emerald-500 dark:text-emerald-400" />
               </div>
               <div>
-                <div
-                  className="text-sm font-semibold text-zinc-950 dark:text-zinc-100"
-                  style={{ fontFamily: getFontFamily(font) }}
-                >
-                  Visitors
-                </div>
+                <div className="text-sm font-semibold text-zinc-950 dark:text-zinc-100">Visitors</div>
                 <div className="text-[14px] text-zinc-400 dark:text-zinc-500">Instant load · Any device · Anywhere</div>
               </div>
             </div>
@@ -1037,10 +965,7 @@ function Home() {
         </section>
 
         <section className="max-w-7xl mx-auto px-6 py-16">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-12 text-center"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-12 text-center">
             All Features
           </h2>
 
@@ -1094,10 +1019,7 @@ function Home() {
 
         {/* Developer */}
         <section className="max-w-7xl mx-auto px-6 py-16">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center">
             Developer First
           </h2>
           <p className="text-center text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl mx-auto">
@@ -1239,10 +1161,7 @@ function Home() {
 
         {/* Hosted in Europe */}
         <section className="max-w-7xl mx-auto px-6 py-16">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center">
             Hosted in Europe
           </h2>
           <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm max-w-md mx-auto">
@@ -1252,10 +1171,7 @@ function Home() {
 
         {/* Open Source */}
         <section className="max-w-7xl mx-auto px-6 py-16">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4 text-center">
             Open Source
           </h2>
           <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm max-w-md mx-auto">
@@ -1265,10 +1181,7 @@ function Home() {
 
         {/* CTA Section */}
         <section className="max-w-7xl mx-auto px-6 py-16 text-center">
-          <h2
-            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4"
-            style={{ fontFamily: getFontFamily(font) }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4">
             Ready to share your creation?
           </h2>
           <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8">

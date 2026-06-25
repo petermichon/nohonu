@@ -1,72 +1,30 @@
 @import 'tailwindcss';
-@import '@fontsource/noto-sans/400.css';
-@import '@fontsource/noto-sans/500.css';
-@import '@fontsource/noto-sans/700.css';
-@import '@fontsource/noto-sans-mono/400.css';
-@import '@fontsource/noto-sans-mono/500.css';
-@import '@fontsource/noto-sans-mono/700.css';
-@import '@fontsource/outfit/400.css';
-@import '@fontsource/outfit/500.css';
-@import '@fontsource/outfit/700.css';
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/700.css';
-@import '@fontsource/roboto/400.css';
-@import '@fontsource/roboto/500.css';
-@import '@fontsource/roboto/700.css';
-@import '@fontsource/open-sans/400.css';
-@import '@fontsource/open-sans/500.css';
-@import '@fontsource/open-sans/700.css';
+@import '@fontsource-variable/noto-sans/wght.css';
+@import '@fontsource-variable/noto-sans-mono/wght.css';
+@import '@fontsource-variable/outfit/wght.css';
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/roboto/wght.css';
+@import '@fontsource-variable/open-sans/wght.css';
 @import '@fontsource/lato/400.css';
 @import '@fontsource/lato/700.css';
-@import '@fontsource/mona-sans/400.css';
-@import '@fontsource/mona-sans/500.css';
-@import '@fontsource/mona-sans/700.css';
-@import '@fontsource/oswald/400.css';
-@import '@fontsource/oswald/500.css';
-@import '@fontsource/oswald/700.css';
+@import '@fontsource-variable/mona-sans/wght.css';
+@import '@fontsource-variable/oswald/wght.css';
 @import '@fontsource/pt-sans/400.css';
 @import '@fontsource/pt-sans/700.css';
-@import '@fontsource/raleway/400.css';
-@import '@fontsource/raleway/500.css';
-@import '@fontsource/raleway/700.css';
-@import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/500.css';
-@import '@fontsource/jetbrains-mono/700.css';
-@import '@fontsource/montserrat/400.css';
-@import '@fontsource/montserrat/500.css';
-@import '@fontsource/montserrat/700.css';
-@import '@fontsource/exo/400.css';
-@import '@fontsource/exo/500.css';
-@import '@fontsource/exo/700.css';
-@import '@fontsource/exo-2/400.css';
-@import '@fontsource/exo-2/500.css';
-@import '@fontsource/exo-2/700.css';
-@import '@fontsource/rubik/400.css';
-@import '@fontsource/rubik/500.css';
-@import '@fontsource/rubik/700.css';
-@import '@fontsource/cinzel/400.css';
-@import '@fontsource/cinzel/500.css';
-@import '@fontsource/cinzel/700.css';
+@import '@fontsource-variable/raleway/wght.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+@import '@fontsource-variable/montserrat/wght.css';
+@import '@fontsource-variable/exo/wght.css';
+@import '@fontsource-variable/exo-2/wght.css';
+@import '@fontsource-variable/rubik/wght.css';
+@import '@fontsource-variable/cinzel/wght.css';
 @import '@fontsource/atkinson-hyperlegible/400.css';
 @import '@fontsource/atkinson-hyperlegible/700.css';
 @import '@fontsource/iceland/400.css';
-@import '@fontsource/figtree/400.css';
-@import '@fontsource/figtree/500.css';
-@import '@fontsource/figtree/600.css';
-@import '@fontsource/figtree/700.css';
-@import '@fontsource/epilogue/400.css';
-@import '@fontsource/epilogue/500.css';
-@import '@fontsource/epilogue/600.css';
-@import '@fontsource/epilogue/700.css';
-@import '@fontsource/geist/400.css';
-@import '@fontsource/geist/500.css';
-@import '@fontsource/geist/700.css';
-@import '@fontsource/expletus-sans/400.css';
-@import '@fontsource/expletus-sans/500.css';
-@import '@fontsource/expletus-sans/600.css';
-@import '@fontsource/expletus-sans/700.css';
+@import '@fontsource-variable/figtree/wght.css';
+@import '@fontsource-variable/epilogue/wght.css';
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/expletus-sans/wght.css';
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -87,15 +45,9 @@ html {
 }
 
 #root {
+  --font-family: 'Outfit Variable', sans-serif;
   -webkit-font-smoothing: antialiased;
-  font-family:
-    'Inter',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--font-family);
   -moz-osx-font-smoothing: grayscale;
 }
 

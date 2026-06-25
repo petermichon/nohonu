@@ -17,7 +17,7 @@ import {
   Server,
   Layout,
 } from 'lucide-react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
 import { useFont, getFontFamily, type Font } from '../lib/FontProvider.tsx';
@@ -193,56 +193,60 @@ export function TopBar() {
     { value: 'fr' as const, icon: 'FR', label: 'Français' },
   ];
 
-  const fontOptions = (
-    [
-      { value: 'system', label: 'System' },
-      { value: 'system-ui', label: 'System UI', divider: true },
-      { value: 'sans-serif', label: 'Sans-serif' },
-      { value: 'serif', label: 'Serif' },
-      { value: 'cursive', label: 'Cursive' },
-      { value: 'monospace', label: 'Monospace', divider: true },
-      { value: 'inter', label: 'Inter' },
-      { value: 'noto-sans', label: 'Noto Sans' },
-      { value: 'roboto', label: 'Roboto' },
-      { value: 'open-sans', label: 'Open Sans' },
-      { value: 'lato', label: 'Lato' },
-      { value: 'oswald', label: 'Oswald' },
-      { value: 'outfit', label: 'Outfit' },
-      { value: 'pt-sans', label: 'PT Sans' },
-      { value: 'raleway', label: 'Raleway' },
-      { value: 'montserrat', label: 'Montserrat' },
-      { value: 'exo', label: 'Exo' },
-      { value: 'exo-2', label: 'Exo 2' },
-      { value: 'rubik', label: 'Rubik' },
-      { value: 'cinzel', label: 'Cinzel' },
-      { value: 'mona-sans', label: 'Mona Sans' },
-      { value: 'noto-sans-mono', label: 'Noto Sans Mono' },
-      { value: 'atkinson', label: 'Atkinson Hyperlegible' },
-      { value: 'iceland', label: 'Iceland' },
-      { value: 'figtree', label: 'Figtree' },
-      { value: 'epilogue', label: 'Epilogue' },
-      { value: 'geist', label: 'Geist' },
-      { value: 'expletus-sans', label: 'Expletus Sans' },
-      { value: 'jetbrains-mono', label: 'JetBrains Mono', divider: true },
-      { value: 'arial', label: 'Arial' },
-      { value: 'verdana', label: 'Verdana' },
-      { value: 'tahoma', label: 'Tahoma' },
-      { value: 'lucida-grande', label: 'Lucida Grande' },
-      { value: 'helvetica-neue', label: 'Helvetica Neue' },
-      { value: 'helvetica', label: 'Helvetica' },
-      { value: 'trebuchet-ms', label: 'Trebuchet MS', divider: true },
-      { value: 'georgia', label: 'Georgia' },
-      { value: 'times-new-roman', label: 'Times New Roman', divider: true },
-      { value: 'courier-new', label: 'Courier New' },
-      { value: 'consolas', label: 'Consolas' },
-      { value: 'menlo', label: 'Menlo' },
-      { value: 'monaco', label: 'Monaco' },
-    ] as Array<{ value: Font; label: string; divider?: boolean }>
-  ).map((opt) => ({
-    ...opt,
-    icon: null,
-    style: { fontFamily: getFontFamily(opt.value) },
-  }));
+  const fontOptions = useMemo(
+    () =>
+      (
+        [
+          { value: 'system', label: 'System' },
+          { value: 'system-ui', label: 'System UI', divider: true },
+          { value: 'sans-serif', label: 'Sans-serif' },
+          { value: 'serif', label: 'Serif' },
+          { value: 'cursive', label: 'Cursive' },
+          { value: 'monospace', label: 'Monospace', divider: true },
+          { value: 'inter', label: 'Inter' },
+          { value: 'noto-sans', label: 'Noto Sans' },
+          { value: 'roboto', label: 'Roboto' },
+          { value: 'open-sans', label: 'Open Sans' },
+          { value: 'lato', label: 'Lato' },
+          { value: 'oswald', label: 'Oswald' },
+          { value: 'outfit', label: 'Outfit' },
+          { value: 'pt-sans', label: 'PT Sans' },
+          { value: 'raleway', label: 'Raleway' },
+          { value: 'montserrat', label: 'Montserrat' },
+          { value: 'exo', label: 'Exo' },
+          { value: 'exo-2', label: 'Exo 2' },
+          { value: 'rubik', label: 'Rubik' },
+          { value: 'cinzel', label: 'Cinzel' },
+          { value: 'mona-sans', label: 'Mona Sans' },
+          { value: 'noto-sans-mono', label: 'Noto Sans Mono' },
+          { value: 'atkinson', label: 'Atkinson Hyperlegible' },
+          { value: 'iceland', label: 'Iceland' },
+          { value: 'figtree', label: 'Figtree' },
+          { value: 'epilogue', label: 'Epilogue' },
+          { value: 'geist', label: 'Geist' },
+          { value: 'expletus-sans', label: 'Expletus Sans' },
+          { value: 'jetbrains-mono', label: 'JetBrains Mono', divider: true },
+          { value: 'arial', label: 'Arial' },
+          { value: 'verdana', label: 'Verdana' },
+          { value: 'tahoma', label: 'Tahoma' },
+          { value: 'lucida-grande', label: 'Lucida Grande' },
+          { value: 'helvetica-neue', label: 'Helvetica Neue' },
+          { value: 'helvetica', label: 'Helvetica' },
+          { value: 'trebuchet-ms', label: 'Trebuchet MS', divider: true },
+          { value: 'georgia', label: 'Georgia' },
+          { value: 'times-new-roman', label: 'Times New Roman', divider: true },
+          { value: 'courier-new', label: 'Courier New' },
+          { value: 'consolas', label: 'Consolas' },
+          { value: 'menlo', label: 'Menlo' },
+          { value: 'monaco', label: 'Monaco' },
+        ] as Array<{ value: Font; label: string; divider?: boolean }>
+      ).map((opt) => ({
+        ...opt,
+        icon: null,
+        style: { fontFamily: getFontFamily(opt.value) },
+      })),
+    []
+  );
 
   const accentColorOptions = (Object.keys(ACCENT_COLORS) as AccentColor[]).map((color) => ({
     value: color,
@@ -346,8 +350,8 @@ export function TopBar() {
               }}
             />
             <span
-              className="font-semibold text-xl text-zinc-950 dark:text-zinc-50 tracking-tight"
-              style={{ fontFamily: "'Outfit', sans-serif" }}
+              className="font-bold text-xl text-zinc-950 dark:text-zinc-50 tracking-tight"
+              style={{ fontFamily: "'Outfit Variable', sans-serif" }}
             >
               nohonu
             </span>

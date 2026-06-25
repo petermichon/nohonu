@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 
 function Login() {
-  const { font } = useFont();
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
   const { setEmail, setUsername } = useConnection();
@@ -183,12 +181,7 @@ function Login() {
       <div className="relative flex-1 flex items-center justify-center">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1
-              className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-2"
-              style={{ fontFamily: getFontFamily(font) }}
-            >
-              Welcome back
-            </h1>
+            <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-2">Welcome back</h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">Log in to your Nohonu account</p>
           </div>
 

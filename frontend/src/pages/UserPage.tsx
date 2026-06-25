@@ -3,7 +3,6 @@ import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus } from 'lucide
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
-import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
@@ -18,7 +17,6 @@ interface CustomDomainEntry {
 export default function UserPage() {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const { font } = useFont();
   const { username } = useParams<{ username: string }>();
   const location = useLocation();
   const { displayName } = useConnection();
@@ -114,12 +112,7 @@ export default function UserPage() {
               <User className={`w-8 h-8 ${accentColorValues.textDark}`} />
             </div>
             <div>
-              <h1
-                className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1"
-                style={{ fontFamily: getFontFamily(font) }}
-              >
-                {displayName || username}
-              </h1>
+              <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{displayName || username}</h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">@{username}</p>
             </div>
           </div>
@@ -270,12 +263,7 @@ export default function UserPage() {
               <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
                 <User className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
               </div>
-              <h3
-                className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2"
-                style={{ fontFamily: getFontFamily(font) }}
-              >
-                No sites yet
-              </h3>
+              <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
               <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
                 @{username} hasn't published any sites yet.
               </p>
@@ -329,12 +317,7 @@ export default function UserPage() {
                 <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Globe className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
                 </div>
-                <h3
-                  className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2"
-                  style={{ fontFamily: getFontFamily(font) }}
-                >
-                  No custom domains
-                </h3>
+                <h3 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No custom domains</h3>
                 <p className="text-zinc-500 dark:text-zinc-400 mb-6 max-w-sm mx-auto">
                   Connect a custom domain to your site to use your own brand.
                 </p>
@@ -365,10 +348,7 @@ export default function UserPage() {
                           <Globe className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
                         </div>
                         <div className="min-w-0">
-                          <h3
-                            className="font-medium text-zinc-950 dark:text-zinc-100 mb-0.5 truncate text-sm"
-                            style={{ fontFamily: getFontFamily(font) }}
-                          >
+                          <h3 className="font-medium text-zinc-950 dark:text-zinc-100 mb-0.5 truncate text-sm">
                             {cd.customDomain}
                           </h3>
                           <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{cd.siteDomain}</p>
@@ -420,12 +400,7 @@ export default function UserPage() {
               <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Server className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
               </div>
-              <h3
-                className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2"
-                style={{ fontFamily: getFontFamily(font) }}
-              >
-                No servers
-              </h3>
+              <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No servers</h3>
               <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
                 @{username} hasn't configured any servers yet.
               </p>

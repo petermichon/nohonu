@@ -7,7 +7,6 @@ import { useSites } from '../lib/SitesProvider.tsx';
 import { calcUptimePct } from '../lib/utils.ts';
 import { useToast } from '../lib/ToastContext.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
-import { useFont, getFontFamily } from '../lib/FontProvider.tsx';
 import { UptimeChart } from '../components/UptimeChart.tsx';
 import { ActivityChart } from '../components/ActivityChart.tsx';
 import { VersionPanel } from '../components/VersionPanel.tsx';
@@ -35,7 +34,6 @@ function SitePage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { getAccentColorValues } = useAccentColor();
-  const { font } = useFont();
   const accentColorValues = getAccentColorValues();
   const activeTab = (section || 'overview') as 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
 
@@ -201,12 +199,7 @@ function SitePage() {
             <Layout className={`w-8 h-8 ${accentColorValues.textDark}`} />
           </div>
           <div>
-            <h1
-              className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1"
-              style={{ fontFamily: getFontFamily(font) }}
-            >
-              {site?.domain}
-            </h1>
+            <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.domain}</h1>
             {username ? (
               <Link
                 to={`/u/${username}`}
