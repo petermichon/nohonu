@@ -438,7 +438,7 @@ export function AccentColorProvider({ children }: { children: ReactNode }) {
     if (saved && validColors.includes(saved as AccentColor)) {
       return saved as AccentColor;
     }
-    return 'indigo';
+    return 'teal';
   });
 
   useEffect(() => {
