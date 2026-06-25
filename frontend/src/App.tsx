@@ -51,7 +51,7 @@ function AppInner() {
   useEffect(() => {
     const getTitle = () => {
       const path = location.pathname;
-      if (path === '/') return 'Nohonu - Open hosting for modern web development';
+      if (path === '/') return 'Nohonu - Open hosting';
       if (path === '/explore') return 'Explore | Nohonu';
       if (path === '/sites') return 'Sites | Nohonu';
       if (path === '/docs') return 'Docs | Nohonu';
