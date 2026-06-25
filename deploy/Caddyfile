@@ -11,20 +11,6 @@
 
 	handle {
 		root * /srv/frontend
-		@fonts {
-			path *.woff *.woff2 *.ttf *.otf *.eot
-		}
-		header @fonts Cache-Control "public, max-age=31536000, immutable"
-		@woff2 path *.woff2
-		header @woff2 Content-Type "font/woff2"
-		@woff path *.woff
-		header @woff Content-Type "font/woff"
-		@ttf path *.ttf
-		header @ttf Content-Type "font/ttf"
-		@otf path *.otf
-		header @otf Content-Type "font/otf"
-		@eot path *.eot
-		header @eot Content-Type "application/vnd.ms-fontobject"
 		try_files {path} /index.html
 		file_server
 	}
