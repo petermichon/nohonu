@@ -104,15 +104,28 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-zinc-200 dark:border-zinc-800">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 justify-center justify-items-center gap-x-0 gap-y-12">
+    <footer className="py-24">
+      <div className="border-t border-zinc-200 dark:border-zinc-900"></div>
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 justify-center justify-items-center gap-x-0 gap-y-12 py-24">
           <FooterSection title="Legal" links={legalLinks} />
           <FooterSection title="Project" links={projectLinks} />
           <FooterSection title="Community" links={communityLinks} />
           <FooterSection title="Social" links={socialLinks} />
         </div>
-        <div className="mt-12 text-sm text-zinc-500 dark:text-zinc-500 text-center">© 2026 Nohonu</div>
+        <div className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <span
+              className="font-semibold text-[18px] text-zinc-950 dark:text-zinc-50 tracking-tight"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              nohonu
+            </span>
+          </Link>
+          <div className="text-[13px] text-zinc-400 dark:text-zinc-600">
+            © 2026 Nohonu. Open hosting for modern web development.
+          </div>
+        </div>
       </div>
     </footer>
   );

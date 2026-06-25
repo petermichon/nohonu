@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { TopBar } from './components/TopBar.tsx';
+import { Footer } from './components/Footer.tsx';
 import { ToastProvider } from './lib/ToastContext.tsx';
 import { GlobalToast } from './components/GlobalToast.tsx';
 import { LanguageProvider } from './lib/LanguageProvider.tsx';
@@ -50,7 +51,7 @@ function AppInner() {
   useEffect(() => {
     const getTitle = () => {
       const path = location.pathname;
-      if (path === '/') return 'Nohonu - Open hosting for developers';
+      if (path === '/') return 'Nohonu - Open hosting for modern web development';
       if (path === '/explore') return 'Explore | Nohonu';
       if (path === '/sites') return 'Sites | Nohonu';
       if (path === '/docs') return 'Docs | Nohonu';
@@ -159,6 +160,7 @@ function AppInner() {
             <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
           </Routes>
         </div>
+        {!isAuthPage && <Footer />}
       </div>
     </div>
   );
