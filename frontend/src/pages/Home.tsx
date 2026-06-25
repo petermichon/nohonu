@@ -193,9 +193,12 @@ function Home() {
           </div>
           <div className="relative flex items-center gap-12">
             <div className="max-w-2xl">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50 animate-fade-in">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50 animate-fade-in">
                 Deploy where <span className={accentColorValues.text}>creators</span> meet.
               </h1>
+              <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8 animate-fade-in">
+                The open hosting platform for your static sites and apps.
+              </p>
               <div className="flex items-center gap-3 animate-fade-in-delayed">
                 <Link
                   to="/signup"
