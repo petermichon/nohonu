@@ -14,10 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@fontsource/atkinson-hyperlegible": "^5.2.8",
-    "@fontsource/iceland": "^5.2.8",
-    "@fontsource/lato": "^5.2.7",
-    "@fontsource/pt-sans": "^5.2.8",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.2.6",
     "@fontsource-variable/cinzel": "^5.2.8",
     "@fontsource-variable/epilogue": "^5.2.8",
     "@fontsource-variable/exo": "^5.2.8",
@@ -37,6 +34,10 @@
     "@fontsource-variable/raleway": "^5.2.8",
     "@fontsource-variable/roboto": "^5.2.10",
     "@fontsource-variable/rubik": "^5.2.8",
+    "@fontsource/atkinson-hyperlegible": "^5.2.8",
+    "@fontsource/iceland": "^5.2.8",
+    "@fontsource/lato": "^5.2.7",
+    "@fontsource/pt-sans": "^5.2.8",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

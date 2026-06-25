@@ -16,6 +16,7 @@ import {
   Globe,
   Server,
   Layout,
+  Settings,
 } from 'lucide-react';
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
@@ -81,17 +82,20 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
           >
             {Icon === null ? (
-              <span className="w-4 h-4" />
+              <span className="w-4 h-4 shrink-0" />
             ) : typeof Icon === 'string' ? (
-              <span className="w-4 h-4 flex items-center justify-center text-xs font-semibold">{Icon}</span>
+              <span className="w-4 h-4 flex items-center justify-center text-xs font-semibold shrink-0">{Icon}</span>
             ) : (
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4 shrink-0" />
             )}
-            <span className={className} style={style}>
+            <span
+              className={`${className} flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-left`}
+              style={style}
+            >
               {label}
             </span>
             <Check
-              className={`ml-auto w-4 h-4 transition-opacity ${currentValue === value ? 'opacity-100 text-zinc-950 dark:text-zinc-50' : 'opacity-0 text-zinc-950 dark:text-zinc-50'}`}
+              className={`ml-auto w-4 h-4 shrink-0 transition-opacity ${currentValue === value ? 'opacity-100 text-zinc-950 dark:text-zinc-50' : 'opacity-0 text-zinc-950 dark:text-zinc-50'}`}
             />
           </button>
           {divider && <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />}
@@ -167,9 +171,9 @@ export function TopBar() {
         { to: `/u/${username}/sites`, label: 'Sites', icon: Layout },
         { to: `/u/${username}/domains`, label: 'Domains', icon: Globe },
         { to: `/u/${username}/servers`, label: 'Servers', icon: Server, divider: true },
-        { to: '/account', label: 'Settings' },
+        { to: '/account', label: 'Settings', icon: Settings },
       ]
-    : [{ to: '/account', label: 'Settings' }];
+    : [{ to: '/account', label: 'Settings', icon: Settings }];
 
   const themeOptions = [
     {
@@ -207,10 +211,8 @@ export function TopBar() {
           { value: 'noto-sans', label: 'Noto Sans' },
           { value: 'roboto', label: 'Roboto' },
           { value: 'open-sans', label: 'Open Sans' },
-          { value: 'lato', label: 'Lato' },
           { value: 'oswald', label: 'Oswald' },
           { value: 'outfit', label: 'Outfit' },
-          { value: 'pt-sans', label: 'PT Sans' },
           { value: 'raleway', label: 'Raleway' },
           { value: 'montserrat', label: 'Montserrat' },
           { value: 'exo', label: 'Exo' },
@@ -219,13 +221,15 @@ export function TopBar() {
           { value: 'cinzel', label: 'Cinzel' },
           { value: 'mona-sans', label: 'Mona Sans' },
           { value: 'noto-sans-mono', label: 'Noto Sans Mono' },
-          { value: 'atkinson', label: 'Atkinson Hyperlegible' },
-          { value: 'iceland', label: 'Iceland' },
+          { value: 'atkinson', label: 'Atkinson Hyperlegible Next' },
           { value: 'figtree', label: 'Figtree' },
           { value: 'epilogue', label: 'Epilogue' },
           { value: 'geist', label: 'Geist' },
           { value: 'expletus-sans', label: 'Expletus Sans' },
           { value: 'jetbrains-mono', label: 'JetBrains Mono', divider: true },
+          { value: 'lato', label: 'Lato' },
+          { value: 'pt-sans', label: 'PT Sans' },
+          { value: 'iceland', label: 'Iceland', divider: true },
           { value: 'arial', label: 'Arial' },
           { value: 'verdana', label: 'Verdana' },
           { value: 'tahoma', label: 'Tahoma' },
@@ -374,7 +378,7 @@ export function TopBar() {
               <MoreVertical className="w-4 h-4" />
             </button>
             {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto dropdown-animate">
+              <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[256px] max-h-[80vh] overflow-y-auto dropdown-animate">
                 <div className="flex flex-col gap-0.5">
                   {menuView === 'main' && (
                     <>
@@ -515,7 +519,7 @@ export function TopBar() {
               <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
             </div>
             {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[260px] max-h-[80vh] overflow-y-auto dropdown-animate">
+              <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[256px] max-h-[80vh] overflow-y-auto dropdown-animate">
                 {username && (
                   <>
                     <div className="flex items-start gap-2 px-3 py-2 mb-1">
