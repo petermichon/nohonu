@@ -41,6 +41,8 @@ function Home() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { theme, resolvedTheme } = useTheme();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
+  // Filter state for future use - currently all filters show the same sites
+  const [filter, setFilter] = useState<'latest' | 'popular' | 'experimental'>('latest');
 
   const accentColorValues = getAccentColorValues();
   const accentColorRef = useRef(accentColor);
@@ -220,7 +222,7 @@ function Home() {
                 to="/docs"
                 className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
               >
-                Documentation
+                Docs
               </Link>
             </div>
           </div>
@@ -229,12 +231,31 @@ function Home() {
 
       {/* Featured Sites */}
       <section className="max-w-7xl mx-auto px-6 py-16">
-        <h2
-          className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-8"
-          style={{ fontFamily: getFontFamily(font) }}
-        >
-          What's being built on Nohonu
-        </h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2
+            className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50"
+            style={{ fontFamily: getFontFamily(font) }}
+          >
+            What's being built on Nohonu
+          </h2>
+          <div className="flex items-center gap-2">
+            {(['latest', 'popular', 'experimental'] as const).map((f) => {
+              const baseClasses =
+                'px-3 h-8 rounded-lg text-sm font-normal text-zinc-600 dark:text-zinc-400 cursor-pointer whitespace-nowrap flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800';
+              const activeClasses = filter === f ? '!text-zinc-950 dark:!text-zinc-100' : '';
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilter(f)}
+                  className={`${baseClasses} ${activeClasses}`}
+                >
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
             { name: 'Portfolio 2026', author: 'alexdesign', stack: ['Next.js', 'Tailwind'] },
@@ -285,7 +306,7 @@ function Home() {
         <div className="text-center mt-8">
           <Link
             to="/explore"
-            className="inline-flex items-center gap-2 px-6 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800"
+            className="inline-flex items-center gap-2 px-6 h-[46px] rounded-full text-base font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800"
           >
             Explore all sites
           </Link>
@@ -536,7 +557,7 @@ function Home() {
           ].map((tech) => (
             <div
               key={tech.name}
-              className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg transition-all w-24 h-24 group"
+              className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg w-24 h-24 group"
               onMouseEnter={(e) => {
                 const icon = e.currentTarget.querySelector('div');
                 if (icon) {
@@ -552,7 +573,7 @@ function Home() {
               }}
             >
               <div
-                className="w-12 h-12 flex items-center justify-center text-zinc-950 dark:text-zinc-300 transition-colors"
+                className="w-12 h-12 flex items-center justify-center text-zinc-950 dark:text-zinc-300"
                 aria-label={tech.name}
                 dangerouslySetInnerHTML={{
                   __html: tech.svg.replace(/fill="[^"]*"/g, '').replace('<svg', '<svg fill="currentColor"'),
@@ -727,8 +748,8 @@ function Home() {
             100% { transform: scale(1); }
           }
           @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
-            50% { box-shadow: 0 0 0 8px rgba(99,102,241,0.15); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+            50% { box-shadow: 0 0 0 8px rgba(var(--accent-rgb), 0.15); }
           }
           .flow-packet-right {
             animation: flowPulse 2.2s ease-in-out infinite;
@@ -761,7 +782,10 @@ function Home() {
           <div className="flex items-center justify-center gap-0">
             {/* YOU node */}
             <div className="flex flex-col items-center z-10">
-              <div className="node-glow w-48 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col items-center gap-3">
+              <div
+                className="node-glow w-48 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col items-center gap-3"
+                style={{ '--accent-rgb': accentColorValues.rgb } as React.CSSProperties}
+              >
                 <div
                   className={`w-18 h-18 rounded-xl ${accentColorValues.bgLighter} flex items-center justify-center p-4`}
                 >
@@ -774,7 +798,7 @@ function Home() {
                   >
                     You
                   </div>
-                  <div className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-0.5">the reader</div>
+                  <div className="text-[14px] text-zinc-400 dark:text-zinc-500 mt-0.5">the reader</div>
                 </div>
                 <div className="w-full space-y-1.5 mt-1">
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
@@ -832,7 +856,7 @@ function Home() {
                   >
                     Nohonu
                   </div>
-                  <div className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-0.5">edge hosting platform</div>
+                  <div className="text-[14px] text-zinc-400 dark:text-zinc-500 mt-0.5">edge hosting platform</div>
                 </div>
                 <div className="w-full space-y-1.5 mt-1">
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
@@ -890,7 +914,7 @@ function Home() {
                   >
                     Visitors
                   </div>
-                  <div className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-0.5">your audience</div>
+                  <div className="text-[14px] text-zinc-400 dark:text-zinc-500 mt-0.5">your audience</div>
                 </div>
                 <div className="w-full space-y-1.5 mt-1">
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
@@ -939,7 +963,7 @@ function Home() {
               >
                 You
               </div>
-              <div className="text-[13px] text-zinc-400 dark:text-zinc-500">Upload files · Manage domains</div>
+              <div className="text-[14px] text-zinc-400 dark:text-zinc-500">Upload files · Manage domains</div>
             </div>
           </div>
 
@@ -976,7 +1000,7 @@ function Home() {
               >
                 Nohonu
               </div>
-              <div className="text-[13px] text-zinc-400 dark:text-zinc-500">SSL · CDN · DDoS protection</div>
+              <div className="text-[14px] text-zinc-400 dark:text-zinc-500">SSL · CDN · DDoS protection</div>
             </div>
           </div>
 
@@ -1003,7 +1027,7 @@ function Home() {
               >
                 Visitors
               </div>
-              <div className="text-[13px] text-zinc-400 dark:text-zinc-500">Instant load · Any device · Anywhere</div>
+              <div className="text-[14px] text-zinc-400 dark:text-zinc-500">Instant load · Any device · Anywhere</div>
             </div>
           </div>
         </div>
@@ -1058,9 +1082,9 @@ function Home() {
         <div className="text-center mt-8">
           <Link
             to="/docs"
-            className="inline-flex items-center gap-2 px-6 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800"
+            className="inline-flex items-center gap-2 px-6 h-[46px] rounded-full text-base font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer transition-colors border border-zinc-200 dark:border-zinc-800"
           >
-            Explore documentation
+            Docs
           </Link>
         </div>
       </section>
@@ -1232,6 +1256,39 @@ function Home() {
         <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm max-w-md mx-auto">
           Fully open-source and transparent. Contribute on GitHub.
         </p>
+      </section>
+
+      {/* CTA Section */}
+      <section className="max-w-7xl mx-auto px-6 py-16 text-center">
+        <h2
+          className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50 mb-4"
+          style={{ fontFamily: getFontFamily(font) }}
+        >
+          Ready to share your creation?
+        </h2>
+        <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-8">
+          Join 20,000+ developers hosting on Nohonu. Deploy in seconds, stay forever.
+        </p>
+        <div className="flex items-center gap-3 justify-center">
+          <Link
+            to="/signup"
+            className={`px-4 h-[46px] rounded-full text-sm font-medium ${
+              accentColorValues.textColor === 'light'
+                ? 'text-white'
+                : accentColorValues.textColor === 'inverted'
+                  ? 'text-zinc-100 dark:text-zinc-950'
+                  : 'text-zinc-950'
+            } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+          >
+            Get Started
+          </Link>
+          <Link
+            to="/docs"
+            className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
+          >
+            Docs
+          </Link>
+        </div>
       </section>
 
       <Footer />
