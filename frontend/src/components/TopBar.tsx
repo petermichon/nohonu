@@ -13,7 +13,9 @@ import {
   Palette,
   LogIn,
   LogOut,
-  Settings,
+  Globe,
+  Server,
+  Layout,
 } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
@@ -161,7 +163,10 @@ export function TopBar() {
 
   const profileOptions = username
     ? [
-        { to: `/u/${username}`, label: 'Overview', divider: true },
+        { to: `/u/${username}`, label: 'Profile', icon: User },
+        { to: `/u/${username}/sites`, label: 'Sites', icon: Layout },
+        { to: `/u/${username}/domains`, label: 'Domains', icon: Globe },
+        { to: `/u/${username}/servers`, label: 'Servers', icon: Server, divider: true },
         { to: '/account', label: 'Settings' },
       ]
     : [{ to: '/account', label: 'Settings' }];
@@ -349,17 +354,9 @@ export function TopBar() {
           </Link>
           <div className="hidden sm:flex items-center h-full ml-5">
             <NavButton to="/explore" label="Explore" isActive={isActive('/explore')} />
-            <NavButton to={username ? `/u/${username}/sites` : '/sites'} label="Sites" isActive={isActive('/sites')} />
-            <NavButton
-              to={username ? `/u/${username}/domains` : '/domains'}
-              label="Domains"
-              isActive={isActive('/domains')}
-            />
-            <NavButton
-              to={username ? `/u/${username}/servers` : '/servers'}
-              label="Servers"
-              isActive={isActive('/servers')}
-            />
+            {username && (
+              <NavButton to={`/u/${username}`} label="Profile" isActive={location.pathname === `/u/${username}`} />
+            )}
             <NavButton to="/docs" label="Docs" isActive={location.pathname === '/docs'} />
           </div>
         </div>
@@ -532,7 +529,7 @@ export function TopBar() {
                   </>
                 )}
                 <div className="flex flex-col gap-0.5">
-                  {profileOptions.map(({ to, label, divider }) => (
+                  {profileOptions.map(({ to, label, divider, icon: Icon }) => (
                     <React.Fragment key={to}>
                       <Link
                         to={to}
@@ -541,8 +538,7 @@ export function TopBar() {
                         }}
                         className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
-                        {label === 'Profile' && <User className="w-4 h-4" />}
-                        {label === 'Settings' && <Settings className="w-4 h-4" />}
+                        {Icon && <Icon className="w-4 h-4" />}
                         <span>{label}</span>
                       </Link>
                       {divider && <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />}
