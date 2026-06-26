@@ -1,30 +1,25 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
+import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
+import { useDomains } from '../lib/DomainsProvider.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
-import { useState, useEffect, useCallback } from 'react';
-
-interface CustomDomainEntry {
-  siteDomain: string;
-  customDomain: string;
-  verified: boolean;
-}
+import { useState } from 'react';
 
 export default function UserPage() {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const { username } = useParams<{ username: string }>();
   const location = useLocation();
-  const { displayName } = useConnection();
-  const { sites, loading, error } = useSites();
+  const { displayName, username: loggedInUsername } = useConnection();
+  const { sites, loading, error, refreshSites } = useSites();
+  const { domains, loading: domainsLoading, refreshDomains } = useDomains();
   const { apiFetch } = useApi();
   const { showToast } = useToast();
-  const [allDomains, setAllDomains] = useState<CustomDomainEntry[]>([]);
-  const [domainsLoading, setDomainsLoading] = useState(false);
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
   const activeTab = (
@@ -37,26 +32,7 @@ export default function UserPage() {
           : 'overview'
   ) as 'overview' | 'sites' | 'domains' | 'servers';
 
-  const loadDomains = useCallback(async () => {
-    setDomainsLoading(true);
-    try {
-      const res = await apiFetch('/custom-domains');
-      const data = await res.json();
-      setAllDomains((data.customDomains as CustomDomainEntry[]) ?? []);
-    } catch {
-      // non-critical
-    } finally {
-      setDomainsLoading(false);
-    }
-  }, [apiFetch]);
-
-  useEffect(() => {
-    if (activeTab === 'domains') {
-      (async () => {
-        await loadDomains();
-      })();
-    }
-  }, [activeTab, loadDomains]);
+  const isOwnProfile = username === loggedInUsername;
 
   const verifyCustomDomain = async (siteDomain: string, customDomain: string) => {
     setVerifyingDomain(customDomain);
@@ -65,7 +41,7 @@ export default function UserPage() {
         method: 'POST',
       });
       if (res.ok) {
-        await loadDomains();
+        await refreshDomains();
         showToast('Custom domain verified', true);
       } else {
         const data = await res.json();
@@ -85,7 +61,7 @@ export default function UserPage() {
         method: 'DELETE',
       });
       if (res.ok) {
-        await loadDomains();
+        await refreshDomains();
         showToast('Custom domain removed', true);
       } else {
         const data = await res.json();
@@ -231,7 +207,7 @@ export default function UserPage() {
                   </div>
                   <h3 className="text-sm font-medium text-zinc-950 dark:text-zinc-100">Domains</h3>
                 </div>
-                <p className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50">{allDomains.length}</p>
+                <p className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50">{domains.length}</p>
               </div>
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -259,15 +235,30 @@ export default function UserPage() {
         {/* Empty state */}
         {!loading && !error && userSites.length === 0 && activeTab === 'sites' && (
           <section className="max-w-7xl mx-auto px-6 py-8">
-            <div className="text-center py-20">
-              <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                <User className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
+            {isOwnProfile ? (
+              <div className="max-w-2xl mx-auto">
+                <div className="text-center py-12 mb-8">
+                  <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <User className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
+                  </div>
+                  <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
+                  <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+                    Deploy your first site to get started.
+                  </p>
+                </div>
+                <InlineDeployForm onDeploy={refreshSites} />
               </div>
-              <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
-                @{username} hasn't published any sites yet.
-              </p>
-            </div>
+            ) : (
+              <div className="text-center py-20">
+                <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <User className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
+                </div>
+                <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
+                  @{username} hasn't published any sites yet.
+                </p>
+              </div>
+            )}
           </section>
         )}
 
@@ -290,7 +281,7 @@ export default function UserPage() {
           <section className="max-w-7xl mx-auto px-6 py-8">
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {allDomains.length} {allDomains.length === 1 ? 'domain' : 'domains'} configured
+                {domains.length} {domains.length === 1 ? 'domain' : 'domains'} configured
               </p>
               <Link
                 to={`/u/${username}/domains/explore`}
@@ -312,7 +303,7 @@ export default function UserPage() {
                   <div key={i} className="rounded-2xl bg-zinc-100 dark:bg-zinc-800 aspect-4/3 animate-pulse" />
                 ))}
               </div>
-            ) : allDomains.length === 0 ? (
+            ) : domains.length === 0 ? (
               <div className="text-center py-16">
                 <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Globe className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
@@ -337,7 +328,7 @@ export default function UserPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {allDomains.map((cd) => (
+                {domains.map((cd) => (
                   <div
                     key={cd.customDomain}
                     className="flex flex-col gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 hover:shadow-md transition-shadow"

@@ -5,6 +5,8 @@ import App from './App.tsx';
 import { ThemeProvider } from './lib/ThemeProvider.tsx';
 import { ConnectionProvider } from './lib/ConnectionProvider.tsx';
 import { AccentColorProvider } from './lib/AccentColorProvider.tsx';
+import { SitesProvider } from './lib/SitesProvider.tsx';
+import { DomainsProvider } from './lib/DomainsProvider.tsx';
 import { applyFont, validFonts, waitForFont, type Font } from './lib/FontProvider.tsx';
 
 const savedFont = localStorage.getItem('font');
@@ -17,7 +19,11 @@ waitForFont(font).then(() => {
       <ConnectionProvider>
         <ThemeProvider>
           <AccentColorProvider>
-            <App />
+            <SitesProvider>
+              <DomainsProvider>
+                <App />
+              </DomainsProvider>
+            </SitesProvider>
           </AccentColorProvider>
         </ThemeProvider>
       </ConnectionProvider>

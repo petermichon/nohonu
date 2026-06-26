@@ -3,6 +3,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 interface Connection {
   apiBase: string;
   apiKey: string;
+  sessionId: string;
   username: string;
   displayName: string;
   email: string;
@@ -12,6 +13,7 @@ interface ConnectionContextType extends Connection {
   setConnection: (c: Connection) => void;
   setApiBase: (url: string) => void;
   setApiKey: (key: string) => void;
+  setSessionId: (sessionId: string) => void;
   setUsername: (username: string) => void;
   setDisplayName: (displayName: string) => void;
   setEmail: (email: string) => void;
@@ -21,6 +23,7 @@ interface ConnectionContextType extends Connection {
 const DEFAULT: Connection = {
   apiBase: 'https://nohonu.com/api',
   apiKey: '',
+  sessionId: '',
   username: '',
   displayName: '',
   email: '',
@@ -30,12 +33,14 @@ function load(): Connection {
   try {
     const apiBase = localStorage.getItem('apiBase');
     const apiKey = localStorage.getItem('apiKey');
+    const sessionId = localStorage.getItem('sessionId');
     const username = localStorage.getItem('username');
     const displayName = localStorage.getItem('displayName');
     const email = localStorage.getItem('email');
     return {
       apiBase: apiBase ?? DEFAULT.apiBase,
       apiKey: apiKey ?? DEFAULT.apiKey,
+      sessionId: sessionId ?? DEFAULT.sessionId,
       username: username ?? DEFAULT.username,
       displayName: displayName ?? DEFAULT.displayName,
       email: email ?? DEFAULT.email,
@@ -67,6 +72,11 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, apiKey: key }));
   };
 
+  const setSessionId = (sessionId: string) => {
+    localStorage.setItem('sessionId', sessionId);
+    setConnectionState((prev) => ({ ...prev, sessionId }));
+  };
+
   const setUsername = (u: string) => {
     localStorage.setItem('username', u);
     setConnectionState((prev) => ({ ...prev, username: u }));
@@ -84,15 +94,26 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
 
   const disconnect = () => {
     localStorage.removeItem('apiKey');
+    localStorage.removeItem('sessionId');
     localStorage.removeItem('username');
     localStorage.removeItem('displayName');
     localStorage.removeItem('email');
-    setConnectionState((prev) => ({ ...prev, apiKey: '', username: '', displayName: '', email: '' }));
+    setConnectionState((prev) => ({ ...prev, apiKey: '', sessionId: '', username: '', displayName: '', email: '' }));
   };
 
   return (
     <ConnectionContext.Provider
-      value={{ ...connection, setConnection, setApiBase, setApiKey, setUsername, setDisplayName, setEmail, disconnect }}
+      value={{
+        ...connection,
+        setConnection,
+        setApiBase,
+        setApiKey,
+        setSessionId,
+        setUsername,
+        setDisplayName,
+        setEmail,
+        disconnect,
+      }}
     >
       {children}
     </ConnectionContext.Provider>

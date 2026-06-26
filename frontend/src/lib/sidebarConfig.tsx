@@ -1,6 +1,6 @@
 import { type ComponentType } from 'react';
-import { Rocket, Server, ChevronRight, User, Key, FileText, Scale, Shield, Info, Search } from 'lucide-react';
-import { SECTIONS, type SectionConfig } from './sectionsConfig.ts';
+import { Server, ChevronRight, User, Key, FileText, Scale, Shield, Info, Search } from 'lucide-react';
+import { type SectionConfig } from './sectionsConfig.ts';
 
 // Shared numbered-icon factory — replaces 3 local `numIcon` copies + 11 inline closures
 function numIcon(n: number): ComponentType<{ className?: string }> {
@@ -45,7 +45,7 @@ export interface SidebarRouteConfig {
 
 export const MAIN_NAV_ITEMS: NavItemConfig[] = [];
 
-export const MOBILE_NAV_ITEMS: NavItemConfig[] = [{ to: '/sites', label: 'Sites', icon: Rocket }];
+export const MOBILE_NAV_ITEMS: NavItemConfig[] = [];
 
 export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
   {
@@ -173,20 +173,5 @@ export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
     backTo: '/',
     backLabel: 'Home',
     currentLabel: 'About',
-  },
-  {
-    path: '/sites/',
-    matchPrefix: true,
-    backTo: '/sites',
-    backLabel: 'Sites',
-    currentLabel: 'Site',
-    sections: SECTIONS,
-  },
-  {
-    path: '/sites',
-    backTo: '/',
-    backLabel: 'Home',
-    currentLabel: 'Sites',
-    renderSiteList: true,
   },
 ];

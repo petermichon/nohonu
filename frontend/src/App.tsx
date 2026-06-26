@@ -8,7 +8,6 @@ import { FontProvider } from './lib/FontProvider.tsx';
 import { SitesProvider } from './lib/SitesProvider.tsx';
 import Home from './pages/Home.tsx';
 import Explore from './pages/Explore.tsx';
-import Sites from './pages/Sites.tsx';
 import DomainExplore from './pages/DomainExplore.tsx';
 import SitePage from './pages/SitePage.tsx';
 import AccountPage from './pages/Account.tsx';
@@ -21,6 +20,7 @@ import UserPage from './pages/UserPage.tsx';
 import Docs from './pages/Docs.tsx';
 import Login from './pages/Login.tsx';
 import Signup from './pages/Signup.tsx';
+import NotFound from './pages/NotFound.tsx';
 import { useState, useEffect } from 'react';
 
 function useScrollbarWidth() {
@@ -53,7 +53,6 @@ function AppInner() {
       const path = location.pathname;
       if (path === '/') return 'Nohonu - Open hosting';
       if (path === '/explore') return 'Explore | Nohonu';
-      if (path === '/sites') return 'Sites | Nohonu';
       if (path === '/docs') return 'Docs | Nohonu';
       if (path === '/login') return 'Log in | Nohonu';
       if (path === '/signup') return 'Sign up | Nohonu';
@@ -92,22 +91,6 @@ function AppInner() {
               element={
                 <SitesProvider>
                   <Explore />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/sites"
-              element={
-                <SitesProvider>
-                  <Sites />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/sites/:domain/:section?"
-              element={
-                <SitesProvider>
-                  <SitePage />
                 </SitesProvider>
               }
             />
@@ -158,6 +141,7 @@ function AppInner() {
             <Route path="/legal/terms-of-service" element={<TermsOfService />} />
             <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
             <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
         {!isAuthPage && <Footer />}

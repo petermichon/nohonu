@@ -3,16 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
+import { useApi } from '../lib/api.ts';
 
 function Login() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setEmail, setUsername } = useConnection();
+  const { setEmail, setUsername, setSessionId, setDisplayName } = useConnection();
+  const { apiFetch } = useApi();
   const navigate = useNavigate();
   const [email, setEmailState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particleCount = 250;
 
@@ -162,12 +166,35 @@ function Login() {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const extractedUsername = email.split('@')[0];
-    setEmail(email);
-    setUsername(extractedUsername);
-    navigate(`/u/${extractedUsername}`);
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await apiFetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Login failed');
+        setLoading(false);
+        return;
+      }
+
+      setEmail(email);
+      setUsername(data.user.username);
+      setDisplayName(data.user.displayName);
+      setSessionId(data.session);
+      navigate(`/u/${data.user.username}`);
+    } catch {
+      setError('Network error');
+      setLoading(false);
+    }
   };
 
   return (
@@ -186,6 +213,12 @@ function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
             <div>
               <input
                 id="email"
@@ -284,8 +317,12 @@ function Login() {
               </Link>
             </div>
 
-            <button type="submit" className={`${buttonBaseClass} ${accentColorValues.bg}`}>
-              Log in
+            <button
+              type="submit"
+              disabled={loading}
+              className={`${buttonBaseClass} ${accentColorValues.bg} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {loading ? 'Logging in...' : 'Log in'}
             </button>
           </form>
 

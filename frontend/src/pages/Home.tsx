@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { GitBranch, Upload, Globe as GlobeIcon, User, Monitor, ArrowRight, ArrowLeft } from 'lucide-react';
 
 function FeatureBadge({
@@ -36,6 +37,7 @@ function FeatureBadge({
 function Home() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { theme, resolvedTheme } = useTheme();
+  const { sessionId, username } = useConnection();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
   // Filter state for future use - currently all filters show the same sites
   const [filter, setFilter] = useState<'latest' | 'popular' | 'experimental'>('latest');
@@ -196,12 +198,12 @@ function Home() {
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50 animate-fade-in">
                 Deploy where <span className={accentColorValues.text}>creators</span> meet.
               </h1>
-              <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8 animate-fade-in">
+              <p className="text-lg text-zinc-50 dark:text-zinc-50 mb-8 animate-fade-in">
                 The open hosting platform for your static sites and apps.
               </p>
               <div className="flex items-center gap-3 animate-fade-in-delayed">
                 <Link
-                  to="/signup"
+                  to={sessionId ? `/u/${username}/sites` : '/signup'}
                   className={`px-4 h-[46px] rounded-full text-sm font-medium ${
                     accentColorValues.textColor === 'light'
                       ? 'text-white'
@@ -230,7 +232,7 @@ function Home() {
         </header>
 
         {/* Featured Sites */}
-        <section className="max-w-7xl mx-auto px-6 py-16">
+        <section className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 dark:text-zinc-50">
               What's being built on Nohonu

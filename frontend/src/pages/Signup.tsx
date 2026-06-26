@@ -8,12 +8,14 @@ import { useApi } from '../lib/api.ts';
 function Signup() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setEmail, setUsername } = useConnection();
+  const { setEmail, setUsername, setSessionId, setDisplayName } = useConnection();
   const { apiFetch } = useApi();
   const navigate = useNavigate();
   const [email, setEmailState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particleCount = 250;
 
@@ -163,42 +165,45 @@ function Signup() {
     };
   }, []);
 
-  const generateUsername = async (email: string): Promise<string> => {
+  const generateUsername = (email: string): string => {
     const base = email
       .split('@')[0]
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '');
-    let username = base;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    while (attempts < maxAttempts) {
-      try {
-        const res = await apiFetch(`/users/${username}`);
-        if (!res.ok) {
-          // Username doesn't exist, we can use it
-          return username;
-        }
-        // Username exists, try with random number
-        const randomNum = Math.floor(Math.random() * 1000);
-        username = `${base}${randomNum}`;
-        attempts++;
-      } catch {
-        // If API fails, assume username is available
-        return username;
-      }
-    }
-
-    // If all attempts failed, return with a larger random number
-    return `${base}${Math.floor(Math.random() * 10000)}`;
+    return base;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setEmail(email);
-    const username = await generateUsername(email);
-    setUsername(username);
-    navigate(`/u/${username}`);
+    setError('');
+    setLoading(true);
+
+    const username = generateUsername(email);
+
+    try {
+      const res = await apiFetch('/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, username }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Registration failed');
+        setLoading(false);
+        return;
+      }
+
+      setEmail(email);
+      setUsername(data.user.username);
+      setDisplayName(data.user.displayName);
+      setSessionId(data.session);
+      navigate(`/u/${data.user.username}`);
+    } catch {
+      setError('Network error');
+      setLoading(false);
+    }
   };
 
   return (
@@ -217,6 +222,12 @@ function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
             <div>
               <input
                 id="email"
@@ -274,8 +285,12 @@ function Signup() {
               </button>
             </div>
 
-            <button type="submit" className={`${buttonBaseClass} ${accentColorValues.bg}`}>
-              Create account
+            <button
+              type="submit"
+              disabled={loading}
+              className={`${buttonBaseClass} ${accentColorValues.bg} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {loading ? 'Creating account...' : 'Create account'}
             </button>
           </form>
 

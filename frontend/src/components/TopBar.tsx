@@ -150,12 +150,6 @@ export function TopBar() {
     if (path === '/explore' && location.pathname === '/explore') {
       return true;
     }
-    if (
-      path === '/sites' &&
-      (location.pathname === '/sites' || (username && location.pathname === `/u/${username}/sites`))
-    ) {
-      return true;
-    }
     if (path === '/domains' && username && location.pathname === `/u/${username}/domains`) {
       return true;
     }

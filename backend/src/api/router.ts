@@ -1,6 +1,10 @@
 import { CORS, requireAuth, error, ensureDomain } from '../shared/http.ts';
 import { health } from './endpoints/health-get.ts';
 import { auth } from './endpoints/auth-get.ts';
+import { authRegister } from './endpoints/auth-register-post.ts';
+import { authLogin } from './endpoints/auth-login-post.ts';
+import { authLogout } from './endpoints/auth-logout-post.ts';
+import { authMe } from './endpoints/auth-me-get.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
 import { checkCustomDomain } from './endpoints/check-custom-domain-get.ts';
 import { serveStatic } from './endpoints/get.ts';
@@ -38,6 +42,10 @@ type Endpoint = {
 const routes: Record<string, Endpoint> = {
   '/health': { handler: health },
   '/auth': { handler: auth },
+  '/auth/register': { handler: authRegister },
+  '/auth/login': { handler: authLogin },
+  '/auth/logout': { handler: authLogout },
+  '/auth/me': { handler: authMe },
   '/check-domain': { handler: checkDomain },
   '/check-custom-domain': { handler: checkCustomDomain },
   '/custom-domains': { handler: getAllCustomDomains, auth: true },
