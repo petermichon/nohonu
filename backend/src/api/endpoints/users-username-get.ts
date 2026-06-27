@@ -21,7 +21,6 @@ export function getUserByUsernameEndpoint(req: Request, path: string): Response 
   return json(
     {
       user: {
-        id: user.id,
         username: user.username,
         displayName: user.displayName,
       },

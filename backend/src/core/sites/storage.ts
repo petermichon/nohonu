@@ -249,8 +249,14 @@ export async function listUsers(): Promise<string[]> {
   const users: string[] = [];
   try {
     for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.isDirectory) {
-        users.push(entry.name);
+      if (entry.isDirectory && !entry.name.startsWith('.')) {
+        // Check if it has a user.json file to confirm it's a user directory
+        try {
+          await Deno.stat(`${SITES_DIR}/${entry.name}/user.json`);
+          users.push(entry.name);
+        } catch {
+          // Not a user directory, skip
+        }
       }
     }
   } catch (error) {

@@ -25,7 +25,6 @@ export async function authRegister(req: Request): Promise<Response> {
     return json(
       {
         user: {
-          id: result.user.id,
           email: result.user.email,
           username: result.user.username,
           displayName: result.user.displayName,

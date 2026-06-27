@@ -14,22 +14,22 @@ export async function login(
   password: string,
   deviceInfo?: string,
   userAgent?: string,
-  ip?: string
+  ip?: string,
 ): Promise<LoginResult> {
   const user = await users.validateUser(email, password);
-  
+
   if (!user) {
     return {
       success: false,
-      error: 'Invalid email or password'
+      error: 'Invalid email or password',
     };
   }
-  
-  const session = sessions.createSession(user.id, deviceInfo, userAgent, ip);
-  
+
+  const session = sessions.createSession(user.username, deviceInfo, userAgent, ip);
+
   return {
     success: true,
     user,
-    session: session.id
+    session: session.id,
   };
 }

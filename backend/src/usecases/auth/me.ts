@@ -16,19 +16,19 @@ export interface MeResult {
 
 export function me(sessionId: string): MeResult {
   const session = sessions.getSession(sessionId);
-  
+
   if (!session) {
     return { error: 'Invalid session' };
   }
-  
-  const user = users.getUserById(session.userId);
-  
+
+  const user = users.getUserByUsername(session.username);
+
   if (!user) {
     return { error: 'User not found' };
   }
-  
+
   sessions.updateSessionActivity(sessionId);
-  
+
   return {
     user,
     session: {
@@ -36,7 +36,7 @@ export function me(sessionId: string): MeResult {
       deviceInfo: session.deviceInfo,
       userAgent: session.userAgent,
       createdAt: session.createdAt,
-      lastActive: session.lastActive
-    }
+      lastActive: session.lastActive,
+    },
   };
 }

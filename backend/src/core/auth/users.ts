@@ -3,10 +3,10 @@
 import { hashPassword, verifyPassword } from './password.ts';
 import { SITES_DIR } from '../../shared/paths.ts';
 
-const USERS_FILE = `${SITES_DIR}/users.json`;
+const EMAIL_INDEX_FILE = `${SITES_DIR}/email-index.json`;
+const USER_FILE = (username: string) => `${SITES_DIR}/${username}/user.json`;
 
 export interface User {
-  id: string;
   email: string;
   passwordHash: string;
   username: string;
@@ -14,40 +14,53 @@ export interface User {
   createdAt: number;
 }
 
-interface UsersData {
-  users: User[];
-  nextId: number;
+interface EmailIndex {
+  [email: string]: string; // email -> username mapping
 }
 
-function loadUsers(): UsersData {
+function loadEmailIndex(): EmailIndex {
   try {
-    const data = Deno.readTextFileSync(USERS_FILE);
+    const data = Deno.readTextFileSync(EMAIL_INDEX_FILE);
     return JSON.parse(data);
   } catch {
-    return { users: [], nextId: 1 };
+    return {};
   }
 }
 
-function saveUsers(data: UsersData): void {
-  Deno.writeTextFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+function saveEmailIndex(index: EmailIndex): void {
+  Deno.writeTextFileSync(EMAIL_INDEX_FILE, JSON.stringify(index, null, 2));
+}
+
+function loadUserFile(username: string): User | null {
+  try {
+    const data = Deno.readTextFileSync(USER_FILE(username));
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
+}
+
+function saveUserFile(username: string, user: User): void {
+  const userDir = `${SITES_DIR}/${username}`;
+  Deno.mkdirSync(userDir, { recursive: true });
+  Deno.writeTextFileSync(USER_FILE(username), JSON.stringify(user, null, 2));
 }
 
 export async function createUser(email: string, password: string, username: string): Promise<User> {
-  const data = loadUsers();
+  const emailIndex = loadEmailIndex();
 
   // Check email uniqueness
-  if (data.users.some((u) => u.email === email)) {
+  if (emailIndex[email]) {
     throw new Error('Email already exists');
   }
 
   // Check username uniqueness
-  if (data.users.some((u) => u.username === username)) {
+  if (loadUserFile(username)) {
     throw new Error('Username already exists');
   }
 
   const passwordHash = await hashPassword(password);
   const user: User = {
-    id: String(data.nextId++),
     email,
     passwordHash,
     username,
@@ -55,33 +68,35 @@ export async function createUser(email: string, password: string, username: stri
     createdAt: Date.now(),
   };
 
-  data.users.push(user);
-  saveUsers(data);
+  saveUserFile(username, user);
+  emailIndex[email] = username;
+  saveEmailIndex(emailIndex);
 
   return user;
 }
 
 export async function validateUser(email: string, password: string): Promise<User | null> {
-  const data = loadUsers();
-  const user = data.users.find((u) => u.email === email);
+  const emailIndex = loadEmailIndex();
+  const username = emailIndex[email];
 
+  if (!username) return null;
+
+  const user = loadUserFile(username);
   if (!user) return null;
 
   const valid = await verifyPassword(password, user.passwordHash);
   return valid ? user : null;
 }
 
-export function getUserById(id: string): User | null {
-  const data = loadUsers();
-  return data.users.find((u) => u.id === id) ?? null;
-}
-
 export function getUserByUsername(username: string): User | null {
-  const data = loadUsers();
-  return data.users.find((u) => u.username === username) ?? null;
+  return loadUserFile(username);
 }
 
 export function getUserByEmail(email: string): User | null {
-  const data = loadUsers();
-  return data.users.find((u) => u.email === email) ?? null;
+  const emailIndex = loadEmailIndex();
+  const username = emailIndex[email];
+
+  if (!username) return null;
+
+  return loadUserFile(username);
 }

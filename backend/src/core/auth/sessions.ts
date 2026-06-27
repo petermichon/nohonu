@@ -6,7 +6,7 @@ const SESSIONS_FILE = `${SITES_DIR}/sessions.json`;
 
 export interface Session {
   id: string;
-  userId: string;
+  username: string;
   deviceInfo?: string;
   userAgent?: string;
   ip?: string;
@@ -31,11 +31,11 @@ function saveSessions(data: SessionsData): void {
   Deno.writeTextFileSync(SESSIONS_FILE, JSON.stringify(data, null, 2));
 }
 
-export function createSession(userId: string, deviceInfo?: string, userAgent?: string, ip?: string): Session {
+export function createSession(username: string, deviceInfo?: string, userAgent?: string, ip?: string): Session {
   const data = loadSessions();
   const session: Session = {
     id: crypto.randomUUID(),
-    userId,
+    username,
     deviceInfo,
     userAgent,
     ip,
@@ -69,15 +69,15 @@ export function deleteSession(id: string): void {
   saveSessions(data);
 }
 
-export function deleteAllUserSessions(userId: string): void {
+export function deleteAllUserSessions(username: string): void {
   const data = loadSessions();
-  data.sessions = data.sessions.filter((s) => s.userId !== userId);
+  data.sessions = data.sessions.filter((s) => s.username !== username);
   saveSessions(data);
 }
 
-export function getUserSessions(userId: string): Session[] {
+export function getUserSessions(username: string): Session[] {
   const data = loadSessions();
-  return data.sessions.filter((s) => s.userId === userId);
+  return data.sessions.filter((s) => s.username === username);
 }
 
 export function cleanupExpiredSessions(maxAgeMs: number = 30 * 24 * 60 * 60 * 1000): void {

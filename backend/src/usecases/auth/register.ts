@@ -1,6 +1,5 @@
 import * as users from '../../core/auth/users.ts';
 import * as sessions from '../../core/auth/sessions.ts';
-import { SITES_DIR } from '../../shared/paths.ts';
 import type { User } from '../../core/auth/users.ts';
 
 export interface RegisterResult {
@@ -20,10 +19,7 @@ export async function register(
 ): Promise<RegisterResult> {
   try {
     const user = await users.createUser(email, password, username);
-    const session = sessions.createSession(user.id, deviceInfo, userAgent, ip);
-
-    // Create user folder for sites
-    await Deno.mkdir(`${SITES_DIR}/${username}`, { recursive: true });
+    const session = sessions.createSession(user.username, deviceInfo, userAgent, ip);
 
     return {
       success: true,
