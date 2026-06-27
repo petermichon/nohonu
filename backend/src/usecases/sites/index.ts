@@ -7,14 +7,18 @@ let customDomainCache: Map<string, string> | null = null;
 
 async function buildCustomDomainCache(): Promise<void> {
   const cache = new Map<string, string>();
-  const domains = await storage.listDomains();
+  // Need to iterate all users to build complete cache
+  const users = await storage.listUsers();
   
-  for (const domain of domains) {
-    const data = await storage.readSiteMetadata(domain);
-    if (data?.customDomains) {
-      for (const entry of data.customDomains) {
-        if (entry.verified) {
-          cache.set(entry.domain, domain);
+  for (const user of users) {
+    const domains = await storage.listDomains(user);
+    for (const domain of domains) {
+      const data = await storage.readSiteMetadata(user, domain);
+      if (data?.customDomains) {
+        for (const entry of data.customDomains) {
+          if (entry.verified) {
+            cache.set(entry.domain, domain);
+          }
         }
       }
     }
@@ -34,11 +38,23 @@ export async function getCustomDomainCache(): Promise<Map<string, string>> {
   return customDomainCache as Map<string, string>;
 }
 
-export async function listSites(): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }>> {
-  const domains = await storage.listDomains();
+// Helper: Find user that owns a domain
+export async function findUserForDomain(domain: string): Promise<string | null> {
+  const users = await storage.listUsers();
+  for (const user of users) {
+    const domains = await storage.listDomains(user);
+    if (domains.includes(domain)) {
+      return user;
+    }
+  }
+  return null;
+}
+
+export async function listSites(user: string): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }>> {
+  const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
-      const data = await storage.readSiteMetadata(domain);
+      const data = await storage.readSiteMetadata(user, domain);
       return {
         domain,
         enabled: data?.enabled ?? false,
@@ -51,48 +67,48 @@ export async function listSites(): Promise<Array<{ domain: string; enabled: bool
   );
 }
 
-export async function setSiteAccount(domain: string, account: string): Promise<void> {
-  const data = await storage.readSiteMetadata(domain);
+export async function setSiteAccount(user: string, domain: string, account: string): Promise<void> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) return;
   data.account = account || undefined;
-  await storage.writeSiteMetadata(domain, data);
+  await storage.writeSiteMetadata(user, domain, data);
 }
 
-export async function checkSite(domain: string): Promise<{ exists: boolean; enabled: boolean }> {
-  const data = await storage.readSiteMetadata(domain);
+export async function checkSite(user: string, domain: string): Promise<{ exists: boolean; enabled: boolean }> {
+  const data = await storage.readSiteMetadata(user, domain);
   return {
     exists: !!data && data.currentIndex !== null,
     enabled: data?.enabled ?? false,
   };
 }
 
-export async function checkDomain(rawDomain: string): Promise<boolean> {
+export async function checkDomain(user: string, rawDomain: string): Promise<boolean> {
   const domain = rawDomain.replace(/\.petermichon\.fr$/, '');
   if (!VALID_DOMAIN.test(domain)) return false;
-  const data = await storage.readSiteMetadata(domain);
+  const data = await storage.readSiteMetadata(user, domain);
   return !!data && data.currentIndex !== null;
 }
 
-export async function getSiteInfo(domain: string): Promise<{ enabled: boolean } | null> {
-  const data = await storage.readSiteMetadata(domain);
+export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean } | null> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) return null;
   return { enabled: data.enabled };
 }
 
-export async function downloadActiveVersion(domain: string): Promise<{ file: Deno.FsFile; filename: string } | null> {
-  const data = await storage.readSiteMetadata(domain);
+export async function downloadActiveVersion(user: string, domain: string): Promise<{ file: Deno.FsFile; filename: string } | null> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data || !data.enabled || data.currentIndex === null) return null;
-  const file = await storage.openActiveVersion(domain);
+  const file = await storage.openActiveVersion(user, domain);
   if (!file) return null;
   return { file, filename: `${domain}.zip` };
 }
 
-export async function getSiteIcon(domain: string): Promise<{ data: Uint8Array; contentType: string } | null> {
-  const data = await storage.readSiteMetadata(domain);
+export async function getSiteIcon(user: string, domain: string): Promise<{ data: Uint8Array; contentType: string } | null> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data || !data.enabled || data.currentIndex === null) return null;
 
   const { readZip } = await import('../../shared/zip.ts');
-  const zipData = await storage.readActiveVersion(domain);
+  const zipData = await storage.readActiveVersion(user, domain);
   if (!zipData) return null;
 
   const files = await readZip(zipData);
@@ -112,8 +128,8 @@ export async function getSiteIcon(domain: string): Promise<{ data: Uint8Array; c
 }
 
 // Get site metadata (accent color)
-export async function getSiteMeta(domain: string): Promise<{ accent?: string } | null> {
-  const data = await storage.readSiteMetadata(domain);
+export async function getSiteMeta(user: string, domain: string): Promise<{ accent?: string } | null> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return null;
   }
@@ -121,10 +137,11 @@ export async function getSiteMeta(domain: string): Promise<{ accent?: string } |
 }
 
 export async function updateSiteMeta(
+  user: string,
   domain: string,
   updates: { accent?: string | undefined },
 ): Promise<UsecaseResult<void>> {
-  const data = await storage.readSiteMetadata(domain);
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, error: 'Site not found', status: 404 };
   }
@@ -134,12 +151,12 @@ export async function updateSiteMeta(
   }
   data.accent = updates.accent;
 
-  await storage.writeSiteMetadata(domain, data);
+  await storage.writeSiteMetadata(user, domain, data);
   return { ok: true, value: undefined };
 }
 
-export async function getSiteRepos(domain: string): Promise<{ history: Array<{ repo: string; branch: string; lastUsed: number }> } | null> {
-  const data = await storage.readSiteMetadata(domain);
+export async function getSiteRepos(user: string, domain: string): Promise<{ history: Array<{ repo: string; branch: string; lastUsed: number }> } | null> {
+  const data = await storage.readSiteMetadata(user, domain);
   return data ? { history: data.repoHistory } : null;
 }
 
@@ -161,25 +178,28 @@ export function getSiteUptime(domain: string, slots: number, groupMinutes = 1): 
   return analytics.getUptime(domain, slots, groupMinutes);
 }
 
-export async function getCustomDomains(domain: string): Promise<{ domain: string; verified: boolean }[]> {
-  const data = await storage.readSiteMetadata(domain);
+export async function getCustomDomains(user: string, domain: string): Promise<{ domain: string; verified: boolean }[]> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) return [];
   return data.customDomains ?? [];
 }
 
 export async function getAllCustomDomains(): Promise<{ siteDomain: string; customDomain: string; verified: boolean }[]> {
-  const domains = await storage.listDomains();
+  const users = await storage.listUsers();
   const allCustomDomains: { siteDomain: string; customDomain: string; verified: boolean }[] = [];
 
-  for (const domain of domains) {
-    const data = await storage.readSiteMetadata(domain);
-    if (data?.customDomains) {
-      for (const entry of data.customDomains) {
-        allCustomDomains.push({
-          siteDomain: domain,
-          customDomain: entry.domain,
-          verified: entry.verified,
-        });
+  for (const user of users) {
+    const domains = await storage.listDomains(user);
+    for (const domain of domains) {
+      const data = await storage.readSiteMetadata(user, domain);
+      if (data?.customDomains) {
+        for (const entry of data.customDomains) {
+          allCustomDomains.push({
+            siteDomain: domain,
+            customDomain: entry.domain,
+            verified: entry.verified,
+          });
+        }
       }
     }
   }
@@ -187,8 +207,8 @@ export async function getAllCustomDomains(): Promise<{ siteDomain: string; custo
   return allCustomDomains;
 }
 
-export async function addCustomDomain(domain: string, customDomain: string): Promise<UsecaseResult<void>> {
-  const data = await storage.readSiteMetadata(domain);
+export async function addCustomDomain(user: string, domain: string, customDomain: string): Promise<UsecaseResult<void>> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, error: 'Site not found', status: 404 };
   }
@@ -203,13 +223,13 @@ export async function addCustomDomain(domain: string, customDomain: string): Pro
   }
   
   data.customDomains.push({ domain: customDomain, verified: false });
-  await storage.writeSiteMetadata(domain, data);
+  await storage.writeSiteMetadata(user, domain, data);
   invalidateCustomDomainCache();
   return { ok: true, value: undefined };
 }
 
-export async function removeCustomDomain(domain: string, customDomain: string): Promise<UsecaseResult<void>> {
-  const data = await storage.readSiteMetadata(domain);
+export async function removeCustomDomain(user: string, domain: string, customDomain: string): Promise<UsecaseResult<void>> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, error: 'Site not found', status: 404 };
   }
@@ -226,14 +246,14 @@ export async function removeCustomDomain(domain: string, customDomain: string): 
   }
   
   data.customDomains = filtered;
-  await storage.writeSiteMetadata(domain, data);
+  await storage.writeSiteMetadata(user, domain, data);
   invalidateCustomDomainCache();
   return { ok: true, value: undefined };
 }
 
-export async function verifyCustomDomain(domain: string, customDomain: string): Promise<UsecaseResult<{ verified: boolean }>> {
+export async function verifyCustomDomain(user: string, domain: string, customDomain: string): Promise<UsecaseResult<{ verified: boolean }>> {
   const { verifyCustomDomain: dnsVerifyCustomDomain } = await import('./customDomains.ts');
-  const data = await storage.readSiteMetadata(domain);
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, error: 'Site not found', status: 404 };
   }
@@ -252,7 +272,7 @@ export async function verifyCustomDomain(domain: string, customDomain: string): 
   const isVerified = await dnsVerifyCustomDomain(domain, customDomain);
   entry.verified = isVerified;
   
-  await storage.writeSiteMetadata(domain, data);
+  await storage.writeSiteMetadata(user, domain, data);
   invalidateCustomDomainCache();
   
   const verified = isVerified;
@@ -265,28 +285,28 @@ export async function getVerificationToken(domain: string): Promise<{ token: str
   return { token };
 }
 
-export async function toggleSite(domain: string): Promise<UsecaseResult<{ enabled: boolean }>> {
-  const data = await storage.readSiteMetadata(domain);
+export async function toggleSite(user: string, domain: string): Promise<UsecaseResult<{ enabled: boolean }>> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) {
     return { ok: false, error: 'Site not found', status: 404 };
   }
 
   data.enabled = !data.enabled;
-  await storage.writeSiteMetadata(domain, data);
+  await storage.writeSiteMetadata(user, domain, data);
 
-  if (!data.enabled) await storage.deleteExtractedFiles(domain);
+  if (!data.enabled) await storage.deleteExtractedFiles(user, domain);
 
   const result = { enabled: data.enabled };
   return { ok: true, value: result };
 }
 
-export async function deleteSite(domain: string): Promise<void> {
-  await storage.deleteSiteFiles(domain);
+export async function deleteSite(user: string, domain: string): Promise<void> {
+  await storage.deleteSiteFiles(user, domain);
   analytics.clearDomain(domain);
 }
 
-export async function listVersions(domain: string): Promise<{ versions: Array<{ index: number; size: number; source: { type: 'upload' } | { type: 'github'; repo: string; branch: string }; createdAt: number }>; current: number | null }> {
-  const data = await storage.readSiteMetadata(domain);
+export async function listVersions(user: string, domain: string): Promise<{ versions: Array<{ index: number; size: number; source: { type: 'upload' } | { type: 'github'; repo: string; branch: string }; createdAt: number }>; current: number | null }> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) return { versions: [], current: null };
 
   const versions = [];
@@ -294,7 +314,7 @@ export async function listVersions(domain: string): Promise<{ versions: Array<{ 
   for (const [key, entry] of Object.entries(data.versions)) {
     const index = parseInt(key, 10);
     try {
-      const stat = await Deno.stat(storage.versionPath(domain, index));
+      const stat = await Deno.stat(storage.versionPath(user, domain, index));
       versions.push({ index, size: stat.size, source: entry.source, createdAt: entry.createdAt });
     } catch {
       // file missing, skip
@@ -307,60 +327,60 @@ export async function listVersions(domain: string): Promise<{ versions: Array<{ 
   return { versions, current: data.currentIndex };
 }
 
-export async function downloadVersion(domain: string, index: number): Promise<{ file: Deno.FsFile; filename: string } | null> {
+export async function downloadVersion(user: string, domain: string, index: number): Promise<{ file: Deno.FsFile; filename: string } | null> {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  if (!(await storage.versionExists(domain, index))) return null;
-  const file = await storage.openVersion(domain, index);
+  if (!(await storage.versionExists(user, domain, index))) return null;
+  const file = await storage.openVersion(user, domain, index);
   return { file, filename: `${domain}-${index}.zip` };
 }
 
-export async function activateVersion(domain: string, index: number): Promise<UsecaseResult<void>> {
+export async function activateVersion(user: string, domain: string, index: number): Promise<UsecaseResult<void>> {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  const exists = await storage.versionExists(domain, index);
+  const exists = await storage.versionExists(user, domain, index);
   if (!exists) {
     return { ok: false, error: 'Version not found', status: 404 };
   }
-  const activated = await storage.setCurrentVersion(domain, index);
+  const activated = await storage.setCurrentVersion(user, domain, index);
   if (!activated) {
     return { ok: false, error: 'Failed to activate version', status: 500 };
   }
-  await storage.deleteExtractedFiles(domain);
+  await storage.deleteExtractedFiles(user, domain);
   return { ok: true, value: undefined };
 }
 
-export async function deleteVersion(domain: string, index: number): Promise<UsecaseResult<void>> {
+export async function deleteVersion(user: string, domain: string, index: number): Promise<UsecaseResult<void>> {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  const exists = await storage.versionExists(domain, index);
+  const exists = await storage.versionExists(user, domain, index);
   if (!exists) {
     return { ok: false, error: 'Version not found', status: 404 };
   }
-  const deleted = await storage.deleteVersionFile(domain, index);
+  const deleted = await storage.deleteVersionFile(user, domain, index);
   if (!deleted) {
     return { ok: false, error: 'Failed to delete version', status: 500 };
   }
   return { ok: true, value: undefined };
 }
 
-export async function uploadVersion(domain: string, zipData: Uint8Array): Promise<{ index: number }> {
-  const existingData = await storage.readSiteMetadata(domain);
+export async function uploadVersion(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number }> {
+  const existingData = await storage.readSiteMetadata(user, domain);
   const data = existingData ?? { ...storage.DEFAULT_DATA };
   const index = data.nextIndex;
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
   if (data.currentIndex === null) data.currentIndex = index;
 
-  await Deno.mkdir(storage.domainDir(domain), { recursive: true });
-  await Deno.mkdir(storage.versionsDir(domain), { recursive: true });
-  await Deno.writeFile(storage.versionPath(domain, index), zipData);
-  await storage.writeSiteMetadata(domain, data);
+  await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
+  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await storage.writeSiteMetadata(user, domain, data);
 
   return { index };
 }
 
-export async function deployFromGithub(domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
+export async function deployFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
   const githubUrl = `https://github.com/${repo}/archive/refs/heads/${ref}.zip`;
 
   let zipData: Uint8Array;
@@ -383,7 +403,7 @@ export async function deployFromGithub(domain: string, repo: string, ref: string
     throw err;
   }
 
-  const existingData = await storage.readSiteMetadata(domain);
+  const existingData = await storage.readSiteMetadata(user, domain);
   const data = existingData ?? { ...storage.DEFAULT_DATA };
   const filtered = data.repoHistory.filter((h) => {
     return !(h.repo === repo && h.branch === ref);
@@ -395,10 +415,10 @@ export async function deployFromGithub(domain: string, repo: string, ref: string
   data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
   if (data.currentIndex === null) data.currentIndex = index;
 
-  await Deno.mkdir(storage.domainDir(domain), { recursive: true });
-  await Deno.mkdir(storage.versionsDir(domain), { recursive: true });
-  await Deno.writeFile(storage.versionPath(domain, index), zipData);
-  await storage.writeSiteMetadata(domain, data);
+  await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
+  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await storage.writeSiteMetadata(user, domain, data);
 
   return { index, repo, branch: ref };
 }
@@ -407,25 +427,25 @@ export function recordPageHit(domain: string, ip: string): void {
   analytics.recordHit(domain, ip);
 }
 
-export async function serveSiteFile(domain: string, filePath: string): Promise<{ file: Deno.FsFile; contentType: string } | null> {
-  const data = await storage.readSiteMetadata(domain);
+export async function serveSiteFile(user: string, domain: string, filePath: string): Promise<{ file: Deno.FsFile; contentType: string } | null> {
+  const data = await storage.readSiteMetadata(user, domain);
   if (!data) return null;
 
-  if (!(await storage.extractedSiteExists(domain))) {
+  if (!(await storage.extractedSiteExists(user, domain))) {
     if (!data.enabled || data.currentIndex === null) return null;
 
     try {
       const { readZip } = await import('../../shared/zip.ts');
-      const zipData = await storage.readActiveVersion(domain);
+      const zipData = await storage.readActiveVersion(user, domain);
       if (!zipData) return null;
       const files = await readZip(zipData);
-      await storage.extractFiles(domain, files);
+      await storage.extractFiles(user, domain, files);
     } catch {
       return null;
     }
   }
 
-  const file = await storage.readExtractedFile(domain, filePath);
+  const file = await storage.readExtractedFile(user, domain, filePath);
   if (!file) return null;
 
   const parts = filePath.split('.');
@@ -433,7 +453,7 @@ export async function serveSiteFile(domain: string, filePath: string): Promise<{
   return { file, contentType: getContentType(ext) };
 }
 
-export async function resolveDomainAndServe(host: string, path: string): Promise<{ domain: string; filePath: string } | null> {
+export async function resolveDomainAndServe(host: string, path: string): Promise<{ user: string; domain: string; filePath: string } | null> {
   console.assert(typeof host === 'string' && host.length > 0, 'host must be a non-empty string');
   console.assert(typeof path === 'string', 'path must be a string');
   
@@ -441,28 +461,48 @@ export async function resolveDomainAndServe(host: string, path: string): Promise
   const cache = await getCustomDomainCache();
   const mappedDomain = cache.get(host);
   if (mappedDomain) {
-    const filePath = path === '/' ? '/index.html' : path;
-    return { domain: mappedDomain, filePath };
+    // Need to find which user owns this domain
+    const users = await storage.listUsers();
+    for (const user of users) {
+      const domains = await storage.listDomains(user);
+      if (domains.includes(mappedDomain)) {
+        const filePath = path === '/' ? '/index.html' : path;
+        return { user, domain: mappedDomain, filePath };
+      }
+    }
   }
   
   const subdomainMatch = host.match(/^([^.]+)\./);
 
   if (subdomainMatch && subdomainMatch[1] && !['www', 'localhost'].includes(subdomainMatch[1])) {
     const domain = subdomainMatch[1];
-    const filePath = path === '/' ? '/index.html' : path;
-    return { domain, filePath };
+    // Find which user owns this domain
+    const users = await storage.listUsers();
+    for (const user of users) {
+      const domains = await storage.listDomains(user);
+      if (domains.includes(domain)) {
+        const filePath = path === '/' ? '/index.html' : path;
+        return { user, domain, filePath };
+      }
+    }
   }
 
   if (path.length > 1) {
     const parts = path.split('/').filter(Boolean);
     const potential = parts[0];
     if (potential && VALID_DOMAIN.test(potential)) {
-      const info = await storage.readSiteMetadata(potential);
-      if (info && info.currentIndex !== null) {
-        const domain = potential;
-        const rest = parts.slice(1).join('/');
-        const filePath = rest !== '' ? '/' + rest : '/index.html';
-        return { domain, filePath };
+      const users = await storage.listUsers();
+      for (const user of users) {
+        const domains = await storage.listDomains(user);
+        if (domains.includes(potential)) {
+          const info = await storage.readSiteMetadata(user, potential);
+          if (info && info.currentIndex !== null) {
+            const domain = potential;
+            const rest = parts.slice(1).join('/');
+            const filePath = rest !== '' ? '/' + rest : '/index.html';
+            return { user, domain, filePath };
+          }
+        }
       }
     }
   }

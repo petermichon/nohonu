@@ -1,28 +1,28 @@
 import { SITES_DIR, SiteData } from '../../shared/paths.ts';
 
-// Path helpers for new domain-based structure
-export function domainDir(domain: string): string {
-  return `${SITES_DIR}/${domain}`;
+// Path helpers for user-based structure: /data/{user}/{domain}/
+export function domainDir(user: string, domain: string): string {
+  return `${SITES_DIR}/${user}/${domain}`;
 }
 
-function metadataPath(domain: string): string {
-  return `${domainDir(domain)}/metadata.json`;
+function metadataPath(user: string, domain: string): string {
+  return `${domainDir(user, domain)}/metadata.json`;
 }
 
-export function versionsDir(domain: string): string {
-  return `${domainDir(domain)}/versions`;
+export function versionsDir(user: string, domain: string): string {
+  return `${domainDir(user, domain)}/versions`;
 }
 
-export function versionPath(domain: string, index: number): string {
-  return `${versionsDir(domain)}/${index}.zip`;
+export function versionPath(user: string, domain: string, index: number): string {
+  return `${versionsDir(user, domain)}/${index}.zip`;
 }
 
-function extractedDir(domain: string): string {
-  return `${domainDir(domain)}/extracted`;
+function extractedDir(user: string, domain: string): string {
+  return `${domainDir(user, domain)}/extracted`;
 }
 
-function extractedFilePath(domain: string, filePath: string): string {
-  return `${extractedDir(domain)}/${filePath}`;
+function extractedFilePath(user: string, domain: string, filePath: string): string {
+  return `${extractedDir(user, domain)}/${filePath}`;
 }
 
 export const VALID_ACCENT = /^#[0-9a-fA-F]{6}$/;
@@ -37,10 +37,10 @@ export const DEFAULT_DATA: SiteData = {
 };
 
 // Low-level: Read site metadata
-export async function readSiteMetadata(domain: string): Promise<SiteData | undefined> {
+export async function readSiteMetadata(user: string, domain: string): Promise<SiteData | undefined> {
   let content: string;
   try {
-    content = await Deno.readTextFile(metadataPath(domain));
+    content = await Deno.readTextFile(metadataPath(user, domain));
   } catch (_error) {
     // File not found is expected for new sites, don't log error
     return undefined;
@@ -51,51 +51,51 @@ export async function readSiteMetadata(domain: string): Promise<SiteData | undef
     return { ...DEFAULT_DATA, ...parsed };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to parse metadata file for ${domain}: ${message}`);
+    console.error(`Failed to parse metadata file for ${user}/${domain}: ${message}`);
     return undefined;
   }
 }
 
 // Low-level: Write site metadata
-export async function writeSiteMetadata(domain: string, data: SiteData): Promise<void> {
+export async function writeSiteMetadata(user: string, domain: string, data: SiteData): Promise<void> {
   if (data.nextIndex < 1) {
-    console.error(`writeSiteMetadata: nextIndex must be >= 1 for ${domain}, got ${data.nextIndex}`);
+    console.error(`writeSiteMetadata: nextIndex must be >= 1 for ${user}/${domain}, got ${data.nextIndex}`);
     return;
   }
   if (data.currentIndex !== null) {
     try {
-      await Deno.stat(versionPath(domain, data.currentIndex));
+      await Deno.stat(versionPath(user, domain, data.currentIndex));
     } catch {
-      console.error(`writeSiteMetadata: currentIndex ${data.currentIndex} has no version file for ${domain}`);
+      console.error(`writeSiteMetadata: currentIndex ${data.currentIndex} has no version file for ${user}/${domain}`);
       return;
     }
   }
-  await Deno.writeTextFile(metadataPath(domain), JSON.stringify(data, null, 2));
+  await Deno.writeTextFile(metadataPath(user, domain), JSON.stringify(data, null, 2));
 }
 
 // Low-level: Open a version file handle
-export async function openVersion(domain: string, index: number): Promise<Deno.FsFile> {
-  return await Deno.open(versionPath(domain, index));
+export async function openVersion(user: string, domain: string, index: number): Promise<Deno.FsFile> {
+  return await Deno.open(versionPath(user, domain, index));
 }
 
 // Low-level: Read version file contents
-export async function readVersion(domain: string, index: number): Promise<Uint8Array> {
-  return await Deno.readFile(versionPath(domain, index));
+export async function readVersion(user: string, domain: string, index: number): Promise<Uint8Array> {
+  return await Deno.readFile(versionPath(user, domain, index));
 }
 
 // Low-level: Delete a version file and update metadata
-export async function deleteVersionFile(domain: string, index: number): Promise<boolean> {
-  const data = await readSiteMetadata(domain);
+export async function deleteVersionFile(user: string, domain: string, index: number): Promise<boolean> {
+  const data = await readSiteMetadata(user, domain);
   if (data === undefined) {
-    console.error(`deleteVersionFile: site not found: ${domain}`);
+    console.error(`deleteVersionFile: site not found: ${user}/${domain}`);
     return false;
   }
 
   try {
-    await Deno.remove(versionPath(domain, index));
+    await Deno.remove(versionPath(user, domain, index));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`deleteVersionFile: failed to delete version file for ${domain}@${index}: ${message}`);
+    console.error(`deleteVersionFile: failed to delete version file for ${user}/${domain}@${index}: ${message}`);
     return false;
   }
 
@@ -107,79 +107,79 @@ export async function deleteVersionFile(domain: string, index: number): Promise<
       .sort((a, b) => { return b - a; });
     data.currentIndex = versionIndices.length > 0 ? versionIndices[0] as number : null;
   }
-  await writeSiteMetadata(domain, data);
+  await writeSiteMetadata(user, domain, data);
   return true;
 }
 
 // Low-level: Set current version index
-export async function setCurrentVersion(domain: string, index: number): Promise<boolean> {
-  const data = await readSiteMetadata(domain);
+export async function setCurrentVersion(user: string, domain: string, index: number): Promise<boolean> {
+  const data = await readSiteMetadata(user, domain);
   if (data === undefined) {
-    console.error(`setCurrentVersion: site not found: ${domain}`);
+    console.error(`setCurrentVersion: site not found: ${user}/${domain}`);
     return false;
   }
 
   try {
-    await Deno.stat(versionPath(domain, index));
+    await Deno.stat(versionPath(user, domain, index));
   } catch {
-    console.error(`setCurrentVersion: version ${index} does not exist for ${domain}`);
+    console.error(`setCurrentVersion: version ${index} does not exist for ${user}/${domain}`);
     return false;
   }
 
   data.currentIndex = index;
   data.enabled = true;
-  await writeSiteMetadata(domain, data);
+  await writeSiteMetadata(user, domain, data);
   return true;
 }
 
 // Low-level: Delete extracted site files
-export async function deleteExtractedFiles(domain: string): Promise<void> {
+export async function deleteExtractedFiles(user: string, domain: string): Promise<void> {
   try {
-    await Deno.remove(extractedDir(domain), { recursive: true });
+    await Deno.remove(extractedDir(user, domain), { recursive: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to delete extracted site for ${domain}: ${message}`);
+    console.error(`Failed to delete extracted site for ${user}/${domain}: ${message}`);
   }
 
   // Clear extracted flag in metadata
-  const data = await readSiteMetadata(domain);
+  const data = await readSiteMetadata(user, domain);
   if (data) {
     data.extracted = false;
-    await writeSiteMetadata(domain, data);
+    await writeSiteMetadata(user, domain, data);
   }
 }
 
 // Low-level: Delete entire site directory
-export async function deleteSiteFiles(domain: string): Promise<void> {
+export async function deleteSiteFiles(user: string, domain: string): Promise<void> {
   try {
-    await Deno.remove(domainDir(domain), { recursive: true });
+    await Deno.remove(domainDir(user, domain), { recursive: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to delete site directory for ${domain}: ${message}`);
+    console.error(`Failed to delete site directory for ${user}/${domain}: ${message}`);
   }
 }
 
 // Low-level: Check if version file exists
-export async function versionExists(domain: string, index: number): Promise<boolean> {
+export async function versionExists(user: string, domain: string, index: number): Promise<boolean> {
   try {
-    await Deno.stat(versionPath(domain, index));
+    await Deno.stat(versionPath(user, domain, index));
     return true;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to check version file for ${domain}@${index}: ${message}`);
+    console.error(`Failed to check version file for ${user}/${domain}@${index}: ${message}`);
     return false;
   }
 }
 
 // Low-level: Check if extracted site exists
-export async function extractedSiteExists(domain: string): Promise<boolean> {
-  const data = await readSiteMetadata(domain);
+export async function extractedSiteExists(user: string, domain: string): Promise<boolean> {
+  const data = await readSiteMetadata(user, domain);
   return data?.extracted ?? false;
 }
 
 // Low-level: Read an extracted file
-export async function readExtractedFile(domain: string, filePath: string): Promise<Deno.FsFile | undefined> {
-  const fullPath = extractedFilePath(domain, filePath);
+export async function readExtractedFile(user: string, domain: string, filePath: string): Promise<Deno.FsFile | undefined> {
+  const fullPath = extractedFilePath(user, domain, filePath);
   try {
     return await Deno.open(fullPath);
   } catch (error) {
@@ -190,9 +190,9 @@ export async function readExtractedFile(domain: string, filePath: string): Promi
 }
 
 // Low-level: Extract files to site directory
-export async function extractFiles(domain: string, files: Record<string, Uint8Array>): Promise<void> {
+export async function extractFiles(user: string, domain: string, files: Record<string, Uint8Array>): Promise<void> {
   try {
-    await Deno.mkdir(extractedDir(domain), { recursive: true });
+    await Deno.mkdir(extractedDir(user, domain), { recursive: true });
 
     // Detect common root folder (e.g., repo-main/ in GitHub zips)
     const paths = Object.keys(files);
@@ -225,34 +225,51 @@ export async function extractFiles(domain: string, files: Record<string, Uint8Ar
       if (relativePath.includes('..') || relativePath.startsWith('/')) {
         continue;
       }
-      const outPath = extractedFilePath(domain, relativePath);
+      const outPath = extractedFilePath(user, domain, relativePath);
       const dir = outPath.substring(0, outPath.lastIndexOf('/'));
       await Deno.mkdir(dir, { recursive: true });
       await Deno.writeFile(outPath, data);
     }
 
     // Update metadata to mark as extracted
-    const data = await readSiteMetadata(domain);
+    const data = await readSiteMetadata(user, domain);
     if (data) {
       data.extracted = true;
-      await writeSiteMetadata(domain, data);
+      await writeSiteMetadata(user, domain, data);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`extractFiles: extraction failed for ${domain}: ${message}`);
-    await deleteExtractedFiles(domain);
+    console.error(`extractFiles: extraction failed for ${user}/${domain}: ${message}`);
+    await deleteExtractedFiles(user, domain);
   }
 }
 
-// Low-level: List all domains with metadata
-export async function listDomains(): Promise<string[]> {
-  const domains: string[] = [];
+// Low-level: List all users
+export async function listUsers(): Promise<string[]> {
+  const users: string[] = [];
   try {
     for await (const entry of Deno.readDir(SITES_DIR)) {
       if (entry.isDirectory) {
+        users.push(entry.name);
+      }
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Failed to read sites directory: ${message}`);
+  }
+  return users;
+}
+
+// Low-level: List all domains for a user
+export async function listDomains(user: string): Promise<string[]> {
+  const domains: string[] = [];
+  const userDir = `${SITES_DIR}/${user}`;
+  try {
+    for await (const entry of Deno.readDir(userDir)) {
+      if (entry.isDirectory) {
         // Check if metadata.json exists in this directory
         try {
-          await Deno.stat(metadataPath(entry.name));
+          await Deno.stat(metadataPath(user, entry.name));
           domains.push(entry.name);
         } catch {
           // Not a valid site directory, skip
@@ -261,32 +278,32 @@ export async function listDomains(): Promise<string[]> {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to read sites directory: ${message}`);
+    console.error(`Failed to read user directory ${userDir}: ${message}`);
   }
   return domains;
 }
 
 // Low-level: Read active version contents
-export async function readActiveVersion(domain: string): Promise<Uint8Array | undefined> {
-  const data = await readSiteMetadata(domain);
+export async function readActiveVersion(user: string, domain: string): Promise<Uint8Array | undefined> {
+  const data = await readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) {
     return undefined;
   }
   try {
-    return await readVersion(domain, data.currentIndex);
+    return await readVersion(user, domain, data.currentIndex);
   } catch {
     return undefined;
   }
 }
 
 // Low-level: Open active version file handle
-export async function openActiveVersion(domain: string): Promise<Deno.FsFile | undefined> {
-  const data = await readSiteMetadata(domain);
+export async function openActiveVersion(user: string, domain: string): Promise<Deno.FsFile | undefined> {
+  const data = await readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) {
     return undefined;
   }
   try {
-    return await openVersion(domain, data.currentIndex);
+    return await openVersion(user, domain, data.currentIndex);
   } catch {
     return undefined;
   }

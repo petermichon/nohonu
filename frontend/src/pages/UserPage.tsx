@@ -206,8 +206,8 @@ export default function UserPage() {
               </div>
               {error === 'unauthorized' ? (
                 <>
-                  <p className={`${accentColorValues.text} text-base font-medium mb-2`}>Invalid API key</p>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-sm">Update your API key in connection settings</p>
+                  <p className={`${accentColorValues.text} text-base font-medium mb-2`}>Authentication required</p>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm">Please log in to view this page</p>
                 </>
               ) : (
                 <>

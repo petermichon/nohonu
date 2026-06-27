@@ -14,6 +14,7 @@ interface ConnectionContextType extends Connection {
   setApiBase: (url: string) => void;
   setApiKey: (key: string) => void;
   setSessionId: (sessionId: string) => void;
+  setUsername: (username: string) => void;
   disconnect: () => void;
 }
 
@@ -31,11 +32,12 @@ function load(): Connection {
     const apiBase = localStorage.getItem('apiBase');
     const apiKey = localStorage.getItem('apiKey');
     const sessionId = localStorage.getItem('sessionId');
+    const username = localStorage.getItem('username');
     return {
       apiBase: apiBase ?? DEFAULT.apiBase,
       apiKey: apiKey ?? DEFAULT.apiKey,
       sessionId: sessionId ?? DEFAULT.sessionId,
-      username: DEFAULT.username,
+      username: username ?? DEFAULT.username,
       displayName: DEFAULT.displayName,
       email: DEFAULT.email,
     };
@@ -97,9 +99,15 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, sessionId }));
   };
 
+  const setUsername = (username: string) => {
+    localStorage.setItem('username', username);
+    setConnectionState((prev) => ({ ...prev, username }));
+  };
+
   const disconnect = () => {
     localStorage.removeItem('apiKey');
     localStorage.removeItem('sessionId');
+    localStorage.removeItem('username');
     setConnectionState((prev) => ({ ...prev, apiKey: '', sessionId: '', username: '', displayName: '', email: '' }));
   };
 
@@ -111,6 +119,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         setApiBase,
         setApiKey,
         setSessionId,
+        setUsername,
         disconnect,
       }}
     >

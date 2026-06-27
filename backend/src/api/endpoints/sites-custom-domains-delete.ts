@@ -3,7 +3,12 @@ import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/path
 import * as sites from '../../usecases/sites/index.ts';
 import type { RouteContext } from './sites-types.ts';
 
-export async function deleteCustomDomain({ domain, customDomain }: RouteContext): Promise<Response> {
+export async function deleteCustomDomain(req: Request, { domain, customDomain }: RouteContext): Promise<Response> {
+  const username = req.headers.get('X-Username');
+  if (!username) {
+    return error('Missing username', 401);
+  }
+
   if (!customDomain) {
     return error('customDomain is required', 400);
   }
@@ -12,7 +17,7 @@ export async function deleteCustomDomain({ domain, customDomain }: RouteContext)
     return error('Invalid custom domain format', 400);
   }
 
-  const result = await sites.removeCustomDomain(domain, customDomain);
+  const result = await sites.removeCustomDomain(username, domain, customDomain);
   if (!result.ok) {
     return error(result.error, result.status);
   }

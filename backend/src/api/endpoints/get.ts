@@ -10,7 +10,7 @@ export async function serveStatic(req: Request, path: string, info: Deno.ServeHa
   const resolved = await sites.resolveDomainAndServe(host, path);
   if (!resolved) return new Response('Not Found', { status: 404, headers: CORS });
 
-  const result = await sites.serveSiteFile(resolved.domain, resolved.filePath);
+  const result = await sites.serveSiteFile(resolved.user, resolved.domain, resolved.filePath);
   if (!result) return new Response('Site not found', { status: 404, headers: CORS });
 
   if (result.contentType === 'text/html') {

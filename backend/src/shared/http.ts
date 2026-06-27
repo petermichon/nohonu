@@ -5,7 +5,7 @@ const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? '*';
 export const CORS = {
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key, X-Account, X-Session-Id',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key, X-Account, X-Session-Id, X-Username',
 };
 
 export const API_KEY = Deno.env.get('API_KEY');

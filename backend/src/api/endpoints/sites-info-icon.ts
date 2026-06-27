@@ -2,8 +2,12 @@ import { CORS } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import type { RouteContext } from './sites-types.ts';
 
-export async function getSiteIcon({ domain }: RouteContext): Promise<Response> {
-  const result = await sites.getSiteIcon(domain);
+export async function getSiteIcon(_req: Request, { domain }: RouteContext): Promise<Response> {
+  const user = await sites.findUserForDomain(domain);
+  if (!user) {
+    return new Response(undefined, { status: 404, headers: CORS });
+  }
+  const result = await sites.getSiteIcon(user, domain);
   if (!result) {
     return new Response(undefined, { status: 404, headers: CORS });
   }

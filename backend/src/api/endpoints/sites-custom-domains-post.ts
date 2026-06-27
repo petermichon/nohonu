@@ -3,7 +3,12 @@ import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/path
 import * as sites from '../../usecases/sites/index.ts';
 import type { RouteContext } from './sites-types.ts';
 
-export async function addCustomDomain({ domain }: RouteContext, req: Request): Promise<Response> {
+export async function addCustomDomain(req: Request, { domain }: RouteContext): Promise<Response> {
+  const username = req.headers.get('X-Username');
+  if (!username) {
+    return error('Missing username', 401);
+  }
+
   const body = await parseJson<{ customDomain: string }>(req);
   if (body instanceof Response) {
     return body;
@@ -17,7 +22,7 @@ export async function addCustomDomain({ domain }: RouteContext, req: Request): P
     return error('Invalid custom domain format. Use a valid lowercase hostname (e.g. blog.example.com)', 400);
   }
 
-  const result = await sites.addCustomDomain(domain, body.customDomain);
+  const result = await sites.addCustomDomain(username, domain, body.customDomain);
   if (!result.ok) {
     return error(result.error, result.status);
   }

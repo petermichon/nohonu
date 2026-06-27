@@ -2,9 +2,17 @@ import { error, json } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import type { RouteContext } from './sites-types.ts';
 
-export async function getSiteVersions({ domain, timestamp: index, subAction }: RouteContext): Promise<Response> {
+export async function getSiteVersions(
+  req: Request,
+  { domain, timestamp: index, subAction }: RouteContext,
+): Promise<Response> {
+  const username = req.headers.get('X-Username');
+  if (!username) {
+    return error('Missing username', 401);
+  }
+
   if (index && subAction === 'download') {
-    const result = await sites.downloadVersion(domain, index);
+    const result = await sites.downloadVersion(username, domain, index);
     if (!result) {
       return error('Version not found', 404);
     }
@@ -15,7 +23,7 @@ export async function getSiteVersions({ domain, timestamp: index, subAction }: R
     return new Response(result.file.readable, { headers });
   }
 
-  const result = await sites.listVersions(domain);
+  const result = await sites.listVersions(username, domain);
   if (!result) {
     return json({ domain, versions: [], current: null });
   }

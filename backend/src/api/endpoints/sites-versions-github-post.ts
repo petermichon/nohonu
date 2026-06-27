@@ -8,6 +8,11 @@ function validateRepo(repo: unknown): repo is string {
 }
 
 export async function fetchGithub(req: Request, { domain }: RouteContext): Promise<Response> {
+  const username = req.headers.get('X-Username');
+  if (!username) {
+    return error('Missing username', 401);
+  }
+
   const body = await parseJson<{ repo?: unknown; branch?: unknown }>(req);
   if (body instanceof Response) {
     return body;
@@ -21,12 +26,9 @@ export async function fetchGithub(req: Request, { domain }: RouteContext): Promi
   const ref = typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main';
 
   try {
-    const result = await sites.deployFromGithub(domain, repo, ref);
+    const result = await sites.deployFromGithub(username, domain, repo, ref);
 
-    const account = req.headers.get('X-Account');
-    if (account) {
-      await sites.setSiteAccount(domain, account);
-    }
+    await sites.setSiteAccount(username, domain, username);
 
     return json({ domain, index: result.index, repo: result.repo, branch: result.branch });
   } catch (err) {

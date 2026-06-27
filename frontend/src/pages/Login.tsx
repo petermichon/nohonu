@@ -9,7 +9,7 @@ import { useApi } from '../lib/api.ts';
 function Login() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setSessionId } = useConnection();
+  const { setSessionId, setUsername } = useConnection();
   const { apiFetch } = useApi();
   const navigate = useNavigate();
   const [email, setEmailState] = useState('');
@@ -36,6 +36,7 @@ function Login() {
     },
     onSuccess: (data) => {
       setSessionId(data.session);
+      setUsername(data.user.username);
       navigate(`/u/${data.user.username}`);
     },
     onError: (err: Error) => {

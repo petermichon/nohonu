@@ -69,7 +69,7 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
   const url = new URL(req.url);
 
   if (path === '/sites' && req.method === 'GET') {
-    return await listSites();
+    return await listSites(req);
   }
 
   if (!path.startsWith('/sites/')) {
@@ -118,34 +118,34 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
     });
 
     if (route) {
-      return route[1](ctx);
+      return route[1](req, ctx);
     }
 
     // Custom domains GET
     if (action === 'custom-domains') {
       if (subAction === 'token') {
-        return getVerificationToken(ctx);
+        return getVerificationToken(req, ctx);
       }
-      return getCustomDomains(ctx);
+      return getCustomDomains(req, ctx);
     }
   }
 
   if (req.method === 'DELETE') {
     if (action === 'versions') {
-      return deleteVersion(ctx);
+      return deleteVersion(req, ctx);
     }
     if (action === 'custom-domains') {
-      return deleteCustomDomain(ctx);
+      return deleteCustomDomain(req, ctx);
     }
     if (!action) {
-      return deleteSite(ctx);
+      return deleteSite(req, ctx);
     }
   }
 
   if (req.method === 'POST') {
     if (action === 'versions') {
       if (subAction === 'activate') {
-        return activateVersion(ctx);
+        return activateVersion(req, ctx);
       }
       if (subAction === 'github') {
         return fetchGithub(req, ctx);
@@ -156,20 +156,20 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
     }
     if (action === 'custom-domains') {
       if (verifyAction === 'verify') {
-        return verifyCustomDomain(ctx);
+        return verifyCustomDomain(req, ctx);
       }
       if (!subAction) {
-        return addCustomDomain(ctx, req);
+        return addCustomDomain(req, ctx);
       }
     }
   }
 
   if (req.method === 'PATCH') {
     if (action === 'toggle') {
-      return toggleSite(ctx);
+      return toggleSite(req, ctx);
     }
     if (action === 'meta') {
-      return updateMeta(ctx, req);
+      return updateMeta(req, ctx);
     }
   }
 

@@ -19,7 +19,7 @@ export function useApi() {
       const headers: HeadersInit = {
         ...(apiKey ? { 'X-Api-Key': apiKey } : {}),
         ...(sessionId ? { 'X-Session-Id': sessionId } : {}),
-        ...(username ? { 'X-Account': username } : {}),
+        ...(username ? { 'X-Username': username } : {}),
       };
       return fetch(`${apiBase}${path}`, { ...init, headers: { ...headers, ...init?.headers } });
     },
