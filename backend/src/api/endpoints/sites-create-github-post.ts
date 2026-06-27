@@ -7,7 +7,7 @@ function validateRepo(repo: unknown): repo is string {
   return typeof repo === 'string' && GITHUB_REPO_REGEX.test(repo);
 }
 
-export async function fetchGithub(req: Request, { domain }: RouteContext): Promise<Response> {
+export async function createSiteFromGithub(req: Request, { domain }: RouteContext): Promise<Response> {
   const username = req.headers.get('X-Username');
   if (!username) {
     return error('Missing username', 401);
@@ -26,11 +26,12 @@ export async function fetchGithub(req: Request, { domain }: RouteContext): Promi
   const ref = typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main';
 
   try {
-    const result = await sites.uploadVersionFromGithub(username, domain, repo, ref);
-    return json({ domain, index: result.index, repo: result.repo, branch: result.branch });
+    const result = await sites.createSiteFromGithub(username, domain, repo, ref);
+    await sites.setSiteAccount(username, domain, username);
+    return json({ domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to upload version from GitHub';
-    const status = message.includes('404') ? 404 : message === 'Site not found' ? 404 : 502;
+    const message = err instanceof Error ? err.message : 'Failed to create site from GitHub';
+    const status = message.includes('404') ? 404 : message === 'Domain already exists for this user' ? 409 : 502;
     return error(message, status);
   }
 }

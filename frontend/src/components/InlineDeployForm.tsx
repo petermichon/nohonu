@@ -28,7 +28,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     mutationFn: async ({ file, domain }: { file: File; domain: string }) => {
       const formData = new FormData();
       formData.append('zip', file);
-      const res = await apiFetch(`/sites/${domain}/versions`, { method: 'POST', body: formData });
+      const res = await apiFetch(`/sites/${domain}`, { method: 'POST', body: formData });
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.error || 'Upload failed');
@@ -47,7 +47,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   // GitHub fetch mutation
   const fetchGithubMutation = useMutation({
     mutationFn: async ({ domain, repo, branch }: { domain: string; repo: string; branch: string }) => {
-      const res = await apiFetch(`/sites/${domain}/versions/github`, {
+      const res = await apiFetch(`/sites/${domain}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ repo, branch }),

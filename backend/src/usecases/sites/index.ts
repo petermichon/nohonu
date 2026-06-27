@@ -364,14 +364,21 @@ export async function deleteVersion(user: string, domain: string, index: number)
   return { ok: true, value: undefined };
 }
 
-export async function uploadVersion(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number }> {
+export async function createSite(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number }> {
+  // Check if domain already exists
   const existingData = await storage.readSiteMetadata(user, domain);
-  const data = existingData ?? { ...storage.DEFAULT_DATA };
+  if (existingData) {
+    throw new Error('Domain already exists for this user');
+  }
+
+  // Create initial site data
+  const data = { ...storage.DEFAULT_DATA };
   const index = data.nextIndex;
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
-  if (data.currentIndex === null) data.currentIndex = index;
+  data.currentIndex = index;
 
+  // Create directories and files
   await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
   await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
@@ -380,7 +387,32 @@ export async function uploadVersion(user: string, domain: string, zipData: Uint8
   return { index };
 }
 
-export async function deployFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
+export async function uploadVersion(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number }> {
+  // Check if domain exists
+  const existingData = await storage.readSiteMetadata(user, domain);
+  if (!existingData) {
+    throw new Error('Site not found');
+  }
+
+  const data = existingData;
+  const index = data.nextIndex;
+  data.nextIndex = index + 1;
+  data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
+
+  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await storage.writeSiteMetadata(user, domain, data);
+
+  return { index };
+}
+
+export async function createSiteFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
+  // Check if domain already exists
+  const existingData = await storage.readSiteMetadata(user, domain);
+  if (existingData) {
+    throw new Error('Domain already exists for this user');
+  }
+
   const githubUrl = `https://github.com/${repo}/archive/refs/heads/${ref}.zip`;
 
   let zipData: Uint8Array;
@@ -403,8 +435,53 @@ export async function deployFromGithub(user: string, domain: string, repo: strin
     throw err;
   }
 
+  // Create initial site data
+  const data = { ...storage.DEFAULT_DATA };
+  data.repoHistory = [{ repo, branch: ref, lastUsed: Date.now() }];
+  const index = data.nextIndex;
+  data.nextIndex = index + 1;
+  data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
+  data.currentIndex = index;
+
+  // Create directories and files
+  await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
+  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await storage.writeSiteMetadata(user, domain, data);
+
+  return { index, repo, branch: ref };
+}
+
+export async function uploadVersionFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
+  // Check if domain exists
   const existingData = await storage.readSiteMetadata(user, domain);
-  const data = existingData ?? { ...storage.DEFAULT_DATA };
+  if (!existingData) {
+    throw new Error('Site not found');
+  }
+
+  const githubUrl = `https://github.com/${repo}/archive/refs/heads/${ref}.zip`;
+
+  let zipData: Uint8Array;
+  try {
+    const abort = new AbortController();
+    const timeout = setTimeout(() => abort.abort(), 30_000);
+    const response = await fetch(githubUrl, { redirect: 'follow', signal: abort.signal });
+    clearTimeout(timeout);
+
+    if (response.status === 404) throw new Error('Repository or branch not found');
+    if (!response.ok) throw new Error(`GitHub error: ${response.status}`);
+
+    const rawBuffer = await response.arrayBuffer();
+    if (rawBuffer.byteLength > MAX_ZIP_BYTES) {
+      throw new Error(`GitHub repo zip too large (max ${MAX_ZIP_BYTES} bytes)`);
+    }
+    zipData = new Uint8Array(rawBuffer);
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') throw new Error('GitHub request timed out');
+    throw err;
+  }
+
+  const data = existingData;
   const filtered = data.repoHistory.filter((h) => {
     return !(h.repo === repo && h.branch === ref);
   });
@@ -413,9 +490,7 @@ export async function deployFromGithub(user: string, domain: string, repo: strin
   const index = data.nextIndex;
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
-  if (data.currentIndex === null) data.currentIndex = index;
 
-  await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
   await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);

@@ -33,6 +33,8 @@ import { verifyCustomDomain } from './endpoints/sites-custom-domains-verify-post
 import { getVerificationToken } from './endpoints/sites-custom-domains-token-get.ts';
 import { getAllCustomDomains } from './endpoints/custom-domains-all-get.ts';
 import { getUserByUsernameEndpoint } from './endpoints/users-username-get.ts';
+import { createSite } from './endpoints/sites-create-post.ts';
+import { createSiteFromGithub } from './endpoints/sites-create-github-post.ts';
 import type { CtxRouteHandler, RouteContext } from './endpoints/sites-types.ts';
 
 type Endpoint = {
@@ -143,6 +145,16 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
   }
 
   if (req.method === 'POST') {
+    // Create new site (first version)
+    if (!action) {
+      // Check if it's GitHub create or file upload
+      const contentType = req.headers.get('Content-Type');
+      if (contentType?.includes('application/json')) {
+        return createSiteFromGithub(req, ctx);
+      }
+      return createSite(req, ctx);
+    }
+    // Add versions to existing site
     if (action === 'versions') {
       if (subAction === 'activate') {
         return activateVersion(req, ctx);
