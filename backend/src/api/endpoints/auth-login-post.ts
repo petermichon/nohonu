@@ -1,12 +1,9 @@
-import { json, checkMethod, requireAuth } from '../../shared/http.ts';
+import { json, checkMethod } from '../../shared/http.ts';
 import * as loginUc from '../../usecases/auth/login.ts';
 
 export async function authLogin(req: Request): Promise<Response> {
   const methodError = checkMethod(req, 'POST');
   if (methodError) return methodError;
-
-  const authError = requireAuth(req);
-  if (authError) return authError;
 
   try {
     const body = await req.json();

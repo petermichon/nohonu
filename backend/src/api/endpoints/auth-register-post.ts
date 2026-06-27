@@ -1,12 +1,9 @@
-import { json, checkMethod, requireAuth } from '../../shared/http.ts';
+import { json, checkMethod } from '../../shared/http.ts';
 import * as registerUc from '../../usecases/auth/register.ts';
 
 export async function authRegister(req: Request): Promise<Response> {
   const methodError = checkMethod(req, 'POST');
   if (methodError) return methodError;
-
-  const authError = requireAuth(req);
-  if (authError) return authError;
 
   try {
     const body = await req.json();
