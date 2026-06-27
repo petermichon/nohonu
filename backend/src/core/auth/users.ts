@@ -1,9 +1,9 @@
 // ponytail: JSON file storage - simple, no database dependency, upgrade to KV/Postgres if scale needed
 
 import { hashPassword, verifyPassword } from './password.ts';
+import { SITES_DIR } from '../../shared/paths.ts';
 
-const dataDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../data`;
-const USERS_FILE = `${dataDir}/users.json`;
+const USERS_FILE = `${SITES_DIR}/users.json`;
 
 export interface User {
   id: string;

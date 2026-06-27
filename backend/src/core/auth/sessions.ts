@@ -1,7 +1,8 @@
 // ponytail: JSON file storage for sessions - simple, upgrade to KV/Redis if scale needed
 
-const dataDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../data`;
-const SESSIONS_FILE = `${dataDir}/sessions.json`;
+import { SITES_DIR } from '../../shared/paths.ts';
+
+const SESSIONS_FILE = `${SITES_DIR}/sessions.json`;
 
 export interface Session {
   id: string;
