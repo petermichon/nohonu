@@ -2,7 +2,8 @@
 
 import { hashPassword, verifyPassword } from './password.ts';
 
-const USERS_FILE = './data/users.json';
+const dataDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../data`;
+const USERS_FILE = `${dataDir}/users.json`;
 
 export interface User {
   id: string;
@@ -33,17 +34,17 @@ function saveUsers(data: UsersData): void {
 
 export async function createUser(email: string, password: string, username: string): Promise<User> {
   const data = loadUsers();
-  
+
   // Check email uniqueness
-  if (data.users.some(u => u.email === email)) {
+  if (data.users.some((u) => u.email === email)) {
     throw new Error('Email already exists');
   }
-  
+
   // Check username uniqueness
-  if (data.users.some(u => u.username === username)) {
+  if (data.users.some((u) => u.username === username)) {
     throw new Error('Username already exists');
   }
-  
+
   const passwordHash = await hashPassword(password);
   const user: User = {
     id: String(data.nextId++),
@@ -51,36 +52,36 @@ export async function createUser(email: string, password: string, username: stri
     passwordHash,
     username,
     displayName: username,
-    createdAt: Date.now()
+    createdAt: Date.now(),
   };
-  
+
   data.users.push(user);
   saveUsers(data);
-  
+
   return user;
 }
 
 export async function validateUser(email: string, password: string): Promise<User | null> {
   const data = loadUsers();
-  const user = data.users.find(u => u.email === email);
-  
+  const user = data.users.find((u) => u.email === email);
+
   if (!user) return null;
-  
+
   const valid = await verifyPassword(password, user.passwordHash);
   return valid ? user : null;
 }
 
 export function getUserById(id: string): User | null {
   const data = loadUsers();
-  return data.users.find(u => u.id === id) ?? null;
+  return data.users.find((u) => u.id === id) ?? null;
 }
 
 export function getUserByUsername(username: string): User | null {
   const data = loadUsers();
-  return data.users.find(u => u.username === username) ?? null;
+  return data.users.find((u) => u.username === username) ?? null;
 }
 
 export function getUserByEmail(email: string): User | null {
   const data = loadUsers();
-  return data.users.find(u => u.email === email) ?? null;
+  return data.users.find((u) => u.email === email) ?? null;
 }

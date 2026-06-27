@@ -1,6 +1,7 @@
 // ponytail: JSON file storage for sessions - simple, upgrade to KV/Redis if scale needed
 
-const SESSIONS_FILE = './data/sessions.json';
+const dataDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../data`;
+const SESSIONS_FILE = `${dataDir}/sessions.json`;
 
 export interface Session {
   id: string;
@@ -38,23 +39,23 @@ export function createSession(userId: string, deviceInfo?: string, userAgent?: s
     userAgent,
     ip,
     createdAt: Date.now(),
-    lastActive: Date.now()
+    lastActive: Date.now(),
   };
-  
+
   data.sessions.push(session);
   saveSessions(data);
-  
+
   return session;
 }
 
 export function getSession(id: string): Session | null {
   const data = loadSessions();
-  return data.sessions.find(s => s.id === id) ?? null;
+  return data.sessions.find((s) => s.id === id) ?? null;
 }
 
 export function updateSessionActivity(id: string): void {
   const data = loadSessions();
-  const session = data.sessions.find(s => s.id === id);
+  const session = data.sessions.find((s) => s.id === id);
   if (session) {
     session.lastActive = Date.now();
     saveSessions(data);
@@ -63,24 +64,24 @@ export function updateSessionActivity(id: string): void {
 
 export function deleteSession(id: string): void {
   const data = loadSessions();
-  data.sessions = data.sessions.filter(s => s.id !== id);
+  data.sessions = data.sessions.filter((s) => s.id !== id);
   saveSessions(data);
 }
 
 export function deleteAllUserSessions(userId: string): void {
   const data = loadSessions();
-  data.sessions = data.sessions.filter(s => s.userId !== userId);
+  data.sessions = data.sessions.filter((s) => s.userId !== userId);
   saveSessions(data);
 }
 
 export function getUserSessions(userId: string): Session[] {
   const data = loadSessions();
-  return data.sessions.filter(s => s.userId === userId);
+  return data.sessions.filter((s) => s.userId === userId);
 }
 
 export function cleanupExpiredSessions(maxAgeMs: number = 30 * 24 * 60 * 60 * 1000): void {
   const data = loadSessions();
   const now = Date.now();
-  data.sessions = data.sessions.filter(s => now - s.lastActive < maxAgeMs);
+  data.sessions = data.sessions.filter((s) => now - s.lastActive < maxAgeMs);
   saveSessions(data);
 }
