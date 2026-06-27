@@ -21,6 +21,7 @@ import Docs from './pages/Docs.tsx';
 import Login from './pages/Login.tsx';
 import Signup from './pages/Signup.tsx';
 import Deploy from './pages/Deploy.tsx';
+import About from './pages/About.tsx';
 import NotFound from './pages/NotFound.tsx';
 import { useState, useEffect } from 'react';
 
@@ -87,6 +88,7 @@ function AppInner() {
             <Route path="/docs" element={<Docs />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/about" element={<About />} />
             <Route
               path="/deploy"
               element={
