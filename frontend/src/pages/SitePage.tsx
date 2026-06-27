@@ -17,7 +17,6 @@ import { OverviewSection } from '../components/OverviewSection.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 import { useSiteData } from '../hooks/useSiteData.ts';
 import { SLOT_MS, type TimeRange } from '../lib/types.ts';
-import { Footer } from '../components/Footer.tsx';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
@@ -413,7 +412,6 @@ function SitePage() {
         domain={versionModal?.label ?? ''}
         loading={!!deletingVersion}
       />
-      <Footer />
     </section>
   );
 }
