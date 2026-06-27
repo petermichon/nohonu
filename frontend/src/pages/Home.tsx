@@ -37,7 +37,7 @@ function FeatureBadge({
 function Home() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { theme, resolvedTheme } = useTheme();
-  const { sessionId, username } = useConnection();
+  const { sessionId } = useConnection();
   const [showCertTooltip, setShowCertTooltip] = useState(false);
   // Filter state for future use - currently all filters show the same sites
   const [filter, setFilter] = useState<'latest' | 'popular' | 'experimental'>('latest');
