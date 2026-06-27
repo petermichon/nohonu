@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 
 type UploadMode = 'file' | 'github';
 
@@ -11,6 +12,8 @@ interface InlineDeployFormProps {
 
 export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const { apiFetch, host } = useApi();
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
   const [newDomain, setNewDomain] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -114,36 +117,37 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-zinc-950 dark:text-zinc-100">Deploy New Site</h3>
+    <div className="max-w-2xl">
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-1">Deploy New Site</h3>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Upload a .zip file or connect a GitHub repository</p>
       </div>
 
-      <div className="grid gap-4 max-w-2xl">
+      <div className="space-y-5">
         {/* Mode toggle */}
-        <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 rounded-lg p-1 w-fit">
+        <div className="flex items-center gap-6 border-b border-zinc-200 dark:border-zinc-800 pb-4">
           <button
             type="button"
             onClick={() => setUploadMode('file')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer ${
+            className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors ${
               uploadMode === 'file'
-                ? 'bg-white dark:bg-stone-700 text-zinc-950 dark:text-zinc-100 shadow-sm'
+                ? 'text-zinc-950 dark:text-zinc-100'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
-            <Upload className="w-3 h-3" />
-            File
+            <Upload className="w-4 h-4" />
+            File Upload
           </button>
           <button
             type="button"
             onClick={() => setUploadMode('github')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer ${
+            className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors ${
               uploadMode === 'github'
-                ? 'bg-white dark:bg-stone-700 text-zinc-950 dark:text-zinc-100 shadow-sm'
+                ? 'text-zinc-950 dark:text-zinc-100'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
-            <GitBranch className="w-3 h-3" />
+            <GitBranch className="w-4 h-4" />
             GitHub
           </button>
         </div>
@@ -151,7 +155,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         {/* Domain input */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input
               type="text"
               id="domain"
@@ -159,16 +163,16 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               value={newDomain}
               onChange={(e) => setNewDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
               placeholder="subdomain"
-              className="w-full pl-9 pr-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
+              className="w-full pl-10 pr-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
               autoFocus
             />
           </div>
-          <span className="text-zinc-400 dark:text-zinc-500 text-xs shrink-0">.{host}</span>
+          <span className="text-zinc-400 dark:text-zinc-500 text-sm shrink-0">.{host}</span>
         </div>
 
         {/* File upload or GitHub inputs */}
         {uploadMode === 'github' ? (
-          <div className="grid gap-3">
+          <div className="space-y-3">
             <input
               type="text"
               id="githubRepo"
@@ -176,7 +180,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               value={githubRepo}
               onChange={(e) => setGithubRepo(e.target.value)}
               placeholder="owner/repo"
-              className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
+              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
             />
             <input
               type="text"
@@ -185,17 +189,17 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
-              className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-white dark:focus:bg-stone-900"
+              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
             />
           </div>
         ) : (
           (() => {
             const baseClasses =
-              'border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 p-6 cursor-pointer';
-            const draggingClasses = 'border-stone-900 dark:border-stone-400 bg-stone-50 dark:bg-stone-800/50';
-            const selectedClasses = 'border-stone-400 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/30';
+              'border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 p-8 cursor-pointer transition-colors';
+            const draggingClasses = 'border-zinc-400 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900/30';
+            const selectedClasses = 'border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/20';
             const defaultClasses =
-              'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600';
+              'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700';
             const stateClasses = isDragging ? draggingClasses : selectedFile ? selectedClasses : defaultClasses;
             return (
               <div
@@ -225,21 +229,21 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                   className="hidden"
                 />
                 {selectedFile ? (
-                  <div className="flex items-center gap-2 w-full">
-                    <FileArchive className="w-5 h-5 text-zinc-500 dark:text-zinc-400 shrink-0" />
+                  <div className="flex items-center gap-3 w-full">
+                    <FileArchive className="w-6 h-6 text-zinc-500 dark:text-zinc-400 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-zinc-950 dark:text-zinc-100 truncate">
+                      <p className="text-sm font-medium text-zinc-950 dark:text-zinc-100 truncate">
                         {selectedFile.name}
                       </p>
-                      <p className="text-[11px] text-zinc-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                      <p className="text-xs text-zinc-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                     </div>
                   </div>
                 ) : (
                   <>
                     <Upload
-                      className={`w-5 h-5 ${isDragging ? 'text-zinc-700 dark:text-zinc-200' : 'text-zinc-400 dark:text-zinc-500'}`}
+                      className={`w-8 h-8 ${isDragging ? 'text-zinc-600 dark:text-zinc-300' : 'text-zinc-400 dark:text-zinc-500'}`}
                     />
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
                       {isDragging ? 'Drop to upload' : 'Drop .zip or click to browse'}
                     </p>
                   </>
@@ -251,9 +255,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
 
         {/* Error message */}
         {uploadError && (
-          <div className="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
-            <AlertCircle className="w-3.5 h-3.5 text-red-500 dark:text-red-400 shrink-0" />
-            <p className="text-xs text-red-600 dark:text-red-400">{uploadError}</p>
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0" />
+            <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
           </div>
         )}
 
@@ -266,7 +270,15 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               ? fetchGithubMutation.isPending || !githubRepo || !newDomain
               : uploadMutation.isPending || !selectedFile || !newDomain
           }
-          className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 text-white dark:text-zinc-950 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
+          className={`w-full py-3 ${
+            accentColorValues.textColor === 'light'
+              ? 'text-white'
+              : accentColorValues.textColor === 'inverted'
+                ? 'text-zinc-100 dark:text-zinc-950'
+                : 'text-zinc-950'
+          } text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto ${
+            accentColorValues.bg
+          } hover:opacity-90 disabled:opacity-40 transition-opacity`}
         >
           {uploadMutation.isPending || fetchGithubMutation.isPending ? (
             <>

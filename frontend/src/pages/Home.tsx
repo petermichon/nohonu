@@ -203,7 +203,7 @@ function Home() {
               </p>
               <div className="flex items-center gap-3 animate-fade-in-delayed">
                 <Link
-                  to={sessionId ? `/u/${username}/sites` : '/signup'}
+                  to={sessionId ? '/deploy' : '/signup'}
                   className={`px-4 h-[46px] rounded-full text-sm font-medium ${
                     accentColorValues.textColor === 'light'
                       ? 'text-white'
