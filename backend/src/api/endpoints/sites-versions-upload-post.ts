@@ -1,12 +1,19 @@
 import { error, json } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
+import * as storage from '../../core/sites/storage.ts';
 import type { RouteContext } from './sites-types.ts';
 
 export async function upload(req: Request, { domain }: RouteContext): Promise<Response> {
   const username = req.headers.get('X-Username');
   if (!username) {
     return error('Missing username', 401);
+  }
+
+  // Check if domain already exists for this user
+  const existingData = await storage.readSiteMetadata(username, domain);
+  if (existingData) {
+    return error('Domain already exists for this user', 409);
   }
 
   const formData = await req.formData();

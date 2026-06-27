@@ -1,14 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
 import { useSites } from '../lib/api.ts';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
 
 export default function Deploy() {
   const navigate = useNavigate();
   const { refreshSites } = useSites();
+  const { username } = useConnection();
 
-  const handleDeploy = () => {
+  const handleDeploy = (domain: string) => {
     refreshSites();
-    navigate('/');
+    if (username) {
+      navigate(`/u/${username}/${domain}`);
+    } else {
+      navigate('/');
+    }
   };
 
   return (

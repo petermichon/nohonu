@@ -7,7 +7,7 @@ import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 type UploadMode = 'file' | 'github';
 
 interface InlineDeployFormProps {
-  onDeploy: () => void;
+  onDeploy: (domain: string) => void;
 }
 
 export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
@@ -35,8 +35,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
       }
     },
     onSuccess: () => {
+      const domain = newDomain;
       reset();
-      onDeploy();
+      onDeploy(domain);
     },
     onError: (err: Error) => {
       setUploadError(err.message);
@@ -57,8 +58,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
       }
     },
     onSuccess: () => {
+      const domain = newDomain;
       reset();
-      onDeploy();
+      onDeploy(domain);
     },
     onError: (err: Error) => {
       setUploadError(err.message);

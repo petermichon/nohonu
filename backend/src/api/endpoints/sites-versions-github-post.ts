@@ -1,5 +1,6 @@
 import { error, json, parseJson } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
+import * as storage from '../../core/sites/storage.ts';
 import type { RouteContext } from './sites-types.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
@@ -11,6 +12,12 @@ export async function fetchGithub(req: Request, { domain }: RouteContext): Promi
   const username = req.headers.get('X-Username');
   if (!username) {
     return error('Missing username', 401);
+  }
+
+  // Check if domain already exists for this user
+  const existingData = await storage.readSiteMetadata(username, domain);
+  if (existingData) {
+    return error('Domain already exists for this user', 409);
   }
 
   const body = await parseJson<{ repo?: unknown; branch?: unknown }>(req);
