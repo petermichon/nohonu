@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Upload, X, FileArchive, GitBranch, Loader2, AlertCircle, Globe } from 'lucide-react';
+import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 
 type UploadMode = 'file' | 'github';
@@ -10,7 +10,6 @@ interface InlineDeployFormProps {
 
 export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const { apiFetch, host } = useApi();
-  const [isOpen, setIsOpen] = useState(false);
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
   const [newDomain, setNewDomain] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -22,7 +21,6 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
-    setIsOpen(false);
     setUploadMode('file');
     setNewDomain('');
     setSelectedFile(null);
@@ -107,30 +105,10 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     }
   };
 
-  if (!isOpen) {
-    return (
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800/50 cursor-pointer h-[58px]"
-      >
-        <Plus className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-        <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Deploy site</span>
-      </button>
-    );
-  }
-
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <h3 className="text-sm font-semibold text-zinc-950 dark:text-zinc-100">Deploy New Site</h3>
-        <button
-          type="button"
-          onClick={reset}
-          className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
       </div>
 
       <div className="grid gap-4 max-w-2xl">
@@ -247,16 +225,6 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                       </p>
                       <p className="text-[11px] text-zinc-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedFile(null);
-                      }}
-                      className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded cursor-pointer shrink-0"
-                    >
-                      <X className="w-3.5 h-3.5 text-zinc-400" />
-                    </button>
                   </div>
                 ) : (
                   <>

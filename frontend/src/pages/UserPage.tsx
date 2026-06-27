@@ -1,7 +1,6 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
-import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
 import { useSites } from '../lib/SitesProvider.tsx';
 import { useDomains } from '../lib/DomainsProvider.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
@@ -16,7 +15,7 @@ export default function UserPage() {
   const { username } = useParams<{ username: string }>();
   const location = useLocation();
   const { displayName, username: loggedInUsername } = useConnection();
-  const { sites, loading, error, refreshSites } = useSites();
+  const { sites, loading, error } = useSites();
   const { domains, loading: domainsLoading, refreshDomains } = useDomains();
   const { apiFetch } = useApi();
   const { showToast } = useToast();
@@ -117,7 +116,8 @@ export default function UserPage() {
         <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
           <div className="flex items-center gap-4 mb-4">
             <div
-              className={`w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center justify-center shrink-0`}
+              className={`w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center
+              justify-center shrink-0`}
             >
               <User className={`w-8 h-8 ${accentColorValues.textDark}`} />
             </div>
@@ -269,39 +269,61 @@ export default function UserPage() {
         {/* Empty state */}
         {!loading && !error && userSites.length === 0 && activeTab === 'sites' && (
           <section className="max-w-7xl mx-auto px-6 py-8">
-            {isOwnProfile ? (
-              <div className="max-w-2xl mx-auto">
-                <div className="text-center py-12 mb-8">
-                  <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <User className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
-                  </div>
-                  <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
-                  <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-                    Deploy your first site to get started.
-                  </p>
-                </div>
-                <InlineDeployForm onDeploy={refreshSites} />
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">0 sites</p>
+              {isOwnProfile && (
+                <Link
+                  to="/deploy"
+                  className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
+                    accentColorValues.textColor === 'light'
+                      ? 'text-white'
+                      : accentColorValues.textColor === 'inverted'
+                        ? 'text-zinc-100 dark:text-zinc-950'
+                        : 'text-zinc-950'
+                  } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+                >
+                  <Plus className="w-4 h-4" />
+                  Deploy site
+                </Link>
+              )}
+            </div>
+            <div className="text-center py-20">
+              <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <User className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
               </div>
-            ) : (
-              <div className="text-center py-20">
-                <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <User className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
-                </div>
-                <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
-                <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
-                  @{username} hasn't published any sites yet.
-                </p>
-              </div>
-            )}
+              <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
+              <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+                {isOwnProfile
+                  ? 'Deploy your first site to get started.'
+                  : `@${username} hasn't published any sites yet.`}
+              </p>
+            </div>
           </section>
         )}
 
         {/* Sites grid */}
         {activeTab === 'sites' && !loading && !error && userSites.length > 0 && (
           <section className="max-w-7xl mx-auto px-6 py-8">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
-              {userSites.length === 1 ? '1 site' : `${userSites.length} sites`}
-            </p>
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                {userSites.length === 1 ? '1 site' : `${userSites.length} sites`}
+              </p>
+              {isOwnProfile && (
+                <Link
+                  to="/deploy"
+                  className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
+                    accentColorValues.textColor === 'light'
+                      ? 'text-white'
+                      : accentColorValues.textColor === 'inverted'
+                        ? 'text-zinc-100 dark:text-zinc-950'
+                        : 'text-zinc-950'
+                  } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+                >
+                  <Plus className="w-4 h-4" />
+                  Deploy site
+                </Link>
+              )}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {userSites.map((site) => (
                 <HomeSiteCard key={site.domain} site={site} />

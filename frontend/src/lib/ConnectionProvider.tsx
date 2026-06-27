@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 interface Connection {
   apiBase: string;
@@ -14,9 +14,6 @@ interface ConnectionContextType extends Connection {
   setApiBase: (url: string) => void;
   setApiKey: (key: string) => void;
   setSessionId: (sessionId: string) => void;
-  setUsername: (username: string) => void;
-  setDisplayName: (displayName: string) => void;
-  setEmail: (email: string) => void;
   disconnect: () => void;
 }
 
@@ -34,16 +31,13 @@ function load(): Connection {
     const apiBase = localStorage.getItem('apiBase');
     const apiKey = localStorage.getItem('apiKey');
     const sessionId = localStorage.getItem('sessionId');
-    const username = localStorage.getItem('username');
-    const displayName = localStorage.getItem('displayName');
-    const email = localStorage.getItem('email');
     return {
       apiBase: apiBase ?? DEFAULT.apiBase,
       apiKey: apiKey ?? DEFAULT.apiKey,
       sessionId: sessionId ?? DEFAULT.sessionId,
-      username: username ?? DEFAULT.username,
-      displayName: displayName ?? DEFAULT.displayName,
-      email: email ?? DEFAULT.email,
+      username: DEFAULT.username,
+      displayName: DEFAULT.displayName,
+      email: DEFAULT.email,
     };
   } catch {
     /* ignore */
@@ -55,6 +49,32 @@ const ConnectionContext = createContext<ConnectionContextType | undefined>(undef
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [connection, setConnectionState] = useState<Connection>(load);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (connection.sessionId && connection.apiBase) {
+        try {
+          const headers: HeadersInit = {
+            ...(connection.apiKey ? { 'X-Api-Key': connection.apiKey } : {}),
+            'X-Session-Id': connection.sessionId,
+          };
+          const res = await fetch(`${connection.apiBase}/auth/me`, { headers });
+          if (res.ok) {
+            const data = await res.json();
+            setConnectionState((prev) => ({
+              ...prev,
+              username: data.user?.username || '',
+              displayName: data.user?.displayName || '',
+              email: data.user?.email || '',
+            }));
+          }
+        } catch {
+          // Silent fail - user data will remain empty
+        }
+      }
+    };
+    fetchUserData();
+  }, [connection.sessionId, connection.apiBase, connection.apiKey]);
 
   const setConnection = (c: Connection) => {
     localStorage.setItem('apiBase', c.apiBase);
@@ -77,27 +97,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, sessionId }));
   };
 
-  const setUsername = (u: string) => {
-    localStorage.setItem('username', u);
-    setConnectionState((prev) => ({ ...prev, username: u }));
-  };
-
-  const setDisplayName = (d: string) => {
-    localStorage.setItem('displayName', d);
-    setConnectionState((prev) => ({ ...prev, displayName: d }));
-  };
-
-  const setEmail = (e: string) => {
-    localStorage.setItem('email', e);
-    setConnectionState((prev) => ({ ...prev, email: e }));
-  };
-
   const disconnect = () => {
     localStorage.removeItem('apiKey');
     localStorage.removeItem('sessionId');
-    localStorage.removeItem('username');
-    localStorage.removeItem('displayName');
-    localStorage.removeItem('email');
     setConnectionState((prev) => ({ ...prev, apiKey: '', sessionId: '', username: '', displayName: '', email: '' }));
   };
 
@@ -109,9 +111,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         setApiBase,
         setApiKey,
         setSessionId,
-        setUsername,
-        setDisplayName,
-        setEmail,
         disconnect,
       }}
     >

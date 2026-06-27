@@ -4,26 +4,9 @@ import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useState, useEffect } from 'react';
 
 export default function Account() {
-  const {
-    apiBase,
-    apiKey,
-    username,
-    displayName,
-    email,
-    setApiBase,
-    setApiKey,
-    setUsername,
-    setDisplayName,
-    setEmail,
-  } = useConnection();
+  const { apiBase, apiKey, username, displayName, email, setApiBase, setApiKey } = useConnection();
   const [url, setUrl] = useState(apiBase);
   const [key, setKey] = useState(apiKey);
-  const [localUsername, setLocalUsername] = useState(username);
-  const [localDisplayName, setLocalDisplayName] = useState(displayName);
-  const [localEmail, setLocalEmail] = useState(email);
-  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'saved'>('idle');
-  const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved'>('idle');
-  const [emailStatus, setEmailStatus] = useState<'idle' | 'saved'>('idle');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,22 +30,6 @@ export default function Account() {
     checkServerSecurity();
   }, [apiBase, apiKey]);
 
-  const saveDisplayName = () => {
-    const trimmed = localDisplayName.trim();
-    setLocalDisplayName(trimmed);
-    setDisplayName(trimmed);
-    setDisplayNameStatus('saved');
-    setTimeout(() => setDisplayNameStatus('idle'), 800);
-  };
-
-  const saveEmail = () => {
-    const trimmed = localEmail.trim();
-    setLocalEmail(trimmed);
-    setEmail(trimmed);
-    setEmailStatus('saved');
-    setTimeout(() => setEmailStatus('idle'), 800);
-  };
-
   const savePassword = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordStatus('error');
@@ -80,17 +47,6 @@ export default function Account() {
     setNewPassword('');
     setConfirmPassword('');
     setTimeout(() => setPasswordStatus('idle'), 2000);
-  };
-
-  const saveUsername = () => {
-    const trimmed = localUsername
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, '');
-    setLocalUsername(trimmed);
-    setUsername(trimmed);
-    setUsernameStatus('saved');
-    setTimeout(() => setUsernameStatus('idle'), 800);
   };
 
   const saveUrl = async () => {
@@ -164,65 +120,12 @@ export default function Account() {
       <Section id="profile" icon={User} title="Profile">
         <div className="grid gap-4 max-w-md">
           <div>
-            <label htmlFor="displayName" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-              Display Name
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                id="displayName"
-                name="displayName"
-                value={localDisplayName}
-                onChange={(e) => {
-                  setLocalDisplayName(e.target.value);
-                  setDisplayNameStatus('idle');
-                }}
-                placeholder="John Doe"
-                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
-              />
-              <button
-                type="button"
-                onClick={saveDisplayName}
-                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer"
-              >
-                {displayNameStatus === 'saved' ? 'Saved' : 'Save'}
-              </button>
-            </div>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Your public name (e.g., John Doe)</p>
+            <label className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Display Name</label>
+            <p className="text-sm text-zinc-950 dark:text-zinc-100">{displayName || 'Not set'}</p>
           </div>
           <div>
-            <label htmlFor="username" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-              Username
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={localUsername}
-                onChange={(e) => {
-                  setLocalUsername(e.target.value);
-                  setUsernameStatus('idle');
-                }}
-                placeholder="your-username"
-                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
-              />
-              <button
-                type="button"
-                onClick={saveUsername}
-                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer"
-              >
-                {usernameStatus === 'saved' ? 'Saved' : 'Save'}
-              </button>
-            </div>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-              Used to identify your sites. Lowercase letters, numbers, hyphens and underscores only.
-            </p>
-            {localUsername && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                Your page: <span className="font-mono">/u/{localUsername}</span>
-              </p>
-            )}
+            <label className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Username</label>
+            <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">@{username || 'Not set'}</p>
           </div>
         </div>
       </Section>
@@ -230,33 +133,8 @@ export default function Account() {
       <Section id="account" icon={UserCircle} title="Account">
         <div className="grid gap-4 max-w-md">
           <div>
-            <label htmlFor="email" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-              Email
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={localEmail}
-                onChange={(e) => {
-                  setLocalEmail(e.target.value);
-                  setEmailStatus('idle');
-                }}
-                placeholder="you@example.com"
-                className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
-              />
-              <button
-                type="button"
-                onClick={saveEmail}
-                className="px-4 py-2 text-sm bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer"
-              >
-                {emailStatus === 'saved' ? 'Saved' : 'Save'}
-              </button>
-            </div>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-              Your email address for account notifications
-            </p>
+            <label className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Email</label>
+            <p className="text-sm text-zinc-950 dark:text-zinc-100">{email || 'Not set'}</p>
           </div>
           <div>
             <label htmlFor="currentPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">

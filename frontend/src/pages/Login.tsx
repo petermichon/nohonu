@@ -8,7 +8,7 @@ import { useApi } from '../lib/api.ts';
 function Login() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setEmail, setUsername, setSessionId, setDisplayName } = useConnection();
+  const { setSessionId } = useConnection();
   const { apiFetch } = useApi();
   const navigate = useNavigate();
   const [email, setEmailState] = useState('');
@@ -186,9 +186,6 @@ function Login() {
         return;
       }
 
-      setEmail(email);
-      setUsername(data.user.username);
-      setDisplayName(data.user.displayName);
       setSessionId(data.session);
       navigate(`/u/${data.user.username}`);
     } catch {
