@@ -32,6 +32,7 @@ import { deleteCustomDomain } from './endpoints/sites-custom-domains-delete.ts';
 import { verifyCustomDomain } from './endpoints/sites-custom-domains-verify-post.ts';
 import { getVerificationToken } from './endpoints/sites-custom-domains-token-get.ts';
 import { getAllCustomDomains } from './endpoints/custom-domains-all-get.ts';
+import { getUserByUsernameEndpoint } from './endpoints/users-username-get.ts';
 import type { CtxRouteHandler, RouteContext } from './endpoints/sites-types.ts';
 
 type Endpoint = {
@@ -181,6 +182,9 @@ function matchRoute(path: string): Endpoint | undefined {
   }
   if (path === '/sites' || path.startsWith('/sites/')) {
     return { handler: handleSiteRoute, auth: true };
+  }
+  if (path.startsWith('/users/')) {
+    return { handler: getUserByUsernameEndpoint };
   }
   return undefined;
 }

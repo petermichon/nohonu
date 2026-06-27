@@ -8,7 +8,7 @@ import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function UserPage() {
   const { getAccentColorValues } = useAccentColor();
@@ -22,6 +22,8 @@ export default function UserPage() {
   const { showToast } = useToast();
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
+  const [userExists, setUserExists] = useState<boolean | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
   const activeTab = (
     location.pathname.endsWith('/domains')
       ? 'domains'
@@ -33,6 +35,21 @@ export default function UserPage() {
   ) as 'overview' | 'sites' | 'domains' | 'servers';
 
   const isOwnProfile = username === loggedInUsername;
+
+  useEffect(() => {
+    const checkUserExists = async () => {
+      if (!username) return;
+      try {
+        const res = await apiFetch(`/users/${username}`);
+        setUserExists(res.ok);
+      } catch {
+        setUserExists(false);
+      } finally {
+        setUserLoading(false);
+      }
+    };
+    checkUserExists();
+  }, [username, apiFetch]);
 
   const verifyCustomDomain = async (siteDomain: string, customDomain: string) => {
     setVerifyingDomain(customDomain);
@@ -75,6 +92,23 @@ export default function UserPage() {
   };
 
   const userSites = sites.filter((s) => s.account === username);
+
+  if (!userLoading && userExists === false) {
+    return (
+      <section className="max-w-7xl mx-auto px-6 py-12">
+        <div className="text-center py-16">
+          <div
+            className={`w-16 h-16 ${accentColorValues.bgLight} rounded-full flex items-center
+            justify-center mx-auto mb-4`}
+          >
+            <AlertCircle className={`w-8 h-8 ${accentColorValues.textDark}`} />
+          </div>
+          <p className={`${accentColorValues.text} text-base font-medium mb-2`}>Account not found</p>
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm">The account @{username} does not exist</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>
