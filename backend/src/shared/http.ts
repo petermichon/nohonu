@@ -12,7 +12,7 @@ export const API_KEY = Deno.env.get('API_KEY');
 
 export function requireAuth(req: Request): Response | undefined {
   if (!API_KEY) {
-    return undefined;
+    return error('Server API key not configured', 500);
   }
   if (req.headers.get('X-Api-Key') === API_KEY) {
     return undefined;
