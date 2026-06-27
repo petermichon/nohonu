@@ -5,6 +5,7 @@ import { authRegister } from './endpoints/auth-register-post.ts';
 import { authLogin } from './endpoints/auth-login-post.ts';
 import { authLogout } from './endpoints/auth-logout-post.ts';
 import { authMe } from './endpoints/auth-me-get.ts';
+import { authDisplayName } from './endpoints/auth-displayname-patch.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
 import { checkCustomDomain } from './endpoints/check-custom-domain-get.ts';
 import { serveStatic } from './endpoints/get.ts';
@@ -49,6 +50,7 @@ const routes: Record<string, Endpoint> = {
   '/auth/login': { handler: authLogin },
   '/auth/logout': { handler: authLogout },
   '/auth/me': { handler: authMe },
+  '/auth/displayname': { handler: authDisplayName },
   '/check-domain': { handler: checkDomain },
   '/check-custom-domain': { handler: checkCustomDomain },
   '/custom-domains': { handler: getAllCustomDomains, auth: true },

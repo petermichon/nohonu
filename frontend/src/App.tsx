@@ -93,9 +93,11 @@ function AppInner() {
             <Route path="/u/:username/sites" element={<UserPage />} />
             <Route path="/u/:username/domains" element={<UserPage />} />
             <Route path="/u/:username/servers" element={<UserPage />} />
+            <Route path="/u/:username/settings" element={<UserPage />} />
             <Route path="/u/:username" element={<UserPage />} />
             <Route path="/u/:username/:sitename/:section?" element={<SitePage />} />
             <Route path="/u/:username/domains/explore" element={<DomainExplore />} />
+            <Route path="/settings" element={<AccountPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/legal" element={<Legal />} />
             <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />

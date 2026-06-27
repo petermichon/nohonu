@@ -1,6 +1,7 @@
 import { Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getAccentStyle } from '../lib/utils.ts';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { Site } from '../lib/types.ts';
 
 interface HomeSiteCardProps {
@@ -9,13 +10,15 @@ interface HomeSiteCardProps {
 
 export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const navigate = useNavigate();
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const accentStyle = getAccentStyle(site.accent, site.enabled);
 
   const badgeClass = !site.enabled
     ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
     : accentStyle
       ? ''
-      : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300';
+      : accentColorValues.bgLight + ' ' + accentColorValues.textDark;
 
   const badgeStyle = accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined;
 

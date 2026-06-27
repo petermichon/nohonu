@@ -415,26 +415,7 @@ const AccentColorContext = createContext<AccentColorContextType | undefined>(und
 export function AccentColorProvider({ children }: { children: ReactNode }) {
   const [accentColor, setAccentColorState] = useState<AccentColor>(() => {
     const saved = localStorage.getItem('accentColor');
-    const validColors: AccentColor[] = [
-      'default',
-      'red',
-      'orange',
-      'amber',
-      'yellow',
-      'lime',
-      'green',
-      'emerald',
-      'teal',
-      'cyan',
-      'sky',
-      'blue',
-      'indigo',
-      'violet',
-      'purple',
-      'fuchsia',
-      'pink',
-      'rose',
-    ];
+    const validColors = Object.keys(ACCENT_COLORS) as AccentColor[];
     if (saved && validColors.includes(saved as AccentColor)) {
       return saved as AccentColor;
     }

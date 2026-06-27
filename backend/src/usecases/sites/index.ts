@@ -67,6 +67,29 @@ export async function listSites(user: string): Promise<Array<{ domain: string; e
   );
 }
 
+export async function listAllSites(): Promise<{ user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }[]> {
+  const users = await storage.listUsers();
+  const allSites: { user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }[] = [];
+  
+  for (const user of users) {
+    const domains = await storage.listDomains(user);
+    for (const domain of domains) {
+      const data = await storage.readSiteMetadata(user, domain);
+      allSites.push({
+        user,
+        domain,
+        enabled: data?.enabled ?? false,
+        hits: analytics.getTotalHits(domain),
+        uptime: analytics.getUptimePct(domain),
+        accent: data?.accent,
+        account: data?.account,
+      });
+    }
+  }
+  
+  return allSites;
+}
+
 export async function setSiteAccount(user: string, domain: string, account: string): Promise<void> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) return;

@@ -14,8 +14,8 @@ export interface MeResult {
   error?: string;
 }
 
-export function me(sessionId: string): MeResult {
-  const session = sessions.getSession(sessionId);
+export async function me(sessionId: string): Promise<MeResult> {
+  const session = await sessions.getSession(sessionId);
 
   if (!session) {
     return { error: 'Invalid session' };
@@ -27,7 +27,7 @@ export function me(sessionId: string): MeResult {
     return { error: 'User not found' };
   }
 
-  sessions.updateSessionActivity(sessionId);
+  await sessions.updateSessionActivity(sessionId);
 
   return {
     user,

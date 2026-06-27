@@ -1,7 +1,7 @@
 import { json, checkMethod } from '../../shared/http.ts';
 import * as logoutUc from '../../usecases/auth/logout.ts';
 
-export function authLogout(req: Request): Response {
+export async function authLogout(req: Request): Promise<Response> {
   const methodError = checkMethod(req, 'POST');
   if (methodError) return methodError;
 
@@ -11,7 +11,7 @@ export function authLogout(req: Request): Response {
     return json({ error: 'Session ID required' }, 400);
   }
 
-  logoutUc.logout(sessionId);
+  await logoutUc.logout(sessionId);
 
   return json({ success: true }, 200);
 }

@@ -15,6 +15,7 @@ interface ConnectionContextType extends Connection {
   setApiKey: (key: string) => void;
   setSessionId: (sessionId: string) => void;
   setUsername: (username: string) => void;
+  setDisplayName: (displayName: string) => void;
   disconnect: () => void;
 }
 
@@ -104,6 +105,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, username }));
   };
 
+  const setDisplayName = (displayName: string) => {
+    setConnectionState((prev) => ({ ...prev, displayName }));
+  };
+
   const disconnect = () => {
     localStorage.removeItem('apiKey');
     localStorage.removeItem('sessionId');
@@ -120,6 +125,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         setApiKey,
         setSessionId,
         setUsername,
+        setDisplayName,
         disconnect,
       }}
     >

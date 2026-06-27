@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   User,
   MoreVertical,
@@ -108,6 +108,7 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
 export function TopBar() {
   const { displayName, username, disconnect } = useConnection();
   const location = useLocation();
+  const navigate = useNavigate();
   const userName = displayName || username || 'Connect';
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -165,7 +166,7 @@ export function TopBar() {
         { to: `/u/${username}/sites`, label: 'Sites', icon: Layout },
         { to: `/u/${username}/domains`, label: 'Domains', icon: Globe },
         { to: `/u/${username}/servers`, label: 'Servers', icon: Server, divider: true },
-        { to: '/account', label: 'Settings', icon: Settings },
+        { to: `/u/${username}/settings`, label: 'Settings', icon: Settings },
       ]
     : [{ to: '/account', label: 'Settings', icon: Settings }];
 
@@ -429,6 +430,18 @@ export function TopBar() {
                       </button>
                       <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
                       <Link
+                        to="/settings"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          setMenuView('main');
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Settings</span>
+                      </Link>
+                      <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
+                      <Link
                         to="/legal"
                         onClick={() => {
                           setIsMenuOpen(false);
@@ -554,8 +567,9 @@ export function TopBar() {
                         onClick={() => {
                           disconnect();
                           setIsProfileOpen(false);
+                          navigate('/');
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Sign out</span>

@@ -100,3 +100,12 @@ export function getUserByEmail(email: string): User | null {
 
   return loadUserFile(username);
 }
+
+export function updateDisplayName(username: string, displayName: string): void {
+  const user = loadUserFile(username);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  user.displayName = displayName;
+  saveUserFile(username, user);
+}

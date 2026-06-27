@@ -1,14 +1,14 @@
 import { SLOT_MS, saveAnalytics, recordUptime } from './src/core/analytics/metrics.ts';
 import * as sites from './src/usecases/sites/index.ts';
 
-async function checkAndRecord(domain: string): Promise<void> {
-  const status = await sites.checkSite(domain);
+async function checkAndRecord(user: string, domain: string): Promise<void> {
+  const status = await sites.checkSite(user, domain);
   recordUptime(domain, status.enabled);
 }
 
 async function runUptimeChecks(): Promise<void> {
-  const siteList = await sites.listSites();
-  const checks = siteList.map(({ domain }) => checkAndRecord(domain));
+  const siteList = await sites.listAllSites();
+  const checks = siteList.map(({ user, domain }) => checkAndRecord(user, domain));
   await Promise.all(checks);
 }
 
