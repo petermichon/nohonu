@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
-import { useApi } from '../lib/api.ts';
-import { useSites } from '../lib/SitesProvider.tsx';
+import { useApi, useSites } from '../lib/api.ts';
 import { calcUptimePct } from '../lib/utils.ts';
 import { useToast } from '../lib/ToastContext.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
@@ -72,6 +72,73 @@ function SitePage() {
   const [now, setNow] = useState(() => Math.floor(Date.now() / SLOT_MS));
   const [globalRange, setGlobalRange] = useState<TimeRange>(1);
 
+  // Delete site mutation
+  const deleteSiteMutation = useMutation({
+    mutationFn: async (domain: string) => {
+      await apiFetch(`/sites/${domain}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      showToast('Site deleted', true);
+      navigate('/');
+    },
+  });
+
+  // Toggle site mutation
+  const toggleSiteMutation = useMutation({
+    mutationFn: async (domain: string) => {
+      await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
+    },
+    onSuccess: async () => {
+      await loadSite();
+      showToast(`Site ${site?.enabled ? 'disabled' : 'enabled'}`, true);
+    },
+  });
+
+  // Activate version mutation
+  const activateVersionMutation = useMutation({
+    mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
+      await apiFetch(`/sites/${domain}/versions/${timestamp}/activate`, { method: 'POST' });
+    },
+    onSuccess: async () => {
+      await loadSite();
+      await loadVersions();
+      showToast('Version activated', true);
+    },
+  });
+
+  // Delete version mutation
+  const deleteVersionMutation = useMutation({
+    mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
+      await apiFetch(`/sites/${domain}/versions/${timestamp}`, { method: 'DELETE' });
+    },
+    onSuccess: async () => {
+      await loadVersions();
+      showToast('Version deleted', true);
+    },
+  });
+
+  // Download version mutation
+  const downloadVersionMutation = useMutation({
+    mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
+      const res = await apiFetch(`/sites/${domain}/versions/${timestamp}/download`);
+      if (!res.ok) {
+        throw new Error('Download failed');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${domain}-${timestamp}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+    onError: () => {
+      showToast('Download failed', false);
+    },
+  });
+
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(Math.floor(Date.now() / SLOT_MS));
@@ -89,21 +156,20 @@ function SitePage() {
     if (!confirmAction || !site) return;
     setActionLoading(true);
 
-    try {
-      if (confirmAction === 'delete') {
-        await apiFetch(`/sites/${site.domain}`, { method: 'DELETE' });
-        showToast('Site deleted', true);
-        navigate('/');
-        return;
-      }
-      await apiFetch(`/sites/${site.domain}/toggle`, { method: 'PATCH' });
-      await loadSite();
-      showToast(`Site ${site.enabled ? 'disabled' : 'enabled'}`, true);
-    } catch {
-      // Silent fail
-    } finally {
-      setActionLoading(false);
-      setConfirmAction(null);
+    if (confirmAction === 'delete') {
+      deleteSiteMutation.mutate(site.domain, {
+        onSettled: () => {
+          setActionLoading(false);
+          setConfirmAction(null);
+        },
+      });
+    } else {
+      toggleSiteMutation.mutate(site.domain, {
+        onSettled: () => {
+          setActionLoading(false);
+          setConfirmAction(null);
+        },
+      });
     }
   };
 
@@ -112,57 +178,31 @@ function SitePage() {
     const { timestamp } = versionModal;
     setVersionModal(null);
     setActivating(timestamp);
-    try {
-      const res = await apiFetch(`/sites/${site.domain}/versions/${timestamp}/activate`, { method: 'POST' });
-      if (res.ok) {
-        await loadSite();
-        await loadVersions();
-        showToast('Version activated', true);
+    activateVersionMutation.mutate(
+      { domain: site.domain, timestamp },
+      {
+        onSettled: () => setActivating(null),
       }
-    } catch {
-      // Silent fail
-    } finally {
-      setActivating(null);
-    }
+    );
   };
 
   const handleDeleteVersion = async () => {
     if (!site || !versionModal) return;
     setDeletingVersion(versionModal.timestamp);
-    try {
-      const res = await apiFetch(`/sites/${site.domain}/versions/${versionModal.timestamp}`, { method: 'DELETE' });
-      if (res.ok) {
-        await loadVersions();
-        showToast('Version deleted', true);
+    deleteVersionMutation.mutate(
+      { domain: site.domain, timestamp: versionModal.timestamp },
+      {
+        onSettled: () => {
+          setDeletingVersion(null);
+          setVersionModal(null);
+        },
       }
-    } catch {
-      // Silent fail
-    } finally {
-      setDeletingVersion(null);
-      setVersionModal(null);
-    }
+    );
   };
 
-  const downloadVersion = async (timestamp: number) => {
+  const downloadVersion = (timestamp: number) => {
     if (!site) return;
-    try {
-      const res = await apiFetch(`/sites/${site.domain}/versions/${timestamp}/download`);
-      if (!res.ok) {
-        showToast('Download failed', false);
-        return;
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${site.domain}-${timestamp}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch {
-      showToast('Download failed', false);
-    }
+    downloadVersionMutation.mutate({ domain: site.domain, timestamp });
   };
 
   const siteUrl = `${protocol}//${site?.domain}.${host}`;

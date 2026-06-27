@@ -1,5 +1,5 @@
 import { Eye, AlertCircle } from 'lucide-react';
-import { useSites } from '../lib/SitesProvider.tsx';
+import { useSites } from '../lib/api.ts';
 import { formatHits } from '../lib/utils.ts';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';

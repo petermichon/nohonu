@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Upload, Loader2, GitBranch, History } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { useClickOutside } from '../lib/useClickOutside.ts';
@@ -35,7 +36,6 @@ export function VersionPanel({
   onToast,
 }: VersionPanelProps) {
   const { apiFetch } = useApi();
-  const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showGithubFetch, setShowGithubFetch] = useState(false);
   const [githubRepo, setGithubRepo] = useState('');
@@ -45,73 +45,85 @@ export function VersionPanel({
   const repoDropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(repoDropdownRef, () => setShowRepoDropdown(false), showRepoDropdown);
 
-  const loadRepoHistory = async () => {
-    try {
+  // Load repo history mutation
+  const loadRepoHistoryMutation = useMutation({
+    mutationFn: async () => {
       const res = await apiFetch(`/sites/${domain}/repos`);
       const data = await res.json();
-      setRepoHistory((data.history as { repo: string; branch: string; lastUsed: number }[]) ?? []);
-    } catch {
-      /* non-critical */
-    }
+      return (data.history as { repo: string; branch: string; lastUsed: number }[]) ?? [];
+    },
+    onSuccess: (data) => {
+      setRepoHistory(data);
+    },
+  });
+
+  // Upload version mutation
+  const uploadVersionMutation = useMutation({
+    mutationFn: async ({ file }: { file: File }) => {
+      const formData = new FormData();
+      formData.append('zip', file);
+      const res = await apiFetch(`/sites/${domain}/versions`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Upload failed');
+      }
+    },
+    onSuccess: () => {
+      onUploaded();
+      onToast('Version uploaded', true);
+    },
+    onError: (err: Error) => {
+      setUploadError(err.message);
+      onToast('Upload failed', false);
+    },
+  });
+
+  // Fetch from GitHub mutation
+  const fetchGithubMutation = useMutation({
+    mutationFn: async ({ repo, branch }: { repo: string; branch: string }) => {
+      const res = await apiFetch(`/sites/${domain}/versions/github`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo, branch }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Fetch failed');
+      }
+    },
+    onSuccess: () => {
+      setGithubRepo('');
+      setGithubBranch('');
+      setShowGithubFetch(false);
+      onUploaded();
+      onToast('Version fetched from GitHub', true);
+    },
+    onError: (err: Error) => {
+      setUploadError(err.message);
+      onToast('Fetch failed', false);
+    },
+  });
+
+  const loadRepoHistory = () => {
+    loadRepoHistoryMutation.mutate();
   };
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = (file: File) => {
     if (!file.name.endsWith('.zip')) {
       setUploadError('Only .zip files are accepted');
       return;
     }
-    setUploading(true);
     setUploadError(null);
-    const formData = new FormData();
-    formData.append('zip', file);
-    try {
-      const res = await apiFetch(`/sites/${domain}/versions`, { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) {
-        onUploaded();
-        onToast('Version uploaded', true);
-      } else {
-        setUploadError(data.error || 'Upload failed');
-        onToast('Upload failed', false);
-      }
-    } catch {
-      setUploadError('Upload failed');
-      onToast('Upload failed', false);
-    } finally {
-      setUploading(false);
-    }
+    uploadVersionMutation.mutate({ file });
   };
 
-  const handleFetchGithub = async () => {
+  const handleFetchGithub = () => {
     if (!githubRepo.includes('/')) {
       setUploadError('Repo format: owner/repo');
       return;
     }
-    setUploading(true);
     setUploadError(null);
-    try {
-      const res = await apiFetch(`/sites/${domain}/versions/github`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repo: githubRepo, branch: githubBranch || 'main' }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setGithubRepo('');
-        setGithubBranch('');
-        setShowGithubFetch(false);
-        onUploaded();
-        onToast('Version fetched from GitHub', true);
-      } else {
-        setUploadError(data.error || 'Fetch failed');
-        onToast('Fetch failed', false);
-      }
-    } catch {
-      setUploadError('Fetch failed');
-      onToast('Fetch failed', false);
-    } finally {
-      setUploading(false);
-    }
+    fetchGithubMutation.mutate({ repo: githubRepo, branch: githubBranch || 'main' });
   };
 
   return (
@@ -134,7 +146,7 @@ export function VersionPanel({
               if (!showGithubFetch) loadRepoHistory();
               setShowGithubFetch(!showGithubFetch);
             }}
-            disabled={uploading}
+            disabled={uploadVersionMutation.isPending}
             className={(() => {
               const baseClasses =
                 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto';
@@ -150,13 +162,17 @@ export function VersionPanel({
           </button>
           <label
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer ${
-              uploading
+              uploadVersionMutation.isPending
                 ? 'text-zinc-400 dark:text-zinc-500'
                 : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800'
             }`}
           >
-            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-            {uploading ? 'Uploading...' : 'Upload New'}
+            {uploadVersionMutation.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Upload className="w-3.5 h-3.5" />
+            )}
+            {uploadVersionMutation.isPending ? 'Uploading...' : 'Upload New'}
             <input
               type="file"
               id="newVersionFile"
@@ -167,7 +183,7 @@ export function VersionPanel({
                 if (f) handleUpload(f);
                 e.target.value = '';
               }}
-              disabled={uploading}
+              disabled={uploadVersionMutation.isPending}
               className="hidden"
             />
           </label>
@@ -226,11 +242,15 @@ export function VersionPanel({
             <button
               type="button"
               onClick={handleFetchGithub}
-              disabled={uploading || !githubRepo}
+              disabled={fetchGithubMutation.isPending || !githubRepo}
               className="px-4 py-2 bg-zinc-900 dark:bg-zinc-700 hover:bg-zinc-800 dark:hover:bg-zinc-600 disabled:bg-zinc-300 dark:disabled:bg-zinc-800 disabled:hover:bg-zinc-300 dark:disabled:hover:bg-zinc-800 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
             >
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GitBranch className="w-4 h-4" />}
-              {uploading ? 'Fetching...' : 'Fetch & Add'}
+              {fetchGithubMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <GitBranch className="w-4 h-4" />
+              )}
+              {fetchGithubMutation.isPending ? 'Fetching...' : 'Fetch & Add'}
             </button>
           </div>
         </div>

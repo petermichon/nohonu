@@ -1,13 +1,13 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
-import { useSites } from '../lib/SitesProvider.tsx';
-import { useDomains } from '../lib/DomainsProvider.tsx';
+import { useSites, useDomains } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function UserPage() {
   const { getAccentColorValues } = useAccentColor();
@@ -16,13 +16,12 @@ export default function UserPage() {
   const location = useLocation();
   const { displayName, username: loggedInUsername } = useConnection();
   const { sites, loading, error } = useSites();
-  const { domains, loading: domainsLoading, refreshDomains } = useDomains();
+  const { domains, loading: domainsLoading } = useDomains();
   const { apiFetch } = useApi();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
-  const [userExists, setUserExists] = useState<boolean | null>(null);
-  const [userLoading, setUserLoading] = useState(true);
   const activeTab = (
     location.pathname.endsWith('/domains')
       ? 'domains'
@@ -35,59 +34,78 @@ export default function UserPage() {
 
   const isOwnProfile = username === loggedInUsername;
 
-  useEffect(() => {
-    const checkUserExists = async () => {
-      if (!username) return;
-      try {
-        const res = await apiFetch(`/users/${username}`);
-        setUserExists(res.ok);
-      } catch {
-        setUserExists(false);
-      } finally {
-        setUserLoading(false);
-      }
-    };
-    checkUserExists();
-  }, [username, apiFetch]);
+  // User existence check query
+  const userExistsQuery = useQuery({
+    queryKey: ['user-exists', username],
+    queryFn: async () => {
+      if (!username) return false;
+      const res = await apiFetch(`/users/${username}`);
+      return res.ok;
+    },
+    retry: false,
+  });
 
-  const verifyCustomDomain = async (siteDomain: string, customDomain: string) => {
-    setVerifyingDomain(customDomain);
-    try {
+  const userExists = userExistsQuery.data ?? null;
+  const userLoading = userExistsQuery.isLoading;
+
+  // Verify custom domain mutation
+  const verifyDomainMutation = useMutation({
+    mutationFn: async ({ siteDomain, customDomain }: { siteDomain: string; customDomain: string }) => {
       const res = await apiFetch(`/sites/${siteDomain}/custom-domains/${customDomain}/verify`, {
         method: 'POST',
       });
-      if (res.ok) {
-        await refreshDomains();
-        showToast('Custom domain verified', true);
-      } else {
+      if (!res.ok) {
         const data = await res.json();
-        showToast(data.message || 'Verification failed', false);
+        throw new Error(data.message || 'Verification failed');
       }
-    } catch {
-      showToast('Verification failed', false);
-    } finally {
-      setVerifyingDomain(null);
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
+      showToast('Custom domain verified', true);
+    },
+    onError: (err: Error) => {
+      showToast(err.message, false);
+    },
+  });
 
-  const deleteCustomDomain = async (siteDomain: string, customDomain: string) => {
-    setDeletingDomain(customDomain);
-    try {
+  // Delete custom domain mutation
+  const deleteDomainMutation = useMutation({
+    mutationFn: async ({ siteDomain, customDomain }: { siteDomain: string; customDomain: string }) => {
       const res = await apiFetch(`/sites/${siteDomain}/custom-domains/${customDomain}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        await refreshDomains();
-        showToast('Custom domain removed', true);
-      } else {
+      if (!res.ok) {
         const data = await res.json();
-        showToast(data.message || 'Failed to remove custom domain', false);
+        throw new Error(data.message || 'Failed to remove custom domain');
       }
-    } catch {
-      showToast('Failed to remove custom domain', false);
-    } finally {
-      setDeletingDomain(null);
-    }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
+      showToast('Custom domain removed', true);
+    },
+    onError: (err: Error) => {
+      showToast(err.message, false);
+    },
+  });
+
+  const verifyCustomDomain = (siteDomain: string, customDomain: string) => {
+    setVerifyingDomain(customDomain);
+    verifyDomainMutation.mutate(
+      { siteDomain, customDomain },
+      {
+        onSettled: () => setVerifyingDomain(null),
+      }
+    );
+  };
+
+  const deleteCustomDomain = (siteDomain: string, customDomain: string) => {
+    setDeletingDomain(customDomain);
+    deleteDomainMutation.mutate(
+      { siteDomain, customDomain },
+      {
+        onSettled: () => setDeletingDomain(null),
+      }
+    );
   };
 
   const userSites = sites.filter((s) => s.account === username);

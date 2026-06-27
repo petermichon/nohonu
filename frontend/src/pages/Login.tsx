@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
@@ -16,9 +17,31 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particleCount = 250;
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      const res = await apiFetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Login failed');
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setSessionId(data.session);
+      navigate(`/u/${data.user.username}`);
+    },
+    onError: (err: Error) => {
+      setError(err.message);
+    },
+  });
 
   const accentColorValues = getAccentColorValues();
   const inputBaseClass =
@@ -169,29 +192,7 @@ function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
-    try {
-      const res = await apiFetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Login failed');
-        setLoading(false);
-        return;
-      }
-
-      setSessionId(data.session);
-      navigate(`/u/${data.user.username}`);
-    } catch {
-      setError('Network error');
-      setLoading(false);
-    }
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -316,10 +317,10 @@ function Login() {
 
             <button
               type="submit"
-              disabled={loading}
-              className={`${buttonBaseClass} ${accentColorValues.bg} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={loginMutation.isPending}
+              className={`${buttonBaseClass} ${accentColorValues.bg} ${loginMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {loading ? 'Logging in...' : 'Log in'}
+              {loginMutation.isPending ? 'Logging in...' : 'Log in'}
             </button>
           </form>
 

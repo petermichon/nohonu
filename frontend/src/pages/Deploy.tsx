@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
-import { useSites } from '../lib/SitesProvider.tsx';
+import { useSites } from '../lib/api.ts';
 
 export default function Deploy() {
   const navigate = useNavigate();

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useApi } from '../lib/api.ts';
 import { usePollData } from '../lib/usePollData.ts';
 import { extractAccentColor } from '../lib/extractColor.ts';
@@ -21,7 +22,7 @@ export interface SiteDataReturn {
   uptimeRange: UptimeRange;
   setUptimeRange: (r: UptimeRange) => void;
   accent: string | null;
-  saveAccent: (color: string | null) => Promise<void>;
+  saveAccent: (color: string | null) => void;
   versions: Version[];
   versionsLoading: boolean;
   currentVersion: number | null;
@@ -33,78 +34,120 @@ export interface SiteDataReturn {
 
 export function useSiteData(domain: string): SiteDataReturn {
   const { apiFetch, apiBase } = useApi();
-  const [site, setSite] = useState<Site | null>(null);
-  const [siteLoading, setSiteLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [stats, setStats] = useState<Slot[]>([]);
-  const [statsLoading, setStatsLoading] = useState(false);
-  const [uptimeLoading, setUptimeLoading] = useState(false);
   const [statsRange, setStatsRange] = useState<TimeRange>(60);
-  const [visitors, setVisitors] = useState<Visitor[]>([]);
-  const [uptimeData, setUptimeData] = useState<UptimeSlot[]>([]);
-  const [uptimeAllData, setUptimeAllData] = useState<UptimeSlot[]>([]);
   const [uptimeRange, setUptimeRange] = useState<UptimeRange>(60);
   const [accent, setAccent] = useState<string | null>(null);
-  const [versions, setVersions] = useState<Version[]>([]);
-  const [versionsLoading, setVersionsLoading] = useState(false);
-  const [currentVersion, setCurrentVersion] = useState<number | null>(null);
   const uptimeMountedRef = useRef(false);
   const statsMountedRef = useRef(false);
 
-  const loadSite = useCallback(async () => {
-    try {
+  // Site query
+  const siteQuery = useQuery({
+    queryKey: ['site', domain],
+    queryFn: async () => {
       const res = await apiFetch(`/sites/${domain}`);
-      if (!res.ok) {
-        setNotFound(true);
-        return;
-      }
+      if (!res.ok) throw new Error('Site not found');
       const data = await res.json();
-      setSite(data as Site);
-    } catch {
-      setNotFound(true);
-    } finally {
-      setSiteLoading(false);
-    }
-  }, [domain, apiFetch]);
+      return data as Site;
+    },
+    retry: false,
+  });
 
-  const loadStats = useCallback(async () => {
-    setStatsLoading(true);
-    try {
+  // Stats query
+  const statsQuery = useQuery({
+    queryKey: ['site-stats', domain, statsRange],
+    queryFn: async () => {
       const slotsToFetch = getSlotsForRange(statsRange);
       const group = getGroupMinutes();
       const res = await apiFetch(`/sites/${domain}/stats?slots=${slotsToFetch}&group=${group}`);
       const data = await res.json();
-      setStats((data.stats as Slot[]) ?? []);
-    } catch {
-      // non-critical
-    } finally {
-      setStatsLoading(false);
-    }
-  }, [domain, statsRange, apiFetch]);
+      return (data.stats as Slot[]) ?? [];
+    },
+    retry: false,
+  });
 
-  const loadVisitors = useCallback(async () => {
-    try {
+  // Visitors query
+  const visitorsQuery = useQuery({
+    queryKey: ['site-visitors', domain],
+    queryFn: async () => {
       const res = await apiFetch(`/sites/${domain}/visitors`);
       const data = await res.json();
-      setVisitors((data.visitors as Visitor[]) ?? []);
-    } catch {
-      // non-critical
-    }
-  }, [domain, apiFetch]);
+      return (data.visitors as Visitor[]) ?? [];
+    },
+    retry: false,
+  });
 
-  const loadVersions = useCallback(async () => {
-    setVersionsLoading(true);
-    try {
+  // Versions query
+  const versionsQuery = useQuery({
+    queryKey: ['site-versions', domain],
+    queryFn: async () => {
       const res = await apiFetch(`/sites/${domain}/versions`);
       const data = await res.json();
-      setVersions((data.versions as Version[]) ?? []);
-      setCurrentVersion(data.current as number | null);
-    } catch {
-      // non-critical
-    } finally {
-      setVersionsLoading(false);
-    }
-  }, [domain, apiFetch]);
+      return {
+        versions: (data.versions as Version[]) ?? [],
+        current: data.current as number | null,
+      };
+    },
+    retry: false,
+  });
+
+  // Uptime query
+  const uptimeQuery = useQuery({
+    queryKey: ['site-uptime', domain, uptimeRange],
+    queryFn: async () => {
+      const slotsToFetch = getSlotsForRange(uptimeRange);
+      const group = getGroupMinutes();
+      const res = await apiFetch(`/sites/${domain}/uptime?slots=${slotsToFetch}&group=${group}`);
+      const data = await res.json();
+      return (data.uptime as UptimeSlot[]) ?? [];
+    },
+    retry: false,
+  });
+
+  // Uptime all query
+  const uptimeAllQuery = useQuery({
+    queryKey: ['site-uptime-all', domain],
+    queryFn: async () => {
+      const res = await apiFetch(`/sites/${domain}/uptime?slots=1440`);
+      const data = await res.json();
+      return (data.uptime as UptimeSlot[]) ?? [];
+    },
+    retry: false,
+  });
+
+  const loadSite = useCallback(async () => {
+    await siteQuery.refetch();
+  }, [siteQuery]);
+
+  const loadStats = useCallback(async () => {
+    await statsQuery.refetch();
+  }, [statsQuery]);
+
+  const loadUptime = useCallback(async () => {
+    await uptimeQuery.refetch();
+  }, [uptimeQuery]);
+
+  const loadVersions = useCallback(async () => {
+    await versionsQuery.refetch();
+  }, [versionsQuery]);
+
+  const loadVisitors = useCallback(async () => {
+    await visitorsQuery.refetch();
+  }, [visitorsQuery]);
+
+  const loadUptimeAll = useCallback(async () => {
+    await uptimeAllQuery.refetch();
+  }, [uptimeAllQuery]);
+
+  // Save accent mutation
+  const saveAccentMutation = useMutation({
+    mutationFn: async (color: string) => {
+      await apiFetch(`/sites/${domain}/meta`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accent: color }),
+      });
+    },
+  });
 
   const loadMeta = useCallback(async () => {
     try {
@@ -121,70 +164,29 @@ export function useSiteData(domain: string): SiteDataReturn {
         if (extractedColor) {
           setAccent(extractedColor);
           // Optionally save it to the server
-          try {
-            await apiFetch(`/sites/${domain}/meta`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ accent: extractedColor }),
-            });
-          } catch {
-            // Silent fail - still use the extracted color locally
-          }
+          saveAccentMutation.mutate(extractedColor);
         }
       }
     } catch {
       // non-critical
     }
-  }, [domain, apiBase, apiFetch]);
+  }, [domain, apiBase, apiFetch, saveAccentMutation]);
 
-  const saveAccent = async (color: string | null) => {
+  const saveAccent = (color: string | null) => {
     setAccent(color);
-    try {
-      await apiFetch(`/sites/${domain}/meta`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accent: color }),
-      });
-    } catch {
-      // non-critical
+    if (color) {
+      saveAccentMutation.mutate(color);
     }
   };
-
-  const loadUptime = useCallback(async () => {
-    setUptimeLoading(true);
-    try {
-      const slotsToFetch = getSlotsForRange(uptimeRange);
-      const group = getGroupMinutes();
-      const res = await apiFetch(`/sites/${domain}/uptime?slots=${slotsToFetch}&group=${group}`);
-      const data = await res.json();
-      setUptimeData((data.uptime as UptimeSlot[]) ?? []);
-    } catch {
-      // non-critical
-    } finally {
-      setUptimeLoading(false);
-    }
-  }, [domain, uptimeRange, apiFetch]);
-
-  const loadUptimeAll = useCallback(async () => {
-    try {
-      const res = await apiFetch(`/sites/${domain}/uptime?slots=1440`);
-      const data = await res.json();
-      setUptimeAllData((data.uptime as UptimeSlot[]) ?? []);
-    } catch {
-      // non-critical
-    }
-  }, [domain, apiFetch]);
 
   // Initial data load
   const mountedRef = useRef(false);
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
-      loadSite();
-      loadVersions();
       loadMeta();
     }
-  }, [loadSite, loadVersions, loadMeta]);
+  }, [loadMeta]);
 
   // Reload uptime only when range changes (not on initial mount — usePollData handles that)
   useEffect(() => {
@@ -217,24 +219,24 @@ export function useSiteData(domain: string): SiteDataReturn {
   );
 
   return {
-    site,
-    siteLoading,
-    notFound,
-    stats,
-    statsLoading,
+    site: siteQuery.data ?? null,
+    siteLoading: siteQuery.isLoading,
+    notFound: siteQuery.isError,
+    stats: statsQuery.data ?? [],
+    statsLoading: statsQuery.isLoading,
     statsRange,
     setStatsRange,
-    visitors,
-    uptimeData,
-    uptimeLoading,
-    uptimeAllData,
+    visitors: visitorsQuery.data ?? [],
+    uptimeData: uptimeQuery.data ?? [],
+    uptimeLoading: uptimeQuery.isLoading,
+    uptimeAllData: uptimeAllQuery.data ?? [],
     uptimeRange,
     setUptimeRange,
     accent,
     saveAccent,
-    versions,
-    versionsLoading,
-    currentVersion,
+    versions: versionsQuery.data?.versions ?? [],
+    versionsLoading: versionsQuery.isLoading,
+    currentVersion: versionsQuery.data?.current ?? null,
     loadSite,
     loadStats,
     loadUptime,

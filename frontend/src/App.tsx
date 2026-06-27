@@ -5,7 +5,6 @@ import { ToastProvider } from './lib/ToastContext.tsx';
 import { GlobalToast } from './components/GlobalToast.tsx';
 import { LanguageProvider } from './lib/LanguageProvider.tsx';
 import { FontProvider } from './lib/FontProvider.tsx';
-import { SitesProvider } from './lib/SitesProvider.tsx';
 import Home from './pages/Home.tsx';
 import Explore from './pages/Explore.tsx';
 import DomainExplore from './pages/DomainExplore.tsx';
@@ -89,62 +88,13 @@ function AppInner() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/about" element={<About />} />
-            <Route
-              path="/deploy"
-              element={
-                <SitesProvider>
-                  <Deploy />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/explore"
-              element={
-                <SitesProvider>
-                  <Explore />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/u/:username/sites"
-              element={
-                <SitesProvider>
-                  <UserPage />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/u/:username/domains"
-              element={
-                <SitesProvider>
-                  <UserPage />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/u/:username/servers"
-              element={
-                <SitesProvider>
-                  <UserPage />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/u/:username"
-              element={
-                <SitesProvider>
-                  <UserPage />
-                </SitesProvider>
-              }
-            />
-            <Route
-              path="/u/:username/:sitename/:section?"
-              element={
-                <SitesProvider>
-                  <SitePage />
-                </SitesProvider>
-              }
-            />
+            <Route path="/deploy" element={<Deploy />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/u/:username/sites" element={<UserPage />} />
+            <Route path="/u/:username/domains" element={<UserPage />} />
+            <Route path="/u/:username/servers" element={<UserPage />} />
+            <Route path="/u/:username" element={<UserPage />} />
+            <Route path="/u/:username/:sitename/:section?" element={<SitePage />} />
             <Route path="/u/:username/domains/explore" element={<DomainExplore />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/legal" element={<Legal />} />

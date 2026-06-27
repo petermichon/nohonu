@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 
@@ -14,11 +15,52 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const [newDomain, setNewDomain] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [githubRepo, setGithubRepo] = useState('');
   const [githubBranch, setGithubBranch] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: async ({ file, domain }: { file: File; domain: string }) => {
+      const formData = new FormData();
+      formData.append('zip', file);
+      const res = await apiFetch(`/sites/${domain}/versions`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Upload failed');
+      }
+    },
+    onSuccess: () => {
+      reset();
+      onDeploy();
+    },
+    onError: (err: Error) => {
+      setUploadError(err.message);
+    },
+  });
+
+  // GitHub fetch mutation
+  const fetchGithubMutation = useMutation({
+    mutationFn: async ({ domain, repo, branch }: { domain: string; repo: string; branch: string }) => {
+      const res = await apiFetch(`/sites/${domain}/versions/github`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo, branch }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Fetch failed');
+      }
+    },
+    onSuccess: () => {
+      reset();
+      onDeploy();
+    },
+    onError: (err: Error) => {
+      setUploadError(err.message);
+    },
+  });
 
   const reset = () => {
     setUploadMode('file');
@@ -53,56 +95,22 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     if (file) handleFileSelect(file);
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!selectedFile || !newDomain) {
       setUploadError(!newDomain ? 'Enter a domain' : 'Select a .zip file');
       return;
     }
-    setUploading(true);
     setUploadError(null);
-    const formData = new FormData();
-    formData.append('zip', selectedFile);
-    try {
-      const res = await apiFetch(`/sites/${newDomain}/versions`, { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) {
-        reset();
-        onDeploy();
-      } else {
-        setUploadError(data.error || 'Upload failed');
-      }
-    } catch {
-      setUploadError('Upload failed');
-    } finally {
-      setUploading(false);
-    }
+    uploadMutation.mutate({ file: selectedFile, domain: newDomain });
   };
 
-  const handleFetchGithub = async () => {
+  const handleFetchGithub = () => {
     if (!githubRepo.includes('/') || !newDomain) {
       setUploadError(!newDomain ? 'Enter a domain' : 'Repo format: owner/repo');
       return;
     }
-    setUploading(true);
     setUploadError(null);
-    try {
-      const res = await apiFetch(`/sites/${newDomain}/versions/github`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repo: githubRepo, branch: githubBranch || 'main' }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        reset();
-        onDeploy();
-      } else {
-        setUploadError(data.error || 'Fetch failed');
-      }
-    } catch {
-      setUploadError('Fetch failed');
-    } finally {
-      setUploading(false);
-    }
+    fetchGithubMutation.mutate({ domain: newDomain, repo: githubRepo, branch: githubBranch || 'main' });
   };
 
   return (
@@ -253,10 +261,14 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         <button
           type="button"
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
-          disabled={uploading || (uploadMode === 'github' ? !githubRepo || !newDomain : !selectedFile || !newDomain)}
+          disabled={
+            uploadMode === 'github'
+              ? fetchGithubMutation.isPending || !githubRepo || !newDomain
+              : uploadMutation.isPending || !selectedFile || !newDomain
+          }
           className="w-full py-2 bg-purple-400 dark:bg-purple-400 hover:bg-purple-300 dark:hover:bg-purple-300 disabled:opacity-40 text-white dark:text-zinc-950 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
         >
-          {uploading ? (
+          {uploadMutation.isPending || fetchGithubMutation.isPending ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
               Deploying...
