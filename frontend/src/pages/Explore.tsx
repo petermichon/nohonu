@@ -39,7 +39,7 @@ function Explore() {
           ) : sites.length > 0 ? (
             <>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${accentColorValues.bgLight}`} />
+                <span className={`w-2 h-2 rounded-full shrink-0 ${accentColorValues.dot}`} />
                 <span className="text-sm text-zinc-700 dark:text-zinc-300">
                   <span className="font-semibold">{onlineCount}</span> online
                 </span>
