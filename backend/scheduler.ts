@@ -12,6 +12,13 @@ async function runUptimeChecks(): Promise<void> {
   await Promise.all(checks);
 }
 
+async function flushAnalytics(): Promise<void> {
+  const siteList = await sites.listAllSites();
+  for (const { user, domain } of siteList) {
+    await saveAnalytics(user, domain);
+  }
+}
+
 export function scheduleUptimeChecks(): void {
   const msToNextMinute = SLOT_MS - (Date.now() % SLOT_MS);
   setTimeout(() => {
@@ -19,5 +26,5 @@ export function scheduleUptimeChecks(): void {
     setInterval(runUptimeChecks, SLOT_MS);
   }, msToNextMinute);
   const FLUSH_INTERVAL_MS = 5 * SLOT_MS;
-  setInterval(saveAnalytics, FLUSH_INTERVAL_MS);
+  setInterval(flushAnalytics, FLUSH_INTERVAL_MS);
 }
