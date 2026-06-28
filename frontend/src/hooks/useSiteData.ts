@@ -30,7 +30,7 @@ export interface SiteDataReturn {
 }
 
 export function useSiteData(domain: string, username?: string, isPublic?: boolean): SiteDataReturn {
-  const { apiFetch, apiBase } = useApi();
+  const { apiFetch } = useApi();
   const queryClient = useQueryClient();
   const [statsRange, setStatsRange] = useState<TimeRange>(60);
   const [uptimeRange, setUptimeRange] = useState<UptimeRange>(60);
