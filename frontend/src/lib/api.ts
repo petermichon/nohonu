@@ -6,9 +6,11 @@ import type { Site } from './types.ts';
 export function useApi() {
   const { apiBase, apiKey, sessionId, username } = useConnection();
   let host = '';
+  let hostWithPort = '';
   let protocol = 'http:';
   try {
     ({ host, protocol } = new URL(apiBase));
+    hostWithPort = host;
     // Strip port from host for subdomain URLs
     host = host.split(':')[0];
   } catch {
@@ -25,7 +27,7 @@ export function useApi() {
     },
     [apiBase, apiKey, sessionId, username]
   );
-  return { apiBase, apiKey, sessionId, username, host, protocol, apiFetch };
+  return { apiBase, apiKey, sessionId, username, host, hostWithPort, protocol, apiFetch };
 }
 
 export function useSites() {

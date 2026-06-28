@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '../lib/api.ts';
 import type { Site } from '../lib/types.ts';
 
 interface ExploreSiteCardProps {
@@ -8,11 +9,19 @@ interface ExploreSiteCardProps {
 
 export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
   const navigate = useNavigate();
+  const { hostWithPort, protocol } = useApi();
+
+  const getSiteUrl = () => {
+    if (!site.enabled) return '';
+    const subdomainBase = site.subdomainBase || hostWithPort;
+    return site.subdomain
+      ? `${protocol}//${site.subdomain}.${subdomainBase}`
+      : `${protocol}//${site.domain}.${subdomainBase}`;
+  };
 
   const handlePreviewClick = () => {
     if (site.enabled) {
-      // Redirect to the actual website
-      window.open(`https://${site.domain}.nohonu.com`, '_blank');
+      window.open(getSiteUrl(), '_blank');
     }
   };
 
@@ -38,7 +47,7 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
       >
         <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800" />
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-end justify-between p-4">
-          <span className="text-zinc-950 dark:text-zinc-100 text-sm font-medium">Website</span>
+          <span className="text-zinc-950 dark:text-zinc-100 text-sm font-medium truncate">{getSiteUrl()}</span>
           <button
             onClick={handleTitleClick}
             className="px-4 h-8 rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center gap-2"

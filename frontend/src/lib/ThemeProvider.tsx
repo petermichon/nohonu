@@ -19,9 +19,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('theme') as Theme | null;
-    if (saved === 'light') return 'light';
-    if (saved === 'dark') return 'dark';
-    return globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    let resolved: 'light' | 'dark';
+    if (saved === 'light') resolved = 'light';
+    else if (saved === 'dark') resolved = 'dark';
+    else resolved = globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark', resolved === 'dark');
+    return resolved;
   });
 
   useEffect(() => {

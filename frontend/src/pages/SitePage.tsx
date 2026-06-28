@@ -29,7 +29,7 @@ function SitePage() {
     section?: string;
   }>();
   const actualDomain = sitename || domain;
-  const { apiFetch, apiBase, host, protocol } = useApi();
+  const { apiFetch, apiBase, host, hostWithPort, protocol } = useApi();
   const { refreshSites } = useSites();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -206,7 +206,7 @@ function SitePage() {
     downloadVersionMutation.mutate({ domain: site.domain, timestamp });
   };
 
-  const subdomainBase = site?.subdomainBase || host;
+  const subdomainBase = site?.subdomainBase || hostWithPort;
   const siteUrl = site?.subdomain
     ? `${protocol}//${site.subdomain}.${subdomainBase}`
     : `${protocol}//${site?.domain}.${subdomainBase}`;
