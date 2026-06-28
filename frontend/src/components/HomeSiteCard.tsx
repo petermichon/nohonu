@@ -1,6 +1,5 @@
 import { Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getAccentStyle } from '../lib/utils.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { Site } from '../lib/types.ts';
 
@@ -12,15 +11,10 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const navigate = useNavigate();
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const accentStyle = getAccentStyle(site.accent, site.enabled);
 
   const badgeClass = !site.enabled
     ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-    : accentStyle
-      ? ''
-      : accentColorValues.bgLight + ' ' + accentColorValues.textDark;
-
-  const badgeStyle = accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined;
+    : accentColorValues.bgLight + ' ' + accentColorValues.textDark;
 
   return (
     <div
@@ -54,7 +48,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 justify-end">
-          <span className={`text-[12px] px-2 py-0.5 rounded-full ${badgeClass}`} style={badgeStyle}>
+          <span className={`text-[12px] px-2 py-0.5 rounded-full ${badgeClass}`}>
             {site.enabled ? 'Online' : 'Offline'}
           </span>
         </div>

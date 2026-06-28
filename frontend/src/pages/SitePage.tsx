@@ -36,7 +36,7 @@ function SitePage() {
   const activeTab = (section || 'overview') as 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
 
   // Determine if this is a public view (viewing someone else's site)
-  const isPublicView = username && username !== loggedInUsername;
+  const isPublicView = !!username && username !== loggedInUsername;
 
   const {
     site,
