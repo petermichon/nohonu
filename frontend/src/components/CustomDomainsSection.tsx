@@ -9,9 +9,10 @@ const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record
 
 interface CustomDomainsSectionProps {
   domain: string;
+  isReadOnly?: boolean;
 }
 
-export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
+export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomainsSectionProps) {
   const { apiFetch, host } = useApi();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
@@ -151,7 +152,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
           <button
             type="button"
             onClick={addCustomDomain}
-            disabled={addingCustomDomain || !newCustomDomain.trim()}
+            disabled={addingCustomDomain || !newCustomDomain.trim() || isReadOnly}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
           >
             <Plus className="w-3.5 h-3.5" />

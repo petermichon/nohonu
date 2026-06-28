@@ -1,5 +1,5 @@
 import { Eye, AlertCircle } from 'lucide-react';
-import { useSites } from '../lib/api.ts';
+import { useExploreSites } from '../lib/api.ts';
 import { formatHits } from '../lib/utils.ts';
 import { ExploreSiteCard } from '../components/ExploreSiteCard.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
@@ -7,7 +7,7 @@ import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 function Explore() {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const { sites, loading, error } = useSites();
+  const { sites, loading, error } = useExploreSites();
 
   const onlineCount = sites.filter((s) => s.enabled).length;
   const offlineCount = sites.filter((s) => !s.enabled).length;

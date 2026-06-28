@@ -10,6 +10,9 @@ import { checkDomain } from './endpoints/check-domain-get.ts';
 import { checkCustomDomain } from './endpoints/check-custom-domain-get.ts';
 import { serveStatic } from './endpoints/get.ts';
 import { listSites } from './endpoints/sites-list-get.ts';
+import { listExploreSites } from './endpoints/explore-sites-get.ts';
+import { getUserSites } from './endpoints/users-username-sites-get.ts';
+import { getPublicSiteInfo } from './endpoints/users-username-domain-get.ts';
 import { getSiteInfo } from './endpoints/sites-info-get.ts';
 import { downloadSite } from './endpoints/sites-info-download.ts';
 import { getSiteIcon } from './endpoints/sites-info-icon.ts';
@@ -54,6 +57,7 @@ const routes: Record<string, Endpoint> = {
   '/check-domain': { handler: checkDomain },
   '/check-custom-domain': { handler: checkCustomDomain },
   '/custom-domains': { handler: getAllCustomDomains, auth: true },
+  '/explore/sites': { handler: listExploreSites },
 };
 
 const SITE_GET_ROUTES: [string, CtxRouteHandler][] = [
@@ -196,6 +200,24 @@ function matchRoute(path: string): Endpoint | undefined {
   }
   if (path === '/sites' || path.startsWith('/sites/')) {
     return { handler: handleSiteRoute, auth: true };
+  }
+  if (path.startsWith('/users/') && path.endsWith('/sites')) {
+    // /users/:username/sites - public endpoint, no auth required
+    const username = path.split('/')[2];
+    if (!username) {
+      return undefined;
+    }
+    return { handler: (req) => getUserSites(req, username) };
+  }
+  if (path.startsWith('/users/') && path.split('/').length === 4) {
+    // /users/:username/:domain - public endpoint for site info
+    const parts = path.split('/');
+    const username = parts[2];
+    const domain = parts[3];
+    if (!username || !domain) {
+      return undefined;
+    }
+    return { handler: (req) => getPublicSiteInfo(req, username, domain) };
   }
   if (path.startsWith('/users/')) {
     return { handler: getUserByUsernameEndpoint };

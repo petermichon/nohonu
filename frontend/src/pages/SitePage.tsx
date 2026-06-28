@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
 import { useApi, useSites } from '../lib/api.ts';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { calcUptimePct } from '../lib/utils.ts';
 import { useToast } from '../lib/ToastContext.tsx';
 import { UptimeChart } from '../components/UptimeChart.tsx';
@@ -29,9 +30,13 @@ function SitePage() {
   const actualDomain = sitename || domain;
   const { apiFetch, host, hostWithPort, protocol } = useApi();
   const { refreshSites } = useSites();
+  const { username: loggedInUsername } = useConnection();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const activeTab = (section || 'overview') as 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
+
+  // Determine if this is a public view (viewing someone else's site)
+  const isPublicView = username && username !== loggedInUsername;
 
   const {
     site,
@@ -52,7 +57,7 @@ function SitePage() {
     loadStats,
     loadUptime,
     loadVersions,
-  } = useSiteData(actualDomain!);
+  } = useSiteData(actualDomain!, username, isPublicView);
 
   const [actionLoading, setActionLoading] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'delete' | 'enable' | 'disable' | null>(null);
@@ -69,45 +74,77 @@ function SitePage() {
   // Delete site mutation
   const deleteSiteMutation = useMutation({
     mutationFn: async (domain: string) => {
-      await apiFetch(`/sites/${domain}`, { method: 'DELETE' });
+      const res = await apiFetch(`/sites/${domain}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete site');
+      }
+      return res.json();
     },
     onSuccess: () => {
       showToast('Site deleted', true);
       navigate('/');
+    },
+    onError: (err: Error) => {
+      showToast(err.message, false);
     },
   });
 
   // Toggle site mutation
   const toggleSiteMutation = useMutation({
     mutationFn: async (domain: string) => {
-      await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
+      const res = await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to toggle site');
+      }
+      return res.json();
     },
     onSuccess: async () => {
       await loadSite();
       showToast(`Site ${site?.enabled ? 'disabled' : 'enabled'}`, true);
+    },
+    onError: (err: Error) => {
+      showToast(err.message, false);
     },
   });
 
   // Activate version mutation
   const activateVersionMutation = useMutation({
     mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
-      await apiFetch(`/sites/${domain}/versions/${timestamp}/activate`, { method: 'POST' });
+      const res = await apiFetch(`/sites/${domain}/versions/${timestamp}/activate`, { method: 'POST' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to activate version');
+      }
+      return res.json();
     },
     onSuccess: async () => {
       await loadSite();
       await loadVersions();
       showToast('Version activated', true);
     },
+    onError: (err: Error) => {
+      showToast(err.message, false);
+    },
   });
 
   // Delete version mutation
   const deleteVersionMutation = useMutation({
     mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
-      await apiFetch(`/sites/${domain}/versions/${timestamp}`, { method: 'DELETE' });
+      const res = await apiFetch(`/sites/${domain}/versions/${timestamp}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete version');
+      }
+      return res.json();
     },
     onSuccess: async () => {
       await loadVersions();
       showToast('Version deleted', true);
+    },
+    onError: (err: Error) => {
+      showToast(err.message, false);
     },
   });
 
@@ -293,17 +330,19 @@ function SitePage() {
             <Layers className="w-4 h-4" />
             Versions
           </Link>
-          <Link
-            to={username ? `/u/${username}/${actualDomain}/settings` : `/sites/${actualDomain}/settings`}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
-              activeTab === 'settings'
-                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            Settings
-          </Link>
+          {!isPublicView && (
+            <Link
+              to={username ? `/u/${username}/${actualDomain}/settings` : `/sites/${actualDomain}/settings`}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                activeTab === 'settings'
+                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </Link>
+          )}
         </nav>
       </header>
 
@@ -319,6 +358,7 @@ function SitePage() {
             host={host}
             totalHits={totalHits}
             uptimePct={uptimePct}
+            isReadOnly={isPublicView}
           />
         </section>
       )}
@@ -354,8 +394,8 @@ function SitePage() {
 
       {activeTab === 'domains' && (
         <section className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
-          <SubdomainSection subdomain={site?.subdomain || null} siteLoading={siteLoading} />
-          <CustomDomainsSection domain={actualDomain!} />
+          <SubdomainSection subdomain={site?.subdomain || null} siteLoading={siteLoading} isReadOnly={isPublicView} />
+          <CustomDomainsSection domain={actualDomain!} isReadOnly={isPublicView} />
         </section>
       )}
 
@@ -396,11 +436,12 @@ function SitePage() {
             onToast={(message, success = true) => {
               showToast(message, success);
             }}
+            isReadOnly={isPublicView}
           />
         </section>
       )}
 
-      {activeTab === 'settings' && (
+      {!isPublicView && activeTab === 'settings' && (
         <section className="max-w-7xl mx-auto px-6 py-8">
           <DangerZoneSection
             site={site}

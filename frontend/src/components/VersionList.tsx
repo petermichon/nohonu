@@ -12,6 +12,7 @@ interface VersionListProps {
   onActivate: (index: number) => void;
   onDelete: (index: number) => void;
   onDownload: (index: number) => void;
+  isReadOnly?: boolean;
 }
 
 export function VersionList({
@@ -22,6 +23,7 @@ export function VersionList({
   onActivate,
   onDelete,
   onDownload,
+  isReadOnly = false,
 }: VersionListProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
@@ -96,7 +98,7 @@ export function VersionList({
                 <button
                   type="button"
                   onClick={() => onDelete(v.index)}
-                  disabled={isDeleting || isCurrent}
+                  disabled={isDeleting || isCurrent || isReadOnly}
                   className={`p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto disabled:hover:bg-transparent dark:disabled:hover:bg-transparent disabled:hover:text-zinc-700 dark:disabled:hover:text-zinc-300 ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
                 >
                   {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -106,7 +108,7 @@ export function VersionList({
                 <button
                   type="button"
                   onClick={() => onActivate(v.index)}
-                  disabled={isActivating || isCurrent}
+                  disabled={isActivating || isCurrent || isReadOnly}
                   className="ml-1 flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800"
                 >
                   {isActivating ? (

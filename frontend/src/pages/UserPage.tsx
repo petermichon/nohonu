@@ -1,8 +1,8 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, Key } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
-import { useSites, useDomains } from '../lib/api.ts';
+import { useSites, useDomains, useUserSites } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
@@ -15,8 +15,17 @@ export default function UserPage() {
   const { username } = useParams<{ username: string }>();
   const location = useLocation();
   const { displayName, username: loggedInUsername, setDisplayName, apiBase, apiKey, sessionId } = useConnection();
-  const { sites, loading, error } = useSites();
+
+  // Use public sites for viewing others' profiles or when not logged in
+  // Only use private sites when logged in and viewing own profile
+  const isOwnProfile = !!loggedInUsername && username === loggedInUsername;
+  const { sites: publicSites, loading: publicLoading, error: publicError } = useUserSites(username);
+  const { sites: privateSites, loading: privateLoading, error: privateError } = useSites();
   const { domains, loading: domainsLoading } = useDomains();
+
+  const sites = isOwnProfile ? privateSites : publicSites;
+  const loading = isOwnProfile ? privateLoading : publicLoading;
+  const error = isOwnProfile ? privateError : publicError;
   const { apiFetch } = useApi();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
@@ -39,22 +48,6 @@ export default function UserPage() {
             ? 'sites'
             : 'overview'
   ) as 'overview' | 'sites' | 'domains' | 'servers' | 'settings';
-
-  const isOwnProfile = username === loggedInUsername;
-
-  // User existence check query
-  const userExistsQuery = useQuery({
-    queryKey: ['user-exists', username],
-    queryFn: async () => {
-      if (!username) return false;
-      const res = await apiFetch(`/users/${username}`);
-      return res.ok;
-    },
-    retry: false,
-  });
-
-  const userExists = userExistsQuery.data ?? null;
-  const userLoading = userExistsQuery.isLoading;
 
   // Verify custom domain mutation
   const verifyDomainMutation = useMutation({
@@ -170,7 +163,7 @@ export default function UserPage() {
 
   const userSites = sites.filter((s) => s.account === username);
 
-  if (!userLoading && userExists === false) {
+  if (!isOwnProfile && error === 'not-found') {
     return (
       <section className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center py-16">

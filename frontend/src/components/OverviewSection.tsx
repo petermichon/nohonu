@@ -11,6 +11,7 @@ interface OverviewSectionProps {
   host: string;
   totalHits: number;
   uptimePct: number | null;
+  isReadOnly?: boolean;
 }
 
 export function OverviewSection({
@@ -22,6 +23,7 @@ export function OverviewSection({
   host,
   totalHits,
   uptimePct,
+  isReadOnly = false,
 }: OverviewSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
@@ -114,7 +116,7 @@ export function OverviewSection({
             <button
               type="button"
               onClick={onToggle}
-              disabled={actionLoading}
+              disabled={actionLoading || isReadOnly}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 w-24 justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
             >
               <Power className="w-3.5 h-3.5 shrink-0" />

@@ -18,6 +18,7 @@ interface VersionPanelProps {
   onDownload: (ts: number) => void;
   onUploaded: () => void;
   onToast: (message: string, success?: boolean) => void;
+  isReadOnly?: boolean;
 }
 
 export function VersionPanel({
@@ -32,6 +33,7 @@ export function VersionPanel({
   onDownload,
   onUploaded,
   onToast,
+  isReadOnly = false,
 }: VersionPanelProps) {
   const { apiFetch } = useApi();
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -139,53 +141,58 @@ export function VersionPanel({
         </h2>
         <div className="flex items-center gap-2">
           {versionsLoading && <Loader2 className="w-3 h-3 text-zinc-400 animate-spin" />}
-          <button
-            type="button"
-            onClick={() => {
-              if (!showGithubFetch) loadRepoHistory();
-              setShowGithubFetch(!showGithubFetch);
-            }}
-            disabled={uploadVersionMutation.isPending}
-            className={(() => {
-              const baseClasses =
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto';
-              const activeClasses = 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300';
-              const inactiveClasses =
-                'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800';
-              const stateClasses = showGithubFetch ? activeClasses : inactiveClasses;
-              return `${baseClasses} ${stateClasses} disabled:opacity-50`;
-            })()}
-          >
-            <GitBranch className="w-3.5 h-3.5" />
-            {showGithubFetch ? 'Cancel' : 'From GitHub'}
-          </button>
-          <label
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer ${
-              uploadVersionMutation.isPending
-                ? 'text-zinc-400 dark:text-zinc-500'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800'
-            }`}
-          >
-            {uploadVersionMutation.isPending ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Upload className="w-3.5 h-3.5" />
-            )}
-            {uploadVersionMutation.isPending ? 'Uploading...' : 'Upload New'}
-            <input
-              type="file"
-              id="newVersionFile"
-              name="newVersionFile"
-              accept=".zip"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleUpload(f);
-                e.target.value = '';
-              }}
-              disabled={uploadVersionMutation.isPending}
-              className="hidden"
-            />
-          </label>
+          {!isReadOnly && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!showGithubFetch) loadRepoHistory();
+                  setShowGithubFetch(!showGithubFetch);
+                }}
+                disabled={uploadVersionMutation.isPending}
+                className={(() => {
+                  const baseClasses =
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer disabled:cursor-auto';
+                  const activeClasses = 'bg-purple-200 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300';
+                  const inactiveClasses =
+                    'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800';
+                  const stateClasses = showGithubFetch ? activeClasses : inactiveClasses;
+                  return `${baseClasses} ${stateClasses} disabled:opacity-50`;
+                })()}
+              >
+                <GitBranch className="w-3.5 h-3.5" />
+                {showGithubFetch ? 'Cancel' : 'From GitHub'}
+              </button>
+              <label
+                className={
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer ' +
+                  (uploadVersionMutation.isPending
+                    ? 'text-zinc-400 dark:text-zinc-500'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:hover:bg-zinc-100 dark:disabled:hover:bg-zinc-800')
+                }
+              >
+                {uploadVersionMutation.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Upload className="w-3.5 h-3.5" />
+                )}
+                {uploadVersionMutation.isPending ? 'Uploading...' : 'Upload New'}
+                <input
+                  type="file"
+                  id="newVersionFile"
+                  name="newVersionFile"
+                  accept=".zip"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleUpload(f);
+                    e.target.value = '';
+                  }}
+                  disabled={uploadVersionMutation.isPending}
+                  className="hidden"
+                />
+              </label>
+            </>
+          )}
         </div>
       </div>
 
@@ -270,6 +277,7 @@ export function VersionPanel({
             onActivate={onActivate}
             onDelete={onDelete}
             onDownload={onDownload}
+            isReadOnly={isReadOnly}
           />
           {versions.length > visibleCount && (
             <button

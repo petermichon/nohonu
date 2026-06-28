@@ -6,9 +6,10 @@ import { useToast } from '../lib/ToastContext.tsx';
 interface SubdomainSectionProps {
   subdomain: string | null;
   siteLoading: boolean;
+  isReadOnly?: boolean;
 }
 
-export function SubdomainSection({ subdomain, siteLoading }: SubdomainSectionProps) {
+export function SubdomainSection({ subdomain, siteLoading, isReadOnly = false }: SubdomainSectionProps) {
   const { apiFetch } = useApi();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
@@ -52,6 +53,10 @@ export function SubdomainSection({ subdomain, siteLoading }: SubdomainSectionPro
       <div className="flex items-center gap-2">
         {siteLoading ? (
           <div className="h-10 flex-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+        ) : isReadOnly ? (
+          <div className="flex-1 px-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100">
+            {subdomain || 'Default (username-deployment)'}
+          </div>
         ) : (
           <>
             <input

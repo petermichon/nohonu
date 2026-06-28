@@ -29,8 +29,8 @@ export interface SiteDataReturn {
   loadVersions: () => Promise<void>;
 }
 
-export function useSiteData(domain: string): SiteDataReturn {
-  const { apiFetch } = useApi();
+export function useSiteData(domain: string, username?: string, isPublic?: boolean): SiteDataReturn {
+  const { apiFetch, apiBase } = useApi();
   const queryClient = useQueryClient();
   const [statsRange, setStatsRange] = useState<TimeRange>(60);
   const [uptimeRange, setUptimeRange] = useState<UptimeRange>(60);
@@ -39,14 +39,16 @@ export function useSiteData(domain: string): SiteDataReturn {
 
   // Site query
   const siteQuery = useQuery({
-    queryKey: ['site', domain],
+    queryKey: ['site', domain, isPublic],
     queryFn: async () => {
-      const res = await apiFetch(`/sites/${domain}`);
+      const url = isPublic && username ? `${apiBase}/users/${username}/${domain}` : `/sites/${domain}`;
+      const res = await (isPublic && username ? fetch(url) : apiFetch(url));
       if (!res.ok) throw new Error('Site not found');
       const data = await res.json();
       return data as Site;
     },
     retry: false,
+    enabled: !isPublic || !!username,
   });
 
   // Stats query
