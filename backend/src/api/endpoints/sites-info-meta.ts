@@ -12,5 +12,5 @@ export async function getSiteMeta(req: Request, { domain }: RouteContext): Promi
   if (!meta) {
     return error('Site not found', 404);
   }
-  return json({ domain, accent: meta.accent });
+  return json({ domain, subdomain: meta.subdomain });
 }

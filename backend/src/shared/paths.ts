@@ -19,7 +19,6 @@ export type SiteData = {
   nextIndex: number;
   currentIndex: number | null;
   enabled: boolean;
-  accent?: string;
   account?: string;
   repoHistory: RepoEntry[];
   versions: Record<string, VersionEntry>;

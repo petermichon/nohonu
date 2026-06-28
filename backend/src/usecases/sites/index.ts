@@ -50,7 +50,7 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
-export async function listSites(user: string): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string; subdomain?: string }>> {
+export async function listSites(user: string): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; subdomain?: string }>> {
   const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
@@ -60,7 +60,6 @@ export async function listSites(user: string): Promise<Array<{ domain: string; e
         enabled: data?.enabled ?? false,
         hits: analytics.getTotalHits(domain),
         uptime: analytics.getUptimePct(domain),
-        accent: data?.accent,
         account: data?.account,
         subdomain: data?.subdomain,
       };
@@ -68,9 +67,9 @@ export async function listSites(user: string): Promise<Array<{ domain: string; e
   );
 }
 
-export async function listAllSites(): Promise<{ user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string; subdomain?: string }[]> {
+export async function listAllSites(): Promise<{ user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; subdomain?: string }[]> {
   const users = await storage.listUsers();
-  const allSites: { user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string; subdomain?: string }[] = [];
+  const allSites: { user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; subdomain?: string }[] = [];
   
   for (const user of users) {
     const domains = await storage.listDomains(user);
@@ -82,7 +81,6 @@ export async function listAllSites(): Promise<{ user: string; domain: string; en
         enabled: data?.enabled ?? false,
         hits: analytics.getTotalHits(domain),
         uptime: analytics.getUptimePct(domain),
-        accent: data?.accent,
         account: data?.account,
         subdomain: data?.subdomain,
       });
@@ -152,29 +150,24 @@ export async function getSiteIcon(user: string, domain: string): Promise<{ data:
   return null;
 }
 
-// Get site metadata (accent color)
-export async function getSiteMeta(user: string, domain: string): Promise<{ accent?: string; subdomain?: string } | null> {
+// Get site metadata
+export async function getSiteMeta(user: string, domain: string): Promise<{ subdomain?: string } | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return null;
   }
-  return { accent: data.accent, subdomain: data.subdomain };
+  return { subdomain: data.subdomain };
 }
 
 export async function updateSiteMeta(
   user: string,
   domain: string,
-  updates: { accent?: string | undefined; subdomain?: string | undefined },
+  updates: { subdomain?: string | undefined },
 ): Promise<UsecaseResult<void>> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, error: 'Site not found', status: 404 };
   }
-
-  if (updates.accent !== undefined && !storage.VALID_ACCENT.test(updates.accent)) {
-    return { ok: false, error: 'Invalid accent color', status: 400 };
-  }
-  data.accent = updates.accent;
 
   if (updates.subdomain !== undefined) {
     if (!VALID_DOMAIN.test(updates.subdomain)) {

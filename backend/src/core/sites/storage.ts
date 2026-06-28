@@ -29,8 +29,6 @@ function extractedFilePath(user: string, domain: string, filePath: string): stri
   return `${dir}/${cleanPath}`.replace(/\/+/g, '/');
 }
 
-export const VALID_ACCENT = /^#[0-9a-fA-F]{6}$/;
-
 export const DEFAULT_DATA: SiteData = {
   nextIndex: 1,
   currentIndex: null,
