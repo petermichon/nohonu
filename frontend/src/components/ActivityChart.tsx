@@ -3,6 +3,7 @@ import { Eye, RefreshCw, Globe } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { relativeTime } from '../lib/utils.ts';
 import { SLOT_MS } from '../lib/types.ts';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { Slot, Visitor, TimeRange } from '../lib/types.ts';
 
 const RANGE_LABELS: Record<TimeRange, string> = {
@@ -44,6 +45,8 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
 };
 
 export function ActivityChart({ stats, visitors, onReload, reloading, range, onRangeChange, now }: ActivityChartProps) {
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const total = stats.reduce((a, b) => a + b.count, 0);
   const sortedVisitors = [...visitors].sort((a, b) => b.last - a.last);
 
@@ -135,7 +138,7 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
                 return (
                   <Cell
                     key={`cell-${index}`}
-                    fill={isCurrent ? '#57534e' : count === 0 ? '#f5f5f4' : '#d6d3d1'}
+                    fill={isCurrent ? accentColorValues.rgb : count === 0 ? '#a1a1aa' : `rgb(${accentColorValues.rgb})`}
                     fillOpacity={isCurrent ? 1 : count === 0 ? 1 : 1}
                   />
                 );

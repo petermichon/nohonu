@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Upload, Loader2, GitBranch, History } from 'lucide-react';
+import { Upload, Loader2, GitBranch, History, ChevronDown } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { useClickOutside } from '../lib/useClickOutside.ts';
 import { VersionList } from './VersionList.tsx';
@@ -40,6 +40,7 @@ export function VersionPanel({
   const [githubBranch, setGithubBranch] = useState('');
   const [repoHistory, setRepoHistory] = useState<{ repo: string; branch: string; lastUsed: number }[]>([]);
   const [showRepoDropdown, setShowRepoDropdown] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(5);
   const repoDropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(repoDropdownRef, () => setShowRepoDropdown(false), showRepoDropdown);
 
@@ -255,25 +256,33 @@ export function VersionPanel({
       )}
 
       {uploadError && <p className="text-xs text-purple-500 dark:text-purple-400 mb-3">{uploadError}</p>}
-      <div className="h-64 relative">
-        <div className="absolute inset-0 overflow-y-auto">
-          {versions.length === 0 ? (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-sm text-zinc-400 dark:text-zinc-500">No versions yet</p>
-            </div>
-          ) : (
-            <VersionList
-              versions={versions}
-              currentVersion={currentVersion}
-              activating={activating}
-              deletingVersion={deletingVersion}
-              onActivate={onActivate}
-              onDelete={onDelete}
-              onDownload={onDownload}
-            />
-          )}
+      {versions.length === 0 ? (
+        <div className="h-64 flex items-center justify-center">
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">No versions yet</p>
         </div>
-      </div>
+      ) : (
+        <>
+          <VersionList
+            versions={versions.slice(0, visibleCount)}
+            currentVersion={currentVersion}
+            activating={activating}
+            deletingVersion={deletingVersion}
+            onActivate={onActivate}
+            onDelete={onDelete}
+            onDownload={onDownload}
+          />
+          {versions.length > visibleCount && (
+            <button
+              type="button"
+              onClick={() => setVisibleCount(versions.length)}
+              className="mt-2 mx-auto flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer"
+            >
+              <ChevronDown className="w-3.5 h-3.5" />
+              Show {versions.length - visibleCount} more
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }

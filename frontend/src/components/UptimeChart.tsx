@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { SLOT_MS } from '../lib/types.ts';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { UptimeSlot, UptimeRange } from '../lib/types.ts';
 import { calcUptimePct } from '../lib/utils.ts';
 
@@ -48,6 +49,8 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
 };
 
 export function UptimeChart({ uptime, allUptime, range, onRangeChange, onReload, reloading, now }: UptimeChartProps) {
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const pct = useMemo(() => calcUptimePct(allUptime), [allUptime]);
 
   const chartData = useMemo(() => {
@@ -86,7 +89,7 @@ export function UptimeChart({ uptime, allUptime, range, onRangeChange, onReload,
       result.push({
         slot,
         up: grouped.get(slot),
-        value: 1,
+        value: grouped.get(slot) === true ? 1 : 0.1,
         time: timeStr,
         isCurrent: i === 0,
       });
@@ -96,13 +99,12 @@ export function UptimeChart({ uptime, allUptime, range, onRangeChange, onReload,
   }, [uptime, range, now]);
 
   const getBarColor = (up: boolean | undefined, isCurrent: boolean) => {
-    if (up === undefined) return '#f5f5f4';
+    if (up === undefined) return '#71717a';
     if (up) {
-      if (isCurrent) return '#a855f7';
-      return '#d8b4fe';
+      return `rgb(${accentColorValues.rgb})`;
     }
-    if (isCurrent) return '#78716c';
-    return '#d6d3d1';
+    if (isCurrent) return '#52525b';
+    return '#a1a1aa';
   };
 
   return (
@@ -111,7 +113,13 @@ export function UptimeChart({ uptime, allUptime, range, onRangeChange, onReload,
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Uptime</h2>
           {pct !== null && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-200 dark:bg-green-900/30 text-green-600 dark:text-green-300">
+            <span
+              className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                pct >= 90
+                  ? `${accentColorValues.bgLight} ${accentColorValues.text}`
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+              }`}
+            >
               {pct}%
             </span>
           )}
@@ -148,7 +156,7 @@ export function UptimeChart({ uptime, allUptime, range, onRangeChange, onReload,
           <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barCategoryGap={2}>
             <XAxis dataKey="slot" hide />
             <Tooltip content={<CustomTooltip />} cursor={false} />
-            <Bar dataKey="value" minPointSize={32}>
+            <Bar dataKey="value" minPointSize={2}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={getBarColor(entry.up, entry.isCurrent)} />
               ))}

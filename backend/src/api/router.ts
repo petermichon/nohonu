@@ -158,7 +158,7 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
     }
     // Add versions to existing site
     if (action === 'versions') {
-      if (subAction === 'activate') {
+      if (verifyAction === 'activate') {
         return activateVersion(req, ctx);
       }
       if (subAction === 'github') {

@@ -26,14 +26,19 @@ export function VersionList({
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   return (
-    <div className="space-y-1">
+    <div className="flex flex-col gap-1">
       {versions.map((v) => {
         const isCurrent = v.index === currentVersion;
         const isActivating = activating === v.index;
         const isDeleting = deletingVersion === v.index;
         const date = new Date(v.createdAt);
         return (
-          <div key={v.index} className="flex items-center justify-between px-3 py-2.5 rounded-xl">
+          <div key={v.index} className="flex items-center px-3 py-2.5 rounded-xl pl-2">
+            <div
+              className={`shrink-0 w-1 self-stretch rounded-full mr-4 ${
+                isCurrent ? accentColorValues.dot : 'bg-zinc-200 dark:bg-zinc-700'
+              }`}
+            />
             <div className="flex items-center gap-3 min-w-0">
               {isCurrent ? (
                 <CheckCircle2 className={`w-4 h-4 shrink-0 ${accentColorValues.text}`} />
@@ -77,7 +82,7 @@ export function VersionList({
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-0.5 ml-2 shrink-0">
+            <div className="flex items-center gap-0.5 ml-auto shrink-0">
               <Tooltip content="Download">
                 <button
                   type="button"

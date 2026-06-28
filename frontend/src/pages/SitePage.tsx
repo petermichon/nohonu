@@ -27,7 +27,7 @@ function SitePage() {
     section?: string;
   }>();
   const actualDomain = sitename || domain;
-  const { apiFetch, apiBase, host, hostWithPort, protocol } = useApi();
+  const { apiFetch, host, hostWithPort, protocol } = useApi();
   const { refreshSites } = useSites();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -63,7 +63,6 @@ function SitePage() {
     timestamp: number;
     label: string;
   } | null>(null);
-  const [iconError, setIconError] = useState(false);
   const [now, setNow] = useState(() => Math.floor(Date.now() / SLOT_MS));
   const [globalRange, setGlobalRange] = useState<TimeRange>(1);
 
@@ -315,12 +314,9 @@ function SitePage() {
             site={site}
             siteLoading={siteLoading}
             actionLoading={actionLoading}
-            iconError={iconError}
-            onIconError={() => setIconError(true)}
             onToggle={() => setConfirmAction(site?.enabled ? 'disable' : 'enable')}
             siteUrl={siteUrl}
             host={host}
-            apiBase={apiBase}
             totalHits={totalHits}
             uptimePct={uptimePct}
           />

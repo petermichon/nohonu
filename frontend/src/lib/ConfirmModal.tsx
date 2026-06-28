@@ -1,6 +1,7 @@
 import { Power, Trash2, Loader2, ArrowUp } from 'lucide-react';
 import { Modal } from './Modal.tsx';
 import { useState, useEffect, useRef } from 'react';
+import { useAccentColor, ACCENT_COLORS } from './AccentColorProvider.tsx';
 
 type Action = 'delete' | 'enable' | 'disable' | 'delete-version' | 'activate-version';
 
@@ -48,12 +49,24 @@ const ICON_MAP: Record<Action, React.ComponentType<{ className?: string }>> = {
 };
 
 export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loading }: ConfirmModalProps) {
+  const { getAccentColorValues, accentColor } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   const { title, message, confirm, isDanger, requiresTimer } = CONFIG[action];
   const Icon = loading ? Loader2 : ICON_MAP[action];
-  const iconClass = isDanger ? 'text-purple-400 dark:text-purple-300' : 'text-zinc-600 dark:text-zinc-400';
+  const iconClass = isDanger ? accentColorValues.text : 'text-zinc-600 dark:text-zinc-400';
   const btnClass = isDanger
-    ? 'bg-purple-400 hover:bg-purple-500'
+    ? `${accentColorValues.bg} hover:opacity-90`
     : 'bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600';
+
+  // Determine button text color based on accent color
+  const btnTextColor = isDanger
+    ? (() => {
+        const textColor = ACCENT_COLORS[accentColor]?.textColor;
+        if (textColor === 'light') return 'text-white';
+        if (textColor === 'dark') return 'text-zinc-950';
+        return 'text-white dark:text-zinc-950'; // inverted
+      })()
+    : 'text-white';
 
   const [countdown, setCountdown] = useState(3);
   const hasInitializedRef = useRef(false);
@@ -81,13 +94,16 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
   }, [isOpen, requiresTimer]);
 
   const isConfirmDisabled = loading || (requiresTimer && countdown > 0);
-  const confirmBtnBase =
-    'flex-1 px-4 py-2 text-white font-medium rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50';
+  const baseBtnClass =
+    'flex-1 px-4 py-2 font-medium rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50';
+  const confirmBtnClass = isDanger ? `${baseBtnClass} ${btnClass} ${btnTextColor}` : `${baseBtnClass} text-white`;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <div
-        className={`w-10 h-10 rounded-full flex items-center justify-center mb-4 ${isDanger ? 'bg-purple-200 dark:bg-purple-900/30' : 'bg-stone-100 dark:bg-stone-800'}`}
+        className={`w-10 h-10 rounded-full flex items-center justify-center mb-4 ${
+          isDanger ? accentColorValues.bgLight : 'bg-stone-100 dark:bg-stone-800'
+        }`}
       >
         <Icon className={`w-5 h-5 ${iconClass} ${loading ? 'animate-spin' : ''}`} />
       </div>
@@ -104,12 +120,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
         >
           Cancel
         </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          disabled={isConfirmDisabled}
-          className={`${confirmBtnBase} ${btnClass}`}
-        >
+        <button type="button" onClick={onConfirm} disabled={isConfirmDisabled} className={confirmBtnClass}>
           {requiresTimer && countdown > 0 ? `${confirm} (${countdown})` : confirm}
         </button>
       </div>

@@ -6,12 +6,9 @@ interface OverviewSectionProps {
   site: Site | null;
   siteLoading: boolean;
   actionLoading: boolean;
-  iconError: boolean;
-  onIconError: () => void;
   onToggle: () => void;
   siteUrl: string;
   host: string;
-  apiBase: string;
   totalHits: number;
   uptimePct: number | null;
 }
@@ -20,12 +17,9 @@ export function OverviewSection({
   site,
   siteLoading,
   actionLoading,
-  iconError,
-  onIconError,
   onToggle,
   siteUrl,
   host,
-  apiBase,
   totalHits,
   uptimePct,
 }: OverviewSectionProps) {
@@ -62,16 +56,7 @@ export function OverviewSection({
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
             <div className={`${baseIconClasses} ${iconStateClasses}`}>
-              {!iconError ? (
-                <img
-                  src={`${apiBase}/sites/${site.domain}/icon`}
-                  alt=""
-                  className="w-6 h-6 object-contain"
-                  onError={onIconError}
-                />
-              ) : (
-                initial
-              )}
+              <span className="text-xl font-semibold text-zinc-600 dark:text-zinc-400">{initial}</span>
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
