@@ -58,13 +58,13 @@ export function useSites() {
 }
 
 export function useExploreSites() {
-  const { apiBase } = useApi();
+  const { apiFetch } = useApi();
   const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: ['explore-sites'],
     queryFn: async () => {
-      const res = await fetch(`${apiBase}/explore/sites`);
+      const res = await apiFetch('/explore/sites');
       if (!res.ok) {
         throw new Error('connection');
       }
@@ -85,14 +85,14 @@ export function useExploreSites() {
 }
 
 export function useUserSites(username: string | undefined) {
-  const { apiBase } = useApi();
+  const { apiFetch } = useApi();
   const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: ['user-sites', username],
     queryFn: async () => {
       if (!username) return [];
-      const res = await fetch(`${apiBase}/users/${username}/sites`);
+      const res = await apiFetch(`/users/${username}/sites`);
       if (!res.ok) {
         if (res.status === 404) {
           throw new Error('not-found');

@@ -41,8 +41,8 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
   const siteQuery = useQuery({
     queryKey: ['site', domain, isPublic],
     queryFn: async () => {
-      const url = isPublic && username ? `${apiBase}/users/${username}/${domain}` : `/sites/${domain}`;
-      const res = await (isPublic && username ? fetch(url) : apiFetch(url));
+      const url = isPublic && username ? `/users/${username}/${domain}` : `/sites/${domain}`;
+      const res = await apiFetch(url);
       if (!res.ok) throw new Error('Site not found');
       const data = await res.json();
       return data as Site;

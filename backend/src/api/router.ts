@@ -47,17 +47,17 @@ type Endpoint = {
 };
 
 const routes: Record<string, Endpoint> = {
-  '/health': { handler: health },
-  '/auth': { handler: auth },
-  '/auth/register': { handler: authRegister },
-  '/auth/login': { handler: authLogin },
-  '/auth/logout': { handler: authLogout },
-  '/auth/me': { handler: authMe },
-  '/auth/displayname': { handler: authDisplayName },
-  '/check-domain': { handler: checkDomain },
-  '/check-custom-domain': { handler: checkCustomDomain },
+  '/health': { handler: health, auth: true },
+  '/auth': { handler: auth, auth: true },
+  '/auth/register': { handler: authRegister, auth: true },
+  '/auth/login': { handler: authLogin, auth: true },
+  '/auth/logout': { handler: authLogout, auth: true },
+  '/auth/me': { handler: authMe, auth: true },
+  '/auth/displayname': { handler: authDisplayName, auth: true },
+  '/check-domain': { handler: checkDomain, auth: true },
+  '/check-custom-domain': { handler: checkCustomDomain, auth: true },
   '/custom-domains': { handler: getAllCustomDomains, auth: true },
-  '/explore/sites': { handler: listExploreSites },
+  '/explore/sites': { handler: listExploreSites, auth: true },
 };
 
 const SITE_GET_ROUTES: [string, CtxRouteHandler][] = [
@@ -202,25 +202,25 @@ function matchRoute(path: string): Endpoint | undefined {
     return { handler: handleSiteRoute, auth: true };
   }
   if (path.startsWith('/users/') && path.endsWith('/sites')) {
-    // /users/:username/sites - public endpoint, no auth required
+    // /users/:username/sites
     const username = path.split('/')[2];
     if (!username) {
       return undefined;
     }
-    return { handler: (req) => getUserSites(req, username) };
+    return { handler: (req) => getUserSites(req, username), auth: true };
   }
   if (path.startsWith('/users/') && path.split('/').length === 4) {
-    // /users/:username/:domain - public endpoint for site info
+    // /users/:username/:domain
     const parts = path.split('/');
     const username = parts[2];
     const domain = parts[3];
     if (!username || !domain) {
       return undefined;
     }
-    return { handler: (req) => getPublicSiteInfo(req, username, domain) };
+    return { handler: (req) => getPublicSiteInfo(req, username, domain), auth: true };
   }
   if (path.startsWith('/users/')) {
-    return { handler: getUserByUsernameEndpoint };
+    return { handler: getUserByUsernameEndpoint, auth: true };
   }
   return undefined;
 }
@@ -237,6 +237,13 @@ export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promis
 
   const route = matchRoute(path);
 
+  // Check API key for all requests (including static file serving)
+  const authError = requireAuth(req);
+  if (authError) {
+    console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
+    return authError;
+  }
+
   // Static file serving as fallback
   if (!route) {
     let response: Response;
@@ -248,14 +255,6 @@ export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promis
     }
     console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
     return response;
-  }
-
-  if (route.auth) {
-    const authError = requireAuth(req);
-    if (authError) {
-      console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
-      return authError;
-    }
   }
 
   let response: Response;
