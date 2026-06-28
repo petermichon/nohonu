@@ -1,73 +1,70 @@
-import { SITES_DIR } from '../../shared/paths.ts';
+import { domainDir } from '../sites/storage.ts';
 
 export const SLOT_MS = 60 * 1000;
 export const STATS_SLOTS = 86400; // 60 days of data (86400 minutes)
 export const UPTIME_SLOTS = 86400; // 60 days of data (86400 minutes)
 export const MAX_VISITORS_PER_DOMAIN = 500;
 
-const ANALYTICS_PATH = `${SITES_DIR}/analytics.json`;
+function analyticsPath(user: string, domain: string): string {
+  return `${domainDir(user, domain)}/analytics.json`;
+}
 
 export const hits = new Map<string, Map<number, number>>();
 export const visitors = new Map<string, Map<string, { count: number; last: number }>>();
 export const uptime = new Map<string, Map<number, boolean>>();
 
 type AnalyticsSnapshot = {
-  hits: Record<string, Record<number, number>>;
-  visitors: Record<string, Record<string, { count: number; last: number }>>;
-  uptime: Record<string, Record<number, boolean>>;
+  hits: Record<number, number>;
+  visitors: Record<string, { count: number; last: number }>;
+  uptime: Record<number, boolean>;
 };
 
-export async function loadAnalytics(): Promise<void> {
+export async function loadAnalytics(user: string, domain: string): Promise<void> {
   let content: string;
   try {
-    content = await Deno.readTextFile(ANALYTICS_PATH);
+    content = await Deno.readTextFile(analyticsPath(user, domain));
   } catch {
     return;
   }
   try {
     const snapshot = JSON.parse(content) as AnalyticsSnapshot;
     const now = Math.floor(Date.now() / SLOT_MS);
-    for (const [domain, slots] of Object.entries(snapshot.hits ?? {})) {
-      const m = new Map<number, number>();
-      for (const [slot, count] of Object.entries(slots)) {
-        const s = Number(slot);
-        if (s >= now - STATS_SLOTS) m.set(s, count as number);
-      }
-      if (m.size > 0) hits.set(domain, m);
+
+    const hitsMap = new Map<number, number>();
+    for (const [slot, count] of Object.entries(snapshot.hits ?? {})) {
+      const s = Number(slot);
+      if (s >= now - STATS_SLOTS) hitsMap.set(s, count);
     }
-    for (const [domain, ips] of Object.entries(snapshot.visitors ?? {})) {
-      visitors.set(domain, new Map(Object.entries(ips as Record<string, { count: number; last: number }>)));
+    if (hitsMap.size > 0) hits.set(domain, hitsMap);
+
+    const visitorsMap = new Map<string, { count: number; last: number }>(Object.entries(snapshot.visitors ?? {}));
+    if (visitorsMap.size > 0) visitors.set(domain, visitorsMap);
+
+    const uptimeMap = new Map<number, boolean>();
+    for (const [slot, up] of Object.entries(snapshot.uptime ?? {})) {
+      const s = Number(slot);
+      if (s >= now - UPTIME_SLOTS) uptimeMap.set(s, up);
     }
-    for (const [domain, slots] of Object.entries(snapshot.uptime ?? {})) {
-      const m = new Map<number, boolean>();
-      for (const [slot, up] of Object.entries(slots)) {
-        const s = Number(slot);
-        if (s >= now - UPTIME_SLOTS) m.set(s, up as boolean);
-      }
-      if (m.size > 0) uptime.set(domain, m);
-    }
+    if (uptimeMap.size > 0) uptime.set(domain, uptimeMap);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`Failed to parse analytics snapshot: ${message}`);
+    console.error(`Failed to parse analytics snapshot for ${user}/${domain}: ${message}`);
   }
 }
 
-export async function saveAnalytics(): Promise<void> {
+export async function saveAnalytics(user: string, domain: string): Promise<void> {
   const snapshot: AnalyticsSnapshot = { hits: {}, visitors: {}, uptime: {} };
-  for (const [domain, m] of hits.entries()) {
-    snapshot.hits[domain] = Object.fromEntries(m);
-  }
-  for (const [domain, m] of visitors.entries()) {
-    snapshot.visitors[domain] = Object.fromEntries(m);
-  }
-  for (const [domain, m] of uptime.entries()) {
-    snapshot.uptime[domain] = Object.fromEntries(m);
-  }
+  const domainHits = hits.get(domain);
+  if (domainHits) snapshot.hits = Object.fromEntries(domainHits);
+  const domainVisitors = visitors.get(domain);
+  if (domainVisitors) snapshot.visitors = Object.fromEntries(domainVisitors);
+  const domainUptime = uptime.get(domain);
+  if (domainUptime) snapshot.uptime = Object.fromEntries(domainUptime);
   try {
-    await Deno.writeTextFile(ANALYTICS_PATH, JSON.stringify(snapshot));
+    await Deno.writeTextFile(analyticsPath(user, domain), JSON.stringify(snapshot));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`Failed to save analytics snapshot: ${message}`);
+    console.error(`Failed to save analytics snapshot for ${user}/${domain}: ${message}`);
   }
 }
 
