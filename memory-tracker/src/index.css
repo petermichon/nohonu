@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+body {
+  font-family: system-ui;
+  margin: 0;
+  padding: 0;
+  @apply bg-neutral-950 text-neutral-400;
+}
+
+/* React Flow Controls styling */
+.react-flow__controls {
+  @apply bg-neutral-900 border border-neutral-800 rounded-md gap-1;
+}
+
+.react-flow__controls-button {
+  @apply bg-neutral-900 border border-neutral-800 fill-neutral-400 rounded;
+}
+
+.react-flow__controls-button:hover {
+  @apply bg-neutral-800;
+}
+
+/* React Flow Background styling */
+.react-flow__background {
+  opacity: 0.4;
+}
