@@ -141,6 +141,7 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
         <div className="flex gap-2">
           <input
             type="text"
+            name="custom-domain"
             value={newCustomDomain}
             onChange={(e) => setNewCustomDomain(e.target.value)}
             placeholder="example.com"

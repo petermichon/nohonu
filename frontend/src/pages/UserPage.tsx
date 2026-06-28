@@ -572,6 +572,7 @@ export default function UserPage() {
                       <input
                         type="text"
                         id="displayName"
+                        name="displayName"
                         value={editingDisplayName || displayName || ''}
                         onChange={(e) => setEditingDisplayName(e.target.value)}
                         placeholder="Enter display name"
@@ -587,7 +588,7 @@ export default function UserPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Username</label>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Username</p>
                     <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">@{username || 'Not set'}</p>
                   </div>
                 </div>
@@ -600,7 +601,7 @@ export default function UserPage() {
                 </h2>
                 <div className="space-y-4 max-w-md">
                   <div>
-                    <label className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Email</label>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Email</p>
                     <p className="text-sm text-zinc-950 dark:text-zinc-100">{email || 'Not set'}</p>
                   </div>
                 </div>
@@ -611,7 +612,27 @@ export default function UserPage() {
                   <Key className="w-5 h-5" />
                   Password
                 </h2>
-                <div className="space-y-4 max-w-md">
+                <form
+                  className="space-y-4 max-w-md"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    savePassword();
+                  }}
+                >
+                  <div>
+                    <label htmlFor="username" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      autoComplete="username"
+                      value={username || ''}
+                      readOnly
+                      className="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-600 dark:text-zinc-400 focus:outline-none cursor-not-allowed"
+                    />
+                  </div>
                   <div>
                     <label htmlFor="currentPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
                       Current Password
@@ -620,6 +641,7 @@ export default function UserPage() {
                       type="password"
                       id="currentPassword"
                       name="currentPassword"
+                      autoComplete="current-password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="••••••••"
@@ -634,6 +656,7 @@ export default function UserPage() {
                       type="password"
                       id="newPassword"
                       name="newPassword"
+                      autoComplete="new-password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="••••••••"
@@ -649,14 +672,14 @@ export default function UserPage() {
                         type="password"
                         id="confirmPassword"
                         name="confirmPassword"
+                        autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="••••••••"
                         className="flex-1 px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                       />
                       <button
-                        type="button"
-                        onClick={savePassword}
+                        type="submit"
                         className="px-4 py-2.5 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer"
                       >
                         {passwordStatus === 'saved' ? 'Saved' : passwordStatus === 'error' ? 'Error' : 'Change'}
@@ -668,7 +691,7 @@ export default function UserPage() {
                       </p>
                     )}
                   </div>
-                </div>
+                </form>
               </div>
             </div>
           </section>

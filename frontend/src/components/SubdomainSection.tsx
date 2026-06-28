@@ -56,6 +56,7 @@ export function SubdomainSection({ subdomain, siteLoading }: SubdomainSectionPro
           <>
             <input
               type="text"
+              name="subdomain"
               value={editingSubdomain}
               onChange={(e) => setEditingSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
               placeholder="subdomain"

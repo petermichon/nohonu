@@ -100,7 +100,12 @@ export default function Account() {
             <Server className="w-5 h-5" />
             Connection
           </h2>
-          <div className="space-y-4">
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
+          >
             <div>
               <label htmlFor="apiUrl" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
                 API URL
@@ -204,7 +209,7 @@ export default function Account() {
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires an API key</p>
               )}
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </section>
