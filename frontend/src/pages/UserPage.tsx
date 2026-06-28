@@ -1,6 +1,6 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, UserCircle, Key } from 'lucide-react';
+import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, Key } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { useSites, useDomains } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
@@ -14,15 +14,7 @@ export default function UserPage() {
   const accentColorValues = getAccentColorValues();
   const { username } = useParams<{ username: string }>();
   const location = useLocation();
-  const {
-    displayName,
-    username: loggedInUsername,
-    email,
-    setDisplayName,
-    apiBase,
-    apiKey,
-    sessionId,
-  } = useConnection();
+  const { displayName, username: loggedInUsername, setDisplayName, apiBase, apiKey, sessionId } = useConnection();
   const { sites, loading, error } = useSites();
   const { domains, loading: domainsLoading } = useDomains();
   const { apiFetch } = useApi();
@@ -590,19 +582,6 @@ export default function UserPage() {
                   <div>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Username</p>
                     <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">@{username || 'Not set'}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-4 flex items-center gap-2">
-                  <UserCircle className="w-5 h-5" />
-                  Account
-                </h2>
-                <div className="space-y-4 max-w-md">
-                  <div>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Email</p>
-                    <p className="text-sm text-zinc-950 dark:text-zinc-100">{email || 'Not set'}</p>
                   </div>
                 </div>
               </div>

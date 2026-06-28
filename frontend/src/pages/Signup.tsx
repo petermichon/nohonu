@@ -12,7 +12,7 @@ function Signup() {
   const { setSessionId, setUsername } = useConnection();
   const { apiFetch } = useApi();
   const navigate = useNavigate();
-  const [email, setEmailState] = useState('');
+  const [username, setUsernameState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -21,11 +21,11 @@ function Signup() {
 
   // Signup mutation
   const signupMutation = useMutation({
-    mutationFn: async ({ email, password, username }: { email: string; password: string; username: string }) => {
+    mutationFn: async ({ username, password }: { username: string; password: string }) => {
       const res = await apiFetch('/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, username }),
+        body: JSON.stringify({ username, password }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -189,19 +189,10 @@ function Signup() {
     };
   }, []);
 
-  const generateUsername = (email: string): string => {
-    const base = email
-      .split('@')[0]
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '');
-    return base;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const username = generateUsername(email);
-    signupMutation.mutate({ email, password, username });
+    signupMutation.mutate({ username, password });
   };
 
   return (
@@ -228,14 +219,14 @@ function Signup() {
 
             <div>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmailState(e.target.value)}
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsernameState(e.target.value)}
                 className={`${inputBaseClass} ${accentColorValues.focus}`}
-                placeholder="Email Address"
+                placeholder="Username"
                 required
-                autoComplete="email"
+                autoComplete="username"
               />
             </div>
 

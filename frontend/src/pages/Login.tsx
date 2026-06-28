@@ -12,7 +12,7 @@ function Login() {
   const { setSessionId, setUsername } = useConnection();
   const { apiFetch } = useApi();
   const navigate = useNavigate();
-  const [email, setEmailState] = useState('');
+  const [username, setUsernameState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -22,11 +22,11 @@ function Login() {
 
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+    mutationFn: async ({ username, password }: { username: string; password: string }) => {
       const res = await apiFetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -193,7 +193,7 @@ function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    loginMutation.mutate({ email, password });
+    loginMutation.mutate({ username, password });
   };
 
   return (
@@ -220,14 +220,14 @@ function Login() {
 
             <div>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmailState(e.target.value)}
-                className={`${inputBaseClass} ${accentColorValues.focus}`}
-                placeholder="Email Address"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsernameState(e.target.value)}
+                className={`${inputBaseClass} focus:ring-zinc-950 dark:focus:ring-zinc-100`}
+                placeholder="Username"
                 required
-                autoComplete="email"
+                autoComplete="username"
               />
             </div>
 
@@ -237,7 +237,7 @@ function Login() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`${inputBaseClass} pr-12 ${accentColorValues.focus}`}
+                className={`${inputBaseClass} pr-12 focus:ring-zinc-950 dark:focus:ring-zinc-100`}
                 placeholder="Password"
                 required
                 autoComplete="current-password"
@@ -311,7 +311,10 @@ function Login() {
                 </div>
                 Remember me
               </label>
-              <Link to="/forgot-password" className={accentColorValues.link}>
+              <Link
+                to="/forgot-password"
+                className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
+              >
                 Forgot password?
               </Link>
             </div>

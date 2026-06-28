@@ -10,18 +10,18 @@ export interface LoginResult {
 }
 
 export async function login(
-  email: string,
+  username: string,
   password: string,
   deviceInfo?: string,
   userAgent?: string,
   ip?: string,
 ): Promise<LoginResult> {
-  const user = await users.validateUser(email, password);
+  const user = await users.validateUser(username, password);
 
   if (!user) {
     return {
       success: false,
-      error: 'Invalid email or password',
+      error: 'Invalid username or password',
     };
   }
 

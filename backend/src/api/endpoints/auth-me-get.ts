@@ -20,7 +20,6 @@ export async function authMe(req: Request): Promise<Response> {
   return json(
     {
       user: {
-        email: result.user.email,
         username: result.user.username,
         displayName: result.user.displayName,
       },

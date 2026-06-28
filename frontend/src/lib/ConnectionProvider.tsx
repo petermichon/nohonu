@@ -6,7 +6,6 @@ interface Connection {
   sessionId: string;
   username: string;
   displayName: string;
-  email: string;
 }
 
 interface ConnectionContextType extends Connection {
@@ -25,7 +24,6 @@ const DEFAULT: Connection = {
   sessionId: '',
   username: '',
   displayName: '',
-  email: '',
 };
 
 function load(): Connection {
@@ -40,7 +38,6 @@ function load(): Connection {
       sessionId: sessionId ?? DEFAULT.sessionId,
       username: username ?? DEFAULT.username,
       displayName: DEFAULT.displayName,
-      email: DEFAULT.email,
     };
   } catch {
     /* ignore */
@@ -68,7 +65,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
               ...prev,
               username: data.user?.username || '',
               displayName: data.user?.displayName || '',
-              email: data.user?.email || '',
             }));
           }
         } catch {
@@ -113,7 +109,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('apiKey');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('username');
-    setConnectionState((prev) => ({ ...prev, apiKey: '', sessionId: '', username: '', displayName: '', email: '' }));
+    setConnectionState((prev) => ({ ...prev, apiKey: '', sessionId: '', username: '', displayName: '' }));
   };
 
   return (
