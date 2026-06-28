@@ -13,5 +13,15 @@ export async function getSiteInfo(req: Request, { domain }: RouteContext): Promi
   if (!info) {
     return error('Site not found', 404);
   }
-  return json({ domain, enabled: info.enabled, subdomain: info.subdomain, subdomainBase: SUBDOMAIN_BASE });
+
+  // Derive subdomainBase from request host if not set via environment variable
+  let subdomainBase = SUBDOMAIN_BASE;
+  if (subdomainBase === 'localhost:8080') {
+    const url = new URL(req.url);
+    const host = url.hostname;
+    const port = url.port;
+    subdomainBase = port ? `${host}:${port}` : host;
+  }
+
+  return json({ domain, enabled: info.enabled, subdomain: info.subdomain, subdomainBase });
 }
