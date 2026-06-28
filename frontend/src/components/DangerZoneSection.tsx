@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { Site } from '../lib/types.ts';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
@@ -13,9 +14,11 @@ interface DangerZoneSectionProps {
 
 export function DangerZoneSection({ site, actionLoading, onRequestDelete }: DangerZoneSectionProps) {
   const [allowDeletion, setAllowDeletion] = useState(false);
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
 
   return (
-    <div className="mt-6 border-2 border-red-500 p-4 rounded-xl">
+    <div className="border-2 p-4 rounded-xl" style={{ borderColor: `rgb(${accentColorValues.rgb})` }}>
       <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">{SECTION_MAP['actions'].label}</h2>
       <div>
         <div className="text-sm text-zinc-700 dark:text-zinc-300 flex items-center justify-between">
@@ -35,7 +38,13 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
                 disabled={actionLoading || !site}
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-red-200 dark:bg-red-900/50 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-red-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+              <div
+                className="w-9 h-5 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: `rgba(${accentColorValues.rgb}, 0.25)`,
+                  borderColor: `rgb(${accentColorValues.rgb})`,
+                }}
+              ></div>
             </div>
           </label>
         </div>
@@ -54,7 +63,8 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
               type="button"
               onClick={onRequestDelete}
               disabled={actionLoading || !site || site.enabled || !allowDeletion}
-              className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-white shrink-0"
+              className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 shrink-0 hover:opacity-80"
+              style={{ color: `rgb(${accentColorValues.rgb})` }}
             >
               <Trash2 className="w-4 h-4" />
               Delete Site Permanently

@@ -132,42 +132,11 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
   };
 
   return (
-    <div className="mt-6">
+    <div className="max-w-md">
       <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">
         {SECTION_MAP['custom-domains'].label}
       </h2>
       <div className="space-y-4">
-        {/* DNS Instructions */}
-        {verificationToken && (
-          <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-            <button
-              type="button"
-              onClick={() => setShowDnsInstructions(!showDnsInstructions)}
-              className="flex items-center justify-between w-full text-left"
-            >
-              <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">DNS Setup Instructions</span>
-              <span className="text-xs text-zinc-400 dark:text-zinc-500">{showDnsInstructions ? 'Hide' : 'Show'}</span>
-            </button>
-            {showDnsInstructions && (
-              <div className="mt-3 space-y-2 text-xs">
-                <div className="p-2 rounded bg-zinc-100 dark:bg-zinc-800">
-                  <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">TXT Record (for verification):</p>
-                  <code className="block text-zinc-600 dark:text-zinc-400 break-all">
-                    _nohonu.{newCustomDomain || 'example.com'} → {verificationToken}
-                  </code>
-                </div>
-                <div className="p-2 rounded bg-zinc-100 dark:bg-zinc-800">
-                  <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">CNAME Record (or A Record):</p>
-                  <code className="block text-zinc-600 dark:text-zinc-400">
-                    {newCustomDomain || 'example.com'} → {host}
-                  </code>
-                  <p className="mt-1 text-zinc-500 dark:text-zinc-500">Or A record to your server IP</p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Add domain input */}
         <div className="flex gap-2">
           <input
@@ -196,7 +165,43 @@ export function CustomDomainsSection({ domain }: CustomDomainsSectionProps) {
             <div className="h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
           </div>
         ) : customDomains.length === 0 ? (
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">No custom domains configured</p>
+          <>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">No custom domains configured</p>
+            {/* DNS Instructions */}
+            {verificationToken && (
+              <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setShowDnsInstructions(!showDnsInstructions)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">DNS Setup Instructions</span>
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                    {showDnsInstructions ? 'Hide' : 'Show'}
+                  </span>
+                </button>
+                {showDnsInstructions && (
+                  <div className="mt-3 space-y-2 text-xs">
+                    <div className="p-2 rounded bg-zinc-100 dark:bg-zinc-800">
+                      <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                        TXT Record (for verification):
+                      </p>
+                      <code className="block text-zinc-600 dark:text-zinc-400 break-all">
+                        _nohonu.{newCustomDomain || 'example.com'} → {verificationToken}
+                      </code>
+                    </div>
+                    <div className="p-2 rounded bg-zinc-100 dark:bg-zinc-800">
+                      <p className="font-medium text-zinc-700 dark:text-zinc-300 mb-1">CNAME Record (or A Record):</p>
+                      <code className="block text-zinc-600 dark:text-zinc-400">
+                        {newCustomDomain || 'example.com'} → {host}
+                      </code>
+                      <p className="mt-1 text-zinc-500 dark:text-zinc-500">Or A record to your server IP</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         ) : (
           <div className="space-y-2">
             {customDomains.map((cd) => (

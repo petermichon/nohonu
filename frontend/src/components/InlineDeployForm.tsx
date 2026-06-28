@@ -16,6 +16,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const accentColorValues = getAccentColorValues();
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
   const [newDomain, setNewDomain] = useState('');
+  const [newSubdomain, setNewSubdomain] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -25,9 +26,12 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
 
   // Upload mutation
   const uploadMutation = useMutation({
-    mutationFn: async ({ file, domain }: { file: File; domain: string }) => {
+    mutationFn: async ({ file, domain, subdomain }: { file: File; domain: string; subdomain: string }) => {
       const formData = new FormData();
       formData.append('zip', file);
+      if (subdomain) {
+        formData.append('subdomain', subdomain);
+      }
       const res = await apiFetch(`/sites/${domain}`, { method: 'POST', body: formData });
       const data = await res.json();
       if (!data.success) {
@@ -46,11 +50,25 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
 
   // GitHub fetch mutation
   const fetchGithubMutation = useMutation({
-    mutationFn: async ({ domain, repo, branch }: { domain: string; repo: string; branch: string }) => {
+    mutationFn: async ({
+      domain,
+      repo,
+      branch,
+      subdomain,
+    }: {
+      domain: string;
+      repo: string;
+      branch: string;
+      subdomain: string;
+    }) => {
+      const body: { repo: string; branch: string; subdomain?: string } = { repo, branch };
+      if (subdomain) {
+        body.subdomain = subdomain;
+      }
       const res = await apiFetch(`/sites/${domain}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repo, branch }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!data.success) {
@@ -70,6 +88,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const reset = () => {
     setUploadMode('file');
     setNewDomain('');
+    setNewSubdomain('');
     setSelectedFile(null);
     setIsDragging(false);
     setUploadError(null);
@@ -106,7 +125,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
       return;
     }
     setUploadError(null);
-    uploadMutation.mutate({ file: selectedFile, domain: newDomain });
+    uploadMutation.mutate({ file: selectedFile, domain: newDomain, subdomain: newSubdomain });
   };
 
   const handleFetchGithub = () => {
@@ -115,7 +134,12 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
       return;
     }
     setUploadError(null);
-    fetchGithubMutation.mutate({ domain: newDomain, repo: githubRepo, branch: githubBranch || 'main' });
+    fetchGithubMutation.mutate({
+      domain: newDomain,
+      repo: githubRepo,
+      branch: githubBranch || 'main',
+      subdomain: newSubdomain,
+    });
   };
 
   return (
@@ -164,9 +188,24 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               name="domain"
               value={newDomain}
               onChange={(e) => setNewDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-              placeholder="subdomain"
+              placeholder="deployment-name"
               className="w-full pl-10 pr-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
               autoFocus
+            />
+          </div>
+        </div>
+
+        {/* Subdomain input */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              id="subdomain"
+              name="subdomain"
+              value={newSubdomain}
+              onChange={(e) => setNewSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+              placeholder="subdomain (optional)"
+              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
             />
           </div>
           <span className="text-zinc-400 dark:text-zinc-500 text-sm shrink-0">.{host}</span>

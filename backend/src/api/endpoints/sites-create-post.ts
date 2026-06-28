@@ -11,6 +11,7 @@ export async function createSite(req: Request, { domain }: RouteContext): Promis
 
   const formData = await req.formData();
   const zipFile = formData.get('zip');
+  const subdomain = formData.get('subdomain') as string | null;
 
   if (!(zipFile instanceof File)) {
     return error('Missing zip file');
@@ -26,6 +27,10 @@ export async function createSite(req: Request, { domain }: RouteContext): Promis
   try {
     const result = await sites.createSite(username, domain, zipData);
     await sites.setSiteAccount(username, domain, username);
+    // Set custom subdomain if provided
+    if (subdomain) {
+      await sites.updateSiteMeta(username, domain, { subdomain });
+    }
     return json({ success: true, domain, index: result.index }, 201);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create site';

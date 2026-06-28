@@ -1,7 +1,7 @@
 import { Eye, AlertCircle } from 'lucide-react';
 import { useSites } from '../lib/api.ts';
 import { formatHits } from '../lib/utils.ts';
-import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
+import { ExploreSiteCard } from '../components/ExploreSiteCard.tsx';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 
 function Explore() {
@@ -117,7 +117,7 @@ function Explore() {
       {!loading && !error && sites.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-6">
           {sites.map((site) => (
-            <HomeSiteCard key={site.domain} site={site} />
+            <ExploreSiteCard key={site.domain} site={site} />
           ))}
         </div>
       )}

@@ -50,7 +50,7 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
-export async function listSites(user: string): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }>> {
+export async function listSites(user: string): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string; subdomain?: string }>> {
   const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
@@ -62,14 +62,15 @@ export async function listSites(user: string): Promise<Array<{ domain: string; e
         uptime: analytics.getUptimePct(domain),
         accent: data?.accent,
         account: data?.account,
+        subdomain: data?.subdomain,
       };
     })
   );
 }
 
-export async function listAllSites(): Promise<{ user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }[]> {
+export async function listAllSites(): Promise<{ user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string; subdomain?: string }[]> {
   const users = await storage.listUsers();
-  const allSites: { user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string }[] = [];
+  const allSites: { user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; accent?: string; account?: string; subdomain?: string }[] = [];
   
   for (const user of users) {
     const domains = await storage.listDomains(user);
@@ -83,6 +84,7 @@ export async function listAllSites(): Promise<{ user: string; domain: string; en
         uptime: analytics.getUptimePct(domain),
         accent: data?.accent,
         account: data?.account,
+        subdomain: data?.subdomain,
       });
     }
   }
@@ -112,10 +114,10 @@ export async function checkDomain(user: string, rawDomain: string): Promise<bool
   return !!data && data.currentIndex !== null;
 }
 
-export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean } | null> {
+export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string } | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) return null;
-  return { enabled: data.enabled };
+  return { enabled: data.enabled, subdomain: data.subdomain };
 }
 
 export async function downloadActiveVersion(user: string, domain: string): Promise<{ file: Deno.FsFile; filename: string } | null> {
@@ -151,18 +153,18 @@ export async function getSiteIcon(user: string, domain: string): Promise<{ data:
 }
 
 // Get site metadata (accent color)
-export async function getSiteMeta(user: string, domain: string): Promise<{ accent?: string } | null> {
+export async function getSiteMeta(user: string, domain: string): Promise<{ accent?: string; subdomain?: string } | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return null;
   }
-  return { accent: data.accent };
+  return { accent: data.accent, subdomain: data.subdomain };
 }
 
 export async function updateSiteMeta(
   user: string,
   domain: string,
-  updates: { accent?: string | undefined },
+  updates: { accent?: string | undefined; subdomain?: string | undefined },
 ): Promise<UsecaseResult<void>> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
@@ -173,6 +175,13 @@ export async function updateSiteMeta(
     return { ok: false, error: 'Invalid accent color', status: 400 };
   }
   data.accent = updates.accent;
+
+  if (updates.subdomain !== undefined) {
+    if (!VALID_DOMAIN.test(updates.subdomain)) {
+      return { ok: false, error: 'Invalid subdomain', status: 400 };
+    }
+    data.subdomain = updates.subdomain;
+  }
 
   await storage.writeSiteMetadata(user, domain, data);
   return { ok: true, value: undefined };
@@ -400,6 +409,8 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
   data.currentIndex = index;
+  // Set default subdomain as username-domain
+  data.subdomain = `${user}-${domain}`;
 
   // Create directories and files
   await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
@@ -465,6 +476,8 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
   data.currentIndex = index;
+  // Set default subdomain as username-domain
+  data.subdomain = `${user}-${domain}`;
 
   // Create directories and files
   await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
@@ -554,7 +567,7 @@ export async function serveSiteFile(user: string, domain: string, filePath: stri
 export async function resolveDomainAndServe(host: string, path: string): Promise<{ user: string; domain: string; filePath: string } | null> {
   console.assert(typeof host === 'string' && host.length > 0, 'host must be a non-empty string');
   console.assert(typeof path === 'string', 'path must be a string');
-  
+
   // Check custom domain registry first
   const cache = await getCustomDomainCache();
   const mappedDomain = cache.get(host);
@@ -569,18 +582,21 @@ export async function resolveDomainAndServe(host: string, path: string): Promise
       }
     }
   }
-  
-  const subdomainMatch = host.match(/^([^.]+)\./);
 
-  if (subdomainMatch && subdomainMatch[1] && !['www', 'localhost'].includes(subdomainMatch[1])) {
-    const domain = subdomainMatch[1];
-    // Find which user owns this domain
+  // Check for subdomain-based routing
+  const subdomainMatch = host.match(/^([^.]+)\./);
+  if (subdomainMatch && subdomainMatch[1] && !['www'].includes(subdomainMatch[1])) {
+    const subdomain = subdomainMatch[1];
+    // Find which site has this subdomain in its metadata
     const users = await storage.listUsers();
     for (const user of users) {
       const domains = await storage.listDomains(user);
-      if (domains.includes(domain)) {
-        const filePath = path === '/' ? '/index.html' : path;
-        return { user, domain, filePath };
+      for (const domain of domains) {
+        const info = await storage.readSiteMetadata(user, domain);
+        if (info && info.subdomain === subdomain && info.currentIndex !== null) {
+          const filePath = path === '/' ? '/index.html' : path;
+          return { user, domain, filePath };
+        }
       }
     }
   }

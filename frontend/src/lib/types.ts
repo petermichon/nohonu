@@ -8,6 +8,8 @@ export interface Site {
   accent?: string;
   account?: string;
   customDomains?: { domain: string; verified: boolean }[];
+  subdomain?: string;
+  subdomainBase?: string;
 }
 
 export type VersionSource = { type: 'upload' } | { type: 'github'; repo: string; branch: string };

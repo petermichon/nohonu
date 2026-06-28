@@ -22,7 +22,11 @@ function extractedDir(user: string, domain: string): string {
 }
 
 function extractedFilePath(user: string, domain: string, filePath: string): string {
-  return `${extractedDir(user, domain)}/${filePath}`;
+  // Remove leading slashes and normalize
+  const cleanPath = filePath.replace(/^\/+/, '');
+  const dir = extractedDir(user, domain);
+  // Ensure no double slashes
+  return `${dir}/${cleanPath}`.replace(/\/+/g, '/');
 }
 
 export const VALID_ACCENT = /^#[0-9a-fA-F]{6}$/;
@@ -174,7 +178,28 @@ export async function versionExists(user: string, domain: string, index: number)
 // Low-level: Check if extracted site exists
 export async function extractedSiteExists(user: string, domain: string): Promise<boolean> {
   const data = await readSiteMetadata(user, domain);
-  return data?.extracted ?? false;
+  if (!data?.extracted) return false;
+  // Also check if the directory actually exists on disk
+  const dir = extractedDir(user, domain);
+  try {
+    await Deno.stat(dir);
+    // Also check if index.html exists
+    const indexPath = extractedFilePath(user, domain, 'index.html');
+    try {
+      await Deno.stat(indexPath);
+      return true;
+    } catch {
+      // index.html doesn't exist, treat as not extracted
+      data.extracted = false;
+      await writeSiteMetadata(user, domain, data);
+      return false;
+    }
+  } catch {
+    // Directory doesn't exist, update metadata
+    data.extracted = false;
+    await writeSiteMetadata(user, domain, data);
+    return false;
+  }
 }
 
 // Low-level: Read an extracted file
@@ -192,7 +217,8 @@ export async function readExtractedFile(user: string, domain: string, filePath: 
 // Low-level: Extract files to site directory
 export async function extractFiles(user: string, domain: string, files: Record<string, Uint8Array>): Promise<void> {
   try {
-    await Deno.mkdir(extractedDir(user, domain), { recursive: true });
+    const targetDir = extractedDir(user, domain);
+    await Deno.mkdir(targetDir, { recursive: true });
 
     // Detect common root folder (e.g., repo-main/ in GitHub zips)
     const paths = Object.keys(files);

@@ -1,5 +1,6 @@
 const sitesDir = Deno.env.get('SITES_DIR') ?? `${import.meta.dirname}/../../data`;
 export const SITES_DIR = sitesDir;
+export const SUBDOMAIN_BASE = Deno.env.get('SUBDOMAIN_BASE') ?? 'localhost:8080';
 export const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 export const VALID_CUSTOM_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;
 export const MAX_CUSTOM_DOMAIN_LENGTH = 253;
@@ -24,6 +25,7 @@ export type SiteData = {
   versions: Record<string, VersionEntry>;
   extracted: boolean;
   customDomains?: CustomDomainEntry[];
+  subdomain?: string;
 };
 
 export async function fileExists(path: string): Promise<boolean> {

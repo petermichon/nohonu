@@ -13,7 +13,7 @@ export async function createSiteFromGithub(req: Request, { domain }: RouteContex
     return error('Missing username', 401);
   }
 
-  const body = await parseJson<{ repo?: unknown; branch?: unknown }>(req);
+  const body = await parseJson<{ repo?: unknown; branch?: unknown; subdomain?: unknown }>(req);
   if (body instanceof Response) {
     return body;
   }
@@ -24,10 +24,15 @@ export async function createSiteFromGithub(req: Request, { domain }: RouteContex
   }
 
   const ref = typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main';
+  const subdomain = typeof body.subdomain === 'string' ? body.subdomain : null;
 
   try {
     const result = await sites.createSiteFromGithub(username, domain, repo, ref);
     await sites.setSiteAccount(username, domain, username);
+    // Set custom subdomain if provided
+    if (subdomain) {
+      await sites.updateSiteMeta(username, domain, { subdomain });
+    }
     return json({ domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create site from GitHub';

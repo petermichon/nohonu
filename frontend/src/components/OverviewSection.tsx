@@ -106,7 +106,9 @@ export function OverviewSection({
                       : 'text-zinc-300 dark:text-zinc-600 pointer-events-none'
                   }`}
                 >
-                  {site.domain}.{host}
+                  {site.subdomain
+                    ? `${site.subdomain}.${site.subdomainBase || host}`
+                    : `${site.domain}.${site.subdomainBase || host}`}
                   {site.enabled && <ExternalLink className="w-3 h-3" />}
                 </a>
                 {totalHits > 0 && (

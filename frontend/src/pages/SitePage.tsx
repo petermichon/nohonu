@@ -13,6 +13,7 @@ import { VersionPanel } from '../components/VersionPanel.tsx';
 import { CustomDomainsSection } from '../components/CustomDomainsSection.tsx';
 import { DangerZoneSection } from '../components/DangerZoneSection.tsx';
 import { AccentSection } from '../components/AccentSection.tsx';
+import { SubdomainSection } from '../components/SubdomainSection.tsx';
 import { OverviewSection } from '../components/OverviewSection.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 import { useSiteData } from '../hooks/useSiteData.ts';
@@ -205,7 +206,10 @@ function SitePage() {
     downloadVersionMutation.mutate({ domain: site.domain, timestamp });
   };
 
-  const siteUrl = `${protocol}//${site?.domain}.${host}`;
+  const subdomainBase = site?.subdomainBase || host;
+  const siteUrl = site?.subdomain
+    ? `${protocol}//${site.subdomain}.${subdomainBase}`
+    : `${protocol}//${site?.domain}.${subdomainBase}`;
 
   if (notFound) {
     return (
@@ -371,7 +375,8 @@ function SitePage() {
       )}
 
       {activeTab === 'domains' && (
-        <section className="max-w-7xl mx-auto px-6 py-8">
+        <section className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
+          <SubdomainSection subdomain={site?.subdomain || null} siteLoading={siteLoading} />
           <CustomDomainsSection domain={actualDomain!} />
         </section>
       )}
