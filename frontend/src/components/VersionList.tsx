@@ -12,7 +12,6 @@ interface VersionListProps {
   onActivate: (index: number) => void;
   onDelete: (index: number) => void;
   onDownload: (index: number) => void;
-  accent?: string | null;
 }
 
 export function VersionList({
@@ -23,13 +22,9 @@ export function VersionList({
   onActivate,
   onDelete,
   onDownload,
-  accent,
 }: VersionListProps) {
-  const { accentColor: globalAccentColor } = useAccentColor();
-  const effectiveAccent = accent || globalAccentColor;
-  const accentStyle = effectiveAccent
-    ? { bg: `${effectiveAccent}22`, color: effectiveAccent, border: `${effectiveAccent}33` }
-    : null;
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   return (
     <div className="space-y-1">
       {versions.map((v) => {
@@ -38,27 +33,10 @@ export function VersionList({
         const isDeleting = deletingVersion === v.index;
         const date = new Date(v.createdAt);
         return (
-          <div
-            key={v.index}
-            className={`flex items-center justify-between px-3 py-2.5 rounded-xl border ${
-              isCurrent
-                ? accentStyle
-                  ? ''
-                  : 'border-green-200 dark:border-green-800/50 bg-green-50/50 dark:bg-green-900/10'
-                : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700'
-            }`}
-            style={
-              isCurrent && accentStyle
-                ? { borderColor: accentStyle.border, backgroundColor: accentStyle.bg }
-                : undefined
-            }
-          >
+          <div key={v.index} className="flex items-center justify-between px-3 py-2.5 rounded-xl">
             <div className="flex items-center gap-3 min-w-0">
               {isCurrent ? (
-                <CheckCircle2
-                  className={`w-4 h-4 shrink-0 ${accentStyle ? '' : 'text-green-400 dark:text-green-300'}`}
-                  style={accentStyle ? { color: accentStyle.color } : undefined}
-                />
+                <CheckCircle2 className={`w-4 h-4 shrink-0 ${accentColorValues.text}`} />
               ) : (
                 <Clock className="w-4 h-4 shrink-0 text-zinc-300 dark:text-zinc-600" />
               )}
@@ -71,10 +49,11 @@ export function VersionList({
                   </p>
                   {isCurrent && (
                     <span
-                      className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${accentStyle ? '' : 'bg-green-200 dark:bg-green-900/40 text-green-600 dark:text-green-300'}`}
-                      style={accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined}
+                      className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                        accentColorValues.bgLight
+                      }`}
                     >
-                      Online
+                      <span className={accentColorValues.text}>Online</span>
                     </span>
                   )}
                   {v.source?.type === 'github' ? (

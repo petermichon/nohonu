@@ -5,7 +5,6 @@ export interface Site {
   enabled: boolean;
   hits: number;
   uptime: number | null;
-  accent?: string;
   account?: string;
   customDomains?: { domain: string; verified: boolean }[];
   subdomain?: string;

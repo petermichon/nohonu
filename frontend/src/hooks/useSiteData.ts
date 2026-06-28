@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../lib/api.ts';
 import { usePollData } from '../lib/usePollData.ts';
-import { extractAccentColor } from '../lib/extractColor.ts';
 import { SLOT_MS } from '../lib/types.ts';
 import { getGroupMinutes, getSlotsForRange } from '../lib/utils.ts';
 import type { Site, Version, Slot, Visitor, UptimeSlot, TimeRange, UptimeRange } from '../lib/types.ts';
@@ -21,8 +20,6 @@ export interface SiteDataReturn {
   uptimeAllData: UptimeSlot[];
   uptimeRange: UptimeRange;
   setUptimeRange: (r: UptimeRange) => void;
-  accent: string | null;
-  saveAccent: (color: string | null) => void;
   versions: Version[];
   versionsLoading: boolean;
   currentVersion: number | null;
@@ -33,10 +30,10 @@ export interface SiteDataReturn {
 }
 
 export function useSiteData(domain: string): SiteDataReturn {
-  const { apiFetch, apiBase } = useApi();
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
   const [statsRange, setStatsRange] = useState<TimeRange>(60);
   const [uptimeRange, setUptimeRange] = useState<UptimeRange>(60);
-  const [accent, setAccent] = useState<string | null>(null);
   const uptimeMountedRef = useRef(false);
   const statsMountedRef = useRef(false);
 
@@ -127,8 +124,8 @@ export function useSiteData(domain: string): SiteDataReturn {
   }, [uptimeQuery]);
 
   const loadVersions = useCallback(async () => {
-    await versionsQuery.refetch();
-  }, [versionsQuery]);
+    await queryClient.invalidateQueries({ queryKey: ['site-versions', domain] });
+  }, [queryClient, domain]);
 
   const loadVisitors = useCallback(async () => {
     await visitorsQuery.refetch();
@@ -137,56 +134,6 @@ export function useSiteData(domain: string): SiteDataReturn {
   const loadUptimeAll = useCallback(async () => {
     await uptimeAllQuery.refetch();
   }, [uptimeAllQuery]);
-
-  // Save accent mutation
-  const saveAccentMutation = useMutation({
-    mutationFn: async (color: string) => {
-      await apiFetch(`/sites/${domain}/meta`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accent: color }),
-      });
-    },
-  });
-
-  const loadMeta = useCallback(async () => {
-    try {
-      const res = await apiFetch(`/sites/${domain}/meta`);
-      const data = await res.json();
-      const savedAccent = typeof data.accent === 'string' ? data.accent : null;
-
-      if (savedAccent) {
-        setAccent(savedAccent);
-      } else {
-        // Auto-extract accent from icon if not set
-        const iconUrl = `${apiBase}/sites/${domain}/icon`;
-        const extractedColor = await extractAccentColor(iconUrl);
-        if (extractedColor) {
-          setAccent(extractedColor);
-          // Optionally save it to the server
-          saveAccentMutation.mutate(extractedColor);
-        }
-      }
-    } catch {
-      // non-critical
-    }
-  }, [domain, apiBase, apiFetch, saveAccentMutation]);
-
-  const saveAccent = (color: string | null) => {
-    setAccent(color);
-    if (color) {
-      saveAccentMutation.mutate(color);
-    }
-  };
-
-  // Initial data load
-  const mountedRef = useRef(false);
-  useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true;
-      loadMeta();
-    }
-  }, [loadMeta]);
 
   // Reload uptime only when range changes (not on initial mount — usePollData handles that)
   useEffect(() => {
@@ -232,8 +179,6 @@ export function useSiteData(domain: string): SiteDataReturn {
     uptimeAllData: uptimeAllQuery.data ?? [],
     uptimeRange,
     setUptimeRange,
-    accent,
-    saveAccent,
     versions: versionsQuery.data?.versions ?? [],
     versionsLoading: versionsQuery.isLoading,
     currentVersion: versionsQuery.data?.current ?? null,

@@ -1,12 +1,11 @@
 import { ExternalLink, Power, Eye } from 'lucide-react';
-import { getAccentStyle } from '../lib/utils.ts';
+import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { Site } from '../lib/types.ts';
 
 interface OverviewSectionProps {
   site: Site | null;
   siteLoading: boolean;
   actionLoading: boolean;
-  accent: string | null;
   iconError: boolean;
   onIconError: () => void;
   onToggle: () => void;
@@ -21,7 +20,6 @@ export function OverviewSection({
   site,
   siteLoading,
   actionLoading,
-  accent,
   iconError,
   onIconError,
   onToggle,
@@ -31,6 +29,8 @@ export function OverviewSection({
   totalHits,
   uptimePct,
 }: OverviewSectionProps) {
+  const { getAccentColorValues } = useAccentColor();
+  const accentColorValues = getAccentColorValues();
   return siteLoading ? (
     <div className="flex items-start justify-between gap-4">
       <div className="flex items-center gap-4 min-w-0">
@@ -53,7 +53,6 @@ export function OverviewSection({
   ) : site ? (
     (() => {
       const initial = site.domain[0].toUpperCase();
-      const accentStyle = getAccentStyle(accent, site.enabled);
       const baseIconClasses =
         'shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-semibold select-none overflow-hidden';
       const enabledIconClasses = 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
@@ -81,15 +80,11 @@ export function OverviewSection({
                   className={`shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                     !site.enabled
                       ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-                      : accentStyle
-                        ? ''
-                        : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300'
+                      : `${accentColorValues.bgLight} ${accentColorValues.text}`
                   }`}
-                  style={accentStyle ? { backgroundColor: accentStyle.bg, color: accentStyle.color } : undefined}
                 >
                   <span
-                    className={`w-1.5 h-1.5 rounded-full ${!site.enabled ? 'bg-zinc-400 dark:bg-zinc-500' : accentStyle ? '' : 'bg-green-400'}`}
-                    style={accentStyle ? { backgroundColor: accentStyle.color } : undefined}
+                    className={`w-1.5 h-1.5 rounded-full ${!site.enabled ? 'bg-zinc-400 dark:bg-zinc-500' : accentColorValues.dot}`}
                   />
                   {site.enabled ? 'Online' : 'Offline'}
                 </span>
@@ -120,13 +115,8 @@ export function OverviewSection({
                 {uptimePct !== null && (
                   <span
                     className={`text-xs font-medium ${
-                      uptimePct < 90
-                        ? 'text-zinc-400 dark:text-zinc-500'
-                        : accentStyle
-                          ? ''
-                          : 'text-green-400 dark:text-green-300'
+                      uptimePct < 90 ? 'text-zinc-400 dark:text-zinc-500' : accentColorValues.text
                     }`}
-                    style={uptimePct >= 90 && accentStyle ? { color: accentStyle.color } : undefined}
                   >
                     {uptimePct}% uptime
                   </span>

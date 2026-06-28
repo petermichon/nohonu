@@ -13,7 +13,6 @@ interface VersionPanelProps {
   currentVersion: number | null;
   activating: number | null;
   deletingVersion: number | null;
-  accent: string | null;
   onActivate: (ts: number) => void;
   onDelete: (ts: number) => void;
   onDownload: (ts: number) => void;
@@ -28,7 +27,6 @@ export function VersionPanel({
   currentVersion,
   activating,
   deletingVersion,
-  accent,
   onActivate,
   onDelete,
   onDownload,
@@ -272,7 +270,6 @@ export function VersionPanel({
               onActivate={onActivate}
               onDelete={onDelete}
               onDownload={onDownload}
-              accent={accent}
             />
           )}
         </div>

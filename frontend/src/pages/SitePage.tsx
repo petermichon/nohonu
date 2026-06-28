@@ -6,13 +6,11 @@ import { ConfirmModal } from '../lib/ConfirmModal.tsx';
 import { useApi, useSites } from '../lib/api.ts';
 import { calcUptimePct } from '../lib/utils.ts';
 import { useToast } from '../lib/ToastContext.tsx';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { UptimeChart } from '../components/UptimeChart.tsx';
 import { ActivityChart } from '../components/ActivityChart.tsx';
 import { VersionPanel } from '../components/VersionPanel.tsx';
 import { CustomDomainsSection } from '../components/CustomDomainsSection.tsx';
 import { DangerZoneSection } from '../components/DangerZoneSection.tsx';
-import { AccentSection } from '../components/AccentSection.tsx';
 import { SubdomainSection } from '../components/SubdomainSection.tsx';
 import { OverviewSection } from '../components/OverviewSection.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
@@ -33,8 +31,6 @@ function SitePage() {
   const { refreshSites } = useSites();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { getAccentColorValues } = useAccentColor();
-  const accentColorValues = getAccentColorValues();
   const activeTab = (section || 'overview') as 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
 
   const {
@@ -49,8 +45,6 @@ function SitePage() {
     uptimeAllData,
     uptimeLoading,
     setUptimeRange,
-    accent,
-    saveAccent,
     versions,
     versionsLoading,
     currentVersion,
@@ -236,10 +230,8 @@ function SitePage() {
       {/* Header */}
       <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
         <div className="flex items-center gap-4 mb-4">
-          <div
-            className={`w-16 h-16 rounded-2xl ${accentColorValues.bgLight} flex items-center justify-center shrink-0`}
-          >
-            <Layout className={`w-8 h-8 ${accentColorValues.textDark}`} />
+          <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+            <Layout className="w-8 h-8 text-zinc-600 dark:text-zinc-400" />
           </div>
           <div>
             <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.domain}</h1>
@@ -323,7 +315,6 @@ function SitePage() {
             site={site}
             siteLoading={siteLoading}
             actionLoading={actionLoading}
-            accent={accent}
             iconError={iconError}
             onIconError={() => setIconError(true)}
             onToggle={() => setConfirmAction(site?.enabled ? 'disable' : 'enable')}
@@ -332,14 +323,6 @@ function SitePage() {
             apiBase={apiBase}
             totalHits={totalHits}
             uptimePct={uptimePct}
-          />
-          <AccentSection
-            accent={accent}
-            siteLoading={siteLoading}
-            onSaveAccent={(color) => {
-              saveAccent(color);
-              showToast('Accent color updated', true);
-            }}
           />
         </section>
       )}
@@ -368,7 +351,6 @@ function SitePage() {
             onRangeChange={setGlobalRange}
             onReload={() => loadUptime()}
             reloading={uptimeLoading}
-            accent={accent}
             now={now}
           />
         </section>
@@ -393,7 +375,6 @@ function SitePage() {
             currentVersion={currentVersion}
             activating={activating}
             deletingVersion={deletingVersion}
-            accent={accent}
             onActivate={(idx) => {
               const v = versions.find((v) => v.index === idx);
               setVersionModal({
