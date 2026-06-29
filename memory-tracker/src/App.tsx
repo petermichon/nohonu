@@ -1,122 +1,177 @@
-import ReactFlow, {
-  Node,
-  Edge,
-  useNodesState,
-  useEdgesState,
-  Background,
-  Controls,
-  Position,
-  Handle,
-  NodeProps,
-  NodeTypes,
-} from 'reactflow';
-import { memo } from 'react';
-import 'reactflow/dist/style.css';
+import { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
 import './index.css';
-import { fileSystem, parseFileSystem } from './fileSystem';
-
-const EndpointNode = memo(({ data }: NodeProps) => (
-  <div
-    className="rounded-lg text-sm font-normal px-4 py-2"
-    style={{
-      background: 'oklch(0.205 0 0)',
-      color: 'oklch(0.708 0 0)',
-      border: '1px solid oklch(0.269 0 0)',
-      width: '140px',
-      display: 'flex',
-      alignItems: 'center',
-    }}
-  >
-    <Handle
-      type="target"
-      position={Position.Left}
-      style={{ width: 0, height: 0, background: 'transparent', border: 'none' }}
-    />
-    <span
-      style={{
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        minWidth: 0,
-      }}
-    >
-      {data.label}
-    </span>
-    <Handle
-      type="source"
-      position={Position.Right}
-      style={{ width: 0, height: 0, background: 'transparent', border: 'none' }}
-    />
-  </div>
-));
-
-const nodeTypes: NodeTypes = {
-  endpoint: EndpointNode,
-};
-
-// Generate nodes and edges from fake file system
-const { nodes: generatedNodes, edges: generatedEdges } = parseFileSystem(fileSystem);
-
-const initialNodes: Node[] = generatedNodes;
-const initialEdges: Edge[] = generatedEdges;
+import { symbols, parseSymbols } from './fileSystem';
 
 function App() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const svgRef = useRef<SVGSVGElement>(null);
 
-  const filteredNodes = nodes;
-  const filteredEdges = edges;
+  const { nodes: generatedNodes, edges: generatedEdges } = parseSymbols(symbols);
+
+  // Extract folder names for coloring
+  const folderMap = new Map<string, string>();
+  generatedNodes.forEach((node: any) => {
+    const folder = node.data.folder || 'root';
+    folderMap.set(node.id, folder);
+  });
+
+  const folders = Array.from(new Set(Array.from(folderMap.values())));
+  const colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(folders);
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    svg.attr('viewBox', [-width / 2, -height / 2, width, height]);
+
+    const g = svg.append('g');
+    const labelGroup = svg.append('g').attr('pointer-events', 'none');
+
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0, Infinity])
+      .on('zoom', (event) => {
+        g.attr('transform', event.transform);
+        labelGroup.attr('transform', event.transform);
+      });
+
+    svg.call(zoom as any);
+
+    const simulation = d3
+      .forceSimulation(generatedNodes as any)
+      .force(
+        'link',
+        d3.forceLink(generatedEdges as any).id((d: any) => d.id)
+      )
+      .force('charge', d3.forceManyBody())
+      .force('x', d3.forceX())
+      .force('y', d3.forceY());
+
+    // Create arrowheads for each link
+    const defs = svg.append('defs');
+    generatedEdges.forEach((edge: any, i: number) => {
+      const sourceColor = colorScale(folderMap.get(edge.source.id) || 'root');
+
+      // Create arrowhead with source color
+      defs
+        .append('marker')
+        .attr('id', `arrowhead-${i}`)
+        .attr('viewBox', '-0 -5 10 10')
+        .attr('refX', 1)
+        .attr('refY', 0)
+        .attr('orient', 'auto')
+        .attr('markerWidth', 3)
+        .attr('markerHeight', 3)
+        .append('path')
+        .attr('d', 'M 0,-5 L 10,0 L 0,5')
+        .attr('fill', sourceColor);
+    });
+
+    const link = g
+      .append('g')
+      .selectAll('line')
+      .data(generatedEdges)
+      .enter()
+      .append('line')
+      .attr('stroke', (d: any) => colorScale(folderMap.get(d.source.id) || 'root'))
+      .attr('stroke-width', 2)
+      .attr('marker-end', (_: any, i: number) => `url(#arrowhead-${i})`);
+
+    const node = g
+      .append('g')
+      .selectAll('g')
+      .data(generatedNodes)
+      .enter()
+      .append('g')
+      .call(
+        d3
+          .drag<SVGGElement, any>()
+          .on('start', (event, d) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on('drag', (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on('end', (event, d) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          })
+      );
+
+    node
+      .append('circle')
+      .attr('r', 5)
+      .attr('fill', (d: any) => colorScale(folderMap.get(d.id) || 'root'))
+      .attr('stroke', '#171717')
+      .attr('stroke-width', 1.5);
+
+    node
+      .on('mouseover', function (_, d: any) {
+        labelGroup
+          .append('text')
+          .attr('class', 'hover-label')
+          .datum(d)
+          .attr('x', d.x + 10)
+          .attr('y', d.y + 4)
+          .attr('fill', '#b4b4b4')
+          .attr('font-size', '12px')
+          .attr('font-family', 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif')
+          .text(d.id);
+      })
+      .on('mouseout', function () {
+        labelGroup.selectAll('.hover-label').remove();
+      });
+
+    simulation.on('tick', () => {
+      link
+        .attr('x1', (d: any) => d.source.x)
+        .attr('y1', (d: any) => d.source.y)
+        .attr('x2', (d: any) => {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const offset = 11;
+          if (distance === 0) return d.target.x;
+          return d.source.x + (dx / distance) * (distance - offset);
+        })
+        .attr('y2', (d: any) => {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const offset = 11;
+          if (distance === 0) return d.target.y;
+          return d.source.y + (dy / distance) * (distance - offset);
+        });
+
+      node.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+
+      // Update label position if it exists
+      labelGroup
+        .selectAll('.hover-label')
+        .attr('x', (d: any) => d.x + 10)
+        .attr('y', (d: any) => d.y + 4);
+    });
+
+    return () => {
+      simulation.stop();
+    };
+  }, [generatedNodes, generatedEdges]);
 
   return (
-    <div className="h-screen w-screen">
-      <div className="relative bg-neutral-900 h-full w-full">
-        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-          <h1 className="font-semibold text-neutral-50">Memory Dependency Tracker</h1>
-          <div className="flex gap-3 items-center">
-            <div className="flex gap-6 p-4 bg-neutral-900 border border-neutral-800 rounded-lg items-center">
-              <div className="flex items-center gap-2.5 text-sm">
-                <div className="w-3 h-3 rounded-sm bg-neutral-900"></div>
-                <span>API Endpoints (42)</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-sm">
-                <div className="w-3 h-3 rounded-sm bg-neutral-900"></div>
-                <span>Usecases (8)</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-sm">
-                <div className="w-3 h-3 rounded-sm bg-neutral-900"></div>
-                <span>Core (6)</span>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setNodes(initialNodes);
-                setEdges(initialEdges);
-              }}
-              className="px-5 py-2.5 bg-neutral-900 text-neutral-400 border border-neutral-800 rounded-md cursor-pointer text-sm font-medium transition-all hover:bg-neutral-800 hover:border-neutral-700"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-        <ReactFlow
-          nodes={filteredNodes}
-          edges={filteredEdges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-          nodesConnectable={false}
-          nodeTypes={nodeTypes}
-          minZoom={0.1}
-          snapToGrid
-          snapGrid={[20, 20]}
-          proOptions={{ hideAttribution: true }}
-          zoomOnScroll={false}
-          panOnScroll
-        >
-          <Background />
-          <Controls />
-        </ReactFlow>
+    <div className="h-screen w-screen bg-neutral-900">
+      <div className="absolute top-4 left-4 z-10">
+        <h1 className="font-semibold text-neutral-50">Memory Dependency Tracker</h1>
       </div>
+      <svg ref={svgRef} width="100%" height="100%" />
     </div>
   );
 }

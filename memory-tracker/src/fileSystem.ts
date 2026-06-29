@@ -14,10 +14,99 @@ type FileSystemNode = FileNode | DirectoryNode;
 
 // Load file system data from generated JSON
 import fileSystemData from './fileSystemData.json';
+import symbolData from './symbolData.json';
 
 const fileSystem: DirectoryNode = fileSystemData as DirectoryNode;
 
 export { fileSystem, type FileSystemNode, type FileNode, type DirectoryNode };
+
+// Symbol-level data interfaces
+interface SymbolNode {
+  id: string;
+  name: string;
+  type: 'function' | 'class' | 'variable' | 'interface' | 'type' | 'enum';
+  file: string;
+  folder: string;
+  isExport: boolean;
+}
+
+interface SymbolEdge {
+  source: string;
+  target: string;
+  sourceFile: string;
+  targetFile: string;
+}
+
+interface SymbolData {
+  nodes: SymbolNode[];
+  edges: SymbolEdge[];
+}
+
+const symbols: SymbolData = symbolData as SymbolData;
+
+export { symbols, type SymbolNode, type SymbolEdge, type SymbolData };
+
+// Parser for symbol-level graph
+export function parseSymbols(data: SymbolData) {
+  console.log('Parsing symbol data...');
+  console.log('Total symbols:', data.nodes.length);
+  console.log('Total edges in data:', data.edges.length);
+
+  // Check for duplicate node IDs
+  const nodeIds = data.nodes.map((n) => n.id);
+  const uniqueNodeIds = new Set(nodeIds);
+  console.log('Unique node IDs:', uniqueNodeIds.size);
+  console.log('Duplicate nodes:', nodeIds.length - uniqueNodeIds.size);
+
+  // Check for duplicate symbol names
+  const symbolNames = data.nodes.map((n) => n.name);
+  const uniqueSymbolNames = new Set(symbolNames);
+  console.log('Unique symbol names:', uniqueSymbolNames.size);
+  console.log('Duplicate symbol names:', symbolNames.length - uniqueSymbolNames.size);
+
+  // Show some duplicate examples if any
+  if (nodeIds.length !== uniqueNodeIds.size) {
+    const idCounts = new Map<string, number>();
+    nodeIds.forEach((id) => idCounts.set(id, (idCounts.get(id) || 0) + 1));
+    const duplicates = Array.from(idCounts.entries()).filter(([_, count]) => count > 1);
+    console.log('Duplicate node IDs examples:', duplicates.slice(0, 5));
+  }
+
+  const nodes: any[] = [];
+  const edges: any[] = [];
+
+  // Create nodes from symbols
+  data.nodes.forEach((symbol) => {
+    nodes.push({
+      id: symbol.id,
+      position: { x: 0, y: 0 },
+      type: 'endpoint',
+      data: {
+        label: symbol.name,
+        file: symbol.file,
+        folder: symbol.folder,
+        symbolType: symbol.type,
+      },
+    });
+  });
+
+  console.log('Created nodes:', nodes.length);
+
+  // Create edges from symbol dependencies
+  data.edges.forEach((edge, idx) => {
+    edges.push({
+      id: `e-${edge.source}-${edge.target}-${idx}`,
+      source: edge.source,
+      target: edge.target,
+    });
+  });
+
+  console.log('Created edges:', edges.length);
+  console.log('Sample edge:', edges[0]);
+  console.log('Sample node:', nodes[0]);
+
+  return { nodes, edges };
+}
 
 // Simple path resolution for relative imports
 function resolvePath(basePath: string, relativePath: string): string {
