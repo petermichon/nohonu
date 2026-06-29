@@ -46,32 +46,11 @@ const symbols: SymbolData = symbolData as SymbolData;
 
 export { symbols, type SymbolNode, type SymbolEdge, type SymbolData };
 
+// Track if logging has already occurred to prevent duplicates
+let hasLogged = false;
+
 // Parser for symbol-level graph
 export function parseSymbols(data: SymbolData) {
-  console.log('Parsing symbol data...');
-  console.log('Total symbols:', data.nodes.length);
-  console.log('Total edges in data:', data.edges.length);
-
-  // Check for duplicate node IDs
-  const nodeIds = data.nodes.map((n) => n.id);
-  const uniqueNodeIds = new Set(nodeIds);
-  console.log('Unique node IDs:', uniqueNodeIds.size);
-  console.log('Duplicate nodes:', nodeIds.length - uniqueNodeIds.size);
-
-  // Check for duplicate symbol names
-  const symbolNames = data.nodes.map((n) => n.name);
-  const uniqueSymbolNames = new Set(symbolNames);
-  console.log('Unique symbol names:', uniqueSymbolNames.size);
-  console.log('Duplicate symbol names:', symbolNames.length - uniqueSymbolNames.size);
-
-  // Show some duplicate examples if any
-  if (nodeIds.length !== uniqueNodeIds.size) {
-    const idCounts = new Map<string, number>();
-    nodeIds.forEach((id) => idCounts.set(id, (idCounts.get(id) || 0) + 1));
-    const duplicates = Array.from(idCounts.entries()).filter(([_, count]) => count > 1);
-    console.log('Duplicate node IDs examples:', duplicates.slice(0, 5));
-  }
-
   const nodes: any[] = [];
   const edges: any[] = [];
 
@@ -90,8 +69,6 @@ export function parseSymbols(data: SymbolData) {
     });
   });
 
-  console.log('Created nodes:', nodes.length);
-
   // Create edges from symbol dependencies
   data.edges.forEach((edge, idx) => {
     edges.push({
@@ -101,9 +78,61 @@ export function parseSymbols(data: SymbolData) {
     });
   });
 
-  console.log('Created edges:', edges.length);
-  console.log('Sample edge:', edges[0]);
-  console.log('Sample node:', nodes[0]);
+  if (!hasLogged) {
+    console.log('Parsing symbol data...');
+    console.log('Total symbols:', data.nodes.length);
+    console.log('Total edges in data:', data.edges.length);
+
+    // Check export status
+    const exportedSymbols = data.nodes.filter((n) => n.isExport);
+    const nonExportedSymbols = data.nodes.filter((n) => !n.isExport);
+    console.log('Exported symbols:', exportedSymbols.length);
+    console.log('Non-exported symbols:', nonExportedSymbols.length);
+
+    // Check for duplicate node IDs
+    const nodeIds = data.nodes.map((n) => n.id);
+    const uniqueNodeIds = new Set(nodeIds);
+    console.log('Unique node IDs:', uniqueNodeIds.size);
+    console.log('Duplicate nodes:', nodeIds.length - uniqueNodeIds.size);
+
+    // Check for duplicate symbol names
+    const symbolNames = data.nodes.map((n) => n.name);
+    const uniqueSymbolNames = new Set(symbolNames);
+    console.log('Unique symbol names:', uniqueSymbolNames.size);
+    console.log('Duplicate symbol names:', symbolNames.length - uniqueSymbolNames.size);
+
+    // Show some duplicate examples if any
+    if (nodeIds.length !== uniqueNodeIds.size) {
+      const idCounts = new Map<string, number>();
+      nodeIds.forEach((id) => idCounts.set(id, (idCounts.get(id) || 0) + 1));
+      const duplicates = Array.from(idCounts.entries()).filter(([_, count]) => count > 1);
+      console.log('Duplicate node IDs examples:', duplicates.slice(0, 5));
+    }
+
+    console.log('Created nodes:', nodes.length);
+    console.log('Created edges:', edges.length);
+    console.log('Sample edge:', edges[0]);
+    console.log('Sample node:', nodes[0]);
+
+    // Detect and log duplicate edges
+    const edgeKeyCount = new Map<string, number>();
+    data.edges.forEach((edge) => {
+      const key = `${edge.source}-${edge.target}`;
+      edgeKeyCount.set(key, (edgeKeyCount.get(key) || 0) + 1);
+    });
+
+    const duplicateEdges = Array.from(edgeKeyCount.entries()).filter(([_, count]) => count > 1);
+    console.log('Total unique edges:', edgeKeyCount.size);
+    console.log('Duplicate edge pairs:', duplicateEdges.length);
+    if (duplicateEdges.length > 0) {
+      console.log('Duplicate edge examples:');
+      duplicateEdges.slice(0, 5).forEach(([key, count]) => {
+        console.log(`  ${key}: ${count} occurrences`);
+      });
+    }
+
+    hasLogged = true;
+  }
 
   return { nodes, edges };
 }
