@@ -1,4 +1,4 @@
-import { domainDir } from '../sites/storage.ts';
+import { domainDir } from '../../shared/paths.ts';
 
 export const SLOT_MS = 60 * 1000;
 export const STATS_SLOTS = 86400; // 60 days of data (86400 minutes)

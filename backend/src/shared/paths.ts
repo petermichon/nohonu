@@ -38,4 +38,9 @@ export async function fileExists(path: string): Promise<boolean> {
 
 export const MAX_ZIP_BYTES = 52_428_800; // 50 MB
 
+// Path helpers for user-based structure: /data/{user}/{domain}/
+export function domainDir(user: string, domain: string): string {
+  return `${SITES_DIR}/${user}/${domain}`;
+}
+
 export type UsecaseResult<T> = { ok: true; value: T } | { ok: false; error: string; status: number };

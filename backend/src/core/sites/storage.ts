@@ -1,9 +1,4 @@
-import { SITES_DIR, SiteData } from '../../shared/paths.ts';
-
-// Path helpers for user-based structure: /data/{user}/{domain}/
-export function domainDir(user: string, domain: string): string {
-  return `${SITES_DIR}/${user}/${domain}`;
-}
+import { SITES_DIR, SiteData, domainDir } from '../../shared/paths.ts';
 
 function metadataPath(user: string, domain: string): string {
   return `${domainDir(user, domain)}/metadata.json`;
