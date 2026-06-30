@@ -1,6 +1,22 @@
 import { useEffect, useRef, useState, useMemo, useCallback, memo } from 'react';
 import * as d3 from 'd3';
-import { Folder, File, Box, Eye, EyeOff, CopyMinus, CopyPlus, Menu, Eye as EyeOpen } from 'lucide-react';
+import {
+  Folder,
+  File,
+  Box,
+  Eye,
+  EyeOff,
+  CopyMinus,
+  CopyPlus,
+  Menu,
+  Eye as EyeOpen,
+  Lock,
+  Unlock,
+  Play,
+  Pause,
+  RefreshCw,
+  Settings,
+} from 'lucide-react';
 import './index.css';
 import { symbols, parseSymbols } from './fileSystem';
 
@@ -64,9 +80,6 @@ function TreeNode({
   onSelectSymbol,
   selectedNodeId,
 }: any) {
-  const [hoveredPath, setHoveredPath] = useState<string | null>(null);
-  const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
-
   // Helper to check if a path or any of its parents is hidden
   const isPathOrParentHidden = (itemPath: string): boolean => {
     if (hiddenPaths.has(itemPath)) return true;
@@ -94,15 +107,13 @@ function TreeNode({
             <div key={fullPath} className="mb-1">
               <div
                 onClick={() => toggleFolder(fullPath)}
-                className="w-full text-left px-2 py-1 text-sm font-medium text-neutral-300 hover:bg-neutral-700 rounded flex items-center gap-1 cursor-pointer"
+                className="w-full text-left px-2 py-1 text-sm font-medium text-neutral-300 hover:bg-neutral-700 rounded flex items-center gap-1 cursor-pointer group"
                 style={{ opacity: isHidden || isParentHidden ? 0.5 : 1 }}
                 onMouseEnter={() => {
-                  setHoveredPath(fullPath);
                   if (isFolder) onHoverFolder(fullPath);
                   else onHoverFile(fullPath);
                 }}
                 onMouseLeave={() => {
-                  setHoveredPath(null);
                   if (isFolder) onHoverFolder(null);
                   else onHoverFile(null);
                 }}
@@ -119,19 +130,17 @@ function TreeNode({
                   <span className="text-neutral-500 text-sm ml-auto">({Object.keys(item.children).length})</span>
                 )}
                 {!isFolder && <span className="text-neutral-500 text-sm ml-auto">({item.symbols.length})</span>}
-                {(isHidden || hoveredPath === fullPath) && (
-                  <Tooltip content={isHidden ? 'Show' : 'Hide'}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePathVisibility(fullPath);
-                      }}
-                      className="ml-2 cursor-pointer text-neutral-300"
-                    >
-                      {isHidden ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </Tooltip>
-                )}
+                <Tooltip content={isHidden ? 'Show' : 'Hide'}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePathVisibility(fullPath);
+                    }}
+                    className={`${isHidden ? '' : 'hidden group-hover:block'} ml-2 cursor-pointer text-neutral-300`}
+                  >
+                    {isHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </Tooltip>
               </div>
               {isExpanded && isFolder && (
                 <div className="ml-4 mt-1">
@@ -186,35 +195,31 @@ function TreeNode({
                               }
                             : null
                         }
-                        className={`text-sm px-2 py-0.5 truncate cursor-pointer rounded flex items-center gap-1 ${
+                        className={`text-sm px-2 py-0.5 truncate cursor-pointer rounded flex items-center gap-1 group ${
                           isSelected ? 'bg-neutral-500' : isHovered ? 'bg-neutral-600' : 'hover:bg-neutral-700'
                         }`}
                         style={{ color: folderColor, opacity: isNodeHidden || isParentHidden ? 0.5 : 1 }}
                         onMouseEnter={() => {
-                          setHoveredSymbol(symbolId);
                           onHoverSymbol(symbolId);
                         }}
                         onMouseLeave={() => {
-                          setHoveredSymbol(null);
                           onHoverSymbol(null);
                         }}
                         onClick={() => onSelectSymbol(symbolId)}
                       >
                         <Box size={16} className="flex-shrink-0" style={{ color: folderColor }} />
                         <span className="truncate flex-1">{symbol}</span>
-                        {(isNodeHidden || hoveredSymbol === symbolId) && (
-                          <Tooltip content={isNodeHidden ? 'Show' : 'Hide'}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleNodeVisibility(symbolId);
-                              }}
-                              className="cursor-pointer text-neutral-300"
-                            >
-                              {isNodeHidden ? <EyeOff size={14} /> : <Eye size={14} />}
-                            </button>
-                          </Tooltip>
-                        )}
+                        <Tooltip content={isNodeHidden ? 'Show' : 'Hide'}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleNodeVisibility(symbolId);
+                            }}
+                            className={`${isNodeHidden ? '' : 'hidden group-hover:block'} cursor-pointer text-neutral-300`}
+                          >
+                            {isNodeHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        </Tooltip>
                       </div>
                     );
                   })}
@@ -236,15 +241,51 @@ function App() {
   const simulationRef = useRef<any>(null);
   const drawRef = useRef<(() => void) | null>(null);
   const hoveredNodeRef = useRef<any>(null);
+  const mousePositionRef = useRef({ x: 0, y: 0 });
+  const mouseOverCanvasRef = useRef(false);
   const selectedNodeRef = useRef<string | null>(null);
   const transformRef = useRef({ x: 0, y: 0, k: 1 });
   const dprRef = useRef(window.devicePixelRatio || 1);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebarOpen');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('rightSidebarOpen');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const rightSidebarOpenRef = useRef(false);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
-  const [hiddenPaths, setHiddenPaths] = useState<Set<string>>(new Set());
-  const [hiddenNodes, setHiddenNodes] = useState<Set<string>>(new Set());
+  const [hiddenPaths, setHiddenPaths] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('hiddenPaths');
+    return saved !== null ? new Set(JSON.parse(saved)) : new Set();
+  });
+  const [hiddenNodes, setHiddenNodes] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('hiddenNodes');
+    return saved !== null ? new Set(JSON.parse(saved)) : new Set();
+  });
   const [hoveredSymbolId, setHoveredSymbolId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [simulationLocked, setSimulationLocked] = useState(false);
+  const simulationLockedRef = useRef(false);
+  const [forcesEnabled, setForcesEnabled] = useState(false);
+  const forcesEnabledRef = useRef(false);
+  const [chargeStrength, setChargeStrength] = useState(() => {
+    const saved = localStorage.getItem('chargeStrength');
+    return saved !== null ? JSON.parse(saved) : -100;
+  });
+  const [linkDistance, setLinkDistance] = useState(() => {
+    const saved = localStorage.getItem('linkDistance');
+    return saved !== null ? JSON.parse(saved) : 30;
+  });
+  const [alphaDecayValue, setAlphaDecayValue] = useState(() => {
+    const saved = localStorage.getItem('alphaDecayValue');
+    return saved !== null ? JSON.parse(saved) : 0.0228;
+  });
+  const [edgeOpacity, setEdgeOpacity] = useState(() => {
+    const saved = localStorage.getItem('edgeOpacity');
+    return saved !== null ? JSON.parse(saved) : 0.5;
+  });
 
   const { nodes: generatedNodes, edges: generatedEdges } = useMemo(() => parseSymbols(symbols), [symbols]);
 
@@ -518,6 +559,59 @@ function App() {
     setHiddenNodes(nodesToHide);
   }, [treeStructure, expandedFolders]);
 
+  const toggleSimulationLock = useCallback(() => {
+    setSimulationLocked((prev) => {
+      const newLocked = !prev;
+      if (simulationRef.current) {
+        if (newLocked) {
+          simulationRef.current.stop();
+        } else {
+          simulationRef.current.alpha(0.3).restart();
+        }
+      }
+      return newLocked;
+    });
+  }, []);
+
+  const toggleForces = useCallback(() => {
+    setForcesEnabled((prev) => {
+      const newEnabled = !prev;
+      forcesEnabledRef.current = newEnabled;
+      if (simulationRef.current) {
+        if (newEnabled) {
+          // Run forces: set alphaDecay to 0 so it doesn't decay
+          simulationRef.current.alphaDecay(0).alpha(0.3).restart();
+        } else {
+          // Stop forces: restore normal alphaDecay
+          simulationRef.current.alphaDecay(0.0228);
+        }
+      }
+      return newEnabled;
+    });
+  }, []);
+
+  const resetGraph = useCallback(() => {
+    if (simulationRef.current) {
+      // Reset all node positions with random positions around center
+      filteredNodes.forEach((node: any) => {
+        node.x = (Math.random() - 0.5) * 100;
+        node.y = (Math.random() - 0.5) * 100;
+        node.vx = 0;
+        node.vy = 0;
+      });
+      // Reset transform to center
+      transformRef.current = {
+        x: window.innerWidth / 2 - (sidebarOpenRef.current ? 150 : 0),
+        y: window.innerHeight / 2,
+        k: 1,
+      };
+      simulationRef.current.alpha(1).restart();
+      if (drawRef.current) {
+        drawRef.current();
+      }
+    }
+  }, [filteredNodes]);
+
   const expandAll = useCallback(() => {
     const allPaths = new Set<string>();
     function collectPaths(node: any, currentPath: string = '') {
@@ -544,7 +638,9 @@ function App() {
 
     const dpr = window.devicePixelRatio || 1;
     dprRef.current = dpr;
-    const widthRef = { current: window.innerWidth - (sidebarOpenRef.current ? 300 : 0) };
+    const widthRef = {
+      current: window.innerWidth - (sidebarOpenRef.current ? 300 : 0) - (rightSidebarOpenRef.current ? 300 : 0),
+    };
     const heightRef = { current: window.innerHeight };
     let width = widthRef.current;
     let height = heightRef.current;
@@ -563,7 +659,7 @@ function App() {
         dprRef.current = newDpr;
       }
 
-      width = window.innerWidth - (sidebarOpenRef.current ? 300 : 0);
+      width = window.innerWidth - (sidebarOpenRef.current ? 300 : 0) - (rightSidebarOpenRef.current ? 300 : 0);
       height = window.innerHeight;
       widthRef.current = width;
       heightRef.current = height;
@@ -579,7 +675,7 @@ function App() {
 
     const handleSidebarResize = () => {
       const newDpr = dprRef.current;
-      const newWidth = window.innerWidth - (sidebarOpenRef.current ? 300 : 0);
+      const newWidth = window.innerWidth - (sidebarOpenRef.current ? 300 : 0) - (rightSidebarOpenRef.current ? 300 : 0);
       widthRef.current = newWidth;
       canvas.width = newWidth * newDpr;
       canvas.style.width = `${newWidth}px`;
@@ -628,14 +724,22 @@ function App() {
       .forceSimulation(filteredNodes as any)
       .force(
         'link',
-        d3.forceLink(filteredEdges as any).id((d: any) => d.id)
+        d3
+          .forceLink(filteredEdges as any)
+          .id((d: any) => d.id)
+          .distance(linkDistance)
       )
-      .force('charge', d3.forceManyBody().strength(-100))
+      .force('charge', d3.forceManyBody().strength(chargeStrength))
       .force('x', d3.forceX(0))
       .force('y', d3.forceY(0))
-      .alphaMin(0.001); // Keep simulation alive for drag interaction
+      .alphaDecay(forcesEnabled ? 0 : alphaDecayValue); // Use forcesEnabled to set initial decay
 
     simulationRef.current = simulation;
+
+    // Stop simulation if locked
+    if (simulationLocked) {
+      simulation.stop();
+    }
 
     // Initial draw
     draw();
@@ -648,6 +752,10 @@ function App() {
       context.scale(transformRef.current.k, transformRef.current.k);
 
       // Draw edges
+      const hoveredNodes = hoveredNodeRef.current;
+      const hoveredNodeId = Array.isArray(hoveredNodes) ? hoveredNodes[0]?.id : hoveredNodes?.id;
+      const selectedNodeId = selectedNodeRef.current;
+
       filteredEdges.forEach((edge: any) => {
         const dx = edge.target.x - edge.source.x;
         const dy = edge.target.y - edge.source.y;
@@ -667,7 +775,10 @@ function App() {
         context.lineTo(targetX, targetY);
         context.strokeStyle = colorScale(folderMap.get(edge.source.id) || 'root') as string;
         context.lineWidth = 2;
-        context.globalAlpha = 0.5;
+        // Show outgoing edges from hovered or selected node at full opacity
+        const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
+        const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
+        context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected ? 1 : edgeOpacity;
         context.stroke();
         context.globalAlpha = 1;
       });
@@ -790,7 +901,33 @@ function App() {
 
     drawRef.current = draw;
 
-    simulation.on('tick', draw);
+    // Check hover state based on current mouse position
+    const checkHover = () => {
+      // Only check canvas hover if mouse is over the canvas
+      if (!mouseOverCanvasRef.current) return;
+
+      const { x: mouseX, y: mouseY } = mousePositionRef.current;
+      let found = null;
+      for (const node of filteredNodes) {
+        const dx = mouseX - node.x;
+        const dy = mouseY - node.y;
+        if (dx * dx + dy * dy < 100) {
+          found = node;
+          break;
+        }
+      }
+
+      if (found !== hoveredNodeRef.current) {
+        hoveredNodeRef.current = found;
+        setHoveredSymbolId(found ? found.id : null);
+        canvas.style.cursor = found ? 'pointer' : 'default';
+      }
+    };
+
+    simulation.on('tick', () => {
+      checkHover();
+      draw();
+    });
 
     // Combined mousemove handler for hover, drag, and pan
     const handleMouseMove = (event: MouseEvent) => {
@@ -808,6 +945,7 @@ function App() {
       const rect = canvas.getBoundingClientRect();
       const mouseX = (event.clientX - rect.left - transformRef.current.x) / transformRef.current.k;
       const mouseY = (event.clientY - rect.top - transformRef.current.y) / transformRef.current.k;
+      mousePositionRef.current = { x: mouseX, y: mouseY };
 
       // Handle drag
       if (draggedNode) {
@@ -838,6 +976,9 @@ function App() {
     };
 
     canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseenter', () => {
+      mouseOverCanvasRef.current = true;
+    });
 
     const handleMouseDown = (event: MouseEvent) => {
       // Check if middle mouse button or shift key for panning
@@ -877,7 +1018,9 @@ function App() {
         const dy = mouseY - node.y;
         if (dx * dx + dy * dy < 100) {
           draggedNode = node;
-          simulation.alpha(0.3).restart();
+          if (!simulationLockedRef.current) {
+            simulation.alpha(0.3).restart();
+          }
           draggedNode.fx = node.x;
           draggedNode.fy = node.y;
           break;
@@ -893,20 +1036,25 @@ function App() {
         draggedNode.fx = null;
         draggedNode.fy = null;
         draggedNode = null;
-        simulation.alphaTarget(0);
+        if (!simulationLockedRef.current) {
+          simulation.alphaTarget(0);
+        }
       }
     };
 
     canvas.addEventListener('mouseup', handleMouseUp);
 
     const handleMouseLeave = () => {
+      mouseOverCanvasRef.current = false;
       isPanning = false;
       hoveredNodeRef.current = null;
       if (draggedNode) {
         draggedNode.fx = null;
         draggedNode.fy = null;
         draggedNode = null;
-        simulation.alphaTarget(0);
+        if (!simulationLockedRef.current) {
+          simulation.alphaTarget(0);
+        }
       }
       draw();
     };
@@ -929,15 +1077,81 @@ function App() {
       canvas.removeEventListener('mouseleave', handleMouseLeave);
       canvas.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, [filteredNodes, filteredEdges, folderMap, colorScale, hiddenPaths, hiddenNodes]);
+  }, [filteredNodes, filteredEdges, folderMap, colorScale, hiddenPaths, hiddenNodes, edgeOpacity]);
 
   // Handle sidebar resize without re-initializing simulation
   useEffect(() => {
     sidebarOpenRef.current = sidebarOpen;
+    localStorage.setItem('sidebarOpen', JSON.stringify(sidebarOpen));
     if (resizeRef.current) {
       resizeRef.current();
     }
   }, [sidebarOpen]);
+
+  // Handle right sidebar resize without re-initializing simulation
+  useEffect(() => {
+    rightSidebarOpenRef.current = rightSidebarOpen;
+    localStorage.setItem('rightSidebarOpen', JSON.stringify(rightSidebarOpen));
+    if (resizeRef.current) {
+      resizeRef.current();
+    }
+  }, [rightSidebarOpen]);
+
+  // Persist hiddenPaths to localStorage
+  useEffect(() => {
+    localStorage.setItem('hiddenPaths', JSON.stringify(Array.from(hiddenPaths)));
+  }, [hiddenPaths]);
+
+  // Persist hiddenNodes to localStorage
+  useEffect(() => {
+    localStorage.setItem('hiddenNodes', JSON.stringify(Array.from(hiddenNodes)));
+  }, [hiddenNodes]);
+
+  // Persist D3 parameters to localStorage
+  useEffect(() => {
+    localStorage.setItem('chargeStrength', JSON.stringify(chargeStrength));
+  }, [chargeStrength]);
+
+  useEffect(() => {
+    localStorage.setItem('linkDistance', JSON.stringify(linkDistance));
+  }, [linkDistance]);
+
+  useEffect(() => {
+    localStorage.setItem('alphaDecayValue', JSON.stringify(alphaDecayValue));
+  }, [alphaDecayValue]);
+
+  useEffect(() => {
+    localStorage.setItem('edgeOpacity', JSON.stringify(edgeOpacity));
+  }, [edgeOpacity]);
+
+  // Update simulation forces when D3 parameters change
+  useEffect(() => {
+    if (simulationRef.current) {
+      simulationRef.current.force('charge').strength(chargeStrength);
+      simulationRef.current.force('link').distance(linkDistance);
+      simulationRef.current.alpha(0.3).restart();
+    }
+  }, [chargeStrength, linkDistance]);
+
+  // Update alpha decay when parameter changes
+  useEffect(() => {
+    if (simulationRef.current) {
+      simulationRef.current.alphaDecay(forcesEnabled ? 0 : alphaDecayValue);
+      simulationRef.current.alpha(0.3).restart();
+    }
+  }, [alphaDecayValue, forcesEnabled]);
+
+  // Handle simulation lock state
+  useEffect(() => {
+    simulationLockedRef.current = simulationLocked;
+    if (simulationRef.current) {
+      if (simulationLocked) {
+        simulationRef.current.stop();
+      } else {
+        simulationRef.current.alpha(0.3).restart();
+      }
+    }
+  }, [simulationLocked]);
 
   return (
     <div className="h-screen w-screen bg-neutral-900 flex">
@@ -952,64 +1166,66 @@ function App() {
             onClick={() => setSidebarOpen(false)}
             style={{ maxWidth: 'fit-content' }}
           >
-            <Menu size={24} className="text-neutral-300" />
+            <Menu size={24} className="text-neutral-50" />
             <h1 className="font-semibold text-neutral-50">Symbol Explorer</h1>
           </div>
         </div>
-        <div className="pr-4">
-          <div className="flex justify-end gap-1">
-            <Tooltip content="Show All">
-              <button
-                onClick={showAll}
-                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
-              >
-                <EyeOpen size={16} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Hide All">
-              <button
-                onClick={hideAll}
-                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
-              >
-                <EyeOff size={16} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Expand All">
-              <button
-                onClick={expandAll}
-                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
-              >
-                <CopyPlus size={16} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Collapse All">
-              <button
-                onClick={collapseAll}
-                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
-              >
-                <CopyMinus size={16} />
-              </button>
-            </Tooltip>
+        <div>
+          <div className="flex flex-col">
+            <div className="pr-4 flex justify-end gap-1">
+              <Tooltip content="Show All">
+                <button
+                  onClick={showAll}
+                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                >
+                  <EyeOpen size={16} />
+                </button>
+              </Tooltip>
+              <Tooltip content="Hide All">
+                <button
+                  onClick={hideAll}
+                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                >
+                  <EyeOff size={16} />
+                </button>
+              </Tooltip>
+              <Tooltip content="Expand All">
+                <button
+                  onClick={expandAll}
+                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                >
+                  <CopyPlus size={16} />
+                </button>
+              </Tooltip>
+              <Tooltip content="Collapse All">
+                <button
+                  onClick={collapseAll}
+                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                >
+                  <CopyMinus size={16} />
+                </button>
+              </Tooltip>
+            </div>
+            <div className="p-2 overflow-y-scroll" style={{ height: 'calc(100vh - 100px)' }}>
+              <MemoizedTreeNode
+                data={treeStructure}
+                path=""
+                expandedFolders={expandedFolders}
+                toggleFolder={toggleFolder}
+                hiddenPaths={hiddenPaths}
+                togglePathVisibility={togglePathVisibility}
+                hiddenNodes={hiddenNodes}
+                toggleNodeVisibility={toggleNodeVisibility}
+                colorScale={colorScale}
+                onHoverSymbol={handleHoverSymbol}
+                onHoverFile={handleHoverFile}
+                onHoverFolder={handleHoverFolder}
+                hoveredSymbolId={hoveredSymbolId}
+                onSelectSymbol={handleSelectSymbol}
+                selectedNodeId={selectedNodeId}
+              />
+            </div>
           </div>
-        </div>
-        <div className="p-2 overflow-y-scroll" style={{ height: 'calc(100vh - 100px)' }}>
-          <MemoizedTreeNode
-            data={treeStructure}
-            path=""
-            expandedFolders={expandedFolders}
-            toggleFolder={toggleFolder}
-            hiddenPaths={hiddenPaths}
-            togglePathVisibility={togglePathVisibility}
-            hiddenNodes={hiddenNodes}
-            toggleNodeVisibility={toggleNodeVisibility}
-            colorScale={colorScale}
-            onHoverSymbol={handleHoverSymbol}
-            onHoverFile={handleHoverFile}
-            onHoverFolder={handleHoverFolder}
-            hoveredSymbolId={hoveredSymbolId}
-            onSelectSymbol={handleSelectSymbol}
-            selectedNodeId={selectedNodeId}
-          />
         </div>
       </div>
 
@@ -1022,12 +1238,124 @@ function App() {
               style={{ maxWidth: 'fit-content' }}
               onClick={() => setSidebarOpen(true)}
             >
-              <Menu size={24} className="text-neutral-300" />
+              <Menu size={24} className="text-neutral-50" />
               <h1 className="font-semibold text-neutral-50">Symbol Explorer</h1>
             </div>
           )}
         </div>
+        <div className="absolute top-6 right-6 z-10">
+          {!rightSidebarOpen && (
+            <div onClick={() => setRightSidebarOpen(!rightSidebarOpen)} className="cursor-pointer">
+              <Settings size={24} className="text-neutral-400" />
+            </div>
+          )}
+        </div>
         <canvas ref={canvasRef} width="100%" height="100%" />
+      </div>
+
+      {/* Right sidebar */}
+      <div
+        className={`bg-neutral-900 overflow-hidden ${rightSidebarOpen ? 'border-l border-neutral-700' : ''}`}
+        style={{ width: rightSidebarOpen ? '300px' : '0px' }}
+      >
+        <div className="p-4">
+          <div className="p-2 flex items-center justify-between">
+            <h1 className="font-semibold text-neutral-50">Settings</h1>
+            <div onClick={() => setRightSidebarOpen(false)} className="cursor-pointer">
+              <Settings size={24} className="text-neutral-400" />
+            </div>
+          </div>
+        </div>
+        <div className="px-4 pb-4">
+          <div className="flex justify-end gap-1">
+            <Tooltip content="Lock Simulation">
+              <button
+                onClick={() => !simulationLocked && toggleSimulationLock()}
+                disabled={simulationLocked}
+                className={`p-2 rounded-lg cursor-pointer ${simulationLocked ? 'text-neutral-600 cursor-not-allowed' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700'}`}
+              >
+                <Lock size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Unlock Simulation">
+              <button
+                onClick={() => simulationLocked && toggleSimulationLock()}
+                disabled={!simulationLocked}
+                className={`p-2 rounded-lg cursor-pointer ${!simulationLocked ? 'text-neutral-600 cursor-not-allowed' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700'}`}
+              >
+                <Unlock size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Run Forces">
+              <button
+                onClick={() => !forcesEnabled && toggleForces()}
+                disabled={forcesEnabled}
+                className={`p-2 rounded-lg cursor-pointer ${forcesEnabled ? 'text-neutral-600 cursor-not-allowed' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700'}`}
+              >
+                <Play size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Stop Forces">
+              <button
+                onClick={() => forcesEnabled && toggleForces()}
+                disabled={!forcesEnabled}
+                className={`p-2 rounded-lg cursor-pointer ${!forcesEnabled ? 'text-neutral-600 cursor-not-allowed' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700'}`}
+              >
+                <Pause size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Reset Graph">
+              <button
+                onClick={resetGraph}
+                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+              >
+                <RefreshCw size={16} />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
+        <div className="px-4 pb-4 space-y-4">
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">Charge Strength</label>
+            <input
+              type="number"
+              value={chargeStrength}
+              onChange={(e) => setChargeStrength(Number(e.target.value))}
+              className="w-full bg-neutral-800 text-neutral-50 rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">Link Distance</label>
+            <input
+              type="number"
+              value={linkDistance}
+              onChange={(e) => setLinkDistance(Number(e.target.value))}
+              className="w-full bg-neutral-800 text-neutral-50 rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">Alpha Decay</label>
+            <input
+              type="number"
+              step="0.0001"
+              value={alphaDecayValue}
+              onChange={(e) => setAlphaDecayValue(Number(e.target.value))}
+              className="w-full bg-neutral-800 text-neutral-50 rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">Edge Opacity</label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="1"
+              value={edgeOpacity}
+              onChange={(e) => setEdgeOpacity(Number(e.target.value))}
+              className="w-full bg-neutral-800 text-neutral-50 rounded px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
