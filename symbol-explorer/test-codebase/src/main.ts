@@ -1,5 +1,5 @@
-import { helper } from './utils';
-import * as utils from './utils';
+import { helper } from './utils/utils';
+import * as utils from './utils/utils';
 import { User } from './types';
 import { UserId } from './types/index';
 import { UserModel, UserRole } from './types';
@@ -7,6 +7,7 @@ import { ProductModel } from './types/models/product';
 import { API_URL, MAX_RETRIES } from './config';
 import { DEFAULT_STATUS } from './internal';
 import { DERIVED_VALUE } from './intermediate';
+import { uselessValue } from './useless';
 
 export function main() {
   const result = helper();

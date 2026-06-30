@@ -16,9 +16,10 @@ import {
   Pause,
   RefreshCw,
   Settings,
+  FolderOpen,
 } from 'lucide-react';
 import './index.css';
-import { symbols, parseSymbols } from './fileSystem';
+import { buildSymbolGraphFromFiles } from './browserParser';
 
 function Tooltip({ children, content }: { children: React.ReactNode; content: string }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -99,15 +100,15 @@ function TreeNode({
           const fullPath = path ? `${path}/${name}` : name;
           const isExpanded = expandedFolders.has(fullPath);
           const isFolder = item.type === 'folder';
-          const isHidden = hiddenPaths.has(fullPath);
+          const isHidden = hiddenPaths.has(fullPath.replace('.ts', ''));
           const isParentHidden = isPathOrParentHidden(fullPath);
-          const folderColor = isFolder ? (colorScale(fullPath) as string) : (colorScale(path) as string);
+          const folderColor = isFolder ? (colorScale(fullPath) as string) : (colorScale(path || 'root') as string);
 
           return (
             <div key={fullPath} className="mb-1">
               <div
                 onClick={() => toggleFolder(fullPath)}
-                className="w-full text-left px-2 py-1 text-sm font-medium text-neutral-300 hover:bg-neutral-700 rounded flex items-center gap-1 cursor-pointer group"
+                className="w-full text-left px-2 py-1 text-sm font-medium text-neutral-300 hover:bg-neutral-700 rounded flex items-center justify-between cursor-pointer group"
                 style={{ opacity: isHidden || isParentHidden ? 0.5 : 1 }}
                 onMouseEnter={() => {
                   if (isFolder) onHoverFolder(fullPath);
@@ -118,25 +119,25 @@ function TreeNode({
                   else onHoverFile(null);
                 }}
               >
-                {isFolder ? (
-                  <Folder size={16} style={{ color: folderColor }} />
-                ) : (
-                  <File size={16} style={{ color: folderColor }} />
-                )}
-                <span className="truncate" style={{ color: folderColor }}>
-                  {name}
-                </span>
-                {isFolder && (
-                  <span className="text-neutral-500 text-sm ml-auto">({Object.keys(item.children).length})</span>
-                )}
-                {!isFolder && <span className="text-neutral-500 text-sm ml-auto">({item.symbols.length})</span>}
+                <div className="flex items-center gap-1">
+                  {isFolder ? (
+                    <Folder size={16} style={{ color: folderColor }} />
+                  ) : (
+                    <File size={16} style={{ color: folderColor }} />
+                  )}
+                  <span className="truncate" style={{ color: folderColor }}>
+                    {name}
+                  </span>
+                  {isFolder && <span className="text-neutral-500 text-sm">({item.totalSymbols || 0})</span>}
+                  {!isFolder && <span className="text-neutral-500 text-sm">({item.symbols.length})</span>}
+                </div>
                 <Tooltip content={isHidden ? 'Show' : 'Hide'}>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       togglePathVisibility(fullPath);
                     }}
-                    className={`${isHidden ? '' : 'hidden group-hover:block'} ml-2 cursor-pointer text-neutral-300`}
+                    className={`${isHidden ? '' : 'hidden group-hover:block'} cursor-pointer text-neutral-300`}
                   >
                     {isHidden ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
@@ -266,8 +267,20 @@ function App() {
   });
   const [hoveredSymbolId, setHoveredSymbolId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [hoveredEdge, setHoveredEdge] = useState<any | null>(null);
+  const [hoveredEdges, setHoveredEdges] = useState<any[]>([]);
+  const hoveredEdgeRef = useRef<any>(null);
+  const hoveredEdgesRef = useRef<any[]>([]);
   const [simulationLocked, setSimulationLocked] = useState(false);
   const simulationLockedRef = useRef(false);
+
+  // Sync hoveredEdge ref with state
+  useEffect(() => {
+    hoveredEdgeRef.current = hoveredEdge;
+  }, [hoveredEdge]);
+  useEffect(() => {
+    hoveredEdgesRef.current = hoveredEdges;
+  }, [hoveredEdges]);
   const [forcesEnabled, setForcesEnabled] = useState(false);
   const forcesEnabledRef = useRef(false);
   const [chargeStrength, setChargeStrength] = useState(() => {
@@ -286,8 +299,14 @@ function App() {
     const saved = localStorage.getItem('edgeOpacity');
     return saved !== null ? JSON.parse(saved) : 0.5;
   });
+  const [customData, setCustomData] = useState<{ nodes: any[]; edges: any[] } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [directoryHandle, setDirectoryHandle] = useState<any>(null);
 
-  const { nodes: generatedNodes, edges: generatedEdges } = useMemo(() => parseSymbols(symbols), [symbols]);
+  const { nodes: generatedNodes, edges: generatedEdges } = useMemo(
+    () => (customData ? customData : { nodes: [], edges: [] }),
+    [customData]
+  );
 
   // Filter nodes and edges based on hidden folders, files, and individual nodes
   const { filteredNodes, filteredEdges } = useMemo(() => {
@@ -313,10 +332,9 @@ function App() {
       }
 
       // Check if this specific file is hidden
-      // Remove .ts extension from file for matching with tree paths
-      const fileNameWithoutExt = file.replace('.ts', '');
-      const filePath = file ? `${folder}/${fileNameWithoutExt}` : folder;
-      if (hiddenSet.has(filePath)) {
+      const filePath = file ? `${folder}/${file}` : folder;
+      const filePathWithoutExt = filePath.replace('.ts', '');
+      if (hiddenSet.has(filePathWithoutExt)) {
         return false;
       }
 
@@ -469,6 +487,23 @@ function App() {
       });
     });
 
+    // Calculate total symbols for each folder recursively
+    function calculateTotalSymbols(node: any): number {
+      if (node.type === 'file') {
+        return node.symbols.length;
+      }
+      let total = 0;
+      for (const child of Object.values(node.children)) {
+        total += calculateTotalSymbols(child);
+      }
+      node.totalSymbols = total;
+      return total;
+    }
+
+    for (const key of Object.keys(tree)) {
+      calculateTotalSymbols(tree[key]);
+    }
+
     return tree;
   }, [generatedNodes]);
 
@@ -487,10 +522,12 @@ function App() {
   const togglePathVisibility = useCallback((path: string) => {
     setHiddenPaths((prev: Set<string>) => {
       const next = new Set(prev);
-      if (next.has(path)) {
-        next.delete(path);
+      // Remove .ts extension for consistency with tree paths
+      const normalizedPath = path.replace('.ts', '');
+      if (next.has(normalizedPath)) {
+        next.delete(normalizedPath);
       } else {
-        next.add(path);
+        next.add(normalizedPath);
       }
       return next;
     });
@@ -629,6 +666,100 @@ function App() {
     setExpandedFolders(allPaths);
   }, [treeStructure]);
 
+  const handleDirectoryPicker = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const dirHandle = await (window as any).showDirectoryPicker();
+      setDirectoryHandle(dirHandle);
+      await loadDirectoryData(dirHandle);
+    } catch (err) {
+      console.error('Directory picker error:', err);
+      if ((err as Error).name !== 'AbortError') {
+        alert('Error picking directory: ' + (err as Error).message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const loadDirectoryData = useCallback(async (dirHandle: any) => {
+    try {
+      setIsLoading(true);
+      const files: { path: string; content: string }[] = [];
+
+      async function* getFiles(dirHandle: any, path: string = ''): AsyncGenerator<{ path: string; content: string }> {
+        for await (const entry of dirHandle.values()) {
+          const entryPath = path ? `${path}/${entry.name}` : entry.name;
+          if (entry.kind === 'file' && (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx'))) {
+            const file = await entry.getFile();
+            const content = await file.text();
+            yield { path: entryPath, content };
+          } else if (entry.kind === 'directory') {
+            yield* getFiles(entry, entryPath);
+          }
+        }
+      }
+
+      for await (const file of getFiles(dirHandle)) {
+        files.push(file);
+      }
+
+      console.log(`Loaded ${files.length} TypeScript files`);
+
+      // Parse the files to build the symbol graph
+      const symbolData = buildSymbolGraphFromFiles(files);
+      console.log(`Parsed ${symbolData.nodes.length} symbols and ${symbolData.edges.length} edges`);
+
+      // Convert to the format expected by the graph
+      const parsedData = {
+        nodes: symbolData.nodes.map((node) => ({
+          id: node.id,
+          position: { x: 0, y: 0 },
+          type: 'endpoint',
+          data: {
+            label: node.name,
+            file: node.file,
+            folder: node.folder,
+            symbolType: node.type,
+            hasUnknownDynamicImport: node.hasUnknownDynamicImport || false,
+          },
+        })),
+        edges: symbolData.edges.map((edge, idx) => ({
+          id: `e-${edge.source}-${edge.target}-${idx}`,
+          source: edge.source,
+          target: edge.target,
+          type: edge.type,
+          label: edge.label,
+        })),
+      };
+
+      setCustomData(parsedData);
+    } catch (err) {
+      console.error('Error loading directory data:', err);
+      alert('Error loading directory data: ' + (err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleRefresh = useCallback(async () => {
+    if (!directoryHandle) {
+      alert('No directory selected. Please select a directory first.');
+      return;
+    }
+    // Save current visibility states
+    const savedHiddenPaths = new Set(hiddenPaths);
+    const savedHiddenNodes = new Set(hiddenNodes);
+    const savedExpandedFolders = new Set(expandedFolders);
+
+    await loadDirectoryData(directoryHandle);
+
+    // Restore visibility states
+    setHiddenPaths(savedHiddenPaths);
+    setHiddenNodes(savedHiddenNodes);
+    setExpandedFolders(savedExpandedFolders);
+  }, [directoryHandle, loadDirectoryData, hiddenPaths, hiddenNodes, expandedFolders]);
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -670,7 +801,9 @@ function App() {
       context.setTransform(newDpr, 0, 0, newDpr, 0, 0);
       transformRef.current.x = width / 2;
       transformRef.current.y = height / 2;
-      simulation.alpha(0.3).restart();
+      if (simulationRef.current) {
+        simulationRef.current.alpha(0.3).restart();
+      }
     };
 
     const handleSidebarResize = () => {
@@ -732,9 +865,13 @@ function App() {
       .force('charge', d3.forceManyBody().strength(chargeStrength))
       .force('x', d3.forceX(0))
       .force('y', d3.forceY(0))
-      .alphaDecay(forcesEnabled ? 0 : alphaDecayValue); // Use forcesEnabled to set initial decay
+      .alphaDecay(forcesEnabled ? 0 : alphaDecayValue);
 
     simulationRef.current = simulation;
+
+    simulation.on('tick', () => {
+      draw();
+    });
 
     // Stop simulation if locked
     if (simulationLocked) {
@@ -778,7 +915,8 @@ function App() {
         // Show outgoing edges from hovered or selected node at full opacity
         const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
         const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
-        context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected ? 1 : edgeOpacity;
+        const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
+        context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected || isHoveredEdge ? 1 : edgeOpacity;
         context.stroke();
         context.globalAlpha = 1;
       });
@@ -790,22 +928,81 @@ function App() {
         const isHovered = Array.isArray(hoveredNodes)
           ? hoveredNodes.some((n: any) => n.id === node.id)
           : hoveredNodes?.id === node.id;
+        const isEdgeSource = hoveredEdgesRef.current.some((e: any) => node.id === e.source.id);
+        const hasUnknownDynamicImport = node.data.hasUnknownDynamicImport;
 
         context.beginPath();
         context.arc(node.x, node.y, isSelected ? 7 : 5, 0, 2 * Math.PI);
         context.fillStyle = colorScale(folderMap.get(node.id) || 'root') as string;
         context.fill();
 
-        context.strokeStyle = isSelected ? '#ffffff' : '#171717';
-        context.lineWidth = isSelected ? 2.5 : 1.5;
+        // Use orange border for nodes with unknown dynamic imports
+        if (hasUnknownDynamicImport && !isSelected) {
+          context.strokeStyle = '#f97316'; // orange-500
+          context.lineWidth = 2;
+        } else {
+          context.strokeStyle = isSelected ? '#ffffff' : '#171717';
+          context.lineWidth = isSelected ? 2.5 : 1.5;
+        }
         context.stroke();
 
         // Draw hover overlay (50% opacity neutral-50) on top of border
-        if (isHovered && !isSelected) {
+        if ((isHovered || isEdgeSource) && !isSelected) {
           context.beginPath();
           context.arc(node.x, node.y, 8, 0, 2 * Math.PI);
           context.fillStyle = 'rgba(250, 250, 250, 0.5)';
           context.fill();
+        }
+
+        // Draw warning indicator for unknown dynamic imports
+        if (hasUnknownDynamicImport) {
+          context.beginPath();
+          context.arc(node.x + 4, node.y - 4, 3, 0, 2 * Math.PI);
+          context.fillStyle = '#f97316';
+          context.fill();
+        }
+      });
+
+      // Draw edge labels (on top of everything)
+      filteredEdges.forEach((edge: any) => {
+        const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
+        if (edge.label && isHoveredEdge) {
+          const dx = edge.target.x - edge.source.x;
+          const dy = edge.target.y - edge.source.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const offset = 12;
+
+          let targetX = edge.target.x;
+          let targetY = edge.target.y;
+
+          if (distance > 0) {
+            targetX = edge.source.x + (dx / distance) * (distance - offset);
+            targetY = edge.source.y + (dy / distance) * (distance - offset);
+          }
+
+          const midX = (edge.source.x + targetX) / 2;
+          const midY = (edge.source.y + targetY) / 2;
+
+          // Measure text
+          context.font = '10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          const textWidth = context.measureText(edge.label).width;
+          const padding = 6;
+          const rectWidth = textWidth + padding * 2;
+          const rectHeight = 20;
+          const rectX = midX - rectWidth / 2;
+          const rectY = midY - rectHeight / 2;
+
+          // Draw rounded rectangle background
+          context.fillStyle = 'rgba(9, 9, 11, 0.5)';
+          context.beginPath();
+          context.roundRect(rectX, rectY, rectWidth, rectHeight, 4);
+          context.fill();
+
+          // Draw text
+          context.fillStyle = '#fafafa';
+          context.textAlign = 'center';
+          context.textBaseline = 'middle';
+          context.fillText(edge.label, midX, midY);
         }
       });
 
@@ -924,11 +1121,6 @@ function App() {
       }
     };
 
-    simulation.on('tick', () => {
-      checkHover();
-      draw();
-    });
-
     // Combined mousemove handler for hover, drag, and pan
     const handleMouseMove = (event: MouseEvent) => {
       // Handle pan
@@ -967,11 +1159,50 @@ function App() {
         }
       }
 
+      // Check for edge hover (collect all overlapping edges)
+      let hoveredEdgesList = [];
+      if (!found) {
+        for (const edge of filteredEdges) {
+          const dx = edge.target.x - edge.source.x;
+          const dy = edge.target.y - edge.source.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance === 0) continue;
+
+          // Calculate distance from point to line segment
+          const t = Math.max(
+            0,
+            Math.min(1, ((mouseX - edge.source.x) * dx + (mouseY - edge.source.y) * dy) / (distance * distance))
+          );
+          const projX = edge.source.x + t * dx;
+          const projY = edge.source.y + t * dy;
+          const distToLine = Math.sqrt((mouseX - projX) ** 2 + (mouseY - projY) ** 2);
+
+          if (distToLine < 5) {
+            hoveredEdgesList.push(edge);
+          }
+        }
+      }
+
       if (found !== hoveredNodeRef.current) {
         hoveredNodeRef.current = found;
         setHoveredSymbolId(found ? found.id : null);
-        canvas.style.cursor = found ? 'pointer' : 'default';
+        canvas.style.cursor = found ? 'pointer' : hoveredEdgesList.length > 0 ? 'pointer' : 'default';
         draw();
+      }
+
+      // Clear edge hover if node is hovered
+      if (found) {
+        setHoveredEdges([]);
+        draw();
+      } else {
+        setHoveredEdges(hoveredEdgesList);
+        if (hoveredEdgesList.length > 0) {
+          canvas.style.cursor = 'pointer';
+          draw();
+        } else {
+          canvas.style.cursor = 'default';
+          draw();
+        }
       }
     };
 
@@ -1018,8 +1249,8 @@ function App() {
         const dy = mouseY - node.y;
         if (dx * dx + dy * dy < 100) {
           draggedNode = node;
-          if (!simulationLockedRef.current) {
-            simulation.alpha(0.3).restart();
+          if (!simulationLockedRef.current && simulationRef.current) {
+            simulationRef.current.alpha(0.3).restart();
           }
           draggedNode.fx = node.x;
           draggedNode.fy = node.y;
@@ -1036,8 +1267,8 @@ function App() {
         draggedNode.fx = null;
         draggedNode.fy = null;
         draggedNode = null;
-        if (!simulationLockedRef.current) {
-          simulation.alphaTarget(0);
+        if (!simulationLockedRef.current && simulationRef.current) {
+          simulationRef.current.alphaTarget(0);
         }
       }
     };
@@ -1048,12 +1279,13 @@ function App() {
       mouseOverCanvasRef.current = false;
       isPanning = false;
       hoveredNodeRef.current = null;
+      setHoveredEdges([]);
       if (draggedNode) {
         draggedNode.fx = null;
         draggedNode.fy = null;
         draggedNode = null;
-        if (!simulationLockedRef.current) {
-          simulation.alphaTarget(0);
+        if (!simulationLockedRef.current && simulationRef.current) {
+          simulationRef.current.alphaTarget(0);
         }
       }
       draw();
@@ -1069,7 +1301,9 @@ function App() {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      simulation.stop();
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
       canvas.removeEventListener('wheel', handleWheel);
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mousedown', handleMouseDown);
@@ -1153,6 +1387,15 @@ function App() {
     }
   }, [simulationLocked]);
 
+  // Update simulation when data changes
+  useEffect(() => {
+    if (simulationRef.current && filteredNodes.length > 0) {
+      simulationRef.current.nodes(filteredNodes as any);
+      simulationRef.current.force('link').links(filteredEdges as any);
+      simulationRef.current.alpha(1).restart();
+    }
+  }, [filteredNodes, filteredEdges]);
+
   return (
     <div className="h-screen w-screen bg-neutral-900 flex">
       {/* Sidebar */}
@@ -1172,59 +1415,83 @@ function App() {
         </div>
         <div>
           <div className="flex flex-col">
-            <div className="pr-4 flex justify-end gap-1">
-              <Tooltip content="Show All">
+            <div className="pr-4 flex justify-end gap-1 mb-2">
+              <Tooltip content="Open Directory">
                 <button
-                  onClick={showAll}
-                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                  onClick={handleDirectoryPicker}
+                  disabled={isLoading}
+                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer disabled:opacity-50"
                 >
-                  <EyeOpen size={16} />
+                  <FolderOpen size={16} />
                 </button>
               </Tooltip>
-              <Tooltip content="Hide All">
+              <Tooltip content="Refresh">
                 <button
-                  onClick={hideAll}
-                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                  onClick={handleRefresh}
+                  disabled={isLoading || !directoryHandle}
+                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer disabled:opacity-50"
                 >
-                  <EyeOff size={16} />
-                </button>
-              </Tooltip>
-              <Tooltip content="Expand All">
-                <button
-                  onClick={expandAll}
-                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
-                >
-                  <CopyPlus size={16} />
-                </button>
-              </Tooltip>
-              <Tooltip content="Collapse All">
-                <button
-                  onClick={collapseAll}
-                  className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
-                >
-                  <CopyMinus size={16} />
+                  <RefreshCw size={16} />
                 </button>
               </Tooltip>
             </div>
-            <div className="p-2 overflow-y-scroll" style={{ height: 'calc(100vh - 100px)' }}>
-              <MemoizedTreeNode
-                data={treeStructure}
-                path=""
-                expandedFolders={expandedFolders}
-                toggleFolder={toggleFolder}
-                hiddenPaths={hiddenPaths}
-                togglePathVisibility={togglePathVisibility}
-                hiddenNodes={hiddenNodes}
-                toggleNodeVisibility={toggleNodeVisibility}
-                colorScale={colorScale}
-                onHoverSymbol={handleHoverSymbol}
-                onHoverFile={handleHoverFile}
-                onHoverFolder={handleHoverFolder}
-                hoveredSymbolId={hoveredSymbolId}
-                onSelectSymbol={handleSelectSymbol}
-                selectedNodeId={selectedNodeId}
-              />
-            </div>
+            {directoryHandle && (
+              <>
+                <div className="pr-4 flex justify-end gap-1">
+                  <Tooltip content="Show All">
+                    <button
+                      onClick={showAll}
+                      className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                    >
+                      <EyeOpen size={16} />
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="Hide All">
+                    <button
+                      onClick={hideAll}
+                      className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                    >
+                      <EyeOff size={16} />
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="Expand All">
+                    <button
+                      onClick={expandAll}
+                      className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                    >
+                      <CopyPlus size={16} />
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="Collapse All">
+                    <button
+                      onClick={collapseAll}
+                      className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+                    >
+                      <CopyMinus size={16} />
+                    </button>
+                  </Tooltip>
+                </div>
+                <div className="p-2 overflow-y-scroll" style={{ height: 'calc(100vh - 180px)' }}>
+                  <MemoizedTreeNode
+                    data={treeStructure}
+                    path=""
+                    expandedFolders={expandedFolders}
+                    toggleFolder={toggleFolder}
+                    hiddenPaths={hiddenPaths}
+                    togglePathVisibility={togglePathVisibility}
+                    hiddenNodes={hiddenNodes}
+                    toggleNodeVisibility={toggleNodeVisibility}
+                    colorScale={colorScale}
+                    onHoverSymbol={handleHoverSymbol}
+                    onHoverFile={handleHoverFile}
+                    onHoverFolder={handleHoverFolder}
+                    hoveredSymbolId={hoveredSymbolId}
+                    onSelectSymbol={handleSelectSymbol}
+                    selectedNodeId={selectedNodeId}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1251,6 +1518,15 @@ function App() {
           )}
         </div>
         <canvas ref={canvasRef} width="100%" height="100%" />
+        {generatedNodes.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center">
+              <FolderOpen size={64} className="text-neutral-600 mx-auto mb-4" />
+              <p className="text-neutral-400 text-lg mb-2">No data loaded</p>
+              <p className="text-neutral-500 text-sm">Click the folder icon in the sidebar to import a directory</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right sidebar */}
