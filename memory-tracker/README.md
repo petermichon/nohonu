@@ -1,4 +1,4 @@
-# Memory Dependency Tracker
+# Symbol Explorer
 
 Visualizes symbol-level access coverage as an interactive graph.
 

@@ -1,20 +1,83 @@
 import { useEffect, useRef, useState, useMemo, useCallback, memo } from 'react';
 import * as d3 from 'd3';
-import { Folder, File, Box } from 'lucide-react';
+import { Folder, File, Box, Eye, EyeOff, CopyMinus, CopyPlus, Menu, Eye as EyeOpen } from 'lucide-react';
 import './index.css';
 import { symbols, parseSymbols } from './fileSystem';
+
+function Tooltip({ children, content }: { children: React.ReactNode; content: string }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 4,
+        left: rect.left + rect.width / 2,
+      });
+    }
+    setIsVisible(true);
+  };
+
+  return (
+    <>
+      <div
+        ref={triggerRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setIsVisible(false)}
+        className="relative inline-block"
+      >
+        {children}
+      </div>
+      {isVisible && (
+        <div
+          className="fixed z-9999 px-3 py-1.5 text-xs text-white bg-neutral-800 rounded-lg shadow-lg border border-neutral-700 whitespace-nowrap pointer-events-none"
+          style={{
+            top: position.top,
+            left: position.left,
+            transform: 'translateX(-50%)',
+            animation: 'fadeIn 0.15s ease-out',
+          }}
+        >
+          {content}
+        </div>
+      )}
+    </>
+  );
+}
 
 function TreeNode({
   data,
   path,
   expandedFolders,
   toggleFolder,
+  hiddenPaths,
+  togglePathVisibility,
+  hiddenNodes,
+  toggleNodeVisibility,
   colorScale,
   onHoverSymbol,
+  onHoverFile,
+  onHoverFolder,
   hoveredSymbolId,
   onSelectSymbol,
   selectedNodeId,
 }: any) {
+  const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
+
+  // Helper to check if a path or any of its parents is hidden
+  const isPathOrParentHidden = (itemPath: string): boolean => {
+    if (hiddenPaths.has(itemPath)) return true;
+    const parts = itemPath.split('/');
+    for (let i = 0; i < parts.length - 1; i++) {
+      const parentPath = parts.slice(0, i + 1).join('/');
+      if (hiddenPaths.has(parentPath)) return true;
+    }
+    return false;
+  };
+
   return (
     <>
       {Object.entries(data)
@@ -23,18 +86,31 @@ function TreeNode({
           const fullPath = path ? `${path}/${name}` : name;
           const isExpanded = expandedFolders.has(fullPath);
           const isFolder = item.type === 'folder';
+          const isHidden = hiddenPaths.has(fullPath);
+          const isParentHidden = isPathOrParentHidden(fullPath);
           const folderColor = isFolder ? (colorScale(fullPath) as string) : (colorScale(path) as string);
 
           return (
             <div key={fullPath} className="mb-1">
-              <button
+              <div
                 onClick={() => toggleFolder(fullPath)}
                 className="w-full text-left px-2 py-1 text-sm font-medium text-neutral-300 hover:bg-neutral-700 rounded flex items-center gap-1 cursor-pointer"
+                style={{ opacity: isHidden || isParentHidden ? 0.5 : 1 }}
+                onMouseEnter={() => {
+                  setHoveredPath(fullPath);
+                  if (isFolder) onHoverFolder(fullPath);
+                  else onHoverFile(fullPath);
+                }}
+                onMouseLeave={() => {
+                  setHoveredPath(null);
+                  if (isFolder) onHoverFolder(null);
+                  else onHoverFile(null);
+                }}
               >
                 {isFolder ? (
-                  <Folder size={16} className="text-neutral-500" />
+                  <Folder size={16} style={{ color: folderColor }} />
                 ) : (
-                  <File size={16} className="text-neutral-500" />
+                  <File size={16} style={{ color: folderColor }} />
                 )}
                 <span className="truncate" style={{ color: folderColor }}>
                   {name}
@@ -43,7 +119,20 @@ function TreeNode({
                   <span className="text-neutral-500 text-sm ml-auto">({Object.keys(item.children).length})</span>
                 )}
                 {!isFolder && <span className="text-neutral-500 text-sm ml-auto">({item.symbols.length})</span>}
-              </button>
+                {(isHidden || hoveredPath === fullPath) && (
+                  <Tooltip content={isHidden ? 'Show' : 'Hide'}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePathVisibility(fullPath);
+                      }}
+                      className="ml-2 cursor-pointer text-neutral-300"
+                    >
+                      {isHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </Tooltip>
+                )}
+              </div>
               {isExpanded && isFolder && (
                 <div className="ml-4 mt-1">
                   <TreeNode
@@ -51,8 +140,14 @@ function TreeNode({
                     path={fullPath}
                     expandedFolders={expandedFolders}
                     toggleFolder={toggleFolder}
+                    hiddenPaths={hiddenPaths}
+                    togglePathVisibility={togglePathVisibility}
+                    hiddenNodes={hiddenNodes}
+                    toggleNodeVisibility={toggleNodeVisibility}
                     colorScale={colorScale}
                     onHoverSymbol={onHoverSymbol}
+                    onHoverFile={onHoverFile}
+                    onHoverFolder={onHoverFolder}
                     hoveredSymbolId={hoveredSymbolId}
                     onSelectSymbol={onSelectSymbol}
                     selectedNodeId={selectedNodeId}
@@ -65,6 +160,8 @@ function TreeNode({
                     const symbolId = `${fullPath}.${symbol}`;
                     const isHovered = hoveredSymbolId === symbolId;
                     const isSelected = selectedNodeId === symbolId;
+                    const isNodeHidden = hiddenNodes.has(symbolId);
+                    const isParentHidden = isPathOrParentHidden(fullPath);
                     return (
                       <div
                         key={symbol}
@@ -72,7 +169,19 @@ function TreeNode({
                           isSelected
                             ? (el: HTMLDivElement) => {
                                 if (el) {
-                                  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                  requestAnimationFrame(() => {
+                                    const scrollContainer = el.closest('.overflow-y-scroll') as HTMLElement;
+                                    if (scrollContainer) {
+                                      const containerRect = scrollContainer.getBoundingClientRect();
+                                      const elementRect = el.getBoundingClientRect();
+                                      const offsetTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+                                      const containerHeight = containerRect.height;
+
+                                      // Center the element in the viewport
+                                      const targetScroll = offsetTop - containerHeight / 2 + elementRect.height / 2;
+                                      scrollContainer.scrollTop = targetScroll;
+                                    }
+                                  });
                                 }
                               }
                             : null
@@ -80,13 +189,32 @@ function TreeNode({
                         className={`text-sm px-2 py-0.5 truncate cursor-pointer rounded flex items-center gap-1 ${
                           isSelected ? 'bg-neutral-500' : isHovered ? 'bg-neutral-600' : 'hover:bg-neutral-700'
                         }`}
-                        style={{ color: folderColor }}
-                        onMouseEnter={() => onHoverSymbol(symbolId)}
-                        onMouseLeave={() => onHoverSymbol(null)}
+                        style={{ color: folderColor, opacity: isNodeHidden || isParentHidden ? 0.5 : 1 }}
+                        onMouseEnter={() => {
+                          setHoveredSymbol(symbolId);
+                          onHoverSymbol(symbolId);
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredSymbol(null);
+                          onHoverSymbol(null);
+                        }}
                         onClick={() => onSelectSymbol(symbolId)}
                       >
-                        <Box size={16} className="text-neutral-500 flex-shrink-0" />
-                        {symbol}
+                        <Box size={16} className="flex-shrink-0" style={{ color: folderColor }} />
+                        <span className="truncate flex-1">{symbol}</span>
+                        {(isNodeHidden || hoveredSymbol === symbolId) && (
+                          <Tooltip content={isNodeHidden ? 'Show' : 'Hide'}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleNodeVisibility(symbolId);
+                              }}
+                              className="cursor-pointer text-neutral-300"
+                            >
+                              {isNodeHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+                            </button>
+                          </Tooltip>
+                        )}
                       </div>
                     );
                   })}
@@ -109,26 +237,117 @@ function App() {
   const drawRef = useRef<(() => void) | null>(null);
   const hoveredNodeRef = useRef<any>(null);
   const selectedNodeRef = useRef<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const transformRef = useRef({ x: 0, y: 0, k: 1 });
+  const dprRef = useRef(window.devicePixelRatio || 1);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [hiddenPaths, setHiddenPaths] = useState<Set<string>>(new Set());
+  const [hiddenNodes, setHiddenNodes] = useState<Set<string>>(new Set());
   const [hoveredSymbolId, setHoveredSymbolId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const { nodes: generatedNodes, edges: generatedEdges } = useMemo(() => parseSymbols(symbols), [symbols]);
+
+  // Filter nodes and edges based on hidden folders, files, and individual nodes
+  const { filteredNodes, filteredEdges } = useMemo(() => {
+    const hiddenSet = hiddenPaths;
+    const hiddenNodeSet = hiddenNodes;
+
+    const visibleNodes = generatedNodes.filter((node: any) => {
+      // Check if this specific node is hidden
+      if (hiddenNodeSet.has(node.id)) {
+        return false;
+      }
+
+      const folder = node.data.folder || 'root';
+      const file = node.data.file || '';
+
+      // Check if this folder or any parent folder is hidden
+      const folderParts = folder.split('/');
+      for (let i = 0; i < folderParts.length; i++) {
+        const parentPath = folderParts.slice(0, i + 1).join('/');
+        if (hiddenSet.has(parentPath)) {
+          return false;
+        }
+      }
+
+      // Check if this specific file is hidden
+      // Remove .ts extension from file for matching with tree paths
+      const fileNameWithoutExt = file.replace('.ts', '');
+      const filePath = file ? `${folder}/${fileNameWithoutExt}` : folder;
+      if (hiddenSet.has(filePath)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const visibleNodeIds = new Set(visibleNodes.map((n: any) => n.id));
+
+    const visibleEdges = generatedEdges.filter((edge: any) => {
+      // Handle both string IDs and D3 node objects
+      const sourceId = typeof edge.source === 'string' ? edge.source : edge.source.id;
+      const targetId = typeof edge.target === 'string' ? edge.target : edge.target.id;
+      return visibleNodeIds.has(sourceId) && visibleNodeIds.has(targetId);
+    });
+
+    return { filteredNodes: visibleNodes, filteredEdges: visibleEdges };
+  }, [generatedNodes, generatedEdges, hiddenPaths, hiddenNodes]);
 
   const handleHoverSymbol = useCallback(
     (nodeId: string | null) => {
       if (nodeId === null) {
         hoveredNodeRef.current = null;
       } else {
-        const node = generatedNodes.find((n: any) => n.id === nodeId);
+        const node = filteredNodes.find((n: any) => n.id === nodeId);
         hoveredNodeRef.current = node || null;
       }
       if (drawRef.current) {
         drawRef.current();
       }
     },
-    [generatedNodes]
+    [filteredNodes]
+  );
+
+  const handleHoverFile = useCallback(
+    (filePath: string | null) => {
+      // Update hovered nodes to include all nodes from this file
+      if (filePath === null) {
+        hoveredNodeRef.current = null;
+      } else {
+        const nodesInFile = filteredNodes.filter((n: any) => {
+          const lastDotIndex = n.id.lastIndexOf('.');
+          const nodeFilePath = n.id.substring(0, lastDotIndex);
+          return nodeFilePath === filePath;
+        });
+        hoveredNodeRef.current = nodesInFile.length > 0 ? nodesInFile : null;
+      }
+      if (drawRef.current) {
+        drawRef.current();
+      }
+    },
+    [filteredNodes]
+  );
+
+  const handleHoverFolder = useCallback(
+    (folderPath: string | null) => {
+      // Update hovered nodes to include all nodes from this folder and subfolders
+      if (folderPath === null) {
+        hoveredNodeRef.current = null;
+      } else {
+        const nodesInFolder = filteredNodes.filter((n: any) => {
+          const lastDotIndex = n.id.lastIndexOf('.');
+          const nodeFilePath = n.id.substring(0, lastDotIndex);
+          // Check if node's file path starts with the folder path
+          return nodeFilePath.startsWith(folderPath + '/') || nodeFilePath === folderPath;
+        });
+        hoveredNodeRef.current = nodesInFolder.length > 0 ? nodesInFolder : null;
+      }
+      if (drawRef.current) {
+        drawRef.current();
+      }
+    },
+    [filteredNodes]
   );
 
   const handleSelectSymbol = useCallback((nodeId: string) => {
@@ -163,7 +382,7 @@ function App() {
     }
   }, [selectedNodeId]);
 
-  // Extract folder names for coloring
+  // Extract folder names for coloring (based on all nodes for consistent colors)
   const { folderMap, colorScale } = useMemo(() => {
     const map = new Map<string, string>();
     generatedNodes.forEach((node: any) => {
@@ -177,7 +396,7 @@ function App() {
     return { folderMap: map, colorScale: scale };
   }, [generatedNodes]);
 
-  // Build hierarchical folder/file tree structure
+  // Build hierarchical folder/file tree structure (based on all nodes for sidebar)
   const treeStructure = useMemo(() => {
     const tree: Record<string, any> = {};
 
@@ -224,9 +443,97 @@ function App() {
     });
   }, []);
 
+  const togglePathVisibility = useCallback((path: string) => {
+    setHiddenPaths((prev: Set<string>) => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleNodeVisibility = useCallback((nodeId: string) => {
+    setHiddenNodes((prev: Set<string>) => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+  }, []);
+
   const collapseAll = useCallback(() => {
     setExpandedFolders(new Set());
   }, []);
+
+  const showAll = useCallback(() => {
+    setHiddenPaths(new Set());
+    setHiddenNodes(new Set());
+  }, []);
+
+  const hideAll = useCallback(() => {
+    const pathsToHide = new Set<string>();
+    const nodesToHide = new Set<string>();
+
+    function collectVisibleItems(node: any, currentPath: string = '') {
+      Object.entries(node).forEach(([name, item]: [string, any]) => {
+        const fullPath = currentPath ? `${currentPath}/${name}` : name;
+
+        if (item.type === 'folder') {
+          if (expandedFolders.has(fullPath)) {
+            // Folder is expanded, hide its direct children
+            Object.entries(item.children).forEach(([childName, childItem]: [string, any]) => {
+              const childPath = `${fullPath}/${childName}`;
+              if (childItem.type === 'folder') {
+                pathsToHide.add(childPath);
+              } else if (childItem.type === 'file') {
+                pathsToHide.add(childPath);
+                childItem.symbols.forEach((symbol: string) => {
+                  nodesToHide.add(`${childPath}.${symbol}`);
+                });
+              }
+            });
+          } else {
+            // Folder is collapsed, hide the folder itself
+            pathsToHide.add(fullPath);
+          }
+        } else if (item.type === 'file') {
+          // Files are only visible if their parent folder is expanded
+          // If we reach a file, its parent must be expanded, so hide it
+          pathsToHide.add(fullPath);
+          item.symbols.forEach((symbol: string) => {
+            nodesToHide.add(`${fullPath}.${symbol}`);
+          });
+        }
+      });
+    }
+
+    collectVisibleItems(treeStructure);
+    setHiddenPaths(pathsToHide);
+    setHiddenNodes(nodesToHide);
+  }, [treeStructure, expandedFolders]);
+
+  const expandAll = useCallback(() => {
+    const allPaths = new Set<string>();
+    function collectPaths(node: any, currentPath: string = '') {
+      Object.entries(node).forEach(([name, item]: [string, any]) => {
+        const fullPath = currentPath ? `${currentPath}/${name}` : name;
+        if (item.type === 'folder') {
+          allPaths.add(fullPath);
+          collectPaths(item.children, fullPath);
+        } else if (item.type === 'file') {
+          allPaths.add(fullPath);
+        }
+      });
+    }
+    collectPaths(treeStructure);
+    setExpandedFolders(allPaths);
+  }, [treeStructure]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -235,29 +542,50 @@ function App() {
     const context = canvas.getContext('2d');
     if (!context) return;
 
-    let width = window.innerWidth - (sidebarOpenRef.current ? 300 : 0);
-    let height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    dprRef.current = dpr;
+    const widthRef = { current: window.innerWidth - (sidebarOpenRef.current ? 300 : 0) };
+    const heightRef = { current: window.innerHeight };
+    let width = widthRef.current;
+    let height = heightRef.current;
 
-    console.log('Canvas dimensions:', { width, height });
-    console.log('Node center position:', { x: width / 2, y: height / 2 });
-
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context.scale(dpr, dpr);
 
     const handleResize = () => {
+      const newDpr = window.devicePixelRatio || 1;
+      const dprChanged = newDpr !== dprRef.current;
+
+      if (dprChanged) {
+        dprRef.current = newDpr;
+      }
+
       width = window.innerWidth - (sidebarOpenRef.current ? 300 : 0);
       height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-      transform.x = width / 2;
-      transform.y = height / 2;
+      widthRef.current = width;
+      heightRef.current = height;
+      canvas.width = width * newDpr;
+      canvas.height = height * newDpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.setTransform(newDpr, 0, 0, newDpr, 0, 0);
+      transformRef.current.x = width / 2;
+      transformRef.current.y = height / 2;
       simulation.alpha(0.3).restart();
     };
 
     const handleSidebarResize = () => {
+      const newDpr = dprRef.current;
       const newWidth = window.innerWidth - (sidebarOpenRef.current ? 300 : 0);
-      canvas.width = newWidth;
-      transform.x = newWidth / 2;
+      widthRef.current = newWidth;
+      canvas.width = newWidth * newDpr;
+      canvas.style.width = `${newWidth}px`;
+      context.setTransform(1, 0, 0, 1, 0, 0);
+      context.scale(newDpr, newDpr);
+      transformRef.current.x = newWidth / 2;
       if (drawRef.current) {
         drawRef.current();
       }
@@ -267,7 +595,10 @@ function App() {
 
     window.addEventListener('resize', handleResize);
 
-    let transform = { x: width / 2, y: height / 2, k: 1 };
+    // Initialize transform if not set
+    if (transformRef.current.x === 0 && transformRef.current.y === 0) {
+      transformRef.current = { x: width / 2, y: height / 2, k: 1 };
+    }
 
     // Manual zoom/pan handling
     let isPanning = false;
@@ -281,12 +612,12 @@ function App() {
       const mouseY = event.clientY - rect.top;
 
       const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
-      const newK = transform.k * zoomFactor;
+      const newK = transformRef.current.k * zoomFactor;
 
       // Zoom towards mouse position
-      transform.x = mouseX - (mouseX - transform.x) * (newK / transform.k);
-      transform.y = mouseY - (mouseY - transform.y) * (newK / transform.k);
-      transform.k = newK;
+      transformRef.current.x = mouseX - (mouseX - transformRef.current.x) * (newK / transformRef.current.k);
+      transformRef.current.y = mouseY - (mouseY - transformRef.current.y) * (newK / transformRef.current.k);
+      transformRef.current.k = newK;
 
       draw();
     };
@@ -294,10 +625,10 @@ function App() {
     canvas.addEventListener('wheel', handleWheel);
 
     const simulation = d3
-      .forceSimulation(generatedNodes as any)
+      .forceSimulation(filteredNodes as any)
       .force(
         'link',
-        d3.forceLink(generatedEdges as any).id((d: any) => d.id)
+        d3.forceLink(filteredEdges as any).id((d: any) => d.id)
       )
       .force('charge', d3.forceManyBody().strength(-100))
       .force('x', d3.forceX(0))
@@ -312,12 +643,12 @@ function App() {
     function draw() {
       if (!context) return;
       context.save();
-      context.clearRect(0, 0, width, height);
-      context.translate(transform.x, transform.y);
-      context.scale(transform.k, transform.k);
+      context.clearRect(0, 0, widthRef.current, heightRef.current);
+      context.translate(transformRef.current.x, transformRef.current.y);
+      context.scale(transformRef.current.k, transformRef.current.k);
 
       // Draw edges
-      generatedEdges.forEach((edge: any) => {
+      filteredEdges.forEach((edge: any) => {
         const dx = edge.target.x - edge.source.x;
         const dy = edge.target.y - edge.source.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -342,29 +673,34 @@ function App() {
       });
 
       // Draw nodes
-      generatedNodes.forEach((node: any) => {
+      filteredNodes.forEach((node: any) => {
         const isSelected = node.id === selectedNodeRef.current;
+        const hoveredNodes = hoveredNodeRef.current;
+        const isHovered = Array.isArray(hoveredNodes)
+          ? hoveredNodes.some((n: any) => n.id === node.id)
+          : hoveredNodes?.id === node.id;
+
         context.beginPath();
         context.arc(node.x, node.y, isSelected ? 7 : 5, 0, 2 * Math.PI);
         context.fillStyle = colorScale(folderMap.get(node.id) || 'root') as string;
         context.fill();
+
         context.strokeStyle = isSelected ? '#ffffff' : '#171717';
         context.lineWidth = isSelected ? 2.5 : 1.5;
         context.stroke();
-      });
 
-      // Log first few node positions for debugging
-      if (generatedNodes.length > 0) {
-        console.log('First node position:', {
-          x: generatedNodes[0].x,
-          y: generatedNodes[0].y,
-          id: generatedNodes[0].id,
-        });
-      }
+        // Draw hover overlay (50% opacity neutral-50) on top of border
+        if (isHovered && !isSelected) {
+          context.beginPath();
+          context.arc(node.x, node.y, 8, 0, 2 * Math.PI);
+          context.fillStyle = 'rgba(250, 250, 250, 0.5)';
+          context.fill();
+        }
+      });
 
       // Draw selected label (always shows if node is selected)
       if (selectedNodeRef.current) {
-        const selectedNode = generatedNodes.find((n: any) => n.id === selectedNodeRef.current);
+        const selectedNode = filteredNodes.find((n: any) => n.id === selectedNodeRef.current);
         if (selectedNode) {
           const lastDotIndex = selectedNode.id.lastIndexOf('.');
           const pathPart = selectedNode.id.substring(0, lastDotIndex);
@@ -380,31 +716,37 @@ function App() {
 
           const totalWidth = symbolWidth + pathWidth;
           const startX = selectedNode.x - totalWidth / 2;
+          const padding = 6;
+          const rectWidth = totalWidth + padding * 2;
+          const rectHeight = 20;
+          const rectX = startX - padding;
+          const rectY = selectedNode.y - 12 - rectHeight;
+          const textY = rectY + rectHeight / 2 + 3; // Center text vertically with slight offset for baseline
 
-          // Draw shadow for symbol (bold)
-          context.font = 'bold 10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          context.fillStyle = 'rgba(0, 0, 0, 1)';
-          context.fillText(symbolPart, startX + 0.5, selectedNode.y - 12 + 0.5);
-
-          // Draw shadow for path (normal)
-          context.font = '10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          context.fillStyle = 'rgba(0, 0, 0, 1)';
-          context.fillText(` ${pathPart}`, startX + symbolWidth + 0.5, selectedNode.y - 12 + 0.5);
+          // Draw rounded rectangle background (zinc-950 transparent)
+          context.fillStyle = 'rgba(9, 9, 11, 0.5)';
+          context.beginPath();
+          context.roundRect(rectX, rectY, rectWidth, rectHeight, 4);
+          context.fill();
 
           // Draw symbol (bold, white)
           context.font = 'bold 10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           context.fillStyle = '#fafafa'; // neutral-50
-          context.fillText(symbolPart, startX, selectedNode.y - 12);
+          context.fillText(symbolPart, startX, textY);
 
           // Draw path (normal, gray)
           context.font = '10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           context.fillStyle = '#fafafa'; // neutral-50
-          context.fillText(` ${pathPart}`, startX + symbolWidth, selectedNode.y - 12);
+          context.fillText(` ${pathPart}`, startX + symbolWidth, textY);
         }
       }
 
       // Draw hover label (shows if hovering and different from selected)
-      if (hoveredNodeRef.current && hoveredNodeRef.current.id !== selectedNodeRef.current) {
+      if (
+        hoveredNodeRef.current &&
+        !Array.isArray(hoveredNodeRef.current) &&
+        hoveredNodeRef.current.id !== selectedNodeRef.current
+      ) {
         const lastDotIndex = hoveredNodeRef.current.id.lastIndexOf('.');
         const pathPart = hoveredNodeRef.current.id.substring(0, lastDotIndex);
         const symbolPart = hoveredNodeRef.current.id.substring(lastDotIndex + 1);
@@ -419,26 +761,28 @@ function App() {
 
         const totalWidth = symbolWidth + pathWidth;
         const startX = hoveredNodeRef.current.x - totalWidth / 2;
+        const padding = 6;
+        const rectWidth = totalWidth + padding * 2;
+        const rectHeight = 20;
+        const rectX = startX - padding;
+        const rectY = hoveredNodeRef.current.y - 10 - rectHeight;
+        const textY = rectY + rectHeight / 2 + 3; // Center text vertically with slight offset for baseline
 
-        // Draw shadow for symbol (bold)
-        context.font = 'bold 10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        context.fillStyle = 'rgba(0, 0, 0, 1)';
-        context.fillText(symbolPart, startX + 0.5, hoveredNodeRef.current.y - 10 + 0.5);
-
-        // Draw shadow for path (normal)
-        context.font = '10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        context.fillStyle = 'rgba(0, 0, 0, 1)';
-        context.fillText(` ${pathPart}`, startX + symbolWidth + 0.5, hoveredNodeRef.current.y - 10 + 0.5);
+        // Draw rounded rectangle background (zinc-950 transparent)
+        context.fillStyle = 'rgba(9, 9, 11, 0.5)';
+        context.beginPath();
+        context.roundRect(rectX, rectY, rectWidth, rectHeight, 4);
+        context.fill();
 
         // Draw symbol (bold, white)
         context.font = 'bold 10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         context.fillStyle = '#fafafa'; // neutral-50
-        context.fillText(symbolPart, startX, hoveredNodeRef.current.y - 10);
+        context.fillText(symbolPart, startX, textY);
 
         // Draw path (normal, gray)
         context.font = '10px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         context.fillStyle = '#fafafa'; // neutral-50
-        context.fillText(` ${pathPart}`, startX + symbolWidth, hoveredNodeRef.current.y - 10);
+        context.fillText(` ${pathPart}`, startX + symbolWidth, textY);
       }
 
       context.restore();
@@ -454,16 +798,16 @@ function App() {
       if (isPanning) {
         const dx = event.clientX - panStart.x;
         const dy = event.clientY - panStart.y;
-        transform.x += dx;
-        transform.y += dy;
+        transformRef.current.x += dx;
+        transformRef.current.y += dy;
         panStart = { x: event.clientX, y: event.clientY };
         draw();
         return;
       }
 
       const rect = canvas.getBoundingClientRect();
-      const mouseX = (event.clientX - rect.left - transform.x) / transform.k;
-      const mouseY = (event.clientY - rect.top - transform.y) / transform.k;
+      const mouseX = (event.clientX - rect.left - transformRef.current.x) / transformRef.current.k;
+      const mouseY = (event.clientY - rect.top - transformRef.current.y) / transformRef.current.k;
 
       // Handle drag
       if (draggedNode) {
@@ -475,7 +819,7 @@ function App() {
 
       // Handle hover
       let found = null;
-      for (const node of generatedNodes) {
+      for (const node of filteredNodes) {
         const dx = mouseX - node.x;
         const dy = mouseY - node.y;
         if (dx * dx + dy * dy < 100) {
@@ -488,6 +832,7 @@ function App() {
       if (found !== hoveredNodeRef.current) {
         hoveredNodeRef.current = found;
         setHoveredSymbolId(found ? found.id : null);
+        canvas.style.cursor = found ? 'pointer' : 'default';
         draw();
       }
     };
@@ -504,12 +849,12 @@ function App() {
       }
 
       const rect = canvas.getBoundingClientRect();
-      const mouseX = (event.clientX - rect.left - transform.x) / transform.k;
-      const mouseY = (event.clientY - rect.top - transform.y) / transform.k;
+      const mouseX = (event.clientX - rect.left - transformRef.current.x) / transformRef.current.k;
+      const mouseY = (event.clientY - rect.top - transformRef.current.y) / transformRef.current.k;
 
       // Check for node click (selection)
       let nodeClicked = false;
-      for (const node of generatedNodes) {
+      for (const node of filteredNodes) {
         const dx = mouseX - node.x;
         const dy = mouseY - node.y;
         if (dx * dx + dy * dy < 100) {
@@ -527,7 +872,7 @@ function App() {
         draw();
       }
 
-      for (const node of generatedNodes) {
+      for (const node of filteredNodes) {
         const dx = mouseX - node.x;
         const dy = mouseY - node.y;
         if (dx * dx + dy * dy < 100) {
@@ -584,7 +929,7 @@ function App() {
       canvas.removeEventListener('mouseleave', handleMouseLeave);
       canvas.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, [generatedNodes, generatedEdges, folderMap, colorScale]);
+  }, [filteredNodes, filteredEdges, folderMap, colorScale, hiddenPaths, hiddenNodes]);
 
   // Handle sidebar resize without re-initializing simulation
   useEffect(() => {
@@ -598,34 +943,69 @@ function App() {
     <div className="h-screen w-screen bg-neutral-900 flex">
       {/* Sidebar */}
       <div
-        className={`bg-neutral-800 overflow-hidden ${sidebarOpen ? 'border-r border-neutral-700' : ''}`}
+        className={`bg-neutral-900 overflow-hidden ${sidebarOpen ? 'border-r border-neutral-700' : ''}`}
         style={{ width: sidebarOpen ? '300px' : '0px' }}
       >
-        <div className="p-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 className="font-semibold text-neutral-50 text-sm">Symbol Explorer</h2>
-          <button
+        <div className="p-4">
+          <div
+            className="flex items-center gap-2 cursor-pointer hover:bg-neutral-800 p-2 rounded-lg select-none"
             onClick={() => setSidebarOpen(false)}
-            className="text-neutral-400 hover:text-neutral-200 cursor-pointer"
+            style={{ maxWidth: 'fit-content' }}
           >
-            ✕
-          </button>
-        </div>
-        <div className="p-2 overflow-y-auto" style={{ height: 'calc(100vh - 60px)' }}>
-          <div className="flex justify-end mb-2">
-            <button
-              onClick={collapseAll}
-              className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded cursor-pointer"
-            >
-              Collapse All
-            </button>
+            <Menu size={24} className="text-neutral-300" />
+            <h1 className="font-semibold text-neutral-50">Symbol Explorer</h1>
           </div>
+        </div>
+        <div className="pr-4">
+          <div className="flex justify-end gap-1">
+            <Tooltip content="Show All">
+              <button
+                onClick={showAll}
+                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+              >
+                <EyeOpen size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Hide All">
+              <button
+                onClick={hideAll}
+                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+              >
+                <EyeOff size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Expand All">
+              <button
+                onClick={expandAll}
+                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+              >
+                <CopyPlus size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Collapse All">
+              <button
+                onClick={collapseAll}
+                className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-lg cursor-pointer"
+              >
+                <CopyMinus size={16} />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
+        <div className="p-2 overflow-y-scroll" style={{ height: 'calc(100vh - 100px)' }}>
           <MemoizedTreeNode
             data={treeStructure}
             path=""
             expandedFolders={expandedFolders}
             toggleFolder={toggleFolder}
+            hiddenPaths={hiddenPaths}
+            togglePathVisibility={togglePathVisibility}
+            hiddenNodes={hiddenNodes}
+            toggleNodeVisibility={toggleNodeVisibility}
             colorScale={colorScale}
             onHoverSymbol={handleHoverSymbol}
+            onHoverFile={handleHoverFile}
+            onHoverFolder={handleHoverFolder}
             hoveredSymbolId={hoveredSymbolId}
             onSelectSymbol={handleSelectSymbol}
             selectedNodeId={selectedNodeId}
@@ -635,17 +1015,18 @@ function App() {
 
       {/* Main content */}
       <div className="flex-1 relative">
-        <div className="absolute top-4 left-4 z-10">
-          <h1 className="font-semibold text-neutral-50">Memory Dependency Tracker</h1>
+        <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+          {!sidebarOpen && (
+            <div
+              className="flex items-center gap-2 cursor-pointer p-2 rounded-lg select-none"
+              style={{ maxWidth: 'fit-content' }}
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu size={24} className="text-neutral-300" />
+              <h1 className="font-semibold text-neutral-50">Symbol Explorer</h1>
+            </div>
+          )}
         </div>
-        {!sidebarOpen && (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="absolute top-4 left-4 z-10 mt-8 bg-neutral-800 border border-neutral-700 text-neutral-300 px-2 py-1 rounded text-xs hover:bg-neutral-700 cursor-pointer"
-          >
-            ☰ Explorer
-          </button>
-        )}
         <canvas ref={canvasRef} width="100%" height="100%" />
       </div>
     </div>

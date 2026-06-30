@@ -7,6 +7,24 @@ body {
   @apply bg-neutral-950 text-neutral-400;
 }
 
+/* Prevent text selection on buttons */
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Tooltip fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* Custom scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
