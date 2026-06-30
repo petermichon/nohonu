@@ -207,7 +207,7 @@ function TreeNode({
                         }}
                         onClick={() => onSelectSymbol(symbolId)}
                       >
-                        <Box size={16} className="flex-shrink-0" style={{ color: folderColor }} />
+                        <Box size={16} className="shrink-0" style={{ color: folderColor }} />
                         <span className="truncate flex-1">{symbol}</span>
                         <Tooltip content={isNodeHidden ? 'Show' : 'Hide'}>
                           <button
