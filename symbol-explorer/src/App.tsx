@@ -267,17 +267,12 @@ function App() {
   });
   const [hoveredSymbolId, setHoveredSymbolId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [hoveredEdge, setHoveredEdge] = useState<any | null>(null);
   const [hoveredEdges, setHoveredEdges] = useState<any[]>([]);
-  const hoveredEdgeRef = useRef<any>(null);
   const hoveredEdgesRef = useRef<any[]>([]);
   const [simulationLocked, setSimulationLocked] = useState(false);
   const simulationLockedRef = useRef(false);
 
-  // Sync hoveredEdge ref with state
-  useEffect(() => {
-    hoveredEdgeRef.current = hoveredEdge;
-  }, [hoveredEdge]);
+  // Sync hoveredEdges ref with state
   useEffect(() => {
     hoveredEdgesRef.current = hoveredEdges;
   }, [hoveredEdges]);
@@ -1098,29 +1093,6 @@ function App() {
 
     drawRef.current = draw;
 
-    // Check hover state based on current mouse position
-    const checkHover = () => {
-      // Only check canvas hover if mouse is over the canvas
-      if (!mouseOverCanvasRef.current) return;
-
-      const { x: mouseX, y: mouseY } = mousePositionRef.current;
-      let found = null;
-      for (const node of filteredNodes) {
-        const dx = mouseX - node.x;
-        const dy = mouseY - node.y;
-        if (dx * dx + dy * dy < 100) {
-          found = node;
-          break;
-        }
-      }
-
-      if (found !== hoveredNodeRef.current) {
-        hoveredNodeRef.current = found;
-        setHoveredSymbolId(found ? found.id : null);
-        canvas.style.cursor = found ? 'pointer' : 'default';
-      }
-    };
-
     // Combined mousemove handler for hover, drag, and pan
     const handleMouseMove = (event: MouseEvent) => {
       // Handle pan
@@ -1512,7 +1484,7 @@ function App() {
         </div>
         <div className="absolute top-6 right-6 z-10">
           {!rightSidebarOpen && (
-            <div onClick={() => setRightSidebarOpen(!rightSidebarOpen)} className="cursor-pointer">
+            <div onClick={() => setRightSidebarOpen(!rightSidebarOpen)} className="cursor-pointer select-none">
               <Settings size={24} className="text-neutral-400" />
             </div>
           )}
@@ -1537,7 +1509,7 @@ function App() {
         <div className="p-4">
           <div className="p-2 flex items-center justify-between">
             <h1 className="font-semibold text-neutral-50">Settings</h1>
-            <div onClick={() => setRightSidebarOpen(false)} className="cursor-pointer">
+            <div onClick={() => setRightSidebarOpen(false)} className="cursor-pointer select-none">
               <Settings size={24} className="text-neutral-400" />
             </div>
           </div>
