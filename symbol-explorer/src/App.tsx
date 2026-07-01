@@ -294,6 +294,29 @@ function App() {
     const saved = localStorage.getItem('edgeOpacity');
     return saved !== null ? JSON.parse(saved) : 0.5;
   });
+  const [viewMode, setViewMode] = useState<
+    | 'edges'
+    | 'polygons'
+    | 'circles'
+    | 'boxes'
+    | 'radial-offset'
+    | 'normal-offset'
+    | 'parallel-offset'
+    | 'voronoi-offset'
+    | 'para-arcto'
+    | 'para-fillet'
+    | 'para-bezier'
+    | 'para-subdiv'
+    | 'expand-poly'
+    | 'circle-poly'
+    | 'buffer-poly'
+    | 'mincircle-poly'
+    | 'ellipse-wrap'
+    | 'oriented-rect'
+    | 'oriented-rect-rounded'
+    | 'oriented-rect-para'
+    | 'oriented-rect-roundpoly'
+  >('edges');
   const [customData, setCustomData] = useState<{ nodes: any[]; edges: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [directoryHandle, setDirectoryHandle] = useState<any>(null);
@@ -883,38 +906,1620 @@ function App() {
       context.translate(transformRef.current.x, transformRef.current.y);
       context.scale(transformRef.current.k, transformRef.current.k);
 
+      // Draw polygons/circles/boxes/offsets around nodes from the same file
+      if (
+        viewMode === 'polygons' ||
+        viewMode === 'circles' ||
+        viewMode === 'boxes' ||
+        viewMode === 'radial-offset' ||
+        viewMode === 'normal-offset' ||
+        viewMode === 'parallel-offset' ||
+        viewMode === 'voronoi-offset' ||
+        viewMode === 'para-arcto' ||
+        viewMode === 'para-fillet' ||
+        viewMode === 'para-bezier' ||
+        viewMode === 'para-subdiv' ||
+        viewMode === 'expand-poly' ||
+        viewMode === 'circle-poly' ||
+        viewMode === 'buffer-poly' ||
+        viewMode === 'mincircle-poly' ||
+        viewMode === 'ellipse-wrap' ||
+        viewMode === 'oriented-rect' ||
+        viewMode === 'oriented-rect-rounded' ||
+        viewMode === 'oriented-rect-para' ||
+        viewMode === 'oriented-rect-roundpoly'
+      ) {
+        const nodesByFile = new Map<string, any[]>();
+        filteredNodes.forEach((node: any) => {
+          const file = node.data.file;
+          if (!nodesByFile.has(file)) {
+            nodesByFile.set(file, []);
+          }
+          nodesByFile.get(file)!.push(node);
+        });
+
+        nodesByFile.forEach((nodes) => {
+          if (viewMode === 'polygons') {
+            // Convex hull for polygons mode
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull) {
+              context.beginPath();
+              hull.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'radial-offset') {
+            // Simple radial offset from hull vertices
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull) {
+              // Calculate centroid of hull
+              const sumX = hull.reduce((sum, p) => sum + p[0], 0);
+              const sumY = hull.reduce((sum, p) => sum + p[1], 0);
+              const centerX = sumX / hull.length;
+              const centerY = sumY / hull.length;
+
+              const padding = 15;
+              const offsetHull = hull.map((point) => {
+                const dx = point[0] - centerX;
+                const dy = point[1] - centerY;
+                const angle = Math.atan2(dy, dx);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const newDistance = distance + padding;
+                return [centerX + Math.cos(angle) * newDistance, centerY + Math.sin(angle) * newDistance] as [
+                  number,
+                  number,
+                ];
+              });
+
+              context.beginPath();
+              offsetHull.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'normal-offset') {
+            // Normal-based offset (parallel offset of edges)
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull && hull.length >= 3) {
+              const padding = 15;
+              const offsetPoints: [number, number][] = [];
+
+              for (let i = 0; i < hull.length; i++) {
+                const current = hull[i];
+                const prev = hull[(i - 1 + hull.length) % hull.length];
+                const next = hull[(i + 1) % hull.length];
+
+                // Calculate normal vectors for adjacent edges
+                const edge1 = [next[0] - current[0], next[1] - current[1]];
+                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
+
+                // Normalize
+                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                const norm2 = [edge2[0] / len2, edge2[1] / len2];
+
+                // Perpendicular normals (pointing outward)
+                const perp1 = [-norm1[1], norm1[0]];
+                const perp2 = [-norm2[1], norm2[0]];
+
+                // Average the perpendiculars
+                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+
+                offsetPoints.push([
+                  current[0] + normalizedAvg[0] * padding,
+                  current[1] + normalizedAvg[1] * padding,
+                ] as [number, number]);
+              }
+
+              context.beginPath();
+              offsetPoints.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'parallel-offset') {
+            // Parallel offset (buffer) - improved normal-offset
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull && hull.length >= 3) {
+              const nodeRadius = 10;
+              const padding = 5;
+              const offset = nodeRadius + padding;
+              const offsetPoints: [number, number][] = [];
+
+              for (let i = 0; i < hull.length; i++) {
+                const current = hull[i];
+                const prev = hull[(i - 1 + hull.length) % hull.length];
+                const next = hull[(i + 1) % hull.length];
+
+                // Calculate edge vectors
+                const edge1 = [next[0] - current[0], next[1] - current[1]];
+                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
+
+                // Normalize
+                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                const norm2 = [edge2[0] / len2, edge2[1] / len2];
+
+                // Perpendicular normals (pointing outward)
+                const perp1 = [-norm1[1], norm1[0]];
+                const perp2 = [-norm2[1], norm2[0]];
+
+                // Average the perpendiculars
+                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+
+                offsetPoints.push([current[0] + normalizedAvg[0] * offset, current[1] + normalizedAvg[1] * offset] as [
+                  number,
+                  number,
+                ]);
+              }
+
+              context.beginPath();
+              offsetPoints.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'voronoi-offset') {
+            // Simplified Voronoi-based offset (using centroid distance)
+            if (nodes.length < 3) return;
+
+            // Calculate centroid of all nodes
+            const sumX = nodes.reduce((sum, n) => sum + n.x, 0);
+            const sumY = nodes.reduce((sum, n) => sum + n.y, 0);
+            const centerX = sumX / nodes.length;
+            const centerY = sumY / nodes.length;
+
+            const nodeRadius = 10;
+            const padding = 5;
+            const offset = nodeRadius + padding;
+
+            // Extend each node based on its distance from centroid
+            const extendedPoints = nodes.map((n) => {
+              const dx = n.x - centerX;
+              const dy = n.y - centerY;
+              const angle = Math.atan2(dy, dx);
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              // Adaptive offset based on distance from centroid
+              const adaptiveOffset = offset * (1 + distance / 100);
+              const newDistance = distance + adaptiveOffset;
+              return [centerX + Math.cos(angle) * newDistance, centerY + Math.sin(angle) * newDistance] as [
+                number,
+                number,
+              ];
+            });
+
+            const hull = d3.polygonHull(extendedPoints);
+
+            if (hull) {
+              context.beginPath();
+              hull.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'para-arcto') {
+            // Parallel offset with arcTo rounding
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull && hull.length >= 3) {
+              const offset = 30;
+              const cornerRadius = 8;
+              const offsetPoints: [number, number][] = [];
+
+              for (let i = 0; i < hull.length; i++) {
+                const current = hull[i];
+                const prev = hull[(i - 1 + hull.length) % hull.length];
+                const next = hull[(i + 1) % hull.length];
+
+                // Calculate edge vectors
+                const edge1 = [next[0] - current[0], next[1] - current[1]];
+                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
+
+                // Normalize
+                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                const norm2 = [edge2[0] / len2, edge2[1] / len2];
+
+                // Perpendicular normals (pointing outward)
+                const perp1 = [-norm1[1], norm1[0]];
+                const perp2 = [-norm2[1], norm2[0]];
+
+                // Average the perpendiculars
+                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+
+                offsetPoints.push([current[0] + normalizedAvg[0] * offset, current[1] + normalizedAvg[1] * offset] as [
+                  number,
+                  number,
+                ]);
+              }
+
+              context.beginPath();
+
+              // Draw rounded corners using quadratic curves
+              for (let i = 0; i < offsetPoints.length; i++) {
+                const current = offsetPoints[i];
+                const prev = offsetPoints[(i - 1 + offsetPoints.length) % offsetPoints.length];
+                const next = offsetPoints[(i + 1) % offsetPoints.length];
+
+                // Calculate vectors to adjacent points
+                const v1 = [prev[0] - current[0], prev[1] - current[1]];
+                const v2 = [next[0] - current[0], next[1] - current[1]];
+
+                const len1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+                const len2 = Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+
+                // Normalize vectors
+                const norm1 = [v1[0] / len1, v1[1] / len1];
+                const norm2 = [v2[0] / len2, v2[1] / len2];
+
+                // Calculate control point (intersection of offset lines)
+                // Move along each edge by cornerRadius
+                const p1 = [current[0] + norm1[0] * cornerRadius, current[1] + norm1[1] * cornerRadius];
+                const p2 = [current[0] + norm2[0] * cornerRadius, current[1] + norm2[1] * cornerRadius];
+
+                if (i === 0) {
+                  context.moveTo(p1[0], p1[1]);
+                }
+                context.quadraticCurveTo(current[0], current[1], p2[0], p2[1]);
+              }
+
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'para-fillet') {
+            // Parallel offset with fillet (45-degree chamfer)
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull && hull.length >= 3) {
+              const nodeRadius = 10;
+              const padding = 5;
+              const offset = nodeRadius + padding;
+              const chamferSize = 8;
+              const offsetPoints: [number, number][] = [];
+
+              for (let i = 0; i < hull.length; i++) {
+                const current = hull[i];
+                const prev = hull[(i - 1 + hull.length) % hull.length];
+                const next = hull[(i + 1) % hull.length];
+
+                const edge1 = [next[0] - current[0], next[1] - current[1]];
+                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
+
+                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                const norm2 = [edge2[0] / len2, edge2[1] / len2];
+
+                const perp1 = [-norm1[1], norm1[0]];
+                const perp2 = [-norm2[1], norm2[0]];
+
+                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+
+                offsetPoints.push([current[0] + normalizedAvg[0] * offset, current[1] + normalizedAvg[1] * offset] as [
+                  number,
+                  number,
+                ]);
+              }
+
+              context.beginPath();
+
+              for (let i = 0; i < offsetPoints.length; i++) {
+                const current = offsetPoints[i];
+                const prev = offsetPoints[(i - 1 + offsetPoints.length) % offsetPoints.length];
+                const next = offsetPoints[(i + 1) % offsetPoints.length];
+
+                const v1 = [prev[0] - current[0], prev[1] - current[1]];
+                const v2 = [next[0] - current[0], next[1] - current[1]];
+
+                const len1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+                const len2 = Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+                const n1 = [v1[0] / len1, v1[1] / len1];
+                const n2 = [v2[0] / len2, v2[1] / len2];
+
+                const chamferDist = Math.min(chamferSize, Math.min(len1, len2) / 2);
+                const chamferStart = [current[0] + n1[0] * chamferDist, current[1] + n1[1] * chamferDist];
+                const chamferEnd = [current[0] + n2[0] * chamferDist, current[1] + n2[1] * chamferDist];
+
+                if (i === 0) {
+                  context.moveTo(chamferStart[0], chamferStart[1]);
+                } else {
+                  context.lineTo(chamferStart[0], chamferStart[1]);
+                }
+                context.lineTo(chamferEnd[0], chamferEnd[1]);
+              }
+
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'para-bezier') {
+            // Parallel offset with Bezier curve smoothing
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull && hull.length >= 3) {
+              const nodeRadius = 10;
+              const padding = 5;
+              const offset = nodeRadius + padding;
+              const smoothness = 0.3;
+              const offsetPoints: [number, number][] = [];
+
+              for (let i = 0; i < hull.length; i++) {
+                const current = hull[i];
+                const prev = hull[(i - 1 + hull.length) % hull.length];
+                const next = hull[(i + 1) % hull.length];
+
+                const edge1 = [next[0] - current[0], next[1] - current[1]];
+                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
+
+                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                const norm2 = [edge2[0] / len2, edge2[1] / len2];
+
+                const perp1 = [-norm1[1], norm1[0]];
+                const perp2 = [-norm2[1], norm2[0]];
+
+                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+
+                offsetPoints.push([current[0] + normalizedAvg[0] * offset, current[1] + normalizedAvg[1] * offset] as [
+                  number,
+                  number,
+                ]);
+              }
+
+              context.beginPath();
+
+              for (let i = 0; i < offsetPoints.length; i++) {
+                const current = offsetPoints[i];
+                const prev = offsetPoints[(i - 1 + offsetPoints.length) % offsetPoints.length];
+                const next = offsetPoints[(i + 1) % offsetPoints.length];
+
+                if (i === 0) {
+                  context.moveTo(current[0], current[1]);
+                } else {
+                  const cp1x = prev[0] + (current[0] - prev[0]) * smoothness;
+                  const cp1y = prev[1] + (current[1] - prev[1]) * smoothness;
+                  const cp2x = current[0] - (next[0] - current[0]) * smoothness;
+                  const cp2y = current[1] - (next[1] - current[1]) * smoothness;
+                  context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, current[0], current[1]);
+                }
+              }
+
+              const first = offsetPoints[0];
+              const last = offsetPoints[offsetPoints.length - 1];
+              const second = offsetPoints[1];
+              const cp1x = last[0] + (first[0] - last[0]) * smoothness;
+              const cp1y = last[1] + (first[1] - last[1]) * smoothness;
+              const cp2x = first[0] - (second[0] - first[0]) * smoothness;
+              const cp2y = first[1] - (second[1] - first[1]) * smoothness;
+              context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, first[0], first[1]);
+
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'para-subdiv') {
+            // Parallel offset with subdivision smoothing (Chaikin's algorithm)
+            if (nodes.length < 3) return;
+
+            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+            const hull = d3.polygonHull(points);
+
+            if (hull && hull.length >= 3) {
+              const nodeRadius = 10;
+              const padding = 5;
+              const offset = nodeRadius + padding;
+              const iterations = 2;
+              const offsetPoints: [number, number][] = [];
+
+              for (let i = 0; i < hull.length; i++) {
+                const current = hull[i];
+                const prev = hull[(i - 1 + hull.length) % hull.length];
+                const next = hull[(i + 1) % hull.length];
+
+                const edge1 = [next[0] - current[0], next[1] - current[1]];
+                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
+
+                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                const norm2 = [edge2[0] / len2, edge2[1] / len2];
+
+                const perp1 = [-norm1[1], norm1[0]];
+                const perp2 = [-norm2[1], norm2[0]];
+
+                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+
+                offsetPoints.push([current[0] + normalizedAvg[0] * offset, current[1] + normalizedAvg[1] * offset] as [
+                  number,
+                  number,
+                ]);
+              }
+
+              // Chaikin's subdivision
+              let smoothed = [...offsetPoints];
+              for (let iter = 0; iter < iterations; iter++) {
+                const newPoints: [number, number][] = [];
+                for (let i = 0; i < smoothed.length; i++) {
+                  const current = smoothed[i];
+                  const next = smoothed[(i + 1) % smoothed.length];
+                  const q = [0.75 * current[0] + 0.25 * next[0], 0.75 * current[1] + 0.25 * next[1]] as [
+                    number,
+                    number,
+                  ];
+                  const r = [0.25 * current[0] + 0.75 * next[0], 0.25 * current[1] + 0.75 * next[1]] as [
+                    number,
+                    number,
+                  ];
+                  newPoints.push(q, r);
+                }
+                smoothed = newPoints;
+              }
+
+              context.beginPath();
+              smoothed.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'expand-poly') {
+            // Expand point to regular polygon
+            const nodeRadius = 10;
+            const padding = 5;
+            const radius = nodeRadius + padding;
+            const sides = 8;
+
+            let basePoints: [number, number][] = [];
+
+            if (nodes.length === 1) {
+              // Single node: create regular polygon around it
+              const centerX = nodes[0].x;
+              const centerY = nodes[0].y;
+              for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * 2 * Math.PI;
+                basePoints.push([centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius]);
+              }
+            } else if (nodes.length === 2) {
+              // Two nodes: create capsule polygon
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const angle = Math.atan2(dy, dx);
+              const dist = Math.sqrt(dx * dx + dy * dy);
+
+              for (let i = 0; i < sides; i++) {
+                const theta = (i / sides) * 2 * Math.PI;
+                const x = (dist / 2) * Math.cos(theta);
+                const y = radius * Math.sin(theta);
+                const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+                const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+                basePoints.push([p1.x + dx / 2 + rotatedX, p1.y + dy / 2 + rotatedY]);
+              }
+            } else {
+              // 3+ nodes: use convex hull
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+              const hull = d3.polygonHull(points);
+              if (hull) basePoints = hull;
+            }
+
+            if (basePoints.length > 0) {
+              context.beginPath();
+              basePoints.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'circle-poly') {
+            // Circle as polygon
+            const nodeRadius = 10;
+            const padding = 5;
+            const circleRadius = nodeRadius + padding;
+            const segments = 32;
+
+            let basePoints: [number, number][] = [];
+
+            if (nodes.length === 1) {
+              const centerX = nodes[0].x;
+              const centerY = nodes[0].y;
+              for (let i = 0; i < segments; i++) {
+                const angle = (i / segments) * 2 * Math.PI;
+                basePoints.push([centerX + Math.cos(angle) * circleRadius, centerY + Math.sin(angle) * circleRadius]);
+              }
+            } else if (nodes.length === 2) {
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const angle = Math.atan2(dy, dx);
+              const dist = Math.sqrt(dx * dx + dy * dy);
+
+              for (let i = 0; i < segments; i++) {
+                const theta = (i / segments) * 2 * Math.PI;
+                const x = (dist / 2) * Math.cos(theta);
+                const y = circleRadius * Math.sin(theta);
+                const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+                const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+                basePoints.push([p1.x + dx / 2 + rotatedX, p1.y + dy / 2 + rotatedY]);
+              }
+            } else {
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+              const hull = d3.polygonHull(points);
+              if (hull) basePoints = hull;
+            }
+
+            if (basePoints.length > 0) {
+              context.beginPath();
+              basePoints.forEach((point, i) => {
+                if (i === 0) context.moveTo(point[0], point[1]);
+                else context.lineTo(point[0], point[1]);
+              });
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'buffer-poly') {
+            // Buffer operation on geometry
+            const nodeRadius = 10;
+            const padding = 5;
+            const bufferDistance = nodeRadius + padding;
+
+            let basePoints: [number, number][] = [];
+
+            if (nodes.length === 1) {
+              const centerX = nodes[0].x;
+              const centerY = nodes[0].y;
+              const segments = 32;
+              for (let i = 0; i < segments; i++) {
+                const angle = (i / segments) * 2 * Math.PI;
+                basePoints.push([
+                  centerX + Math.cos(angle) * bufferDistance,
+                  centerY + Math.sin(angle) * bufferDistance,
+                ]);
+              }
+            } else if (nodes.length === 2) {
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const angle = Math.atan2(dy, dx);
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              const segments = 32;
+
+              for (let i = 0; i < segments; i++) {
+                const theta = (i / segments) * 2 * Math.PI;
+                const x = (dist / 2 + bufferDistance) * Math.cos(theta);
+                const y = bufferDistance * Math.sin(theta);
+                const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+                const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+                basePoints.push([p1.x + dx / 2 + rotatedX, p1.y + dy / 2 + rotatedY]);
+              }
+            } else {
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+              const hull = d3.polygonHull(points);
+              if (hull) {
+                const centroidX = hull.reduce((sum, p) => sum + p[0], 0) / hull.length;
+                const centroidY = hull.reduce((sum, p) => sum + p[1], 0) / hull.length;
+                basePoints = hull.map((point) => {
+                  const dx = point[0] - centroidX;
+                  const dy = point[1] - centroidY;
+                  const angle = Math.atan2(dy, dx);
+                  const distance = Math.sqrt(dx * dx + dy * dy);
+                  const newDistance = distance + bufferDistance;
+                  return [centroidX + Math.cos(angle) * newDistance, centroidY + Math.sin(angle) * newDistance] as [
+                    number,
+                    number,
+                  ];
+                });
+              }
+            }
+
+            if (basePoints.length > 0) {
+              const cornerRadius = 8;
+              context.beginPath();
+
+              // Draw rounded corners using arcTo
+              for (let i = 0; i < basePoints.length; i++) {
+                const current = basePoints[i];
+                const prev = basePoints[(i - 1 + basePoints.length) % basePoints.length];
+
+                if (i === 0) {
+                  context.moveTo(current[0], current[1]);
+                } else {
+                  context.arcTo(prev[0], prev[1], current[0], current[1], cornerRadius);
+                }
+              }
+
+              // Close the path with arcTo for the last corner
+              context.arcTo(
+                basePoints[basePoints.length - 1][0],
+                basePoints[basePoints.length - 1][1],
+                basePoints[0][0],
+                basePoints[0][1],
+                cornerRadius
+              );
+              context.closePath();
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+            }
+          } else if (viewMode === 'mincircle-poly') {
+            // Minimum bounding circle as polygon
+            const nodeRadius = 10;
+            const padding = 5;
+            const segments = 32;
+
+            let centerX, centerY, circleRadius;
+
+            if (nodes.length === 1) {
+              centerX = nodes[0].x;
+              centerY = nodes[0].y;
+              circleRadius = nodeRadius + padding;
+            } else if (nodes.length === 2) {
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              centerX = (p1.x + p2.x) / 2;
+              centerY = (p1.y + p2.y) / 2;
+              const dist = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+              circleRadius = dist / 2 + nodeRadius + padding;
+            } else {
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+              const hull = d3.polygonHull(points);
+              if (hull) {
+                const cx = hull.reduce((sum, p) => sum + p[0], 0) / hull.length;
+                const cy = hull.reduce((sum, p) => sum + p[1], 0) / hull.length;
+                const maxDist = Math.max(...hull.map((p) => Math.sqrt((p[0] - cx) ** 2 + (p[1] - cy) ** 2)));
+                centerX = cx;
+                centerY = cy;
+                circleRadius = maxDist + nodeRadius + padding;
+              } else {
+                return;
+              }
+            }
+
+            const basePoints: [number, number][] = [];
+            for (let i = 0; i < segments; i++) {
+              const angle = (i / segments) * 2 * Math.PI;
+              basePoints.push([centerX + Math.cos(angle) * circleRadius, centerY + Math.sin(angle) * circleRadius]);
+            }
+
+            context.beginPath();
+            basePoints.forEach((point, i) => {
+              if (i === 0) context.moveTo(point[0], point[1]);
+              else context.lineTo(point[0], point[1]);
+            });
+            context.closePath();
+            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fill();
+            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.lineWidth = 1;
+            context.stroke();
+          } else if (viewMode === 'ellipse-wrap') {
+            // Minimum bounding ellipse
+            const nodeRadius = 10;
+            const padding = 5;
+            const bufferDistance = nodeRadius + padding;
+            const segments = 32;
+
+            let centerX, centerY, radiusX, radiusY, angle;
+
+            if (nodes.length === 1) {
+              centerX = nodes[0].x;
+              centerY = nodes[0].y;
+              radiusX = bufferDistance;
+              radiusY = bufferDistance;
+              angle = 0;
+            } else if (nodes.length === 2) {
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              centerX = (p1.x + p2.x) / 2;
+              centerY = (p1.y + p2.y) / 2;
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              radiusX = dist / 2 + bufferDistance;
+              radiusY = bufferDistance;
+              angle = Math.atan2(dy, dx);
+            } else {
+              // 3+ nodes: compute oriented bounding ellipse using PCA
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+
+              // Compute centroid
+              const cx = points.reduce((sum, p) => sum + p[0], 0) / points.length;
+              const cy = points.reduce((sum, p) => sum + p[1], 0) / points.length;
+
+              // Compute covariance matrix
+              let covXX = 0,
+                covYY = 0,
+                covXY = 0;
+              points.forEach((p) => {
+                const dx = p[0] - cx;
+                const dy = p[1] - cy;
+                covXX += dx * dx;
+                covYY += dy * dy;
+                covXY += dx * dy;
+              });
+              covXX /= points.length;
+              covYY /= points.length;
+              covXY /= points.length;
+
+              // Compute eigenvalues and eigenvectors
+              const trace = covXX + covYY;
+              const det = covXX * covYY - covXY * covXY;
+              const discriminant = Math.sqrt(trace * trace - 4 * det);
+              const lambda1 = (trace + discriminant) / 2;
+
+              // Eigenvector for lambda1
+              let ev1x, ev1y;
+              if (Math.abs(covXY) < 0.0001) {
+                ev1x = 1;
+                ev1y = 0;
+              } else {
+                ev1x = lambda1 - covYY;
+                ev1y = covXY;
+                const len = Math.sqrt(ev1x * ev1x + ev1y * ev1y);
+                ev1x /= len;
+                ev1y /= len;
+              }
+
+              // Compute spread along principal axes
+              let maxDist1 = 0,
+                maxDist2 = 0;
+              points.forEach((p) => {
+                const dx = p[0] - cx;
+                const dy = p[1] - cy;
+                const proj1 = dx * ev1x + dy * ev1y;
+                const proj2 = -dx * ev1y + dy * ev1x;
+                maxDist1 = Math.max(maxDist1, Math.abs(proj1));
+                maxDist2 = Math.max(maxDist2, Math.abs(proj2));
+              });
+
+              centerX = cx;
+              centerY = cy;
+              radiusX = maxDist1 + bufferDistance;
+              radiusY = maxDist2 + bufferDistance;
+              angle = Math.atan2(ev1y, ev1x);
+            }
+
+            // Draw ellipse as polygon
+            const basePoints: [number, number][] = [];
+            for (let i = 0; i < segments; i++) {
+              const theta = (i / segments) * 2 * Math.PI;
+              const x = radiusX * Math.cos(theta);
+              const y = radiusY * Math.sin(theta);
+              const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+              const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+              basePoints.push([centerX + rotatedX, centerY + rotatedY]);
+            }
+
+            context.beginPath();
+            basePoints.forEach((point, i) => {
+              if (i === 0) context.moveTo(point[0], point[1]);
+              else context.lineTo(point[0], point[1]);
+            });
+            context.closePath();
+            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fill();
+            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.lineWidth = 1;
+            context.stroke();
+          } else if (viewMode === 'oriented-rect') {
+            // PCA-based oriented bounding rectangle with rounded corners
+            const nodeRadius = 10;
+            const padding = 5;
+            const bufferDistance = nodeRadius + padding;
+            const cornerRadius = 8;
+
+            let centerX, centerY, width, height, angle;
+
+            if (nodes.length === 1) {
+              centerX = nodes[0].x;
+              centerY = nodes[0].y;
+              width = bufferDistance * 2;
+              height = bufferDistance * 2;
+              angle = 0;
+            } else if (nodes.length === 2) {
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              centerX = (p1.x + p2.x) / 2;
+              centerY = (p1.y + p2.y) / 2;
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              width = dist + bufferDistance * 2;
+              height = bufferDistance * 2;
+              angle = Math.atan2(dy, dx);
+            } else {
+              // 3+ nodes: compute oriented bounding box using PCA
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+
+              // Compute centroid
+              const cx = points.reduce((sum, p) => sum + p[0], 0) / points.length;
+              const cy = points.reduce((sum, p) => sum + p[1], 0) / points.length;
+
+              // Compute covariance matrix
+              let covXX = 0,
+                covYY = 0,
+                covXY = 0;
+              points.forEach((p) => {
+                const dx = p[0] - cx;
+                const dy = p[1] - cy;
+                covXX += dx * dx;
+                covYY += dy * dy;
+                covXY += dx * dy;
+              });
+              covXX /= points.length;
+              covYY /= points.length;
+              covXY /= points.length;
+
+              // Compute eigenvectors
+              const trace = covXX + covYY;
+              const det = covXX * covYY - covXY * covXY;
+              const discriminant = Math.sqrt(trace * trace - 4 * det);
+              const lambda1 = (trace + discriminant) / 2;
+
+              // Eigenvector for lambda1
+              let ev1x, ev1y;
+              if (Math.abs(covXY) < 0.0001) {
+                ev1x = 1;
+                ev1y = 0;
+              } else {
+                ev1x = lambda1 - covYY;
+                ev1y = covXY;
+                const len = Math.sqrt(ev1x * ev1x + ev1y * ev1y);
+                ev1x /= len;
+                ev1y /= len;
+              }
+
+              // Project points onto principal axes
+              let minProj1 = Infinity,
+                maxProj1 = -Infinity;
+              let minProj2 = Infinity,
+                maxProj2 = -Infinity;
+              points.forEach((p) => {
+                const dx = p[0] - cx;
+                const dy = p[1] - cy;
+                const proj1 = dx * ev1x + dy * ev1y;
+                const proj2 = -dx * ev1y + dy * ev1x;
+                minProj1 = Math.min(minProj1, proj1);
+                maxProj1 = Math.max(maxProj1, proj1);
+                minProj2 = Math.min(minProj2, proj2);
+                maxProj2 = Math.max(maxProj2, proj2);
+              });
+
+              centerX = cx;
+              centerY = cy;
+              width = maxProj1 - minProj1 + bufferDistance * 2;
+              height = maxProj2 - minProj2 + bufferDistance * 2;
+              angle = Math.atan2(ev1y, ev1x);
+            }
+
+            // Draw oriented rounded rectangle
+            context.save();
+            context.translate(centerX, centerY);
+            context.rotate(angle);
+
+            context.beginPath();
+            context.roundRect(-width / 2, -height / 2, width, height, cornerRadius);
+            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fill();
+            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.lineWidth = 1;
+            context.stroke();
+
+            context.restore();
+          } else if (viewMode === 'oriented-rect-rounded') {
+            // PCA-based oriented bounding rectangle with adaptive rounding
+            const nodeRadius = 10;
+            const padding = 5;
+            const bufferDistance = nodeRadius + padding;
+            const cornerRadius = 8;
+
+            let centerX, centerY, width, height, angle, adaptiveCornerRadius;
+
+            if (nodes.length === 1) {
+              // Circle for 1 node
+              centerX = nodes[0].x;
+              centerY = nodes[0].y;
+              const radius = bufferDistance;
+
+              context.beginPath();
+              context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+              return;
+            } else if (nodes.length === 2) {
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              centerX = (p1.x + p2.x) / 2;
+              centerY = (p1.y + p2.y) / 2;
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              width = dist + bufferDistance * 2;
+              height = bufferDistance * 2;
+              angle = Math.atan2(dy, dx);
+              adaptiveCornerRadius = height / 2; // Fully rounded (capsule)
+            } else {
+              // 3+ nodes: compute oriented bounding box using PCA
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+
+              // Compute centroid
+              const cx = points.reduce((sum, p) => sum + p[0], 0) / points.length;
+              const cy = points.reduce((sum, p) => sum + p[1], 0) / points.length;
+
+              // Compute covariance matrix
+              let covXX = 0,
+                covYY = 0,
+                covXY = 0;
+              points.forEach((p) => {
+                const dx = p[0] - cx;
+                const dy = p[1] - cy;
+                covXX += dx * dx;
+                covYY += dy * dy;
+                covXY += dx * dy;
+              });
+              covXX /= points.length;
+              covYY /= points.length;
+              covXY /= points.length;
+
+              // Compute eigenvectors
+              const trace = covXX + covYY;
+              const det = covXX * covYY - covXY * covXY;
+              const discriminant = Math.sqrt(trace * trace - 4 * det);
+              const lambda1 = (trace + discriminant) / 2;
+
+              // Eigenvector for lambda1
+              let ev1x, ev1y;
+              if (Math.abs(covXY) < 0.0001) {
+                ev1x = 1;
+                ev1y = 0;
+              } else {
+                ev1x = lambda1 - covYY;
+                ev1y = covXY;
+                const len = Math.sqrt(ev1x * ev1x + ev1y * ev1y);
+                ev1x /= len;
+                ev1y /= len;
+              }
+
+              // Project points onto principal axes
+              let minProj1 = Infinity,
+                maxProj1 = -Infinity;
+              let minProj2 = Infinity,
+                maxProj2 = -Infinity;
+              points.forEach((p) => {
+                const dx = p[0] - cx;
+                const dy = p[1] - cy;
+                const proj1 = dx * ev1x + dy * ev1y;
+                const proj2 = -dx * ev1y + dy * ev1x;
+                minProj1 = Math.min(minProj1, proj1);
+                maxProj1 = Math.max(maxProj1, proj1);
+                minProj2 = Math.min(minProj2, proj2);
+                maxProj2 = Math.max(maxProj2, proj2);
+              });
+
+              centerX = cx;
+              centerY = cy;
+              width = maxProj1 - minProj1 + bufferDistance * 2;
+              height = maxProj2 - minProj2 + bufferDistance * 2;
+              angle = Math.atan2(ev1y, ev1x);
+              adaptiveCornerRadius = cornerRadius;
+            }
+
+            // Draw oriented rounded rectangle
+            context.save();
+            context.translate(centerX, centerY);
+            context.rotate(angle);
+
+            context.beginPath();
+            context.roundRect(-width / 2, -height / 2, width, height, adaptiveCornerRadius);
+            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fill();
+            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.lineWidth = 1;
+            context.stroke();
+
+            context.restore();
+          } else if (viewMode === 'oriented-rect-para') {
+            // Adaptive rounding with Para+ polygons for 3+ nodes
+            const nodeRadius = 10;
+            const padding = 5;
+            const bufferDistance = nodeRadius + padding;
+            const cornerRadius = 8;
+
+            if (nodes.length === 1) {
+              // Circle for 1 node
+              const centerX = nodes[0].x;
+              const centerY = nodes[0].y;
+              const radius = bufferDistance;
+
+              context.beginPath();
+              context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+              return;
+            } else if (nodes.length === 2) {
+              // Capsule for 2 nodes
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              const centerX = (p1.x + p2.x) / 2;
+              const centerY = (p1.y + p2.y) / 2;
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              const width = dist + bufferDistance * 2;
+              const height = bufferDistance * 2;
+              const angle = Math.atan2(dy, dx);
+              const adaptiveCornerRadius = height / 2;
+
+              context.save();
+              context.translate(centerX, centerY);
+              context.rotate(angle);
+
+              context.beginPath();
+              context.roundRect(-width / 2, -height / 2, width, height, adaptiveCornerRadius);
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+
+              context.restore();
+            } else {
+              // 3+ nodes: Para+ polygons (parallel offset with arcTo rounding)
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+              const hull = d3.polygonHull(points);
+
+              if (hull && hull.length >= 3) {
+                const offset = 30;
+                const offsetPoints: [number, number][] = [];
+
+                for (let i = 0; i < hull.length; i++) {
+                  const current = hull[i];
+                  const prev = hull[(i - 1 + hull.length) % hull.length];
+                  const next = hull[(i + 1) % hull.length];
+
+                  // Calculate edge vectors
+                  const edge1 = [next[0] - current[0], next[1] - current[1]];
+                  const edge2 = [current[0] - prev[0], current[1] - prev[1]];
+
+                  // Normalize
+                  const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                  const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                  const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                  const norm2 = [edge2[0] / len2, edge2[1] / len2];
+
+                  // Perpendicular normals (pointing outward)
+                  const perp1 = [-norm1[1], norm1[0]];
+                  const perp2 = [-norm2[1], norm2[0]];
+
+                  // Average the perpendiculars
+                  const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                  const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                  const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+
+                  offsetPoints.push([
+                    current[0] + normalizedAvg[0] * offset,
+                    current[1] + normalizedAvg[1] * offset,
+                  ] as [number, number]);
+                }
+
+                context.beginPath();
+
+                // Draw rounded corners using quadratic curves
+                for (let i = 0; i < offsetPoints.length; i++) {
+                  const current = offsetPoints[i];
+                  const prev = offsetPoints[(i - 1 + offsetPoints.length) % offsetPoints.length];
+                  const next = offsetPoints[(i + 1) % offsetPoints.length];
+
+                  // Calculate vectors to adjacent points
+                  const v1 = [prev[0] - current[0], prev[1] - current[1]];
+                  const v2 = [next[0] - current[0], next[1] - current[1]];
+
+                  const len1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+                  const len2 = Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+
+                  // Normalize vectors
+                  const norm1 = [v1[0] / len1, v1[1] / len1];
+                  const norm2 = [v2[0] / len2, v2[1] / len2];
+
+                  // Calculate control point (intersection of offset lines)
+                  // Move along each edge by cornerRadius
+                  const p1 = [current[0] + norm1[0] * cornerRadius, current[1] + norm1[1] * cornerRadius];
+                  const p2 = [current[0] + norm2[0] * cornerRadius, current[1] + norm2[1] * cornerRadius];
+
+                  if (i === 0) {
+                    context.moveTo(p1[0], p1[1]);
+                  }
+                  context.quadraticCurveTo(current[0], current[1], p2[0], p2[1]);
+                }
+
+                context.closePath();
+                context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+                context.fill();
+                context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+                context.lineWidth = 1;
+                context.stroke();
+              }
+            }
+          } else if (viewMode === 'oriented-rect-roundpoly') {
+            // Adaptive rounding with Para+ polygons for 3+ nodes
+            const nodeRadius = 10;
+            const padding = 5;
+            const bufferDistance = nodeRadius + padding;
+            const cornerRadius = 8;
+
+            if (nodes.length === 1) {
+              // Circle for 1 node
+              const centerX = nodes[0].x;
+              const centerY = nodes[0].y;
+              const radius = bufferDistance;
+
+              context.beginPath();
+              context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+              return;
+            } else if (nodes.length === 2) {
+              // Capsule for 2 nodes
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              const centerX = (p1.x + p2.x) / 2;
+              const centerY = (p1.y + p2.y) / 2;
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              const width = dist + bufferDistance * 2;
+              const height = bufferDistance * 2;
+              const angle = Math.atan2(dy, dx);
+              const adaptiveCornerRadius = height / 2;
+
+              context.save();
+              context.translate(centerX, centerY);
+              context.rotate(angle);
+
+              context.beginPath();
+              context.roundRect(-width / 2, -height / 2, width, height, adaptiveCornerRadius);
+              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fill();
+              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.lineWidth = 1;
+              context.stroke();
+
+              context.restore();
+            } else {
+              // 3+ nodes: Edge offset with intersection for perfect circle wrapping
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+              const hull = d3.polygonHull(points);
+
+              if (hull && hull.length >= 3) {
+                const offset = bufferDistance;
+                const offsetPoints: [number, number][] = [];
+
+                // Helper function to compute intersection of two lines
+                const lineIntersection = (
+                  p1: [number, number],
+                  p2: [number, number],
+                  p3: [number, number],
+                  p4: [number, number]
+                ): [number, number] | null => {
+                  const x1 = p1[0],
+                    y1 = p1[1];
+                  const x2 = p2[0],
+                    y2 = p2[1];
+                  const x3 = p3[0],
+                    y3 = p3[1];
+                  const x4 = p4[0],
+                    y4 = p4[1];
+
+                  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+                  if (Math.abs(denom) < 0.0001) return null; // Parallel lines
+
+                  const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+                  return [x1 + t * (x2 - x1), y1 + t * (y2 - y1)];
+                };
+
+                // For each hull vertex, compute intersection of offset edges
+                for (let i = 0; i < hull.length; i++) {
+                  const current = hull[i];
+                  const prev = hull[(i - 1 + hull.length) % hull.length];
+                  const next = hull[(i + 1) % hull.length];
+
+                  // Edge from prev to current
+                  const edge1 = [current[0] - prev[0], current[1] - prev[1]];
+                  const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
+                  const norm1 = [edge1[0] / len1, edge1[1] / len1];
+                  // Perpendicular outward normal for edge1
+                  const perp1 = [-norm1[1], norm1[0]];
+
+                  // Edge from current to next
+                  const edge2 = [next[0] - current[0], next[1] - current[1]];
+                  const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
+                  const norm2 = [edge2[0] / len2, edge2[1] / len2];
+                  // Perpendicular outward normal for edge2
+                  const perp2 = [-norm2[1], norm2[0]];
+
+                  // Offset the two edges
+                  const offsetEdge1_p1 = [prev[0] + perp1[0] * offset, prev[1] + perp1[1] * offset] as [number, number];
+                  const offsetEdge1_p2 = [current[0] + perp1[0] * offset, current[1] + perp1[1] * offset] as [
+                    number,
+                    number,
+                  ];
+                  const offsetEdge2_p1 = [current[0] + perp2[0] * offset, current[1] + perp2[1] * offset] as [
+                    number,
+                    number,
+                  ];
+                  const offsetEdge2_p2 = [next[0] + perp2[0] * offset, next[1] + perp2[1] * offset] as [number, number];
+
+                  // Find intersection of the two offset edges
+                  const intersection = lineIntersection(offsetEdge1_p1, offsetEdge1_p2, offsetEdge2_p1, offsetEdge2_p2);
+
+                  if (intersection) {
+                    offsetPoints.push(intersection);
+                  } else {
+                    // Fallback: use vertex offset by averaged normal
+                    const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
+                    const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
+                    const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
+                    offsetPoints.push([
+                      current[0] + normalizedAvg[0] * offset,
+                      current[1] + normalizedAvg[1] * offset,
+                    ] as [number, number]);
+                  }
+                }
+
+                // Draw the offset polygon with sharp corners
+                context.beginPath();
+
+                offsetPoints.forEach((point, i) => {
+                  if (i === 0) {
+                    context.moveTo(point[0], point[1]);
+                  } else {
+                    context.lineTo(point[0], point[1]);
+                  }
+                });
+
+                context.closePath();
+                context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+                context.fill();
+                context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+                context.lineWidth = 1;
+                context.stroke();
+              }
+            }
+
+            // Draw debug circles around each node showing buffer distance
+            nodes.forEach((node) => {
+              context.beginPath();
+              context.arc(node.x, node.y, bufferDistance, 0, 2 * Math.PI);
+              context.strokeStyle = 'rgba(255, 100, 100, 0.5)';
+              context.lineWidth = 1;
+              context.stroke();
+            });
+          } else if (viewMode === 'circles') {
+            // Circle enclosure for circles mode
+            if (nodes.length < 1) return;
+
+            // Calculate centroid
+            const sumX = nodes.reduce((sum, n) => sum + n.x, 0);
+            const sumY = nodes.reduce((sum, n) => sum + n.y, 0);
+            const centerX = sumX / nodes.length;
+            const centerY = sumY / nodes.length;
+
+            // Calculate max distance from centroid
+            const maxDistance = Math.max(...nodes.map((n) => Math.sqrt((n.x - centerX) ** 2 + (n.y - centerY) ** 2)));
+
+            // Add padding
+            const padding = 15;
+            const radius = maxDistance + padding;
+
+            context.beginPath();
+            context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fill();
+            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.lineWidth = 1;
+            context.stroke();
+          } else if (viewMode === 'boxes') {
+            // Bounding box with rounded corners for boxes mode
+            if (nodes.length < 1) return;
+
+            const padding = 15;
+            const minX = Math.min(...nodes.map((n) => n.x)) - padding;
+            const maxX = Math.max(...nodes.map((n) => n.x)) + padding;
+            const minY = Math.min(...nodes.map((n) => n.y)) - padding;
+            const maxY = Math.max(...nodes.map((n) => n.y)) + padding;
+            const width = maxX - minX;
+            const height = maxY - minY;
+            const radius = 8;
+
+            context.beginPath();
+            context.roundRect(minX, minY, width, height, radius);
+            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fill();
+            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.lineWidth = 1;
+            context.stroke();
+          }
+        });
+      }
+
       // Draw edges
       const hoveredNodes = hoveredNodeRef.current;
       const hoveredNodeId = Array.isArray(hoveredNodes) ? hoveredNodes[0]?.id : hoveredNodes?.id;
       const selectedNodeId = selectedNodeRef.current;
 
-      filteredEdges.forEach((edge: any) => {
-        const dx = edge.target.x - edge.source.x;
-        const dy = edge.target.y - edge.source.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const offset = 12;
+      // Check if we're in a grouping mode
+      const isGroupingMode =
+        viewMode === 'polygons' ||
+        viewMode === 'circles' ||
+        viewMode === 'boxes' ||
+        viewMode === 'radial-offset' ||
+        viewMode === 'normal-offset' ||
+        viewMode === 'parallel-offset' ||
+        viewMode === 'voronoi-offset' ||
+        viewMode === 'para-arcto' ||
+        viewMode === 'para-fillet' ||
+        viewMode === 'para-bezier' ||
+        viewMode === 'para-subdiv' ||
+        viewMode === 'expand-poly' ||
+        viewMode === 'circle-poly' ||
+        viewMode === 'buffer-poly' ||
+        viewMode === 'mincircle-poly' ||
+        viewMode === 'ellipse-wrap' ||
+        viewMode === 'oriented-rect' ||
+        viewMode === 'oriented-rect-rounded' ||
+        viewMode === 'oriented-rect-para' ||
+        viewMode === 'oriented-rect-roundpoly';
 
-        let targetX = edge.target.x;
-        let targetY = edge.target.y;
+      if (isGroupingMode) {
+        // Group edges by file-to-file connections for namespace imports
+        const fileToNodes = new Map<string, any[]>();
+        filteredNodes.forEach((node: any) => {
+          const file = node.data.file;
+          if (!fileToNodes.has(file)) {
+            fileToNodes.set(file, []);
+          }
+          fileToNodes.get(file)!.push(node);
+        });
 
-        if (distance > 0) {
-          targetX = edge.source.x + (dx / distance) * (distance - offset);
-          targetY = edge.source.y + (dy / distance) * (distance - offset);
-        }
+        // Calculate centroids for each file
+        const fileCentroids = new Map<string, { x: number; y: number }>();
+        fileToNodes.forEach((nodes, file) => {
+          const sumX = nodes.reduce((sum, n) => sum + n.x, 0);
+          const sumY = nodes.reduce((sum, n) => sum + n.y, 0);
+          fileCentroids.set(file, { x: sumX / nodes.length, y: sumY / nodes.length });
+        });
 
-        context.beginPath();
-        context.moveTo(edge.source.x, edge.source.y);
-        context.lineTo(targetX, targetY);
-        context.strokeStyle = colorScale(folderMap.get(edge.source.id) || 'root') as string;
-        context.lineWidth = 2;
-        // Show outgoing edges from hovered or selected node at full opacity
-        const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
-        const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
-        const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
-        context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected || isHoveredEdge ? 1 : edgeOpacity;
-        context.stroke();
-        context.globalAlpha = 1;
-      });
+        // Group wildcard edges by source file -> target file
+        const wildcardConnections = new Map<string, Set<string>>();
+        const processedWildcardEdges = new Set<string>();
+
+        filteredEdges.forEach((edge: any) => {
+          // Skip intra-file edges in grouping modes
+          if (edge.source.data.file === edge.target.data.file) {
+            return;
+          }
+
+          // For wildcard imports, group by file-to-file connection
+          if (edge.type === 'wildcard') {
+            const sourceFile = edge.source.data.file;
+            const targetFile = edge.target.data.file;
+
+            if (!wildcardConnections.has(sourceFile)) {
+              wildcardConnections.set(sourceFile, new Set());
+            }
+            wildcardConnections.get(sourceFile)!.add(targetFile);
+            processedWildcardEdges.add(edge.id);
+          }
+        });
+
+        // Draw single edges for wildcard connections between file centroids
+        wildcardConnections.forEach((targetFiles, sourceFile) => {
+          const sourceCentroid = fileCentroids.get(sourceFile);
+          if (!sourceCentroid) return;
+
+          targetFiles.forEach((targetFile) => {
+            const targetCentroid = fileCentroids.get(targetFile);
+            if (!targetCentroid) return;
+
+            const dx = targetCentroid.x - sourceCentroid.x;
+            const dy = targetCentroid.y - sourceCentroid.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const offset = 12;
+
+            let targetX = targetCentroid.x;
+            let targetY = targetCentroid.y;
+
+            if (distance > 0) {
+              targetX = sourceCentroid.x + (dx / distance) * (distance - offset);
+              targetY = sourceCentroid.y + (dy / distance) * (distance - offset);
+            }
+
+            context.beginPath();
+            context.moveTo(sourceCentroid.x, sourceCentroid.y);
+            context.lineTo(targetX, targetY);
+            context.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+            context.lineWidth = 3;
+            context.globalAlpha = edgeOpacity;
+            context.stroke();
+            context.globalAlpha = 1;
+          });
+        });
+
+        // Draw individual edges for non-wildcard imports
+        filteredEdges.forEach((edge: any) => {
+          // Skip intra-file edges
+          if (edge.source.data.file === edge.target.data.file) {
+            return;
+          }
+
+          // Skip already processed wildcard edges
+          if (processedWildcardEdges.has(edge.id)) {
+            return;
+          }
+
+          const dx = edge.target.x - edge.source.x;
+          const dy = edge.target.y - edge.source.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const offset = 12;
+
+          let targetX = edge.target.x;
+          let targetY = edge.target.y;
+
+          if (distance > 0) {
+            targetX = edge.source.x + (dx / distance) * (distance - offset);
+            targetY = edge.source.y + (dy / distance) * (distance - offset);
+          }
+
+          context.beginPath();
+          context.moveTo(edge.source.x, edge.source.y);
+          context.lineTo(targetX, targetY);
+          context.strokeStyle = colorScale(folderMap.get(edge.source.id) || 'root') as string;
+          context.lineWidth = 2;
+          const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
+          const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
+          const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
+          context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected || isHoveredEdge ? 1 : edgeOpacity;
+          context.stroke();
+          context.globalAlpha = 1;
+        });
+      } else {
+        // Edges mode: draw all individual edges
+        filteredEdges.forEach((edge: any) => {
+          const dx = edge.target.x - edge.source.x;
+          const dy = edge.target.y - edge.source.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const offset = 12;
+
+          let targetX = edge.target.x;
+          let targetY = edge.target.y;
+
+          if (distance > 0) {
+            targetX = edge.source.x + (dx / distance) * (distance - offset);
+            targetY = edge.source.y + (dy / distance) * (distance - offset);
+          }
+
+          context.beginPath();
+          context.moveTo(edge.source.x, edge.source.y);
+          context.lineTo(targetX, targetY);
+          context.strokeStyle = colorScale(folderMap.get(edge.source.id) || 'root') as string;
+          context.lineWidth = 2;
+          const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
+          const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
+          const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
+          context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected || isHoveredEdge ? 1 : edgeOpacity;
+          context.stroke();
+          context.globalAlpha = 1;
+        });
+      }
 
       // Draw nodes
       filteredNodes.forEach((node: any) => {
@@ -1283,7 +2888,7 @@ function App() {
       canvas.removeEventListener('mouseleave', handleMouseLeave);
       canvas.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, [filteredNodes, filteredEdges, folderMap, colorScale, hiddenPaths, hiddenNodes, edgeOpacity]);
+  }, [filteredNodes, filteredEdges, folderMap, colorScale, hiddenPaths, hiddenNodes, edgeOpacity, viewMode]);
 
   // Handle sidebar resize without re-initializing simulation
   useEffect(() => {
@@ -1563,6 +3168,137 @@ function App() {
           </div>
         </div>
         <div className="px-4 pb-4 space-y-4">
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">View Mode</label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setViewMode('edges')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'edges' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Edges
+              </button>
+              <button
+                onClick={() => setViewMode('ellipse-wrap')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'ellipse-wrap' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Ellipse
+              </button>
+              <button
+                onClick={() => setViewMode('polygons')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'polygons' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Polygons
+              </button>
+              <button
+                onClick={() => setViewMode('circles')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'circles' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Circles
+              </button>
+              <button
+                onClick={() => setViewMode('boxes')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'boxes' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Boxes
+              </button>
+              <button
+                onClick={() => setViewMode('radial-offset')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'radial-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Radial
+              </button>
+              <button
+                onClick={() => setViewMode('normal-offset')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'normal-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Normal
+              </button>
+              <button
+                onClick={() => setViewMode('parallel-offset')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'parallel-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Para
+              </button>
+              <button
+                onClick={() => setViewMode('voronoi-offset')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'voronoi-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Vor
+              </button>
+              <button
+                onClick={() => setViewMode('para-arcto')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-arcto' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Para+
+              </button>
+              <button
+                onClick={() => setViewMode('para-fillet')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-fillet' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Fillet
+              </button>
+              <button
+                onClick={() => setViewMode('para-bezier')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-bezier' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Bezier
+              </button>
+              <button
+                onClick={() => setViewMode('para-subdiv')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-subdiv' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Subdiv
+              </button>
+              <button
+                onClick={() => setViewMode('expand-poly')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'expand-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                ExpPoly
+              </button>
+              <button
+                onClick={() => setViewMode('circle-poly')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'circle-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                CirPoly
+              </button>
+              <button
+                onClick={() => setViewMode('buffer-poly')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'buffer-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                BufPoly
+              </button>
+              <button
+                onClick={() => setViewMode('mincircle-poly')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'mincircle-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                MinCir
+              </button>
+              <button
+                onClick={() => setViewMode('oriented-rect')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Rectangles
+              </button>
+              <button
+                onClick={() => setViewMode('oriented-rect-rounded')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect-rounded' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                Capsules
+              </button>
+              <button
+                onClick={() => setViewMode('oriented-rect-para')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect-para' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                ParaCaps
+              </button>
+              <button
+                onClick={() => setViewMode('oriented-rect-roundpoly')}
+                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect-roundpoly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+              >
+                RoundPoly
+              </button>
+            </div>
+          </div>
           <div>
             <label className="block text-sm text-neutral-400 mb-2">Charge Strength</label>
             <input
