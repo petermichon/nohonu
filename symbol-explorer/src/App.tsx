@@ -328,6 +328,7 @@ function App() {
     | 'oriented-rect'
     | 'oriented-rect-rounded'
     | 'oriented-rect-roundpoly'
+    | 'oriented-rect-roundpoly2'
   >('edges');
   const [customData, setCustomData] = useState<{ nodes: any[]; edges: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -933,7 +934,8 @@ function App() {
         viewMode === 'ellipse-wrap' ||
         viewMode === 'oriented-rect' ||
         viewMode === 'oriented-rect-rounded' ||
-        viewMode === 'oriented-rect-roundpoly'
+        viewMode === 'oriented-rect-roundpoly' ||
+        viewMode === 'oriented-rect-roundpoly2'
       ) {
         const nodesByFile = new Map<string, any[]>();
         filteredNodes.forEach((node: any) => {
@@ -1805,6 +1807,155 @@ function App() {
                 context.stroke();
               }
             }
+          } else if (viewMode === 'oriented-rect-roundpoly2') {
+            // Adaptive rounding with Para+ polygons for 3+ nodes (Polygon2 - copy of Polygon)
+            const nodeRadius = 10;
+            const padding = 5;
+            const bufferDistance = nodeRadius + padding;
+
+            if (nodes.length === 1) {
+              // Circle for 1 node
+              const centerX = nodes[0].x;
+              const centerY = nodes[0].y;
+              const radius = bufferDistance;
+
+              context.beginPath();
+              context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+              context.fillStyle = fillColor;
+              context.fill();
+              context.strokeStyle = strokeColor;
+              context.lineWidth = 1;
+              context.stroke();
+              return;
+            } else if (nodes.length === 2) {
+              // Capsule for 2 nodes
+              const p1 = nodes[0];
+              const p2 = nodes[1];
+              const centerX = (p1.x + p2.x) / 2;
+              const centerY = (p1.y + p2.y) / 2;
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              const width = dist + bufferDistance * 2;
+              const height = bufferDistance * 2;
+              const angle = Math.atan2(dy, dx);
+              const adaptiveCornerRadius = height / 2;
+
+              context.save();
+              context.translate(centerX, centerY);
+              context.rotate(angle);
+
+              context.beginPath();
+              context.roundRect(-width / 2, -height / 2, width, height, adaptiveCornerRadius);
+              context.fillStyle = fillColor;
+              context.fill();
+              context.strokeStyle = strokeColor;
+              context.lineWidth = 1;
+              context.stroke();
+
+              context.restore();
+            } else {
+              // 3+ nodes: Minkowski sum with circle for proper rounded corners
+              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
+              const hull = d3.polygonHull(points);
+
+              if (hull && hull.length >= 3) {
+                // Store hull for clipping
+                groupHulls.set(uniqueKey, hull);
+                const offset = bufferDistance;
+                const radius = bufferDistance;
+
+                // Helper to normalize vector
+                const normalize = (v: [number, number]): [number, number] => {
+                  const len = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+                  return [v[0] / len, v[1] / len];
+                };
+
+                // Helper to get perpendicular (rotated 90 degrees counter-clockwise)
+                const perpendicular = (v: [number, number]): [number, number] => {
+                  return [-v[1], v[0]];
+                };
+
+                context.beginPath();
+
+                // Process each vertex of the hull
+                for (let i = 0; i < hull.length; i++) {
+                  const current = hull[i];
+                  const prev = hull[(i - 1 + hull.length) % hull.length];
+                  const next = hull[(i + 1) % hull.length];
+
+                  // Edge vectors (pointing away from current)
+                  const edge1 = [prev[0] - current[0], prev[1] - current[1]] as [number, number];
+                  const edge2 = [next[0] - current[0], next[1] - current[1]] as [number, number];
+
+                  // Normalize edge vectors
+                  const norm1 = normalize(edge1);
+                  const norm2 = normalize(edge2);
+
+                  // Outward perpendicular normals
+                  const perp1 = perpendicular(norm1);
+                  const perp2 = perpendicular(norm2);
+
+                  // Check if normals point outward (away from polygon center)
+                  const centroid: [number, number] = [
+                    hull.reduce((sum, p) => sum + p[0], 0) / hull.length,
+                    hull.reduce((sum, p) => sum + p[1], 0) / hull.length,
+                  ];
+                  const toCenter: [number, number] = [centroid[0] - current[0], centroid[1] - current[1]];
+
+                  if (perp1[0] * toCenter[0] + perp1[1] * toCenter[1] > 0) {
+                    perp1[0] = -perp1[0];
+                    perp1[1] = -perp1[1];
+                  }
+                  if (perp2[0] * toCenter[0] + perp2[1] * toCenter[1] > 0) {
+                    perp2[0] = -perp2[0];
+                    perp2[1] = -perp2[1];
+                  }
+
+                  // Compute offset edge lines
+                  const offsetEdge1_p1 = [prev[0] + perp1[0] * offset, prev[1] + perp1[1] * offset] as [number, number];
+                  const offsetEdge1_p2 = [current[0] + perp1[0] * offset, current[1] + perp1[1] * offset] as [
+                    number,
+                    number,
+                  ];
+
+                  if (i === 0) {
+                    // Start at the first offset edge point
+                    context.moveTo(offsetEdge1_p1[0], offsetEdge1_p1[1]);
+                  }
+
+                  // Draw line to the start of the arc (along offset edge 1)
+                  context.lineTo(offsetEdge1_p2[0], offsetEdge1_p2[1]);
+
+                  // Draw circular arc centered at the original vertex
+                  // The arc connects the two offset edges
+                  const angle1 = Math.atan2(perp1[1], perp1[0]);
+                  const angle2 = Math.atan2(perp2[1], perp2[0]);
+
+                  // Determine arc direction (should go around the outside)
+                  const cross = perp1[0] * perp2[1] - perp1[1] * perp2[0];
+                  let startAngle = angle1;
+                  let endAngle = angle2;
+
+                  if (cross < 0) {
+                    // Arc goes counter-clockwise
+                    if (endAngle < startAngle) endAngle += 2 * Math.PI;
+                  } else {
+                    // Arc goes clockwise
+                    if (endAngle > startAngle) endAngle -= 2 * Math.PI;
+                  }
+
+                  context.arc(current[0], current[1], radius, startAngle, endAngle, cross < 0);
+                }
+
+                context.closePath();
+                context.fillStyle = fillColor;
+                context.fill();
+                context.strokeStyle = strokeColor;
+                context.lineWidth = 1;
+                context.stroke();
+              }
+            }
           } else if (viewMode === 'circles') {
             // Circle enclosure for circles mode
             if (nodes.length < 1) return;
@@ -1819,8 +1970,8 @@ function App() {
             const maxDistance = Math.max(...nodes.map((n) => Math.sqrt((n.x - centerX) ** 2 + (n.y - centerY) ** 2)));
 
             // Add padding
-            const padding = 15;
-            const radius = maxDistance + padding;
+            const circlePadding = 15;
+            const radius = maxDistance + circlePadding;
 
             context.beginPath();
             context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
@@ -1888,7 +2039,8 @@ function App() {
         viewMode === 'ellipse-wrap' ||
         viewMode === 'oriented-rect' ||
         viewMode === 'oriented-rect-rounded' ||
-        viewMode === 'oriented-rect-roundpoly';
+        viewMode === 'oriented-rect-roundpoly' ||
+        viewMode === 'oriented-rect-roundpoly2';
 
       if (isGroupingMode) {
         // Group edges by file-to-file connections for namespace imports
@@ -1971,7 +2123,8 @@ function App() {
         });
 
         // Clip edges inside groups using destination-out compositing
-        if (groupHulls.size > 0) {
+        // Only apply clipping for Polygon2 (oriented-rect-roundpoly2), not for Polygon
+        if (groupHulls.size > 0 && viewMode === 'oriented-rect-roundpoly2') {
           context.save();
           context.globalCompositeOperation = 'destination-out';
 
@@ -2786,6 +2939,12 @@ function App() {
                 label="CirPoly"
                 currentViewMode={viewMode}
                 onClick={() => setViewMode('circle-poly')}
+              />
+              <ViewModeButton
+                mode="oriented-rect-roundpoly2"
+                label="Polygon2"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('oriented-rect-roundpoly2')}
               />
             </div>
           </div>
