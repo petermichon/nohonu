@@ -17,6 +17,7 @@ export interface SymbolEdge {
   targetFile: string;
   type: 'import' | 'wildcard' | 're-export' | 'intra-file' | 'dynamic';
   label: string;
+  sourceSymbolType?: 'function' | 'module';
 }
 
 export interface SymbolData {
@@ -382,6 +383,7 @@ export function buildSymbolGraphFromFiles(files: FileData[]): SymbolData {
                   targetFile: targetPath.split('/').pop() || '',
                   type: 'dynamic',
                   label: 'dynamic import',
+                  sourceSymbolType: 'function', // Mark as symbol-level
                 });
                 edgeKeyCount.set(edgeKey, 1);
               }
@@ -400,6 +402,7 @@ export function buildSymbolGraphFromFiles(files: FileData[]): SymbolData {
                   targetFile: targetPath.split('/').pop() || '',
                   type: 'dynamic',
                   label: 'dynamic import',
+                  sourceSymbolType: 'module', // Mark as module-level
                 });
                 edgeKeyCount.set(edgeKey, 1);
               }

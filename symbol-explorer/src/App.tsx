@@ -2063,9 +2063,14 @@ function App() {
           fileCentroids.set(file, { x: sumX / nodes.length, y: sumY / nodes.length });
         });
 
-        // Group wildcard edges by source file -> target file
-        const wildcardConnections = new Map<string, Set<string>>();
-        const processedWildcardEdges = new Set<string>();
+        // Separate edge types for polygon view:
+        // - Wildcard imports: source file centroid -> target file centroid
+        // - Named imports: source file centroid -> target symbol node
+        // - Symbol-level dynamic imports: source symbol node -> target file centroid
+        const fileConnections = new Map<string, Map<string, { count: number; types: Set<string> }>>();
+        const namedImportEdges: any[] = []; // source file -> target symbol
+        const symbolLevelEdges: any[] = []; // source symbol -> target file
+        const processedEdges = new Set<string>();
 
         filteredEdges.forEach((edge: any) => {
           // Skip intra-file edges in grouping modes
@@ -2078,18 +2083,34 @@ function App() {
             return;
           }
 
-          // For wildcard imports, group by file-to-file connection
-          if (edge.type === 'wildcard') {
-            if (!wildcardConnections.has(sourceKey)) {
-              wildcardConnections.set(sourceKey, new Set());
+          // Symbol-level: dynamic imports from specific functions
+          if (edge.sourceSymbolType === 'function') {
+            symbolLevelEdges.push(edge);
+            processedEdges.add(edge.id);
+          }
+          // Named imports: source file -> target symbol (not wildcard, not symbol-level)
+          else if (edge.type === 'import' || edge.type === 're-export') {
+            namedImportEdges.push(edge);
+            processedEdges.add(edge.id);
+          }
+          // Wildcard and module-level: aggregate by file-to-file
+          else {
+            if (!fileConnections.has(sourceKey)) {
+              fileConnections.set(sourceKey, new Map());
             }
-            wildcardConnections.get(sourceKey)!.add(targetKey);
-            processedWildcardEdges.add(edge.id);
+            const targetMap = fileConnections.get(sourceKey)!;
+            if (!targetMap.has(targetKey)) {
+              targetMap.set(targetKey, { count: 0, types: new Set() });
+            }
+            const connection = targetMap.get(targetKey)!;
+            connection.count++;
+            connection.types.add(edge.type);
+            processedEdges.add(edge.id);
           }
         });
 
-        // Draw single edges for wildcard connections between file centroids
-        wildcardConnections.forEach((targetFiles, sourceFile) => {
+        // Draw single edges for file-to-file connections between file centroids
+        fileConnections.forEach((targetMap, sourceFile) => {
           const sourceCentroid = fileCentroids.get(sourceFile);
           if (!sourceCentroid) return;
 
@@ -2107,19 +2128,91 @@ function App() {
           };
           const edgeColor = hexToRgba(sourceColor, 1);
 
-          targetFiles.forEach((targetFile) => {
+          targetMap.forEach((connection, targetFile) => {
             const targetCentroid = fileCentroids.get(targetFile);
             if (!targetCentroid) return;
+
+            // Use line width based on edge count (min 2, max 8)
+            const lineWidth = Math.min(8, Math.max(2, Math.log2(connection.count) + 2));
+            const isWildcard = connection.types.has('wildcard');
 
             context.beginPath();
             context.moveTo(sourceCentroid.x, sourceCentroid.y);
             context.lineTo(targetCentroid.x, targetCentroid.y);
             context.strokeStyle = edgeColor;
-            context.lineWidth = 5;
+            context.lineWidth = isWildcard ? 5 : lineWidth;
             context.globalAlpha = edgeOpacity;
             context.stroke();
             context.globalAlpha = 1;
           });
+        });
+
+        // Draw named import edges from source file centroid to target symbol node
+        namedImportEdges.forEach((edge: any) => {
+          const sourceFolder = edge.source.data.folder || '';
+          const sourceKey = sourceFolder ? `${sourceFolder}/${edge.source.data.file}` : edge.source.data.file;
+          const sourceCentroid = fileCentroids.get(sourceKey);
+
+          if (!sourceCentroid) return;
+
+          const dx = edge.target.x - sourceCentroid.x;
+          const dy = edge.target.y - sourceCentroid.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const offset = 12;
+
+          let targetX = edge.target.x;
+          let targetY = edge.target.y;
+
+          if (distance > 0) {
+            targetX = sourceCentroid.x + (dx / distance) * (distance - offset);
+            targetY = sourceCentroid.y + (dy / distance) * (distance - offset);
+          }
+
+          context.beginPath();
+          context.moveTo(sourceCentroid.x, sourceCentroid.y);
+          context.lineTo(targetX, targetY);
+          context.strokeStyle = colorScale(folderMap.get(edge.source.id) || 'root') as string;
+          context.lineWidth = 2;
+          const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
+          const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
+          const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
+          context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected || isHoveredEdge ? 1 : edgeOpacity;
+          context.stroke();
+          context.globalAlpha = 1;
+        });
+
+        // Draw symbol-level edges from specific symbol nodes to target file centroids
+        symbolLevelEdges.forEach((edge: any) => {
+          const targetFolder = edge.target.data.folder || '';
+          const targetKey = targetFolder ? `${targetFolder}/${edge.target.data.file}` : edge.target.data.file;
+          const targetCentroid = fileCentroids.get(targetKey);
+
+          if (!targetCentroid) return;
+
+          const dx = targetCentroid.x - edge.source.x;
+          const dy = targetCentroid.y - edge.source.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const offset = 12;
+
+          let targetX = targetCentroid.x;
+          let targetY = targetCentroid.y;
+
+          if (distance > 0) {
+            targetX = edge.source.x + (dx / distance) * (distance - offset);
+            targetY = edge.source.y + (dy / distance) * (distance - offset);
+          }
+
+          context.beginPath();
+          context.moveTo(edge.source.x, edge.source.y);
+          context.lineTo(targetX, targetY);
+          context.strokeStyle = colorScale(folderMap.get(edge.source.id) || 'root') as string;
+          context.lineWidth = 2;
+          const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
+          const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
+          const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
+          context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected || isHoveredEdge ? 1 : edgeOpacity;
+          context.stroke();
+          context.globalAlpha = 1;
         });
 
         // Clip edges inside groups using destination-out compositing
@@ -2140,49 +2233,6 @@ function App() {
 
           context.restore();
         }
-
-        // Draw individual edges for non-wildcard imports
-        filteredEdges.forEach((edge: any) => {
-          // Skip intra-file edges
-          const sourceFolder = edge.source.data.folder || '';
-          const targetFolder = edge.target.data.folder || '';
-          const sourceKey = sourceFolder ? `${sourceFolder}/${edge.source.data.file}` : edge.source.data.file;
-          const targetKey = targetFolder ? `${targetFolder}/${edge.target.data.file}` : edge.target.data.file;
-
-          if (sourceKey === targetKey) {
-            return;
-          }
-
-          // Skip already processed wildcard edges
-          if (processedWildcardEdges.has(edge.id)) {
-            return;
-          }
-
-          const dx = edge.target.x - edge.source.x;
-          const dy = edge.target.y - edge.source.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const offset = 12;
-
-          let targetX = edge.target.x;
-          let targetY = edge.target.y;
-
-          if (distance > 0) {
-            targetX = edge.source.x + (dx / distance) * (distance - offset);
-            targetY = edge.source.y + (dy / distance) * (distance - offset);
-          }
-
-          context.beginPath();
-          context.moveTo(edge.source.x, edge.source.y);
-          context.lineTo(targetX, targetY);
-          context.strokeStyle = colorScale(folderMap.get(edge.source.id) || 'root') as string;
-          context.lineWidth = 2;
-          const isOutgoingFromHovered = hoveredNodeId && edge.source.id === hoveredNodeId;
-          const isOutgoingFromSelected = selectedNodeId && edge.source.id === selectedNodeId;
-          const isHoveredEdge = hoveredEdgesRef.current.some((e: any) => e.id === edge.id);
-          context.globalAlpha = isOutgoingFromHovered || isOutgoingFromSelected || isHoveredEdge ? 1 : edgeOpacity;
-          context.stroke();
-          context.globalAlpha = 1;
-        });
       } else {
         // Edges mode: draw all individual edges
         filteredEdges.forEach((edge: any) => {
