@@ -329,7 +329,7 @@ function App() {
     | 'oriented-rect-rounded'
     | 'oriented-rect-roundpoly'
     | 'oriented-rect-roundpoly2'
-  >('edges');
+  >('oriented-rect-roundpoly');
   const [customData, setCustomData] = useState<{ nodes: any[]; edges: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [directoryHandle, setDirectoryHandle] = useState<any>(null);
