@@ -21,6 +21,27 @@ import {
 import './index.css';
 import { buildSymbolGraphFromFiles } from './browserParser';
 
+function ViewModeButton({
+  mode,
+  label,
+  currentViewMode,
+  onClick,
+}: {
+  mode: string;
+  label: string;
+  currentViewMode: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-2 rounded text-sm cursor-pointer ${currentViewMode === mode ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function Tooltip({ children, content }: { children: React.ReactNode; content: string }) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -296,25 +317,16 @@ function App() {
   });
   const [viewMode, setViewMode] = useState<
     | 'edges'
-    | 'polygons'
     | 'circles'
     | 'boxes'
-    | 'radial-offset'
-    | 'normal-offset'
-    | 'parallel-offset'
-    | 'voronoi-offset'
-    | 'para-arcto'
     | 'para-fillet'
     | 'para-bezier'
     | 'para-subdiv'
     | 'expand-poly'
     | 'circle-poly'
-    | 'buffer-poly'
-    | 'mincircle-poly'
     | 'ellipse-wrap'
     | 'oriented-rect'
     | 'oriented-rect-rounded'
-    | 'oriented-rect-para'
     | 'oriented-rect-roundpoly'
   >('edges');
   const [customData, setCustomData] = useState<{ nodes: any[]; edges: any[] } | null>(null);
@@ -908,328 +920,45 @@ function App() {
 
       // Draw polygons/circles/boxes/offsets around nodes from the same file
       if (
-        viewMode === 'polygons' ||
         viewMode === 'circles' ||
         viewMode === 'boxes' ||
-        viewMode === 'radial-offset' ||
-        viewMode === 'normal-offset' ||
-        viewMode === 'parallel-offset' ||
-        viewMode === 'voronoi-offset' ||
-        viewMode === 'para-arcto' ||
         viewMode === 'para-fillet' ||
         viewMode === 'para-bezier' ||
         viewMode === 'para-subdiv' ||
         viewMode === 'expand-poly' ||
         viewMode === 'circle-poly' ||
-        viewMode === 'buffer-poly' ||
-        viewMode === 'mincircle-poly' ||
         viewMode === 'ellipse-wrap' ||
         viewMode === 'oriented-rect' ||
         viewMode === 'oriented-rect-rounded' ||
-        viewMode === 'oriented-rect-para' ||
         viewMode === 'oriented-rect-roundpoly'
       ) {
         const nodesByFile = new Map<string, any[]>();
         filteredNodes.forEach((node: any) => {
           const file = node.data.file;
-          if (!nodesByFile.has(file)) {
-            nodesByFile.set(file, []);
+          const folder = node.data.folder || '';
+          const uniqueKey = folder ? `${folder}/${file}` : file;
+          if (!nodesByFile.has(uniqueKey)) {
+            nodesByFile.set(uniqueKey, []);
           }
-          nodesByFile.get(file)!.push(node);
+          nodesByFile.get(uniqueKey)!.push(node);
         });
 
         nodesByFile.forEach((nodes) => {
-          if (viewMode === 'polygons') {
-            // Convex hull for polygons mode
-            if (nodes.length < 3) return;
+          // Get folder color for this group
+          const folder = nodes[0].data.folder || 'root';
+          const folderColor = colorScale(folder) as string;
 
-            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-            const hull = d3.polygonHull(points);
+          // Convert hex to rgba with 0.15 opacity
+          const hexToRgba = (hex: string, alpha: number): string => {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+          };
+          const fillColor = hexToRgba(folderColor, 0.15);
+          const strokeColor = hexToRgba(folderColor, 0.3);
 
-            if (hull) {
-              context.beginPath();
-              hull.forEach((point, i) => {
-                if (i === 0) context.moveTo(point[0], point[1]);
-                else context.lineTo(point[0], point[1]);
-              });
-              context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-            }
-          } else if (viewMode === 'radial-offset') {
-            // Simple radial offset from hull vertices
-            if (nodes.length < 3) return;
-
-            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-            const hull = d3.polygonHull(points);
-
-            if (hull) {
-              // Calculate centroid of hull
-              const sumX = hull.reduce((sum, p) => sum + p[0], 0);
-              const sumY = hull.reduce((sum, p) => sum + p[1], 0);
-              const centerX = sumX / hull.length;
-              const centerY = sumY / hull.length;
-
-              const padding = 15;
-              const offsetHull = hull.map((point) => {
-                const dx = point[0] - centerX;
-                const dy = point[1] - centerY;
-                const angle = Math.atan2(dy, dx);
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const newDistance = distance + padding;
-                return [centerX + Math.cos(angle) * newDistance, centerY + Math.sin(angle) * newDistance] as [
-                  number,
-                  number,
-                ];
-              });
-
-              context.beginPath();
-              offsetHull.forEach((point, i) => {
-                if (i === 0) context.moveTo(point[0], point[1]);
-                else context.lineTo(point[0], point[1]);
-              });
-              context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-            }
-          } else if (viewMode === 'normal-offset') {
-            // Normal-based offset (parallel offset of edges)
-            if (nodes.length < 3) return;
-
-            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-            const hull = d3.polygonHull(points);
-
-            if (hull && hull.length >= 3) {
-              const padding = 15;
-              const offsetPoints: [number, number][] = [];
-
-              for (let i = 0; i < hull.length; i++) {
-                const current = hull[i];
-                const prev = hull[(i - 1 + hull.length) % hull.length];
-                const next = hull[(i + 1) % hull.length];
-
-                // Calculate normal vectors for adjacent edges
-                const edge1 = [next[0] - current[0], next[1] - current[1]];
-                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
-
-                // Normalize
-                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
-                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
-                const norm1 = [edge1[0] / len1, edge1[1] / len1];
-                const norm2 = [edge2[0] / len2, edge2[1] / len2];
-
-                // Perpendicular normals (pointing outward)
-                const perp1 = [-norm1[1], norm1[0]];
-                const perp2 = [-norm2[1], norm2[0]];
-
-                // Average the perpendiculars
-                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
-                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
-                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
-
-                offsetPoints.push([
-                  current[0] + normalizedAvg[0] * padding,
-                  current[1] + normalizedAvg[1] * padding,
-                ] as [number, number]);
-              }
-
-              context.beginPath();
-              offsetPoints.forEach((point, i) => {
-                if (i === 0) context.moveTo(point[0], point[1]);
-                else context.lineTo(point[0], point[1]);
-              });
-              context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-            }
-          } else if (viewMode === 'parallel-offset') {
-            // Parallel offset (buffer) - improved normal-offset
-            if (nodes.length < 3) return;
-
-            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-            const hull = d3.polygonHull(points);
-
-            if (hull && hull.length >= 3) {
-              const nodeRadius = 10;
-              const padding = 5;
-              const offset = nodeRadius + padding;
-              const offsetPoints: [number, number][] = [];
-
-              for (let i = 0; i < hull.length; i++) {
-                const current = hull[i];
-                const prev = hull[(i - 1 + hull.length) % hull.length];
-                const next = hull[(i + 1) % hull.length];
-
-                // Calculate edge vectors
-                const edge1 = [next[0] - current[0], next[1] - current[1]];
-                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
-
-                // Normalize
-                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
-                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
-                const norm1 = [edge1[0] / len1, edge1[1] / len1];
-                const norm2 = [edge2[0] / len2, edge2[1] / len2];
-
-                // Perpendicular normals (pointing outward)
-                const perp1 = [-norm1[1], norm1[0]];
-                const perp2 = [-norm2[1], norm2[0]];
-
-                // Average the perpendiculars
-                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
-                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
-                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
-
-                offsetPoints.push([current[0] + normalizedAvg[0] * offset, current[1] + normalizedAvg[1] * offset] as [
-                  number,
-                  number,
-                ]);
-              }
-
-              context.beginPath();
-              offsetPoints.forEach((point, i) => {
-                if (i === 0) context.moveTo(point[0], point[1]);
-                else context.lineTo(point[0], point[1]);
-              });
-              context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-            }
-          } else if (viewMode === 'voronoi-offset') {
-            // Simplified Voronoi-based offset (using centroid distance)
-            if (nodes.length < 3) return;
-
-            // Calculate centroid of all nodes
-            const sumX = nodes.reduce((sum, n) => sum + n.x, 0);
-            const sumY = nodes.reduce((sum, n) => sum + n.y, 0);
-            const centerX = sumX / nodes.length;
-            const centerY = sumY / nodes.length;
-
-            const nodeRadius = 10;
-            const padding = 5;
-            const offset = nodeRadius + padding;
-
-            // Extend each node based on its distance from centroid
-            const extendedPoints = nodes.map((n) => {
-              const dx = n.x - centerX;
-              const dy = n.y - centerY;
-              const angle = Math.atan2(dy, dx);
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              // Adaptive offset based on distance from centroid
-              const adaptiveOffset = offset * (1 + distance / 100);
-              const newDistance = distance + adaptiveOffset;
-              return [centerX + Math.cos(angle) * newDistance, centerY + Math.sin(angle) * newDistance] as [
-                number,
-                number,
-              ];
-            });
-
-            const hull = d3.polygonHull(extendedPoints);
-
-            if (hull) {
-              context.beginPath();
-              hull.forEach((point, i) => {
-                if (i === 0) context.moveTo(point[0], point[1]);
-                else context.lineTo(point[0], point[1]);
-              });
-              context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-            }
-          } else if (viewMode === 'para-arcto') {
-            // Parallel offset with arcTo rounding
-            if (nodes.length < 3) return;
-
-            const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-            const hull = d3.polygonHull(points);
-
-            if (hull && hull.length >= 3) {
-              const offset = 30;
-              const cornerRadius = 8;
-              const offsetPoints: [number, number][] = [];
-
-              for (let i = 0; i < hull.length; i++) {
-                const current = hull[i];
-                const prev = hull[(i - 1 + hull.length) % hull.length];
-                const next = hull[(i + 1) % hull.length];
-
-                // Calculate edge vectors
-                const edge1 = [next[0] - current[0], next[1] - current[1]];
-                const edge2 = [current[0] - prev[0], current[1] - prev[1]];
-
-                // Normalize
-                const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
-                const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
-                const norm1 = [edge1[0] / len1, edge1[1] / len1];
-                const norm2 = [edge2[0] / len2, edge2[1] / len2];
-
-                // Perpendicular normals (pointing outward)
-                const perp1 = [-norm1[1], norm1[0]];
-                const perp2 = [-norm2[1], norm2[0]];
-
-                // Average the perpendiculars
-                const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
-                const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
-                const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
-
-                offsetPoints.push([current[0] + normalizedAvg[0] * offset, current[1] + normalizedAvg[1] * offset] as [
-                  number,
-                  number,
-                ]);
-              }
-
-              context.beginPath();
-
-              // Draw rounded corners using quadratic curves
-              for (let i = 0; i < offsetPoints.length; i++) {
-                const current = offsetPoints[i];
-                const prev = offsetPoints[(i - 1 + offsetPoints.length) % offsetPoints.length];
-                const next = offsetPoints[(i + 1) % offsetPoints.length];
-
-                // Calculate vectors to adjacent points
-                const v1 = [prev[0] - current[0], prev[1] - current[1]];
-                const v2 = [next[0] - current[0], next[1] - current[1]];
-
-                const len1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
-                const len2 = Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
-
-                // Normalize vectors
-                const norm1 = [v1[0] / len1, v1[1] / len1];
-                const norm2 = [v2[0] / len2, v2[1] / len2];
-
-                // Calculate control point (intersection of offset lines)
-                // Move along each edge by cornerRadius
-                const p1 = [current[0] + norm1[0] * cornerRadius, current[1] + norm1[1] * cornerRadius];
-                const p2 = [current[0] + norm2[0] * cornerRadius, current[1] + norm2[1] * cornerRadius];
-
-                if (i === 0) {
-                  context.moveTo(p1[0], p1[1]);
-                }
-                context.quadraticCurveTo(current[0], current[1], p2[0], p2[1]);
-              }
-
-              context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-            }
-          } else if (viewMode === 'para-fillet') {
+          if (viewMode === 'para-fillet') {
             // Parallel offset with fillet (45-degree chamfer)
             if (nodes.length < 3) return;
 
@@ -1297,9 +1026,9 @@ function App() {
               }
 
               context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
             }
@@ -1371,9 +1100,9 @@ function App() {
               context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, first[0], first[1]);
 
               context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
             }
@@ -1443,9 +1172,9 @@ function App() {
                 else context.lineTo(point[0], point[1]);
               });
               context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
             }
@@ -1497,9 +1226,9 @@ function App() {
                 else context.lineTo(point[0], point[1]);
               });
               context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
             }
@@ -1548,150 +1277,12 @@ function App() {
                 else context.lineTo(point[0], point[1]);
               });
               context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
             }
-          } else if (viewMode === 'buffer-poly') {
-            // Buffer operation on geometry
-            const nodeRadius = 10;
-            const padding = 5;
-            const bufferDistance = nodeRadius + padding;
-
-            let basePoints: [number, number][] = [];
-
-            if (nodes.length === 1) {
-              const centerX = nodes[0].x;
-              const centerY = nodes[0].y;
-              const segments = 32;
-              for (let i = 0; i < segments; i++) {
-                const angle = (i / segments) * 2 * Math.PI;
-                basePoints.push([
-                  centerX + Math.cos(angle) * bufferDistance,
-                  centerY + Math.sin(angle) * bufferDistance,
-                ]);
-              }
-            } else if (nodes.length === 2) {
-              const p1 = nodes[0];
-              const p2 = nodes[1];
-              const dx = p2.x - p1.x;
-              const dy = p2.y - p1.y;
-              const angle = Math.atan2(dy, dx);
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              const segments = 32;
-
-              for (let i = 0; i < segments; i++) {
-                const theta = (i / segments) * 2 * Math.PI;
-                const x = (dist / 2 + bufferDistance) * Math.cos(theta);
-                const y = bufferDistance * Math.sin(theta);
-                const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
-                const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
-                basePoints.push([p1.x + dx / 2 + rotatedX, p1.y + dy / 2 + rotatedY]);
-              }
-            } else {
-              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-              const hull = d3.polygonHull(points);
-              if (hull) {
-                const centroidX = hull.reduce((sum, p) => sum + p[0], 0) / hull.length;
-                const centroidY = hull.reduce((sum, p) => sum + p[1], 0) / hull.length;
-                basePoints = hull.map((point) => {
-                  const dx = point[0] - centroidX;
-                  const dy = point[1] - centroidY;
-                  const angle = Math.atan2(dy, dx);
-                  const distance = Math.sqrt(dx * dx + dy * dy);
-                  const newDistance = distance + bufferDistance;
-                  return [centroidX + Math.cos(angle) * newDistance, centroidY + Math.sin(angle) * newDistance] as [
-                    number,
-                    number,
-                  ];
-                });
-              }
-            }
-
-            if (basePoints.length > 0) {
-              const cornerRadius = 8;
-              context.beginPath();
-
-              // Draw rounded corners using arcTo
-              for (let i = 0; i < basePoints.length; i++) {
-                const current = basePoints[i];
-                const prev = basePoints[(i - 1 + basePoints.length) % basePoints.length];
-
-                if (i === 0) {
-                  context.moveTo(current[0], current[1]);
-                } else {
-                  context.arcTo(prev[0], prev[1], current[0], current[1], cornerRadius);
-                }
-              }
-
-              // Close the path with arcTo for the last corner
-              context.arcTo(
-                basePoints[basePoints.length - 1][0],
-                basePoints[basePoints.length - 1][1],
-                basePoints[0][0],
-                basePoints[0][1],
-                cornerRadius
-              );
-              context.closePath();
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-            }
-          } else if (viewMode === 'mincircle-poly') {
-            // Minimum bounding circle as polygon
-            const nodeRadius = 10;
-            const padding = 5;
-            const segments = 32;
-
-            let centerX, centerY, circleRadius;
-
-            if (nodes.length === 1) {
-              centerX = nodes[0].x;
-              centerY = nodes[0].y;
-              circleRadius = nodeRadius + padding;
-            } else if (nodes.length === 2) {
-              const p1 = nodes[0];
-              const p2 = nodes[1];
-              centerX = (p1.x + p2.x) / 2;
-              centerY = (p1.y + p2.y) / 2;
-              const dist = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
-              circleRadius = dist / 2 + nodeRadius + padding;
-            } else {
-              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-              const hull = d3.polygonHull(points);
-              if (hull) {
-                const cx = hull.reduce((sum, p) => sum + p[0], 0) / hull.length;
-                const cy = hull.reduce((sum, p) => sum + p[1], 0) / hull.length;
-                const maxDist = Math.max(...hull.map((p) => Math.sqrt((p[0] - cx) ** 2 + (p[1] - cy) ** 2)));
-                centerX = cx;
-                centerY = cy;
-                circleRadius = maxDist + nodeRadius + padding;
-              } else {
-                return;
-              }
-            }
-
-            const basePoints: [number, number][] = [];
-            for (let i = 0; i < segments; i++) {
-              const angle = (i / segments) * 2 * Math.PI;
-              basePoints.push([centerX + Math.cos(angle) * circleRadius, centerY + Math.sin(angle) * circleRadius]);
-            }
-
-            context.beginPath();
-            basePoints.forEach((point, i) => {
-              if (i === 0) context.moveTo(point[0], point[1]);
-              else context.lineTo(point[0], point[1]);
-            });
-            context.closePath();
-            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-            context.fill();
-            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-            context.lineWidth = 1;
-            context.stroke();
           } else if (viewMode === 'ellipse-wrap') {
             // Minimum bounding ellipse
             const nodeRadius = 10;
@@ -1796,9 +1387,9 @@ function App() {
               else context.lineTo(point[0], point[1]);
             });
             context.closePath();
-            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fillStyle = fillColor;
             context.fill();
-            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.strokeStyle = strokeColor;
             context.lineWidth = 1;
             context.stroke();
           } else if (viewMode === 'oriented-rect') {
@@ -1899,9 +1490,9 @@ function App() {
 
             context.beginPath();
             context.roundRect(-width / 2, -height / 2, width, height, cornerRadius);
-            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fillStyle = fillColor;
             context.fill();
-            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.strokeStyle = strokeColor;
             context.lineWidth = 1;
             context.stroke();
 
@@ -1923,9 +1514,9 @@ function App() {
 
               context.beginPath();
               context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
               return;
@@ -2014,144 +1605,18 @@ function App() {
 
             context.beginPath();
             context.roundRect(-width / 2, -height / 2, width, height, adaptiveCornerRadius);
-            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fillStyle = fillColor;
             context.fill();
-            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.strokeStyle = strokeColor;
             context.lineWidth = 1;
             context.stroke();
 
             context.restore();
-          } else if (viewMode === 'oriented-rect-para') {
-            // Adaptive rounding with Para+ polygons for 3+ nodes
-            const nodeRadius = 10;
-            const padding = 5;
-            const bufferDistance = nodeRadius + padding;
-            const cornerRadius = 8;
-
-            if (nodes.length === 1) {
-              // Circle for 1 node
-              const centerX = nodes[0].x;
-              const centerY = nodes[0].y;
-              const radius = bufferDistance;
-
-              context.beginPath();
-              context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-              return;
-            } else if (nodes.length === 2) {
-              // Capsule for 2 nodes
-              const p1 = nodes[0];
-              const p2 = nodes[1];
-              const centerX = (p1.x + p2.x) / 2;
-              const centerY = (p1.y + p2.y) / 2;
-              const dx = p2.x - p1.x;
-              const dy = p2.y - p1.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              const width = dist + bufferDistance * 2;
-              const height = bufferDistance * 2;
-              const angle = Math.atan2(dy, dx);
-              const adaptiveCornerRadius = height / 2;
-
-              context.save();
-              context.translate(centerX, centerY);
-              context.rotate(angle);
-
-              context.beginPath();
-              context.roundRect(-width / 2, -height / 2, width, height, adaptiveCornerRadius);
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-              context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-              context.lineWidth = 1;
-              context.stroke();
-
-              context.restore();
-            } else {
-              // 3+ nodes: Para+ polygons (parallel offset with arcTo rounding)
-              const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
-              const hull = d3.polygonHull(points);
-
-              if (hull && hull.length >= 3) {
-                const offset = 30;
-                const offsetPoints: [number, number][] = [];
-
-                for (let i = 0; i < hull.length; i++) {
-                  const current = hull[i];
-                  const prev = hull[(i - 1 + hull.length) % hull.length];
-                  const next = hull[(i + 1) % hull.length];
-
-                  // Calculate edge vectors
-                  const edge1 = [next[0] - current[0], next[1] - current[1]];
-                  const edge2 = [current[0] - prev[0], current[1] - prev[1]];
-
-                  // Normalize
-                  const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
-                  const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
-                  const norm1 = [edge1[0] / len1, edge1[1] / len1];
-                  const norm2 = [edge2[0] / len2, edge2[1] / len2];
-
-                  // Perpendicular normals (pointing outward)
-                  const perp1 = [-norm1[1], norm1[0]];
-                  const perp2 = [-norm2[1], norm2[0]];
-
-                  // Average the perpendiculars
-                  const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
-                  const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
-                  const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
-
-                  offsetPoints.push([
-                    current[0] + normalizedAvg[0] * offset,
-                    current[1] + normalizedAvg[1] * offset,
-                  ] as [number, number]);
-                }
-
-                context.beginPath();
-
-                // Draw rounded corners using quadratic curves
-                for (let i = 0; i < offsetPoints.length; i++) {
-                  const current = offsetPoints[i];
-                  const prev = offsetPoints[(i - 1 + offsetPoints.length) % offsetPoints.length];
-                  const next = offsetPoints[(i + 1) % offsetPoints.length];
-
-                  // Calculate vectors to adjacent points
-                  const v1 = [prev[0] - current[0], prev[1] - current[1]];
-                  const v2 = [next[0] - current[0], next[1] - current[1]];
-
-                  const len1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
-                  const len2 = Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
-
-                  // Normalize vectors
-                  const norm1 = [v1[0] / len1, v1[1] / len1];
-                  const norm2 = [v2[0] / len2, v2[1] / len2];
-
-                  // Calculate control point (intersection of offset lines)
-                  // Move along each edge by cornerRadius
-                  const p1 = [current[0] + norm1[0] * cornerRadius, current[1] + norm1[1] * cornerRadius];
-                  const p2 = [current[0] + norm2[0] * cornerRadius, current[1] + norm2[1] * cornerRadius];
-
-                  if (i === 0) {
-                    context.moveTo(p1[0], p1[1]);
-                  }
-                  context.quadraticCurveTo(current[0], current[1], p2[0], p2[1]);
-                }
-
-                context.closePath();
-                context.fillStyle = 'rgba(100, 100, 100, 0.15)';
-                context.fill();
-                context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
-                context.lineWidth = 1;
-                context.stroke();
-              }
-            }
           } else if (viewMode === 'oriented-rect-roundpoly') {
             // Adaptive rounding with Para+ polygons for 3+ nodes
             const nodeRadius = 10;
             const padding = 5;
             const bufferDistance = nodeRadius + padding;
-            const cornerRadius = 8;
 
             if (nodes.length === 1) {
               // Circle for 1 node
@@ -2161,9 +1626,9 @@ function App() {
 
               context.beginPath();
               context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
               return;
@@ -2187,122 +1652,113 @@ function App() {
 
               context.beginPath();
               context.roundRect(-width / 2, -height / 2, width, height, adaptiveCornerRadius);
-              context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+              context.fillStyle = fillColor;
               context.fill();
-              context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+              context.strokeStyle = strokeColor;
               context.lineWidth = 1;
               context.stroke();
 
               context.restore();
             } else {
-              // 3+ nodes: Edge offset with intersection for perfect circle wrapping
+              // 3+ nodes: Minkowski sum with circle for proper rounded corners
               const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
               const hull = d3.polygonHull(points);
 
               if (hull && hull.length >= 3) {
                 const offset = bufferDistance;
-                const offsetPoints: [number, number][] = [];
+                const radius = bufferDistance;
 
-                // Helper function to compute intersection of two lines
-                const lineIntersection = (
-                  p1: [number, number],
-                  p2: [number, number],
-                  p3: [number, number],
-                  p4: [number, number]
-                ): [number, number] | null => {
-                  const x1 = p1[0],
-                    y1 = p1[1];
-                  const x2 = p2[0],
-                    y2 = p2[1];
-                  const x3 = p3[0],
-                    y3 = p3[1];
-                  const x4 = p4[0],
-                    y4 = p4[1];
-
-                  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-                  if (Math.abs(denom) < 0.0001) return null; // Parallel lines
-
-                  const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
-                  return [x1 + t * (x2 - x1), y1 + t * (y2 - y1)];
+                // Helper to normalize vector
+                const normalize = (v: [number, number]): [number, number] => {
+                  const len = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+                  return [v[0] / len, v[1] / len];
                 };
 
-                // For each hull vertex, compute intersection of offset edges
+                // Helper to get perpendicular (rotated 90 degrees counter-clockwise)
+                const perpendicular = (v: [number, number]): [number, number] => {
+                  return [-v[1], v[0]];
+                };
+
+                context.beginPath();
+
+                // Process each vertex of the hull
                 for (let i = 0; i < hull.length; i++) {
                   const current = hull[i];
                   const prev = hull[(i - 1 + hull.length) % hull.length];
                   const next = hull[(i + 1) % hull.length];
 
-                  // Edge from prev to current
-                  const edge1 = [current[0] - prev[0], current[1] - prev[1]];
-                  const len1 = Math.sqrt(edge1[0] * edge1[0] + edge1[1] * edge1[1]);
-                  const norm1 = [edge1[0] / len1, edge1[1] / len1];
-                  // Perpendicular outward normal for edge1
-                  const perp1 = [-norm1[1], norm1[0]];
+                  // Edge vectors (pointing away from current)
+                  const edge1 = [prev[0] - current[0], prev[1] - current[1]] as [number, number];
+                  const edge2 = [next[0] - current[0], next[1] - current[1]] as [number, number];
 
-                  // Edge from current to next
-                  const edge2 = [next[0] - current[0], next[1] - current[1]];
-                  const len2 = Math.sqrt(edge2[0] * edge2[0] + edge2[1] * edge2[1]);
-                  const norm2 = [edge2[0] / len2, edge2[1] / len2];
-                  // Perpendicular outward normal for edge2
-                  const perp2 = [-norm2[1], norm2[0]];
+                  // Normalize edge vectors
+                  const norm1 = normalize(edge1);
+                  const norm2 = normalize(edge2);
 
-                  // Offset the two edges
+                  // Outward perpendicular normals
+                  const perp1 = perpendicular(norm1);
+                  const perp2 = perpendicular(norm2);
+
+                  // Check if normals point outward (away from polygon center)
+                  const centroid: [number, number] = [
+                    hull.reduce((sum, p) => sum + p[0], 0) / hull.length,
+                    hull.reduce((sum, p) => sum + p[1], 0) / hull.length,
+                  ];
+                  const toCenter: [number, number] = [centroid[0] - current[0], centroid[1] - current[1]];
+
+                  if (perp1[0] * toCenter[0] + perp1[1] * toCenter[1] > 0) {
+                    perp1[0] = -perp1[0];
+                    perp1[1] = -perp1[1];
+                  }
+                  if (perp2[0] * toCenter[0] + perp2[1] * toCenter[1] > 0) {
+                    perp2[0] = -perp2[0];
+                    perp2[1] = -perp2[1];
+                  }
+
+                  // Compute offset edge lines
                   const offsetEdge1_p1 = [prev[0] + perp1[0] * offset, prev[1] + perp1[1] * offset] as [number, number];
                   const offsetEdge1_p2 = [current[0] + perp1[0] * offset, current[1] + perp1[1] * offset] as [
                     number,
                     number,
                   ];
-                  const offsetEdge2_p1 = [current[0] + perp2[0] * offset, current[1] + perp2[1] * offset] as [
-                    number,
-                    number,
-                  ];
-                  const offsetEdge2_p2 = [next[0] + perp2[0] * offset, next[1] + perp2[1] * offset] as [number, number];
 
-                  // Find intersection of the two offset edges
-                  const intersection = lineIntersection(offsetEdge1_p1, offsetEdge1_p2, offsetEdge2_p1, offsetEdge2_p2);
-
-                  if (intersection) {
-                    offsetPoints.push(intersection);
-                  } else {
-                    // Fallback: use vertex offset by averaged normal
-                    const avgPerp = [(perp1[0] + perp2[0]) / 2, (perp1[1] + perp2[1]) / 2];
-                    const avgLen = Math.sqrt(avgPerp[0] * avgPerp[0] + avgPerp[1] * avgPerp[1]);
-                    const normalizedAvg = [avgPerp[0] / avgLen, avgPerp[1] / avgLen];
-                    offsetPoints.push([
-                      current[0] + normalizedAvg[0] * offset,
-                      current[1] + normalizedAvg[1] * offset,
-                    ] as [number, number]);
+                  if (i === 0) {
+                    // Start at the first offset edge point
+                    context.moveTo(offsetEdge1_p1[0], offsetEdge1_p1[1]);
                   }
+
+                  // Draw line to the start of the arc (along offset edge 1)
+                  context.lineTo(offsetEdge1_p2[0], offsetEdge1_p2[1]);
+
+                  // Draw circular arc centered at the original vertex
+                  // The arc connects the two offset edges
+                  const angle1 = Math.atan2(perp1[1], perp1[0]);
+                  const angle2 = Math.atan2(perp2[1], perp2[0]);
+
+                  // Determine arc direction (should go around the outside)
+                  const cross = perp1[0] * perp2[1] - perp1[1] * perp2[0];
+                  let startAngle = angle1;
+                  let endAngle = angle2;
+
+                  if (cross < 0) {
+                    // Arc goes counter-clockwise
+                    if (endAngle < startAngle) endAngle += 2 * Math.PI;
+                  } else {
+                    // Arc goes clockwise
+                    if (endAngle > startAngle) endAngle -= 2 * Math.PI;
+                  }
+
+                  context.arc(current[0], current[1], radius, startAngle, endAngle, cross < 0);
                 }
 
-                // Draw the offset polygon with sharp corners
-                context.beginPath();
-
-                offsetPoints.forEach((point, i) => {
-                  if (i === 0) {
-                    context.moveTo(point[0], point[1]);
-                  } else {
-                    context.lineTo(point[0], point[1]);
-                  }
-                });
-
                 context.closePath();
-                context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+                context.fillStyle = fillColor;
                 context.fill();
-                context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+                context.strokeStyle = strokeColor;
                 context.lineWidth = 1;
                 context.stroke();
               }
             }
-
-            // Draw debug circles around each node showing buffer distance
-            nodes.forEach((node) => {
-              context.beginPath();
-              context.arc(node.x, node.y, bufferDistance, 0, 2 * Math.PI);
-              context.strokeStyle = 'rgba(255, 100, 100, 0.5)';
-              context.lineWidth = 1;
-              context.stroke();
-            });
           } else if (viewMode === 'circles') {
             // Circle enclosure for circles mode
             if (nodes.length < 1) return;
@@ -2322,9 +1778,9 @@ function App() {
 
             context.beginPath();
             context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fillStyle = fillColor;
             context.fill();
-            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.strokeStyle = strokeColor;
             context.lineWidth = 1;
             context.stroke();
           } else if (viewMode === 'boxes') {
@@ -2342,9 +1798,9 @@ function App() {
 
             context.beginPath();
             context.roundRect(minX, minY, width, height, radius);
-            context.fillStyle = 'rgba(100, 100, 100, 0.15)';
+            context.fillStyle = fillColor;
             context.fill();
-            context.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            context.strokeStyle = strokeColor;
             context.lineWidth = 1;
             context.stroke();
           }
@@ -2358,25 +1814,16 @@ function App() {
 
       // Check if we're in a grouping mode
       const isGroupingMode =
-        viewMode === 'polygons' ||
         viewMode === 'circles' ||
         viewMode === 'boxes' ||
-        viewMode === 'radial-offset' ||
-        viewMode === 'normal-offset' ||
-        viewMode === 'parallel-offset' ||
-        viewMode === 'voronoi-offset' ||
-        viewMode === 'para-arcto' ||
         viewMode === 'para-fillet' ||
         viewMode === 'para-bezier' ||
         viewMode === 'para-subdiv' ||
         viewMode === 'expand-poly' ||
         viewMode === 'circle-poly' ||
-        viewMode === 'buffer-poly' ||
-        viewMode === 'mincircle-poly' ||
         viewMode === 'ellipse-wrap' ||
         viewMode === 'oriented-rect' ||
         viewMode === 'oriented-rect-rounded' ||
-        viewMode === 'oriented-rect-para' ||
         viewMode === 'oriented-rect-roundpoly';
 
       if (isGroupingMode) {
@@ -2384,10 +1831,12 @@ function App() {
         const fileToNodes = new Map<string, any[]>();
         filteredNodes.forEach((node: any) => {
           const file = node.data.file;
-          if (!fileToNodes.has(file)) {
-            fileToNodes.set(file, []);
+          const folder = node.data.folder || '';
+          const uniqueKey = folder ? `${folder}/${file}` : file;
+          if (!fileToNodes.has(uniqueKey)) {
+            fileToNodes.set(uniqueKey, []);
           }
-          fileToNodes.get(file)!.push(node);
+          fileToNodes.get(uniqueKey)!.push(node);
         });
 
         // Calculate centroids for each file
@@ -2404,19 +1853,21 @@ function App() {
 
         filteredEdges.forEach((edge: any) => {
           // Skip intra-file edges in grouping modes
-          if (edge.source.data.file === edge.target.data.file) {
+          const sourceFolder = edge.source.data.folder || '';
+          const targetFolder = edge.target.data.folder || '';
+          const sourceKey = sourceFolder ? `${sourceFolder}/${edge.source.data.file}` : edge.source.data.file;
+          const targetKey = targetFolder ? `${targetFolder}/${edge.target.data.file}` : edge.target.data.file;
+
+          if (sourceKey === targetKey) {
             return;
           }
 
           // For wildcard imports, group by file-to-file connection
           if (edge.type === 'wildcard') {
-            const sourceFile = edge.source.data.file;
-            const targetFile = edge.target.data.file;
-
-            if (!wildcardConnections.has(sourceFile)) {
-              wildcardConnections.set(sourceFile, new Set());
+            if (!wildcardConnections.has(sourceKey)) {
+              wildcardConnections.set(sourceKey, new Set());
             }
-            wildcardConnections.get(sourceFile)!.add(targetFile);
+            wildcardConnections.get(sourceKey)!.add(targetKey);
             processedWildcardEdges.add(edge.id);
           }
         });
@@ -2425,6 +1876,20 @@ function App() {
         wildcardConnections.forEach((targetFiles, sourceFile) => {
           const sourceCentroid = fileCentroids.get(sourceFile);
           if (!sourceCentroid) return;
+
+          // Get folder color for the source file
+          const sourcePathParts = sourceFile.split('/');
+          const sourceFolder = sourcePathParts.slice(0, -1).join('/') || 'root';
+          const sourceColor = colorScale(sourceFolder) as string;
+
+          // Convert hex to rgba
+          const hexToRgba = (hex: string, alpha: number): string => {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+          };
+          const edgeColor = hexToRgba(sourceColor, 0.5);
 
           targetFiles.forEach((targetFile) => {
             const targetCentroid = fileCentroids.get(targetFile);
@@ -2446,7 +1911,7 @@ function App() {
             context.beginPath();
             context.moveTo(sourceCentroid.x, sourceCentroid.y);
             context.lineTo(targetX, targetY);
-            context.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+            context.strokeStyle = edgeColor;
             context.lineWidth = 3;
             context.globalAlpha = edgeOpacity;
             context.stroke();
@@ -2457,7 +1922,12 @@ function App() {
         // Draw individual edges for non-wildcard imports
         filteredEdges.forEach((edge: any) => {
           // Skip intra-file edges
-          if (edge.source.data.file === edge.target.data.file) {
+          const sourceFolder = edge.source.data.folder || '';
+          const targetFolder = edge.target.data.folder || '';
+          const sourceKey = sourceFolder ? `${sourceFolder}/${edge.source.data.file}` : edge.source.data.file;
+          const targetKey = targetFolder ? `${targetFolder}/${edge.target.data.file}` : edge.target.data.file;
+
+          if (sourceKey === targetKey) {
             return;
           }
 
@@ -3171,132 +2641,83 @@ function App() {
           <div>
             <label className="block text-sm text-neutral-400 mb-2">View Mode</label>
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setViewMode('edges')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'edges' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Edges
-              </button>
-              <button
-                onClick={() => setViewMode('ellipse-wrap')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'ellipse-wrap' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Ellipse
-              </button>
-              <button
-                onClick={() => setViewMode('polygons')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'polygons' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Polygons
-              </button>
-              <button
-                onClick={() => setViewMode('circles')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'circles' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Circles
-              </button>
-              <button
-                onClick={() => setViewMode('boxes')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'boxes' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Boxes
-              </button>
-              <button
-                onClick={() => setViewMode('radial-offset')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'radial-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Radial
-              </button>
-              <button
-                onClick={() => setViewMode('normal-offset')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'normal-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Normal
-              </button>
-              <button
-                onClick={() => setViewMode('parallel-offset')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'parallel-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Para
-              </button>
-              <button
-                onClick={() => setViewMode('voronoi-offset')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'voronoi-offset' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Vor
-              </button>
-              <button
-                onClick={() => setViewMode('para-arcto')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-arcto' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Para+
-              </button>
-              <button
-                onClick={() => setViewMode('para-fillet')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-fillet' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Fillet
-              </button>
-              <button
-                onClick={() => setViewMode('para-bezier')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-bezier' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Bezier
-              </button>
-              <button
-                onClick={() => setViewMode('para-subdiv')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'para-subdiv' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Subdiv
-              </button>
-              <button
-                onClick={() => setViewMode('expand-poly')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'expand-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                ExpPoly
-              </button>
-              <button
-                onClick={() => setViewMode('circle-poly')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'circle-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                CirPoly
-              </button>
-              <button
-                onClick={() => setViewMode('buffer-poly')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'buffer-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                BufPoly
-              </button>
-              <button
-                onClick={() => setViewMode('mincircle-poly')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'mincircle-poly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                MinCir
-              </button>
-              <button
-                onClick={() => setViewMode('oriented-rect')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Rectangles
-              </button>
-              <button
-                onClick={() => setViewMode('oriented-rect-rounded')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect-rounded' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                Capsules
-              </button>
-              <button
-                onClick={() => setViewMode('oriented-rect-para')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect-para' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                ParaCaps
-              </button>
-              <button
+              <ViewModeButton
+                mode="oriented-rect-roundpoly"
+                label="Polygon"
+                currentViewMode={viewMode}
                 onClick={() => setViewMode('oriented-rect-roundpoly')}
-                className={`px-3 py-2 rounded text-sm ${viewMode === 'oriented-rect-roundpoly' ? 'bg-neutral-700 text-neutral-50' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}
-              >
-                RoundPoly
-              </button>
+              />
+              <ViewModeButton
+                mode="edges"
+                label="Edges"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('edges')}
+              />
+              <ViewModeButton
+                mode="ellipse-wrap"
+                label="Ellipse"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('ellipse-wrap')}
+              />
+              <ViewModeButton
+                mode="circles"
+                label="Circles"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('circles')}
+              />
+              <ViewModeButton
+                mode="boxes"
+                label="Blocks"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('boxes')}
+              />
+              <ViewModeButton
+                mode="oriented-rect"
+                label="Rectangles"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('oriented-rect')}
+              />
+              <ViewModeButton
+                mode="oriented-rect-rounded"
+                label="Capsules"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('oriented-rect-rounded')}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2 text-xs uppercase tracking-wide">Experimental</label>
+            <div className="flex flex-wrap gap-2">
+              <ViewModeButton
+                mode="para-fillet"
+                label="Fillet"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('para-fillet')}
+              />
+              <ViewModeButton
+                mode="para-bezier"
+                label="Bezier"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('para-bezier')}
+              />
+              <ViewModeButton
+                mode="para-subdiv"
+                label="Subdiv"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('para-subdiv')}
+              />
+              <ViewModeButton
+                mode="expand-poly"
+                label="ExpPoly"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('expand-poly')}
+              />
+              <ViewModeButton
+                mode="circle-poly"
+                label="CirPoly"
+                currentViewMode={viewMode}
+                onClick={() => setViewMode('circle-poly')}
+              />
             </div>
           </div>
           <div>
