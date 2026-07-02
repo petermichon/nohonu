@@ -919,6 +919,9 @@ function App() {
       context.scale(transformRef.current.k, transformRef.current.k);
 
       // Draw polygons/circles/boxes/offsets around nodes from the same file
+      // Store hull paths for clipping edges inside groups
+      const groupHulls = new Map<string, [number, number][]>();
+
       if (
         viewMode === 'circles' ||
         viewMode === 'boxes' ||
@@ -943,7 +946,7 @@ function App() {
           nodesByFile.get(uniqueKey)!.push(node);
         });
 
-        nodesByFile.forEach((nodes) => {
+        nodesByFile.forEach((nodes, uniqueKey) => {
           // Get folder color for this group
           const folder = nodes[0].data.folder || 'root';
           const folderColor = colorScale(folder) as string;
@@ -966,6 +969,8 @@ function App() {
             const hull = d3.polygonHull(points);
 
             if (hull && hull.length >= 3) {
+              // Store hull for clipping
+              groupHulls.set(uniqueKey, hull);
               const nodeRadius = 10;
               const padding = 5;
               const offset = nodeRadius + padding;
@@ -1040,6 +1045,8 @@ function App() {
             const hull = d3.polygonHull(points);
 
             if (hull && hull.length >= 3) {
+              // Store hull for clipping
+              groupHulls.set(uniqueKey, hull);
               const nodeRadius = 10;
               const padding = 5;
               const offset = nodeRadius + padding;
@@ -1114,6 +1121,8 @@ function App() {
             const hull = d3.polygonHull(points);
 
             if (hull && hull.length >= 3) {
+              // Store hull for clipping
+              groupHulls.set(uniqueKey, hull);
               const nodeRadius = 10;
               const padding = 5;
               const offset = nodeRadius + padding;
@@ -1216,7 +1225,10 @@ function App() {
               // 3+ nodes: use convex hull
               const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
               const hull = d3.polygonHull(points);
-              if (hull) basePoints = hull;
+              if (hull) {
+                basePoints = hull;
+                groupHulls.set(uniqueKey, hull);
+              }
             }
 
             if (basePoints.length > 0) {
@@ -1267,7 +1279,10 @@ function App() {
             } else {
               const points: [number, number][] = nodes.map((n) => [n.x, n.y]);
               const hull = d3.polygonHull(points);
-              if (hull) basePoints = hull;
+              if (hull) {
+                basePoints = hull;
+                groupHulls.set(uniqueKey, hull);
+              }
             }
 
             if (basePoints.length > 0) {
@@ -1380,6 +1395,9 @@ function App() {
               const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
               basePoints.push([centerX + rotatedX, centerY + rotatedY]);
             }
+
+            // Store hull for clipping
+            groupHulls.set(uniqueKey, basePoints);
 
             context.beginPath();
             basePoints.forEach((point, i) => {
@@ -1497,6 +1515,19 @@ function App() {
             context.stroke();
 
             context.restore();
+
+            // Store hull for clipping (convert rect to polygon)
+            const rectHull: [number, number][] = [
+              [-width / 2, -height / 2],
+              [width / 2, -height / 2],
+              [width / 2, height / 2],
+              [-width / 2, height / 2],
+            ].map(([x, y]) => {
+              const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+              const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+              return [centerX + rotatedX, centerY + rotatedY] as [number, number];
+            });
+            groupHulls.set(uniqueKey, rectHull);
           } else if (viewMode === 'oriented-rect-rounded') {
             // PCA-based oriented bounding rectangle with adaptive rounding
             const nodeRadius = 10;
@@ -1612,6 +1643,19 @@ function App() {
             context.stroke();
 
             context.restore();
+
+            // Store hull for clipping (convert rect to polygon)
+            const rectHull2: [number, number][] = [
+              [-width / 2, -height / 2],
+              [width / 2, -height / 2],
+              [width / 2, height / 2],
+              [-width / 2, height / 2],
+            ].map(([x, y]) => {
+              const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+              const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+              return [centerX + rotatedX, centerY + rotatedY] as [number, number];
+            });
+            groupHulls.set(uniqueKey, rectHull2);
           } else if (viewMode === 'oriented-rect-roundpoly') {
             // Adaptive rounding with Para+ polygons for 3+ nodes
             const nodeRadius = 10;
@@ -1665,6 +1709,8 @@ function App() {
               const hull = d3.polygonHull(points);
 
               if (hull && hull.length >= 3) {
+                // Store hull for clipping
+                groupHulls.set(uniqueKey, hull);
                 const offset = bufferDistance;
                 const radius = bufferDistance;
 
@@ -1783,6 +1829,15 @@ function App() {
             context.strokeStyle = strokeColor;
             context.lineWidth = 1;
             context.stroke();
+
+            // Store hull for clipping (convert circle to polygon)
+            const circleHull: [number, number][] = [];
+            const segments = 32;
+            for (let i = 0; i < segments; i++) {
+              const theta = (i / segments) * 2 * Math.PI;
+              circleHull.push([centerX + radius * Math.cos(theta), centerY + radius * Math.sin(theta)]);
+            }
+            groupHulls.set(uniqueKey, circleHull);
           } else if (viewMode === 'boxes') {
             // Bounding box with rounded corners for boxes mode
             if (nodes.length < 1) return;
@@ -1803,6 +1858,15 @@ function App() {
             context.strokeStyle = strokeColor;
             context.lineWidth = 1;
             context.stroke();
+
+            // Store hull for clipping (convert rect to polygon)
+            const boxHull: [number, number][] = [
+              [minX, minY],
+              [maxX, minY],
+              [maxX, maxY],
+              [minX, maxY],
+            ];
+            groupHulls.set(uniqueKey, boxHull);
           }
         });
       }
@@ -1889,35 +1953,40 @@ function App() {
             const b = parseInt(hex.slice(5, 7), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
           };
-          const edgeColor = hexToRgba(sourceColor, 0.5);
+          const edgeColor = hexToRgba(sourceColor, 1);
 
           targetFiles.forEach((targetFile) => {
             const targetCentroid = fileCentroids.get(targetFile);
             if (!targetCentroid) return;
 
-            const dx = targetCentroid.x - sourceCentroid.x;
-            const dy = targetCentroid.y - sourceCentroid.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const offset = 12;
-
-            let targetX = targetCentroid.x;
-            let targetY = targetCentroid.y;
-
-            if (distance > 0) {
-              targetX = sourceCentroid.x + (dx / distance) * (distance - offset);
-              targetY = sourceCentroid.y + (dy / distance) * (distance - offset);
-            }
-
             context.beginPath();
             context.moveTo(sourceCentroid.x, sourceCentroid.y);
-            context.lineTo(targetX, targetY);
+            context.lineTo(targetCentroid.x, targetCentroid.y);
             context.strokeStyle = edgeColor;
-            context.lineWidth = 3;
+            context.lineWidth = 5;
             context.globalAlpha = edgeOpacity;
             context.stroke();
             context.globalAlpha = 1;
           });
         });
+
+        // Clip edges inside groups using destination-out compositing
+        if (groupHulls.size > 0) {
+          context.save();
+          context.globalCompositeOperation = 'destination-out';
+
+          groupHulls.forEach((hull) => {
+            context.beginPath();
+            hull.forEach((point, i) => {
+              if (i === 0) context.moveTo(point[0], point[1]);
+              else context.lineTo(point[0], point[1]);
+            });
+            context.closePath();
+            context.fill();
+          });
+
+          context.restore();
+        }
 
         // Draw individual edges for non-wildcard imports
         filteredEdges.forEach((edge: any) => {
