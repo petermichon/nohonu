@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
@@ -37,7 +37,7 @@ function Login() {
     onSuccess: (data) => {
       setSessionId(data.session);
       setUsername(data.user.username);
-      navigate(`/u/${data.user.username}`);
+      navigate({ to: `/u/${data.user.username}` });
     },
     onError: (err: Error) => {
       setError(err.message);
@@ -311,12 +311,9 @@ function Login() {
                 </div>
                 Remember me
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
-              >
+              <span className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 cursor-pointer">
                 Forgot password?
-              </Link>
+              </span>
             </div>
 
             <button

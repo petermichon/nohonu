@@ -1,4 +1,4 @@
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, Key } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
@@ -12,7 +12,7 @@ import { useState } from 'react';
 export default function UserPage() {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const { username } = useParams<{ username: string }>();
+  const { username } = useParams({ from: '/u/$username' });
   const location = useLocation();
   const { displayName, username: loggedInUsername, setDisplayName, apiBase, apiKey, sessionId } = useConnection();
 
@@ -201,7 +201,8 @@ export default function UserPage() {
           {/* Navigation tabs */}
           <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
             <Link
-              to={`/u/${username}`}
+              to="/u/$username"
+              params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'overview'
                   ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -212,7 +213,8 @@ export default function UserPage() {
               Overview
             </Link>
             <Link
-              to={`/u/${username}/sites`}
+              to="/u/$username/sites"
+              params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'sites'
                   ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -223,7 +225,8 @@ export default function UserPage() {
               Sites
             </Link>
             <Link
-              to={`/u/${username}/domains`}
+              to="/u/$username/domains"
+              params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'domains'
                   ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -234,7 +237,8 @@ export default function UserPage() {
               Domains
             </Link>
             <Link
-              to={`/u/${username}/servers`}
+              to="/u/$username/servers"
+              params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'servers'
                   ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -246,7 +250,8 @@ export default function UserPage() {
             </Link>
             {isOwnProfile && (
               <Link
-                to={`/u/${username}/settings`}
+                to="/u/$username/settings"
+                params={{ username }}
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                   activeTab === 'settings'
                     ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'

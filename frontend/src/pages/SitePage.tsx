@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
@@ -21,13 +21,10 @@ import { SLOT_MS, type TimeRange } from '../lib/types.ts';
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SitePage() {
-  const { domain, sitename, username, section } = useParams<{
-    domain?: string;
-    sitename?: string;
-    username?: string;
-    section?: string;
-  }>();
-  const actualDomain = sitename || domain;
+  const { username, sitename, section } = useParams({
+    from: '/u/$username/$sitename/$section',
+  });
+  const actualDomain = sitename;
   const { apiFetch, host, hostWithPort, protocol } = useApi();
   const { refreshSites } = useSites();
   const { username: loggedInUsername } = useConnection();
@@ -83,7 +80,7 @@ function SitePage() {
     },
     onSuccess: () => {
       showToast('Site deleted', true);
-      navigate('/');
+      navigate({ to: '/' });
     },
     onError: (err: Error) => {
       showToast(err.message, false);
@@ -249,10 +246,10 @@ function SitePage() {
         </div>
         <p className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Site not found</p>
         <Link
-          to="/sites"
+          to="/"
           className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 mt-2 inline-block"
         >
-          Back to sites
+          Back to home
         </Link>
       </div>
     );
@@ -273,7 +270,8 @@ function SitePage() {
             <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.domain}</h1>
             {username ? (
               <Link
-                to={`/u/${username}`}
+                to="/u/$username"
+                params={{ username }}
                 className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
               >
                 @{username}
@@ -287,7 +285,8 @@ function SitePage() {
         {/* Navigation tabs */}
         <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
           <Link
-            to={username ? `/u/${username}/${actualDomain}` : `/sites/${actualDomain}`}
+            to="/u/$username/$sitename/$section"
+            params={{ username: username || '', sitename: actualDomain, section: '' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'overview'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -298,7 +297,8 @@ function SitePage() {
             Overview
           </Link>
           <Link
-            to={username ? `/u/${username}/${actualDomain}/analytics` : `/sites/${actualDomain}/analytics`}
+            to="/u/$username/$sitename/$section"
+            params={{ username: username || '', sitename: actualDomain, section: 'analytics' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'analytics'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -309,7 +309,8 @@ function SitePage() {
             Analytics
           </Link>
           <Link
-            to={username ? `/u/${username}/${actualDomain}/domains` : `/sites/${actualDomain}/domains`}
+            to="/u/$username/$sitename/$section"
+            params={{ username: username || '', sitename: actualDomain, section: 'domains' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'domains'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -320,7 +321,8 @@ function SitePage() {
             Domains
           </Link>
           <Link
-            to={username ? `/u/${username}/${actualDomain}/versions` : `/sites/${actualDomain}/versions`}
+            to="/u/$username/$sitename/$section"
+            params={{ username: username || '', sitename: actualDomain, section: 'versions' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'versions'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -332,7 +334,8 @@ function SitePage() {
           </Link>
           {!isPublicView && (
             <Link
-              to={username ? `/u/${username}/${actualDomain}/settings` : `/sites/${actualDomain}/settings`}
+              to="/u/$username/$sitename/$section"
+              params={{ username: username || '', sitename: actualDomain, section: 'settings' }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'settings'
                   ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'

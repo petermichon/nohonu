@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { FileText, Scale, Shield, Info } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';

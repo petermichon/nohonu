@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
 import { useSites } from '../lib/api.ts';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
@@ -11,9 +11,9 @@ export default function Deploy() {
   const handleDeploy = (domain: string) => {
     refreshSites();
     if (username) {
-      navigate(`/u/${username}/${domain}`);
+      navigate({ to: `/u/${username}/${domain}` });
     } else {
-      navigate('/');
+      navigate({ to: '/' });
     }
   };
 

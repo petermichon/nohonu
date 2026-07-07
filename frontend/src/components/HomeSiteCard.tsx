@@ -1,5 +1,5 @@
 import { Globe } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import type { Site } from '../lib/types.ts';
 
@@ -20,7 +20,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
     <div
       onClick={() => {
         const targetPath = site.account ? `/u/${site.account}/${site.domain}` : `/sites/${site.domain}`;
-        navigate(targetPath);
+        navigate({ to: targetPath });
       }}
       className="cursor-pointer flex flex-col gap-4"
     >

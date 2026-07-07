@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import {
   User,
   MoreVertical,
@@ -147,28 +147,22 @@ export function TopBar() {
 
   const browserTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-  const isActive = (path: string) => {
-    if (path === '/' && location.pathname === '/') {
-      return true;
-    }
-    if (path === '/domains' && username && location.pathname === `/u/${username}/domains`) {
-      return true;
-    }
-    if (path === '/servers' && username && location.pathname === `/u/${username}/servers`) {
-      return true;
-    }
-    return false;
+  type ProfileOption = {
+    route: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    divider?: boolean;
   };
 
-  const profileOptions = username
+  const profileOptions: ProfileOption[] = username
     ? [
-        { to: `/u/${username}`, label: 'Profile', icon: User },
-        { to: `/u/${username}/sites`, label: 'Sites', icon: Layout },
-        { to: `/u/${username}/domains`, label: 'Domains', icon: Globe },
-        { to: `/u/${username}/servers`, label: 'Servers', icon: Server, divider: true },
-        { to: `/u/${username}/settings`, label: 'Settings', icon: Settings },
+        { route: '/u/$username', label: 'Profile', icon: User, divider: false },
+        { route: '/u/$username/sites', label: 'Sites', icon: Layout, divider: false },
+        { route: '/u/$username/domains', label: 'Domains', icon: Globe, divider: false },
+        { route: '/u/$username/servers', label: 'Servers', icon: Server, divider: true },
+        { route: '/u/$username/settings', label: 'Settings', icon: Settings, divider: false },
       ]
-    : [{ to: '/account', label: 'Settings', icon: Settings }];
+    : [{ route: '/account', label: 'Settings', icon: Settings, divider: false }];
 
   const themeOptions = [
     {
@@ -543,10 +537,10 @@ export function TopBar() {
                   </>
                 )}
                 <div className="flex flex-col gap-0.5">
-                  {profileOptions.map(({ to, label, divider, icon: Icon }) => (
-                    <React.Fragment key={to}>
+                  {profileOptions.map(({ route, label, divider, icon: Icon }) => (
+                    <React.Fragment key={route}>
                       <Link
-                        to={to}
+                        {...(route.includes('$') ? { to: route, params: { username } } : { to: route })}
                         onClick={() => {
                           setIsProfileOpen(false);
                         }}

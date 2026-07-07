@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useTheme } from '../lib/ThemeProvider.tsx';
@@ -36,7 +36,7 @@ function Signup() {
     onSuccess: (data) => {
       setSessionId(data.session);
       setUsername(data.user.username);
-      navigate(`/u/${data.user.username}`);
+      navigate({ to: `/u/${data.user.username}` });
     },
     onError: (err: Error) => {
       setError(err.message);

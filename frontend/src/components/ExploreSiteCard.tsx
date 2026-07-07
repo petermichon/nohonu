@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useApi } from '../lib/api.ts';
 import type { Site } from '../lib/types.ts';
 
@@ -28,13 +28,13 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
   const handleTitleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const targetPath = site.account ? `/u/${site.account}/${site.domain}` : `/sites/${site.domain}`;
-    navigate(targetPath);
+    navigate({ to: targetPath });
   };
 
   const handleAuthorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (site.account) {
-      navigate(`/u/${site.account}`);
+      navigate({ to: `/u/${site.account}` });
     }
   };
 

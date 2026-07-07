@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { ExternalLink, Power, Loader2, Eye, Activity } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { formatHits } from '../lib/utils.ts';
@@ -33,7 +33,7 @@ export function SiteCard({ site, onToggle, loading }: SiteCardProps) {
     : 'bg-stone-100 dark:bg-stone-800/60 text-zinc-400 dark:text-zinc-600';
 
   const handleCardClick = (e: { target: EventTarget | null }) => {
-    if (!(e.target as HTMLElement).closest('button, a')) navigate(`/sites/${site.domain}`);
+    if (!(e.target as HTMLElement).closest('button, a')) navigate({ to: `/sites/${site.domain}` });
   };
 
   return (
