@@ -1,4 +1,4 @@
-import { Zap, Palette, BarChart3, Clock, Layers, AlertCircle, Globe } from 'lucide-react';
+import { Palette, BarChart3, Clock, Layers, AlertCircle, Globe } from 'lucide-react';
 
 export interface SectionConfig {
   id: string;
