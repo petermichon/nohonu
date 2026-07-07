@@ -90,7 +90,7 @@ function SitePage() {
     },
     onSuccess: () => {
       showToast('Site deleted', true);
-      navigate({ to: '/' });
+      navigate({ to: '/u/$username', params: { username } });
     },
     onError: (err: Error) => {
       showToast(err.message, false);

@@ -11,6 +11,11 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  // Check if React is properly loaded (HMR issue)
+  if (typeof useState !== 'function') {
+    throw new Error('React not loaded correctly. Please refresh the page.');
+  }
+
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme') as Theme | null;
     if (saved === 'light' || saved === 'dark' || saved === 'system') return saved;
