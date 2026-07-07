@@ -225,34 +225,32 @@ function matchRoute(path: string): Endpoint | undefined {
   return undefined;
 }
 
-export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
-  // await delay(1000);
-  const start = Date.now();
-  const url = new URL(req.url);
-  const path = url.pathname;
-
-  if (req.method === 'OPTIONS') {
-    return new Response(undefined, { headers: CORS });
+// Virtual reverse proxy - routes requests to appropriate service
+function routeRequest(path: string): 'auth' | 'api' | 'static' {
+  if (path.startsWith('/auth')) {
+    return 'auth';
   }
+  if (
+    path.startsWith('/sites') ||
+    path.startsWith('/users') ||
+    path === '/health' ||
+    path === '/check-domain' ||
+    path === '/check-custom-domain' ||
+    path === '/custom-domains' ||
+    path === '/explore/sites'
+  ) {
+    return 'api';
+  }
+  return 'static';
+}
 
+// AuthService - handles /auth/* endpoints (no auth required)
+async function handleAuthService(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
+  const start = Date.now();
   const route = matchRoute(path);
 
-  // Check API key for all requests (including static file serving)
-  const authError = requireAuth(req);
-  if (authError) {
-    console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
-    return authError;
-  }
-
-  // Static file serving as fallback
   if (!route) {
-    let response: Response;
-    try {
-      response = await serveStatic(req, path, info);
-    } catch (err) {
-      console.error('Error in static endpoint:', err);
-      response = new Response('Internal server error', { status: 500, headers: CORS });
-    }
+    const response = error('Auth endpoint not found', 404);
     console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
     return response;
   }
@@ -261,10 +259,61 @@ export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promis
   try {
     response = await route.handler(req, path, info);
   } catch (err) {
-    console.error('Error in endpoint:', err);
+    console.error('Error in auth endpoint:', err);
     response = new Response('Internal server error', { status: 500, headers: CORS });
   }
 
+  const finalResponse = addCorsHeaders(response);
+  console.log(`${req.method} ${path} ${finalResponse.status} ${Date.now() - start}ms`);
+  return finalResponse;
+}
+
+// ApiService - handles protected endpoints (requires auth)
+async function handleApiService(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
+  const start = Date.now();
+  const route = matchRoute(path);
+
+  // Check auth for API requests
+  const authError = requireAuth(req);
+  if (authError) {
+    console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
+    return authError;
+  }
+
+  if (!route) {
+    const response = error('API endpoint not found', 404);
+    console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
+    return response;
+  }
+
+  let response: Response;
+  try {
+    response = await route.handler(req, path, info);
+  } catch (err) {
+    console.error('Error in API endpoint:', err);
+    response = new Response('Internal server error', { status: 500, headers: CORS });
+  }
+
+  const finalResponse = addCorsHeaders(response);
+  console.log(`${req.method} ${path} ${finalResponse.status} ${Date.now() - start}ms`);
+  return finalResponse;
+}
+
+// StaticService - handles static file serving (no auth)
+async function handleStaticService(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
+  const start = Date.now();
+  let response: Response;
+  try {
+    response = await serveStatic(req, path, info);
+  } catch (err) {
+    console.error('Error in static endpoint:', err);
+    response = new Response('Internal server error', { status: 500, headers: CORS });
+  }
+  console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
+  return response;
+}
+
+function addCorsHeaders(response: Response): Response {
   let headers: Headers;
   try {
     headers = new Headers(response.headers);
@@ -277,11 +326,32 @@ export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promis
     headers = new Headers(CORS);
   }
 
-  const finalResponse = new Response(response.body, {
+  return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
   });
-  console.log(`${req.method} ${path} ${finalResponse.status} ${Date.now() - start}ms`);
-  return finalResponse;
+}
+
+export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
+  const url = new URL(req.url);
+  const path = url.pathname;
+
+  if (req.method === 'OPTIONS') {
+    return new Response(undefined, { headers: CORS });
+  }
+
+  // Virtual reverse proxy - route to appropriate service
+  const service = routeRequest(path);
+
+  switch (service) {
+    case 'auth':
+      return handleAuthService(req, path, info);
+    case 'api':
+      return handleApiService(req, path, info);
+    case 'static':
+      return handleStaticService(req, path, info);
+    default:
+      return error('Invalid route', 500);
+  }
 }
