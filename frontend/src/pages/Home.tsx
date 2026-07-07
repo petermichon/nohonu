@@ -171,7 +171,7 @@ function Home() {
           </div>
           <div className="relative max-w-2xl">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 leading-[1.05] text-balance text-zinc-950 dark:text-zinc-50">
-              Static site hosting
+              Frontend hosting
             </h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8">
               Open-source platform for deploying and discovering static sites

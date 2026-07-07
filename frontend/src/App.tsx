@@ -6,7 +6,6 @@ import { GlobalToast } from './components/GlobalToast.tsx';
 import { LanguageProvider } from './lib/LanguageProvider.tsx';
 import { FontProvider } from './lib/FontProvider.tsx';
 import Home from './pages/Home.tsx';
-import DomainExplore from './pages/DomainExplore.tsx';
 import SitePage from './pages/SitePage.tsx';
 import AccountPage from './pages/Account.tsx';
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx';
@@ -51,7 +50,7 @@ function AppInner() {
   useEffect(() => {
     const getTitle = () => {
       const path = location.pathname;
-      if (path === '/') return 'Nohonu - Open hosting';
+      if (path === '/') return 'Nohonu - Frontend hosting';
       if (path === '/docs') return 'Docs | Nohonu';
       if (path === '/login') return 'Log in | Nohonu';
       if (path === '/signup') return 'Sign up | Nohonu';
@@ -93,7 +92,6 @@ function AppInner() {
             <Route path="/u/:username/settings" element={<UserPage />} />
             <Route path="/u/:username" element={<UserPage />} />
             <Route path="/u/:username/:sitename/:section?" element={<SitePage />} />
-            <Route path="/u/:username/domains/explore" element={<DomainExplore />} />
             <Route path="/settings" element={<AccountPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/legal" element={<Legal />} />

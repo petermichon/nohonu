@@ -356,7 +356,6 @@ export function TopBar() {
             </span>
           </Link>
           <div className="hidden sm:flex items-center h-full ml-5">
-            <NavButton to="/" label="Explore" isActive={isActive('/')} />
             {username && (
               <NavButton to={`/u/${username}`} label="Profile" isActive={location.pathname === `/u/${username}`} />
             )}

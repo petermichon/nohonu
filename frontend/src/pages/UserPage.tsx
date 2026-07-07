@@ -423,19 +423,23 @@ export default function UserPage() {
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {domains.length} {domains.length === 1 ? 'domain' : 'domains'} configured
               </p>
-              <Link
-                to={`/u/${username}/domains/explore`}
-                className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
-                  accentColorValues.textColor === 'light'
-                    ? 'text-white'
-                    : accentColorValues.textColor === 'inverted'
-                      ? 'text-zinc-100 dark:text-zinc-950'
-                      : 'text-zinc-950'
-                } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
-              >
-                <Plus className="w-4 h-4" />
-                Connect domain
-              </Link>
+              {isOwnProfile && (
+                <button
+                  onClick={() => {
+                    /* TODO: Open add domain modal/input */
+                  }}
+                  className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
+                    accentColorValues.textColor === 'light'
+                      ? 'text-white'
+                      : accentColorValues.textColor === 'inverted'
+                        ? 'text-zinc-100 dark:text-zinc-950'
+                        : 'text-zinc-950'
+                  } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+                >
+                  <Plus className="w-4 h-4" />
+                  Add domain
+                </button>
+              )}
             </div>
             {domainsLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -452,19 +456,23 @@ export default function UserPage() {
                 <p className="text-zinc-500 dark:text-zinc-400 mb-6 max-w-sm mx-auto">
                   Connect a custom domain to your site to use your own brand.
                 </p>
-                <Link
-                  to={`/u/${username}/domains/explore`}
-                  className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
-                    accentColorValues.textColor === 'light'
-                      ? 'text-white'
-                      : accentColorValues.textColor === 'inverted'
-                        ? 'text-zinc-100 dark:text-zinc-950'
-                        : 'text-zinc-950'
-                  } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
-                >
-                  <Plus className="w-4 h-4" />
-                  Register your first domain
-                </Link>
+                {isOwnProfile && (
+                  <button
+                    onClick={() => {
+                      /* TODO: Open add domain modal/input */
+                    }}
+                    className={`inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
+                      accentColorValues.textColor === 'light'
+                        ? 'text-white'
+                        : accentColorValues.textColor === 'inverted'
+                          ? 'text-zinc-100 dark:text-zinc-950'
+                          : 'text-zinc-950'
+                    } cursor-pointer whitespace-nowrap flex items-center justify-center ${accentColorValues.bg}`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add your first domain
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
