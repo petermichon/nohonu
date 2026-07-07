@@ -7,7 +7,8 @@ export async function checkDomain(req: Request): Promise<Response> {
 
   const url = new URL(req.url);
   const rawDomain = url.searchParams.get('domain') ?? '';
+  const user = url.searchParams.get('user') ?? '';
 
-  const exists = await sites.checkDomain(rawDomain);
+  const exists = await sites.checkDomain(user, rawDomain);
   return new Response(undefined, { status: exists ? 200 : 404 });
 }

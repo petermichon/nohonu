@@ -18,6 +18,7 @@ import {
   Layout,
   Settings,
 } from 'lucide-react';
+import { useLogout } from '../lib/api.ts';
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
@@ -107,6 +108,7 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
 
 export function TopBar() {
   const { displayName, username, disconnect } = useConnection();
+  const { logout } = useLogout();
   const location = useLocation();
   const navigate = useNavigate();
   const userName = displayName || username || 'Connect';
@@ -557,7 +559,8 @@ export function TopBar() {
                       <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={async () => {
+                          await logout();
                           disconnect();
                           setIsProfileOpen(false);
                           navigate({ to: '/' });

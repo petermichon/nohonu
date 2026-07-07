@@ -9,16 +9,10 @@ export interface RegisterResult {
   error?: string;
 }
 
-export async function register(
-  password: string,
-  username: string,
-  deviceInfo?: string,
-  userAgent?: string,
-  ip?: string,
-): Promise<RegisterResult> {
+export async function register(password: string, username: string, userAgent?: string): Promise<RegisterResult> {
   try {
     const user = await users.createUser(password, username);
-    const session = sessions.createSession(user.username, deviceInfo, userAgent, ip);
+    const session = sessions.createSession(user.username, userAgent);
 
     return {
       success: true,

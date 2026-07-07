@@ -1,12 +1,14 @@
 import { useParams, Link, useLocation } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, Key } from 'lucide-react';
+import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, Key, Monitor, LogOut } from 'lucide-react';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
-import { useSites, useDomains, useUserSites } from '../lib/api.ts';
+import { Tooltip } from '../components/Tooltip.tsx';
+import { useSites, useDomains, useUserSites, useSessions, useDeleteSession } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
+import { formatUserAgent } from '../lib/userAgent.ts';
 import { useState } from 'react';
 
 export default function UserPage() {
@@ -22,6 +24,8 @@ export default function UserPage() {
   const { sites: publicSites, loading: publicLoading, error: publicError } = useUserSites(username);
   const { sites: privateSites, loading: privateLoading, error: privateError } = useSites();
   const { domains, loading: domainsLoading } = useDomains();
+  const { sessions, loading: sessionsLoading } = useSessions();
+  const { deleteSession } = useDeleteSession();
 
   const sites = isOwnProfile ? privateSites : publicSites;
   const loading = isOwnProfile ? privateLoading : publicLoading;
@@ -677,6 +681,75 @@ export default function UserPage() {
                     )}
                   </div>
                 </form>
+              </div>
+
+              <div>
+                <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-4 flex items-center gap-2">
+                  <Monitor className="w-5 h-5" />
+                  Active Sessions
+                </h2>
+                <div className="flex flex-col gap-3 max-w-2xl">
+                  {sessionsLoading ? (
+                    <div className="flex flex-col gap-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-zinc-100 dark:bg-zinc-800 rounded-lg h-16 animate-pulse" />
+                      ))}
+                    </div>
+                  ) : sessions.length === 0 ? (
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">No active sessions</p>
+                  ) : (
+                    sessions.map((session) => (
+                      <div
+                        key={session.id}
+                        className="flex items-center justify-between w-full py-4 pr-4 overflow-hidden"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                            <Monitor className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-zinc-950 dark:text-zinc-100 truncate">
+                              {formatUserAgent(session.userAgent)}
+                            </p>
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                              Last active {new Date(session.lastActive).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        {session.id === sessionId ? (
+                          <button
+                            type="button"
+                            disabled
+                            className="p-2 rounded-lg shrink-0 cursor-default
+                              text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
+                          >
+                            <LogOut className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <Tooltip content="Revoke session">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                deleteSession(session.id)
+                                  .then(() => {
+                                    showToast('Session revoked', true);
+                                  })
+                                  .catch(() => {
+                                    showToast('Failed to revoke session', false);
+                                  });
+                              }}
+                              className="p-2 rounded-lg shrink-0 cursor-pointer
+                                text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800
+                                hover:text-zinc-900 dark:hover:text-zinc-100"
+                            >
+                              <LogOut className="w-4 h-4" />
+                            </button>
+                          </Tooltip>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </section>

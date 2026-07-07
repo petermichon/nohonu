@@ -144,3 +144,66 @@ export function useDomains() {
     refreshDomains,
   };
 }
+
+interface Session {
+  id: string;
+  username: string;
+  userAgent?: string;
+  createdAt: number;
+  lastActive: number;
+}
+
+export function useSessions() {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ['sessions'],
+    queryFn: async () => {
+      const res = await apiFetch('/auth/sessions');
+      if (!res.ok) {
+        throw new Error('Failed to fetch sessions');
+      }
+      const data = await res.json();
+      return (data.sessions ?? []) as Session[];
+    },
+    retry: false,
+  });
+
+  const refreshSessions = () => queryClient.invalidateQueries({ queryKey: ['sessions'] });
+
+  return {
+    sessions: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error ? 'Failed to fetch sessions' : false,
+    refreshSessions,
+  };
+}
+
+export function useDeleteSession() {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const deleteSession = async (sessionId: string) => {
+    const res = await apiFetch(`/auth/sessions/delete?id=${sessionId}`, { method: 'DELETE' });
+    if (!res.ok) {
+      throw new Error('Failed to delete session');
+    }
+    await queryClient.invalidateQueries({ queryKey: ['sessions'] });
+  };
+
+  return { deleteSession };
+}
+
+export function useLogout() {
+  const { apiFetch } = useApi();
+
+  const logout = async () => {
+    const res = await apiFetch('/auth/logout', { method: 'POST' });
+    if (!res.ok) {
+      throw new Error('Failed to logout');
+    }
+  };
+
+  return { logout };
+}

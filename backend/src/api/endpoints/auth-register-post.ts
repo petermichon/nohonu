@@ -13,10 +13,9 @@ export async function authRegister(req: Request): Promise<Response> {
       return json({ error: 'Password and username are required' }, 400);
     }
 
-    const ip = req.headers.get('X-Forwarded-For') || req.headers.get('X-Real-IP') || undefined;
     const userAgent = req.headers.get('User-Agent') || undefined;
 
-    const result = await registerUc.register(password, username, undefined, userAgent, ip);
+    const result = await registerUc.register(password, username, userAgent);
 
     if (!result.success || !result.user) {
       return json({ error: result.error || 'Registration failed' }, 400);

@@ -13,10 +13,9 @@ export async function authLogin(req: Request): Promise<Response> {
       return json({ error: 'Username and password are required' }, 400);
     }
 
-    const ip = req.headers.get('X-Forwarded-For') || req.headers.get('X-Real-IP') || undefined;
     const userAgent = req.headers.get('User-Agent') || undefined;
 
-    const result = await loginUc.login(username, password, undefined, userAgent, ip);
+    const result = await loginUc.login(username, password, userAgent);
 
     if (!result.success || !result.user) {
       return json({ error: result.error || 'Login failed' }, 401);

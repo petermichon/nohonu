@@ -1,4 +1,5 @@
 import { VALID_DOMAIN } from './paths.ts';
+import * as sessions from '../core/auth/sessions.ts';
 
 const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? '*';
 
@@ -10,13 +11,28 @@ export const CORS = {
 
 export const API_KEY = Deno.env.get('API_KEY');
 
-export function requireAuth(req: Request): Response | undefined {
+export async function requireAuth(req: Request): Promise<Response | undefined> {
+  // Check API key first (for dev/admin access)
+  if (API_KEY && req.headers.get('X-Api-Key') === API_KEY) {
+    return undefined;
+  }
+
+  // Check session (for user web UI access)
+  const sessionId = req.headers.get('X-Session-Id');
+  if (sessionId) {
+    const session = await sessions.getSession(sessionId);
+    if (session) {
+      // Update last activity
+      await sessions.updateSessionActivity(sessionId);
+      return undefined;
+    }
+  }
+
+  // If no API key env var and no valid session, allow (dev mode)
   if (!API_KEY) {
     return undefined;
   }
-  if (req.headers.get('X-Api-Key') === API_KEY) {
-    return undefined;
-  }
+
   return error('Unauthorized', 401);
 }
 

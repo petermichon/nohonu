@@ -6,6 +6,8 @@ import { authLogin } from './endpoints/auth-login-post.ts';
 import { authLogout } from './endpoints/auth-logout-post.ts';
 import { authMe } from './endpoints/auth-me-get.ts';
 import { authDisplayName } from './endpoints/auth-displayname-patch.ts';
+import { getSessions } from './endpoints/auth-sessions-get.ts';
+import { deleteSession as deleteSessionEndpoint } from './endpoints/auth-sessions-delete.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
 import { checkCustomDomain } from './endpoints/check-custom-domain-get.ts';
 import { serveStatic } from './endpoints/get.ts';
@@ -54,6 +56,8 @@ const routes: Record<string, Endpoint> = {
   '/auth/logout': { handler: authLogout, auth: true },
   '/auth/me': { handler: authMe, auth: true },
   '/auth/displayname': { handler: authDisplayName, auth: true },
+  '/auth/sessions': { handler: getSessions, auth: true },
+  '/auth/sessions/delete': { handler: deleteSessionEndpoint, auth: true },
   '/check-domain': { handler: checkDomain, auth: true },
   '/check-custom-domain': { handler: checkCustomDomain, auth: true },
   '/custom-domains': { handler: getAllCustomDomains, auth: true },
@@ -226,7 +230,7 @@ function matchRoute(path: string): Endpoint | undefined {
 }
 
 // Virtual reverse proxy - routes requests to appropriate service
-function routeRequest(path: string): 'auth' | 'api' | 'static' {
+export function routeRequest(path: string): 'auth' | 'api' | 'static' {
   if (path.startsWith('/auth')) {
     return 'auth';
   }
@@ -244,10 +248,17 @@ function routeRequest(path: string): 'auth' | 'api' | 'static' {
   return 'static';
 }
 
-// AuthService - handles /auth/* endpoints (no auth required)
+// AuthService - handles /auth/* endpoints (requires API key for dev protection)
 async function handleAuthService(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
   const start = Date.now();
   const route = matchRoute(path);
+
+  // Check API key for auth endpoints (dev protection)
+  const authError = await requireAuth(req);
+  if (authError) {
+    console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
+    return authError;
+  }
 
   if (!route) {
     const response = error('Auth endpoint not found', 404);
@@ -273,8 +284,8 @@ async function handleApiService(req: Request, path: string, info: Deno.ServeHand
   const start = Date.now();
   const route = matchRoute(path);
 
-  // Check auth for API requests
-  const authError = requireAuth(req);
+  // Check auth for API requests (now async for session validation)
+  const authError = await requireAuth(req);
   if (authError) {
     console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
     return authError;

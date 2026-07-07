@@ -12,7 +12,7 @@ export async function getAllCustomDomains(req: Request): Promise<Response> {
     if (account) {
       filteredDomains = [];
       for (const cd of allCustomDomains) {
-        const siteData = await storage.readSiteMetadata(cd.siteDomain);
+        const siteData = await storage.readSiteMetadata(cd.user, cd.siteDomain);
         if (siteData?.account === account) {
           filteredDomains.push(cd);
         }

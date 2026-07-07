@@ -9,9 +9,7 @@ function getUserSessionsFile(username: string): string {
 export interface Session {
   id: string;
   username: string;
-  deviceInfo?: string;
   userAgent?: string;
-  ip?: string;
   createdAt: number;
   lastActive: number;
 }
@@ -39,14 +37,12 @@ function saveUserSessions(username: string, data: SessionsData): void {
   Deno.writeTextFileSync(getUserSessionsFile(username), JSON.stringify(data, null, 2));
 }
 
-export function createSession(username: string, deviceInfo?: string, userAgent?: string, ip?: string): Session {
+export function createSession(username: string, userAgent?: string): Session {
   const data = loadUserSessions(username);
   const session: Session = {
     id: crypto.randomUUID(),
     username,
-    deviceInfo,
     userAgent,
-    ip,
     createdAt: Date.now(),
     lastActive: Date.now(),
   };

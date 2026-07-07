@@ -9,13 +9,7 @@ export interface LoginResult {
   error?: string;
 }
 
-export async function login(
-  username: string,
-  password: string,
-  deviceInfo?: string,
-  userAgent?: string,
-  ip?: string,
-): Promise<LoginResult> {
+export async function login(username: string, password: string, userAgent?: string): Promise<LoginResult> {
   const user = await users.validateUser(username, password);
 
   if (!user) {
@@ -25,7 +19,7 @@ export async function login(
     };
   }
 
-  const session = sessions.createSession(user.username, deviceInfo, userAgent, ip);
+  const session = sessions.createSession(user.username, userAgent);
 
   return {
     success: true,

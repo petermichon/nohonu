@@ -209,9 +209,9 @@ export async function getCustomDomains(user: string, domain: string): Promise<{ 
   return data.customDomains ?? [];
 }
 
-export async function getAllCustomDomains(): Promise<{ siteDomain: string; customDomain: string; verified: boolean }[]> {
+export async function getAllCustomDomains(): Promise<{ user: string; siteDomain: string; customDomain: string; verified: boolean }[]> {
   const users = await storage.listUsers();
-  const allCustomDomains: { siteDomain: string; customDomain: string; verified: boolean }[] = [];
+  const allCustomDomains: { user: string; siteDomain: string; customDomain: string; verified: boolean }[] = [];
 
   for (const user of users) {
     const domains = await storage.listDomains(user);
@@ -220,6 +220,7 @@ export async function getAllCustomDomains(): Promise<{ siteDomain: string; custo
       if (data?.customDomains) {
         for (const entry of data.customDomains) {
           allCustomDomains.push({
+            user,
             siteDomain: domain,
             customDomain: entry.domain,
             verified: entry.verified,
