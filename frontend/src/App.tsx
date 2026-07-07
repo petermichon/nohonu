@@ -6,7 +6,6 @@ import { GlobalToast } from './components/GlobalToast.tsx';
 import { LanguageProvider } from './lib/LanguageProvider.tsx';
 import { FontProvider } from './lib/FontProvider.tsx';
 import Home from './pages/Home.tsx';
-import Explore from './pages/Explore.tsx';
 import DomainExplore from './pages/DomainExplore.tsx';
 import SitePage from './pages/SitePage.tsx';
 import AccountPage from './pages/Account.tsx';
@@ -53,7 +52,6 @@ function AppInner() {
     const getTitle = () => {
       const path = location.pathname;
       if (path === '/') return 'Nohonu - Open hosting';
-      if (path === '/explore') return 'Explore | Nohonu';
       if (path === '/docs') return 'Docs | Nohonu';
       if (path === '/login') return 'Log in | Nohonu';
       if (path === '/signup') return 'Sign up | Nohonu';
@@ -89,7 +87,6 @@ function AppInner() {
             <Route path="/login" element={<Login />} />
             <Route path="/about" element={<About />} />
             <Route path="/deploy" element={<Deploy />} />
-            <Route path="/explore" element={<Explore />} />
             <Route path="/u/:username/sites" element={<UserPage />} />
             <Route path="/u/:username/domains" element={<UserPage />} />
             <Route path="/u/:username/servers" element={<UserPage />} />
@@ -103,7 +100,7 @@ function AppInner() {
             <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/legal/terms-of-service" element={<TermsOfService />} />
             <Route path="/legal/copyright-policy" element={<CopyrightPolicy />} />
-            <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
+            <Route path="/legal/legal-notice" element={<MentionsLegales />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

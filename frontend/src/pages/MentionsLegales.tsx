@@ -1,6 +1,5 @@
 import { BackButton } from '../components/BackButton.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
-import { Footer } from '../components/Footer.tsx';
 
 export default function MentionsLegales() {
   const { resolvedLanguage } = useLanguage();
@@ -72,9 +71,6 @@ export default function MentionsLegales() {
           </p>
         </section>
       </div>
-
-      <div className="min-h-[30vh]" />
-      <Footer />
     </div>
   );
 }

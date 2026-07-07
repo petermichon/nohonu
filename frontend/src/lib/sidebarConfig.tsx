@@ -135,7 +135,7 @@ export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
     ],
   },
   {
-    path: '/legal/mentions-legales',
+    path: '/legal/legal-notice',
     backTo: '/legal',
     backLabel: 'Legal',
     currentLabel: 'Mentions légales',
@@ -154,7 +154,7 @@ export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
       { to: '/legal/privacy-policy', label: 'Privacy Policy', icon: FileText, rightIcon: ChevronRight },
       { to: '/legal/terms-of-service', label: 'Terms of Service', icon: Scale, rightIcon: ChevronRight },
       { to: '/legal/copyright-policy', label: 'Copyright Policy', icon: Shield, rightIcon: ChevronRight },
-      { to: '/legal/mentions-legales', label: 'Mentions légales', icon: Info, rightIcon: ChevronRight },
+      { to: '/legal/legal-notice', label: 'Legal Notice', icon: Info, rightIcon: ChevronRight },
     ],
   },
   {

@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { FileText, Scale, Shield, Info } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
-import { Footer } from '../components/Footer.tsx';
 
 const getLegalPages = (resolvedLanguage: 'en' | 'fr') => [
   {
@@ -24,7 +23,7 @@ const getLegalPages = (resolvedLanguage: 'en' | 'fr') => [
     Icon: Shield,
   },
   {
-    to: '/legal/mentions-legales',
+    to: '/legal/legal-notice',
     label: resolvedLanguage === 'fr' ? 'Mentions légales' : 'Legal notice',
     description: 'Legal identification and company information (French LCEN compliance).',
     Icon: Info,
@@ -48,30 +47,27 @@ export default function Legal() {
         </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="flex flex-col gap-4">
         {LEGAL_PAGES.map(({ to, label, description, Icon }) => (
           <Link
             key={to}
             to={to}
-            className="flex items-start gap-4 p-5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl hover:border-stone-300 dark:hover:border-stone-700"
+            className="flex items-start gap-4 py-3 hover:opacity-70 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 w-fit"
           >
-            <div className="shrink-0 w-10 h-10 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+            <div className="shrink-0 w-10 h-10 flex items-center justify-center">
+              <Icon className="w-6 h-6 text-zinc-500 dark:text-zinc-400" />
             </div>
             <div>
               <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-100 mb-1">{label}</h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
             </div>
           </Link>
         ))}
       </div>
 
       <div className="text-center text-xs text-zinc-400 dark:text-zinc-500 py-8">
-        &copy; {new Date().getFullYear()} Nohonu. All rights reserved.
+        &copy; {new Date().getFullYear()} Nohonu
       </div>
-
-      <div className="min-h-[50vh]" />
-      <Footer />
     </div>
   );
 }

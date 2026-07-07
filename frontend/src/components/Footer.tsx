@@ -122,7 +122,7 @@ export function Footer() {
               nohonu
             </span>
           </Link>
-          <div className="text-[13px] text-zinc-400 dark:text-zinc-600">© 2026 Nohonu. Open hosting.</div>
+          <div className="text-[13px] text-zinc-400 dark:text-zinc-600">© 2026 Nohonu</div>
         </div>
       </div>
     </footer>

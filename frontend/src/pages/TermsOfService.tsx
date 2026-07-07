@@ -1,5 +1,4 @@
 import { BackButton } from '../components/BackButton.tsx';
-import { Footer } from '../components/Footer.tsx';
 
 export default function TermsOfService() {
   return (
@@ -149,9 +148,6 @@ export default function TermsOfService() {
           </p>
         </section>
       </div>
-
-      <div className="min-h-[30vh]" />
-      <Footer />
     </div>
   );
 }

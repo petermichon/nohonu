@@ -1,5 +1,4 @@
 import { BackButton } from '../components/BackButton.tsx';
-import { Footer } from '../components/Footer.tsx';
 
 export default function CopyrightPolicy() {
   return (
@@ -118,9 +117,6 @@ export default function CopyrightPolicy() {
           </p>
         </section>
       </div>
-
-      <div className="min-h-[30vh]" />
-      <Footer />
     </div>
   );
 }

@@ -148,7 +148,7 @@ export function TopBar() {
   const browserTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
   const isActive = (path: string) => {
-    if (path === '/explore' && location.pathname === '/explore') {
+    if (path === '/' && location.pathname === '/') {
       return true;
     }
     if (path === '/domains' && username && location.pathname === `/u/${username}/domains`) {
@@ -356,7 +356,7 @@ export function TopBar() {
             </span>
           </Link>
           <div className="hidden sm:flex items-center h-full ml-5">
-            <NavButton to="/explore" label="Explore" isActive={isActive('/explore')} />
+            <NavButton to="/" label="Explore" isActive={isActive('/')} />
             {username && (
               <NavButton to={`/u/${username}`} label="Profile" isActive={location.pathname === `/u/${username}`} />
             )}
