@@ -19,8 +19,12 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
   return (
     <div
       onClick={() => {
-        const targetPath = site.account ? `/u/${site.account}/${site.domain}` : `/sites/${site.domain}`;
-        navigate({ to: targetPath });
+        if (site.account) {
+          navigate({
+            to: '/u/$username/$sitename',
+            params: { username: site.account, sitename: site.domain },
+          });
+        }
       }}
       className="cursor-pointer flex flex-col gap-4"
     >

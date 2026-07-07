@@ -1,4 +1,4 @@
-import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult } from '../../shared/paths.ts';
+import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult, domainDir } from '../../shared/paths.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 
@@ -406,7 +406,7 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
   data.subdomain = `${user}-${domain}`;
 
   // Create directories and files
-  await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
+  await Deno.mkdir(domainDir(user, domain), { recursive: true });
   await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
@@ -473,7 +473,7 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   data.subdomain = `${user}-${domain}`;
 
   // Create directories and files
-  await Deno.mkdir(storage.domainDir(user, domain), { recursive: true });
+  await Deno.mkdir(domainDir(user, domain), { recursive: true });
   await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);

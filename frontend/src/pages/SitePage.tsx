@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from '@tanstack/react-router';
+import { useNavigate, Link, useLocation } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
 import { ConfirmModal } from '../lib/ConfirmModal.tsx';
@@ -21,19 +21,29 @@ import { SLOT_MS, type TimeRange } from '../lib/types.ts';
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SitePage() {
-  const { username, sitename, section } = useParams({
-    from: '/u/$username/$sitename/$section',
-  });
-  const actualDomain = sitename;
+  const location = useLocation();
+
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const hasSection = pathSegments.length >= 4; // /u/username/sitename/section
+
+  const username = pathSegments[1] as string;
+  const sitename = pathSegments[2] as string;
+  const section = pathSegments[3] as string | undefined;
+
+  const actualUsername = username;
+  const actualSitename = sitename;
+  const actualSection = hasSection ? section : undefined;
+
+  const actualDomain = actualSitename;
   const { apiFetch, host, hostWithPort, protocol } = useApi();
   const { refreshSites } = useSites();
   const { username: loggedInUsername } = useConnection();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const activeTab = (section || 'overview') as 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
+  const activeTab = (actualSection || 'overview') as 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
 
   // Determine if this is a public view (viewing someone else's site)
-  const isPublicView = !!username && username !== loggedInUsername;
+  const isPublicView = !!actualUsername && actualUsername !== loggedInUsername;
 
   const {
     site,
@@ -54,7 +64,7 @@ function SitePage() {
     loadStats,
     loadUptime,
     loadVersions,
-  } = useSiteData(actualDomain!, username, isPublicView);
+  } = useSiteData(actualDomain!, actualUsername, isPublicView);
 
   const [actionLoading, setActionLoading] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'delete' | 'enable' | 'disable' | null>(null);
@@ -268,13 +278,13 @@ function SitePage() {
           </div>
           <div>
             <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.domain}</h1>
-            {username ? (
+            {actualUsername ? (
               <Link
                 to="/u/$username"
-                params={{ username }}
+                params={{ username: actualUsername }}
                 className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
               >
-                @{username}
+                @{actualUsername}
               </Link>
             ) : (
               <p className="text-sm text-zinc-500 dark:text-zinc-400">Your site</p>
@@ -285,8 +295,8 @@ function SitePage() {
         {/* Navigation tabs */}
         <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
           <Link
-            to="/u/$username/$sitename/$section"
-            params={{ username: username || '', sitename: actualDomain, section: '' }}
+            to="/u/$username/$sitename"
+            params={{ username: actualUsername || '', sitename: actualDomain }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'overview'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -298,7 +308,7 @@ function SitePage() {
           </Link>
           <Link
             to="/u/$username/$sitename/$section"
-            params={{ username: username || '', sitename: actualDomain, section: 'analytics' }}
+            params={{ username: actualUsername || '', sitename: actualDomain, section: 'analytics' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'analytics'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -310,7 +320,7 @@ function SitePage() {
           </Link>
           <Link
             to="/u/$username/$sitename/$section"
-            params={{ username: username || '', sitename: actualDomain, section: 'domains' }}
+            params={{ username: actualUsername || '', sitename: actualDomain, section: 'domains' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'domains'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -322,7 +332,7 @@ function SitePage() {
           </Link>
           <Link
             to="/u/$username/$sitename/$section"
-            params={{ username: username || '', sitename: actualDomain, section: 'versions' }}
+            params={{ username: actualUsername || '', sitename: actualDomain, section: 'versions' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
               activeTab === 'versions'
                 ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
@@ -335,7 +345,7 @@ function SitePage() {
           {!isPublicView && (
             <Link
               to="/u/$username/$sitename/$section"
-              params={{ username: username || '', sitename: actualDomain, section: 'settings' }}
+              params={{ username: actualUsername || '', sitename: actualDomain, section: 'settings' }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'settings'
                   ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'

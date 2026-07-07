@@ -7,7 +7,6 @@ export interface SectionConfig {
 }
 
 export const SECTIONS: SectionConfig[] = [
-  { id: 'overview', label: 'Overview', icon: Zap },
   { id: 'accent', label: 'Accent Color', icon: Palette },
   { id: 'custom-domains', label: 'Custom Domains', icon: Globe },
   { id: 'activity', label: 'Activity', icon: BarChart3 },
