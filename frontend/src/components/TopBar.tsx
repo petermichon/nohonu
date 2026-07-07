@@ -560,7 +560,7 @@ export function TopBar() {
                         onClick={() => {
                           disconnect();
                           setIsProfileOpen(false);
-                          navigate('/');
+                          navigate({ to: '/' });
                         }}
                         className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
