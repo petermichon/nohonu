@@ -14,6 +14,7 @@ import { CustomDomainsSection } from '../components/CustomDomainsSection.tsx';
 import { DangerZoneSection } from '../components/DangerZoneSection.tsx';
 import { SubdomainSection } from '../components/SubdomainSection.tsx';
 import { OverviewSection } from '../components/OverviewSection.tsx';
+import { SiteProfileSection } from '../components/SiteProfileSection.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 import { useSiteData } from '../hooks/useSiteData.ts';
 import { SLOT_MS, type TimeRange } from '../lib/types.ts';
@@ -456,6 +457,8 @@ function SitePage() {
 
       {!isPublicView && activeTab === 'settings' && (
         <section className="max-w-7xl mx-auto px-6 py-8">
+          <SiteProfileSection site={site} siteLoading={siteLoading} />
+          <div className="border-t border-zinc-200 dark:border-zinc-800 my-8" />
           <DangerZoneSection
             site={site}
             actionLoading={actionLoading}

@@ -1,7 +1,9 @@
 export const SLOT_MS = 60 * 1000;
 
 export interface Site {
+  siteId: string;
   domain: string;
+  displayName?: string;
   enabled: boolean;
   hits: number;
   uptime: number | null;
@@ -9,6 +11,7 @@ export interface Site {
   customDomains?: { domain: string; verified: boolean }[];
   subdomain?: string;
   subdomainBase?: string;
+  coverImage?: string;
 }
 
 export type VersionSource = { type: 'upload' } | { type: 'github'; repo: string; branch: string };

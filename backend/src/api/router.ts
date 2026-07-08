@@ -18,6 +18,7 @@ import { getPublicSiteInfo } from './endpoints/users-username-domain-get.ts';
 import { getSiteInfo } from './endpoints/sites-info-get.ts';
 import { downloadSite } from './endpoints/sites-info-download.ts';
 import { getSiteIcon } from './endpoints/sites-info-icon.ts';
+import { getSiteCover } from './endpoints/sites-info-cover.ts';
 import { getSiteMeta } from './endpoints/sites-info-meta.ts';
 import { getSiteStats } from './endpoints/sites-info-stats.ts';
 import { getSiteVisitors } from './endpoints/sites-info-visitors.ts';
@@ -36,6 +37,8 @@ import { getCustomDomains } from './endpoints/sites-custom-domains-get.ts';
 import { addCustomDomain } from './endpoints/sites-custom-domains-post.ts';
 import { deleteCustomDomain } from './endpoints/sites-custom-domains-delete.ts';
 import { verifyCustomDomain } from './endpoints/sites-custom-domains-verify-post.ts';
+import { uploadCover } from './endpoints/sites-cover-post.ts';
+import { deleteCover } from './endpoints/sites-cover-delete.ts';
 import { getVerificationToken } from './endpoints/sites-custom-domains-token-get.ts';
 import { getAllCustomDomains } from './endpoints/custom-domains-all-get.ts';
 import { getUserByUsernameEndpoint } from './endpoints/users-username-get.ts';
@@ -68,6 +71,7 @@ const SITE_GET_ROUTES: [string, CtxRouteHandler][] = [
   ['', getSiteInfo],
   ['download', downloadSite],
   ['icon', getSiteIcon],
+  ['cover', getSiteCover],
   ['meta', getSiteMeta],
   ['stats', getSiteStats],
   ['visitors', getSiteVisitors],
@@ -149,6 +153,9 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
     if (action === 'custom-domains') {
       return deleteCustomDomain(req, ctx);
     }
+    if (action === 'cover') {
+      return deleteCover(req, ctx);
+    }
     if (!action) {
       return deleteSite(req, ctx);
     }
@@ -183,6 +190,9 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
       if (!subAction) {
         return addCustomDomain(req, ctx);
       }
+    }
+    if (action === 'cover') {
+      return uploadCover(req, ctx);
     }
   }
 

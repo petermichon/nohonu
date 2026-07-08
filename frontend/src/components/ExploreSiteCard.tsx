@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Globe } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useApi } from '../lib/api.ts';
 import type { Site } from '../lib/types.ts';
@@ -9,7 +9,8 @@ interface ExploreSiteCardProps {
 
 export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
   const navigate = useNavigate();
-  const { hostWithPort, protocol } = useApi();
+  const { hostWithPort, protocol, apiBase } = useApi();
+  const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
 
   const getSiteUrl = () => {
     if (!site.enabled) return '';
@@ -45,7 +46,13 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
         onClick={handlePreviewClick}
         className={`rounded-3xl overflow-hidden relative group cursor-pointer ${!site.enabled ? 'cursor-not-allowed' : ''}`}
       >
-        <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800" />
+        {coverUrl ? (
+          <img src={coverUrl} alt={site.domain} className="w-full aspect-4/3 object-cover" />
+        ) : (
+          <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+            <Globe className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />
+          </div>
+        )}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-end justify-between p-4">
           <span className="text-zinc-950 dark:text-zinc-100 text-sm font-medium truncate">{getSiteUrl()}</span>
           <button

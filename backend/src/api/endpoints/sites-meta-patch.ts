@@ -8,12 +8,12 @@ export async function updateMeta(req: Request, { domain }: RouteContext): Promis
     return error('Missing username', 401);
   }
 
-  const body = await parseJson<{ subdomain?: string | undefined }>(req);
+  const body = await parseJson<{ subdomain?: string | undefined; displayName?: string | undefined }>(req);
   if (body instanceof Response) return body;
 
   const result = await sites.updateSiteMeta(username, domain, body);
   if (!result.ok) {
     return error(result.error, result.status);
   }
-  return json({ domain, subdomain: body.subdomain });
+  return json({ domain, subdomain: body.subdomain, displayName: body.displayName });
 }

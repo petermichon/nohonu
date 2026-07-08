@@ -23,5 +23,13 @@ export async function getPublicSiteInfo(req: Request, username: string, domain: 
     subdomainBase = port ? `${host}:${port}` : host;
   }
 
-  return json({ domain, enabled: info.enabled, subdomain: info.subdomain, subdomainBase });
+  return json({
+    domain,
+    siteId: info.siteId,
+    enabled: info.enabled,
+    subdomain: info.subdomain,
+    subdomainBase,
+    displayName: info.displayName,
+    account: info.account,
+  });
 }

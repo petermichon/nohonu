@@ -1,0 +1,125 @@
+import { useState } from 'react';
+import { Layout, User } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { useApi } from '../lib/api.ts';
+import type { Site } from '../lib/types.ts';
+
+interface SiteProfileSectionProps {
+  site: Site | null;
+  siteLoading: boolean;
+}
+
+export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProps) {
+  const { apiFetch } = useApi();
+  const [editingDisplayName, setEditingDisplayName] = useState(site?.displayName || '');
+  const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+
+  // Update site metadata mutation
+  const updateMetaMutation = useMutation({
+    mutationFn: async ({ domain, displayName }: { domain: string; displayName: string }) => {
+      const res = await apiFetch(`/sites/${domain}/meta`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayName }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to update display name');
+      }
+      return res.json();
+    },
+    onSuccess: (_data, variables) => {
+      setEditingDisplayName(variables.displayName);
+      setDisplayNameStatus('saved');
+      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+    },
+    onError: () => {
+      setDisplayNameStatus('error');
+      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+    },
+  });
+
+  const saveDisplayName = () => {
+    if (!site || !editingDisplayName.trim()) {
+      setDisplayNameStatus('error');
+      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+      return;
+    }
+    updateMetaMutation.mutate({ domain: site.domain, displayName: editingDisplayName.trim() });
+  };
+
+  if (siteLoading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-4 flex items-center gap-2">
+            <Layout className="w-5 h-5" />
+            Profile
+          </h2>
+          <div className="space-y-4 max-w-md">
+            <div className="h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+            <div className="h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100 mb-4 flex items-center gap-2">
+          <Layout className="w-5 h-5" />
+          Profile
+        </h2>
+        <div className="space-y-4 max-w-md">
+          <div>
+            <label htmlFor="siteDisplayName" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
+              Display Name
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                id="siteDisplayName"
+                name="siteDisplayName"
+                value={editingDisplayName || site?.displayName || ''}
+                onChange={(e) => setEditingDisplayName(e.target.value)}
+                placeholder="Enter display name"
+                className="flex-1 px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+              />
+              <button
+                type="button"
+                onClick={saveDisplayName}
+                disabled={updateMetaMutation.isPending}
+                className="px-4 py-2.5 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer disabled:opacity-50"
+              >
+                {updateMetaMutation.isPending
+                  ? 'Saving...'
+                  : displayNameStatus === 'saved'
+                    ? 'Saved'
+                    : displayNameStatus === 'error'
+                      ? 'Error'
+                      : 'Save'}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="siteUsername" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
+              Owner
+            </label>
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+              <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">@{site?.account || 'Not set'}</p>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="siteId" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
+              Site ID
+            </label>
+            <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">{site?.siteId || 'Not set'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,7 +1,7 @@
 import { useParams, Link, useLocation } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, Key, Monitor, LogOut } from 'lucide-react';
-import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
+import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
 import { useSites, useDomains, useUserSites, useSessions, useDeleteSession } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
@@ -351,7 +351,7 @@ export default function UserPage() {
                 <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-4">Recent sites</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {userSites.slice(0, 3).map((site) => (
-                    <HomeSiteCard key={site.domain} site={site} />
+                    <ProfileSiteCard key={site.domain} site={site} />
                   ))}
                 </div>
               </div>
@@ -419,7 +419,7 @@ export default function UserPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {userSites.map((site) => (
-                <HomeSiteCard key={site.domain} site={site} />
+                <ProfileSiteCard key={site.domain} site={site} />
               ))}
             </div>
           </section>

@@ -5,7 +5,7 @@ import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useExploreSites } from '../lib/api.ts';
 import { formatHits } from '../lib/utils.ts';
-import { ExploreSiteCard } from '../components/ExploreSiteCard.tsx';
+import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { Eye, AlertCircle } from 'lucide-react';
 
 function Home() {
@@ -179,7 +179,7 @@ function Home() {
             <div className="flex items-center gap-3">
               <Link
                 to={sessionId ? '/deploy' : '/signup'}
-                className={`inline-flex items-center justify-center px-6 h-[46px] rounded-full text-sm font-medium ${
+                className={`inline-flex items-center justify-center px-6 h-[46px] rounded-full text-base font-medium ${
                   accentColorValues.textColor === 'light'
                     ? 'text-white'
                     : accentColorValues.textColor === 'inverted'
@@ -191,7 +191,7 @@ function Home() {
               </Link>
               <Link
                 to="/docs"
-                className="px-4 h-[46px] rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
+                className="px-4 h-[46px] rounded-full text-base font-medium text-zinc-950 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center"
               >
                 Docs
               </Link>
@@ -280,7 +280,7 @@ function Home() {
           {!loading && !error && sites.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {sites.map((site) => (
-                <ExploreSiteCard key={site.domain} site={site} />
+                <HomeSiteCard key={site.domain} site={site} />
               ))}
             </div>
           )}

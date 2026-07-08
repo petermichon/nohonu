@@ -25,6 +25,7 @@ function extractedFilePath(user: string, domain: string, filePath: string): stri
 }
 
 export const DEFAULT_DATA: SiteData = {
+  siteId: '',
   nextIndex: 1,
   currentIndex: null,
   enabled: true,
@@ -45,7 +46,24 @@ export async function readSiteMetadata(user: string, domain: string): Promise<Si
 
   try {
     const parsed = JSON.parse(content) as Partial<SiteData>;
-    return { ...DEFAULT_DATA, ...parsed };
+    const data = { ...DEFAULT_DATA, ...parsed };
+    
+    // Set siteId if not set (for backward compatibility)
+    if (!data.siteId) {
+      data.siteId = crypto.randomUUID();
+    }
+    
+    // Set displayName to siteId if not set or if it's set to domain (for backward compatibility)
+    if (!data.displayName || data.displayName === domain) {
+      data.displayName = data.siteId;
+    }
+    
+    // Set account to user if not set (for backward compatibility)
+    if (!data.account) {
+      data.account = user;
+    }
+    
+    return data;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Failed to parse metadata file for ${user}/${domain}: ${message}`);

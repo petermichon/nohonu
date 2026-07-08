@@ -16,15 +16,18 @@ export type Version = {
 export type RepoEntry = { repo: string; branch: string; lastUsed: number };
 export type CustomDomainEntry = { domain: string; verified: boolean };
 export type SiteData = {
+  siteId: string;
   nextIndex: number;
   currentIndex: number | null;
   enabled: boolean;
   account?: string;
+  displayName?: string;
   repoHistory: RepoEntry[];
   versions: Record<string, VersionEntry>;
   extracted: boolean;
   customDomains?: CustomDomainEntry[];
   subdomain?: string;
+  coverImage?: string;
 };
 
 export async function fileExists(path: string): Promise<boolean> {
@@ -39,8 +42,13 @@ export async function fileExists(path: string): Promise<boolean> {
 export const MAX_ZIP_BYTES = 52_428_800; // 50 MB
 
 // Path helpers for user-based structure: /data/{user}/{domain}/
+// Note: domain is used for directory structure, siteId is the stable identifier
 export function domainDir(user: string, domain: string): string {
   return `${SITES_DIR}/${user}/${domain}`;
+}
+
+export function coverImagePath(user: string, domain: string): string {
+  return `${domainDir(user, domain)}/cover.jpg`;
 }
 
 export type UsecaseResult<T> = { ok: true; value: T } | { ok: false; error: string; status: number };

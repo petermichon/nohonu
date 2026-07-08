@@ -1,6 +1,6 @@
 import { Globe } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useRouter } from '@tanstack/react-router';
+import { useApi } from '../lib/api.ts';
 import type { Site } from '../lib/types.ts';
 
 interface HomeSiteCardProps {
@@ -8,34 +8,38 @@ interface HomeSiteCardProps {
 }
 
 export function HomeSiteCard({ site }: HomeSiteCardProps) {
-  const navigate = useNavigate();
-  const { getAccentColorValues } = useAccentColor();
-  const accentColorValues = getAccentColorValues();
+  const { hostWithPort, protocol, apiBase } = useApi();
+  const router = useRouter();
+  const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
 
-  const badgeClass = !site.enabled
-    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-    : accentColorValues.bgLight + ' ' + accentColorValues.textDark;
+  const getSiteUrl = () => {
+    if (!site.enabled) return '';
+    const subdomainBase = site.subdomainBase || hostWithPort;
+    return site.subdomain
+      ? `${protocol}//${site.subdomain}.${subdomainBase}`
+      : `${protocol}//${site.domain}.${subdomainBase}`;
+  };
 
-  return (
-    <div
-      onClick={() => {
-        if (site.account) {
-          navigate({
-            to: '/u/$username/$sitename',
-            params: { username: site.account, sitename: site.domain },
-          });
-        }
-      }}
-      className="cursor-pointer flex flex-col gap-4"
-    >
+  const cardContent = (
+    <>
       {/* Preview area */}
-      <div className={`rounded-3xl overflow-hidden relative group ${!site.enabled ? 'opacity-50' : ''}`}>
-        <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-          <Globe className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />
+      <div className={`rounded-3xl overflow-hidden relative group ${!site.enabled ? 'cursor-not-allowed' : ''}`}>
+        {coverUrl ? (
+          <img src={coverUrl} alt={site.domain} className="w-full aspect-4/3 object-cover" />
+        ) : (
+          <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+            <Globe className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />
+          </div>
+        )}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-end justify-between p-4">
+          <span className="text-zinc-950 dark:text-zinc-100 text-sm font-medium truncate">
+            {site.displayName || site.domain}
+          </span>
         </div>
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-start p-4">
-          <span className="text-white text-sm font-medium">View site</span>
-        </div>
+        <div
+          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100"
+          style={{ boxShadow: 'inset 0 -60px 40px -20px rgba(0, 0, 0, 0.3)' }}
+        />
       </div>
 
       {/* Card footer */}
@@ -47,16 +51,34 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
             </span>
           </div>
           <div>
-            <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 mb-0.5 truncate">{site.domain}</h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">by @{site.account ?? 'Guest'}</p>
+            <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 mb-0.5 truncate">
+              {site.displayName || site.domain}
+            </h3>
+            {site.account && (
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.navigate({ to: '/u/$username', params: { username: site.account! } });
+                }}
+                className="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-950 dark:hover:text-zinc-100 block"
+              >
+                by @{site.account}
+              </span>
+            )}
           </div>
         </div>
-        <div className="flex flex-wrap gap-1.5 justify-end">
-          <span className={`text-[12px] px-2 py-0.5 rounded-full ${badgeClass}`}>
-            {site.enabled ? 'Online' : 'Offline'}
-          </span>
-        </div>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <a
+      href={getSiteUrl()}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex flex-col gap-4 ${!site.enabled ? 'opacity-50' : ''}`}
+    >
+      {cardContent}
+    </a>
   );
 }

@@ -1,4 +1,4 @@
-import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult, domainDir } from '../../shared/paths.ts';
+import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult, domainDir, coverImagePath } from '../../shared/paths.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 
@@ -50,26 +50,29 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
-export async function listSites(user: string): Promise<Array<{ domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; subdomain?: string }>> {
+export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string }>> {
   const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
       const data = await storage.readSiteMetadata(user, domain);
       return {
+        siteId: data?.siteId || domain,
         domain,
         enabled: data?.enabled ?? false,
         hits: analytics.getTotalHits(domain),
         uptime: analytics.getUptimePct(domain),
         account: data?.account,
+        displayName: data?.displayName,
         subdomain: data?.subdomain,
+        coverImage: data?.coverImage,
       };
     })
   );
 }
 
-export async function listAllSites(): Promise<{ user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; subdomain?: string }[]> {
+export async function listAllSites(): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string }[]> {
   const users = await storage.listUsers();
-  const allSites: { user: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; subdomain?: string }[] = [];
+  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string }[] = [];
   
   for (const user of users) {
     const domains = await storage.listDomains(user);
@@ -77,12 +80,15 @@ export async function listAllSites(): Promise<{ user: string; domain: string; en
       const data = await storage.readSiteMetadata(user, domain);
       allSites.push({
         user,
+        siteId: data?.siteId || domain,
         domain,
         enabled: data?.enabled ?? false,
         hits: analytics.getTotalHits(domain),
         uptime: analytics.getUptimePct(domain),
         account: data?.account,
+        displayName: data?.displayName,
         subdomain: data?.subdomain,
+        coverImage: data?.coverImage,
       });
     }
   }
@@ -112,10 +118,10 @@ export async function checkDomain(user: string, rawDomain: string): Promise<bool
   return !!data && data.currentIndex !== null;
 }
 
-export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string } | null> {
+export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string; siteId: string; displayName?: string; account?: string } | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) return null;
-  return { enabled: data.enabled, subdomain: data.subdomain };
+  return { enabled: data.enabled, subdomain: data.subdomain, siteId: data.siteId, displayName: data.displayName, account: data.account };
 }
 
 export async function downloadActiveVersion(user: string, domain: string): Promise<{ file: Deno.FsFile; filename: string } | null> {
@@ -162,7 +168,7 @@ export async function getSiteMeta(user: string, domain: string): Promise<{ subdo
 export async function updateSiteMeta(
   user: string,
   domain: string,
-  updates: { subdomain?: string | undefined },
+  updates: { subdomain?: string | undefined; displayName?: string | undefined },
 ): Promise<UsecaseResult<void>> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
@@ -174,6 +180,10 @@ export async function updateSiteMeta(
       return { ok: false, error: 'Invalid subdomain', status: 400 };
     }
     data.subdomain = updates.subdomain;
+  }
+
+  if (updates.displayName !== undefined) {
+    data.displayName = updates.displayName || undefined;
   }
 
   await storage.writeSiteMetadata(user, domain, data);
@@ -390,21 +400,28 @@ export async function deleteVersion(user: string, domain: string, index: number)
   return { ok: true, value: undefined };
 }
 
-export async function createSite(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number }> {
+export async function createSite(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number; siteId: string }> {
   // Check if domain already exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (existingData) {
     throw new Error('Domain already exists for this user');
   }
 
+  // Generate unique siteId
+  const siteId = crypto.randomUUID();
+
   // Create initial site data
   const data = { ...storage.DEFAULT_DATA };
+  data.siteId = siteId;
+  data.account = user;
   const index = data.nextIndex;
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
   data.currentIndex = index;
   // Set default subdomain as username-domain
   data.subdomain = `${user}-${domain}`;
+  // Set default displayName as siteId
+  data.displayName = siteId;
 
   // Create directories and files
   await Deno.mkdir(domainDir(user, domain), { recursive: true });
@@ -412,7 +429,7 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
-  return { index };
+  return { index, siteId };
 }
 
 export async function uploadVersion(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number }> {
@@ -434,7 +451,7 @@ export async function uploadVersion(user: string, domain: string, zipData: Uint8
   return { index };
 }
 
-export async function createSiteFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
+export async function createSiteFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; siteId: string; repo: string; branch: string }> {
   // Check if domain already exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (existingData) {
@@ -463,8 +480,13 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
     throw err;
   }
 
+  // Generate unique siteId
+  const siteId = crypto.randomUUID();
+
   // Create initial site data
   const data = { ...storage.DEFAULT_DATA };
+  data.siteId = siteId;
+  data.account = user;
   data.repoHistory = [{ repo, branch: ref, lastUsed: Date.now() }];
   const index = data.nextIndex;
   data.nextIndex = index + 1;
@@ -472,6 +494,8 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   data.currentIndex = index;
   // Set default subdomain as username-domain
   data.subdomain = `${user}-${domain}`;
+  // Set default displayName as siteId
+  data.displayName = siteId;
 
   // Create directories and files
   await Deno.mkdir(domainDir(user, domain), { recursive: true });
@@ -479,7 +503,7 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
-  return { index, repo, branch: ref };
+  return { index, siteId, repo, branch: ref };
 }
 
 export async function uploadVersionFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
@@ -635,4 +659,49 @@ function getContentType(ext: string): string {
     ttf: 'font/ttf',
   };
   return types[ext] ?? 'application/octet-stream';
+}
+
+export async function getSiteCover(user: string, domain: string): Promise<Uint8Array | null> {
+  const data = await storage.readSiteMetadata(user, domain);
+  if (!data || !data.coverImage) return null;
+
+  try {
+    return await Deno.readFile(coverImagePath(user, domain));
+  } catch {
+    return null;
+  }
+}
+
+export async function uploadSiteCover(user: string, domain: string, imageData: Uint8Array): Promise<UsecaseResult<void>> {
+  const data = await storage.readSiteMetadata(user, domain);
+  if (!data) {
+    return { ok: false, error: 'Site not found', status: 404 };
+  }
+
+  try {
+    await Deno.writeFile(coverImagePath(user, domain), imageData);
+    data.coverImage = 'cover.jpg';
+    await storage.writeSiteMetadata(user, domain, data);
+    return { ok: true, value: undefined };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: `Failed to save cover image: ${message}`, status: 500 };
+  }
+}
+
+export async function deleteSiteCover(user: string, domain: string): Promise<UsecaseResult<void>> {
+  const data = await storage.readSiteMetadata(user, domain);
+  if (!data) {
+    return { ok: false, error: 'Site not found', status: 404 };
+  }
+
+  try {
+    await Deno.remove(coverImagePath(user, domain));
+  } catch {
+    // File might not exist, that's ok
+  }
+
+  data.coverImage = undefined;
+  await storage.writeSiteMetadata(user, domain, data);
+  return { ok: true, value: undefined };
 }
