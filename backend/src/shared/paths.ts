@@ -29,6 +29,8 @@ export type SiteData = {
   subdomain?: string;
   coverImage?: string;
   lastDeployedAt?: number;
+  starCount?: number;
+  starredBy?: string[];
 };
 
 export async function fileExists(path: string): Promise<boolean> {

@@ -33,6 +33,8 @@ export const DEFAULT_DATA: SiteData = {
   versions: {},
   extracted: false,
   lastDeployedAt: undefined,
+  starCount: 0,
+  starredBy: [],
 };
 
 // Low-level: Read site metadata

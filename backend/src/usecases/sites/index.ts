@@ -50,7 +50,7 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
-export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number }>> {
+export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }>> {
   const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
@@ -66,14 +66,16 @@ export async function listSites(user: string): Promise<Array<{ siteId: string; d
         subdomain: data?.subdomain,
         coverImage: data?.coverImage,
         lastDeployedAt: data?.lastDeployedAt,
+        starCount: data?.starCount,
+        isStarred: data?.starredBy?.includes(user),
       };
     })
   );
 }
 
-export async function listAllSites(): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number }[]> {
+export async function listAllSites(): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number }[]> {
   const users = await storage.listUsers();
-  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number }[] = [];
+  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number }[] = [];
 
   for (const user of users) {
     const domains = await storage.listDomains(user);
@@ -91,6 +93,7 @@ export async function listAllSites(): Promise<{ user: string; siteId: string; do
         subdomain: data?.subdomain,
         coverImage: data?.coverImage,
         lastDeployedAt: data?.lastDeployedAt,
+        starCount: data?.starCount,
       });
     }
   }
@@ -336,6 +339,43 @@ export async function toggleSite(user: string, domain: string): Promise<UsecaseR
 
   const result = { enabled: data.enabled };
   return { ok: true, value: result };
+}
+
+export async function toggleStar(user: string, domain: string, starred: boolean): Promise<UsecaseResult<{ starred: boolean; starCount: number }>> {
+  // Find the user that owns this site
+  const siteOwner = await findUserForDomain(domain);
+  if (!siteOwner) {
+    return { ok: false, error: 'Site not found', status: 404 };
+  }
+
+  const data = await storage.readSiteMetadata(siteOwner, domain);
+  if (!data) {
+    return { ok: false, error: 'Site not found', status: 404 };
+  }
+
+  // Initialize arrays if not present
+  if (!data.starredBy) {
+    data.starredBy = [];
+  }
+  if (!data.starCount) {
+    data.starCount = 0;
+  }
+
+  const isStarred = data.starredBy.includes(user);
+
+  if (starred && !isStarred) {
+    // Add star
+    data.starredBy.push(user);
+    data.starCount = data.starredBy.length;
+  } else if (!starred && isStarred) {
+    // Remove star
+    data.starredBy = data.starredBy.filter((u) => u !== user);
+    data.starCount = data.starredBy.length;
+  }
+
+  await storage.writeSiteMetadata(siteOwner, domain, data);
+
+  return { ok: true, value: { starred: data.starredBy.includes(user), starCount: data.starCount } };
 }
 
 export async function deleteSite(user: string, domain: string): Promise<void> {

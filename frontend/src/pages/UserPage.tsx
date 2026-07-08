@@ -13,7 +13,7 @@ import {
   Key,
   Monitor,
   LogOut,
-  ChevronRight,
+  Star,
 } from 'lucide-react';
 import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
@@ -33,11 +33,11 @@ function formatRelativeTime(timestamp: number): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (seconds < 60) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return new Date(timestamp).toLocaleDateString();
+  if (seconds < 60) return 'Updated now';
+  if (minutes < 60) return `Updated ${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  if (hours < 24) return `Updated ${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (days < 7) return `Updated ${days} day${days > 1 ? 's' : ''} ago`;
+  return `Updated ${new Date(timestamp).toLocaleDateString()}`;
 }
 
 export default function UserPage() {
@@ -46,6 +46,9 @@ export default function UserPage() {
   const { username } = useParams({ from: '/u/$username' });
   const location = useLocation();
   const { displayName, username: loggedInUsername, setDisplayName, apiBase, apiKey, sessionId } = useConnection();
+  const { apiFetch } = useApi();
+  const { refreshSites } = useSites();
+  const { showToast } = useToast();
 
   // Use public sites for viewing others' profiles or when not logged in
   // Only use private sites when logged in and viewing own profile
@@ -56,11 +59,27 @@ export default function UserPage() {
   const { sessions, loading: sessionsLoading } = useSessions();
   const { deleteSession } = useDeleteSession();
 
+  const handleToggleStar = async (domain: string, isStarred: boolean) => {
+    try {
+      const res = await apiFetch(`/sites/${domain}/star`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ starred: !isStarred }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast(data.error || 'Failed to update star');
+        return;
+      }
+      await refreshSites();
+    } catch {
+      showToast('Failed to update star');
+    }
+  };
+
   const sites = isOwnProfile ? privateSites : publicSites;
   const loading = isOwnProfile ? privateLoading : publicLoading;
   const error = isOwnProfile ? privateError : publicError;
-  const { apiFetch } = useApi();
-  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
@@ -449,34 +468,54 @@ export default function UserPage() {
             <div className="overflow-hidden">
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {userSites.map((site) => (
-                  <Link
-                    key={site.domain}
-                    to="/u/$username/$sitename"
-                    params={{ username: site.account || '', sitename: site.domain }}
-                    className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer"
-                  >
-                    <div className="flex-1 min-w-0 flex items-center gap-3">
-                      <h3 className="font-medium text-zinc-950 dark:text-zinc-100 truncate">
-                        {site.displayName || site.domain}
-                      </h3>
-                      <span
-                        className={`text-[12px] px-2 py-0.5 rounded-full shrink-0 ${
-                          !site.enabled
-                            ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-                            : accentColorValues.bgLight + ' ' + accentColorValues.textDark
-                        }`}
-                      >
-                        {site.enabled ? 'Online' : 'Offline'}
-                      </span>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{site.domain}</p>
-                      {site.lastDeployedAt && (
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                          {formatRelativeTime(site.lastDeployedAt)}
-                        </p>
-                      )}
+                  <div key={site.domain} className="flex items-center gap-4 px-6 py-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <Link
+                          to="/u/$username/$sitename"
+                          params={{ username: site.account || '', sitename: site.domain }}
+                          className="font-medium text-zinc-950 dark:text-zinc-100 truncate hover:underline"
+                        >
+                          {site.displayName || site.domain}
+                        </Link>
+                        <span
+                          className={`text-[14px] px-2 py-0.5 rounded-full shrink-0 ${
+                            !site.enabled
+                              ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                              : accentColorValues.bgLight + ' ' + accentColorValues.textDark
+                          }`}
+                        >
+                          {site.enabled ? 'Online' : 'Offline'}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleToggleStar(site.domain, site.isStarred || false);
+                          }}
+                          className="shrink-0 flex items-center gap-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-2 py-1.5 cursor-pointer transition-colors"
+                        >
+                          <Star
+                            className={`w-4 h-4 ${
+                              site.isStarred ? 'fill-yellow-400 text-yellow-400' : 'text-zinc-400 dark:text-zinc-500'
+                            }`}
+                          />
+                          {site.starCount !== undefined && (
+                            <span className="text-[14px] text-zinc-500 dark:text-zinc-400 leading-none">
+                              {site.starCount}
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{site.domain}</p>
+                        {site.lastDeployedAt && (
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            {formatRelativeTime(site.lastDeployedAt)}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-zinc-400 shrink-0" />
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>

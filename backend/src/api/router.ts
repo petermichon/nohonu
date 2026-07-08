@@ -32,6 +32,7 @@ import { deleteVersion } from './endpoints/sites-versions-delete.ts';
 import { activateVersion } from './endpoints/sites-versions-activate-post.ts';
 import { deleteSite } from './endpoints/sites-delete.ts';
 import { toggleSite } from './endpoints/sites-toggle-patch.ts';
+import { toggleStar } from './endpoints/sites-star-patch.ts';
 import { updateMeta } from './endpoints/sites-meta-patch.ts';
 import { getCustomDomains } from './endpoints/sites-custom-domains-get.ts';
 import { addCustomDomain } from './endpoints/sites-custom-domains-post.ts';
@@ -199,6 +200,9 @@ async function handleSiteRoute(req: Request, path: string): Promise<Response> {
   if (req.method === 'PATCH') {
     if (action === 'toggle') {
       return toggleSite(req, ctx);
+    }
+    if (action === 'star') {
+      return toggleStar(req, ctx);
     }
     if (action === 'meta') {
       return updateMeta(req, ctx);

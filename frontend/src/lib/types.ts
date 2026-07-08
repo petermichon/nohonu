@@ -13,6 +13,8 @@ export interface Site {
   subdomainBase?: string;
   coverImage?: string;
   lastDeployedAt?: number;
+  starCount?: number;
+  isStarred?: boolean;
 }
 
 export type VersionSource = { type: 'upload' } | { type: 'github'; repo: string; branch: string };
