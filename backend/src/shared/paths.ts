@@ -28,6 +28,7 @@ export type SiteData = {
   customDomains?: CustomDomainEntry[];
   subdomain?: string;
   coverImage?: string;
+  lastDeployedAt?: number;
 };
 
 export async function fileExists(path: string): Promise<boolean> {

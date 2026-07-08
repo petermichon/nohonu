@@ -1,6 +1,20 @@
 import { useParams, Link, useLocation } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, AlertCircle, Layout, Globe, Server, Check, X, Plus, Settings, Key, Monitor, LogOut } from 'lucide-react';
+import {
+  User,
+  AlertCircle,
+  Layout,
+  Globe,
+  Server,
+  Check,
+  X,
+  Plus,
+  Settings,
+  Key,
+  Monitor,
+  LogOut,
+  ChevronRight,
+} from 'lucide-react';
 import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
 import { useSites, useDomains, useUserSites, useSessions, useDeleteSession } from '../lib/api.ts';
@@ -10,6 +24,21 @@ import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
 import { formatUserAgent } from '../lib/userAgent.ts';
 import { useState } from 'react';
+
+function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString();
+}
 
 export default function UserPage() {
   const { getAccentColorValues } = useAccentColor();
@@ -417,10 +446,39 @@ export default function UserPage() {
                 </Link>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userSites.map((site) => (
-                <ProfileSiteCard key={site.domain} site={site} />
-              ))}
+            <div className="overflow-hidden">
+              <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {userSites.map((site) => (
+                  <Link
+                    key={site.domain}
+                    to="/u/$username/$sitename"
+                    params={{ username: site.account || '', sitename: site.domain }}
+                    className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer"
+                  >
+                    <div className="flex-1 min-w-0 flex items-center gap-3">
+                      <h3 className="font-medium text-zinc-950 dark:text-zinc-100 truncate">
+                        {site.displayName || site.domain}
+                      </h3>
+                      <span
+                        className={`text-[12px] px-2 py-0.5 rounded-full shrink-0 ${
+                          !site.enabled
+                            ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                            : accentColorValues.bgLight + ' ' + accentColorValues.textDark
+                        }`}
+                      >
+                        {site.enabled ? 'Online' : 'Offline'}
+                      </span>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{site.domain}</p>
+                      {site.lastDeployedAt && (
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          {formatRelativeTime(site.lastDeployedAt)}
+                        </p>
+                      )}
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-zinc-400 shrink-0" />
+                  </Link>
+                ))}
+              </div>
             </div>
           </section>
         )}

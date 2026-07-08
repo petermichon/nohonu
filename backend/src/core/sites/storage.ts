@@ -32,6 +32,7 @@ export const DEFAULT_DATA: SiteData = {
   repoHistory: [],
   versions: {},
   extracted: false,
+  lastDeployedAt: undefined,
 };
 
 // Low-level: Read site metadata

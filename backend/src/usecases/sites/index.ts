@@ -50,7 +50,7 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
-export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string }>> {
+export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number }>> {
   const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
@@ -65,15 +65,16 @@ export async function listSites(user: string): Promise<Array<{ siteId: string; d
         displayName: data?.displayName,
         subdomain: data?.subdomain,
         coverImage: data?.coverImage,
+        lastDeployedAt: data?.lastDeployedAt,
       };
     })
   );
 }
 
-export async function listAllSites(): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string }[]> {
+export async function listAllSites(): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number }[]> {
   const users = await storage.listUsers();
-  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string }[] = [];
-  
+  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number }[] = [];
+
   for (const user of users) {
     const domains = await storage.listDomains(user);
     for (const domain of domains) {
@@ -89,10 +90,11 @@ export async function listAllSites(): Promise<{ user: string; siteId: string; do
         displayName: data?.displayName,
         subdomain: data?.subdomain,
         coverImage: data?.coverImage,
+        lastDeployedAt: data?.lastDeployedAt,
       });
     }
   }
-  
+
   return allSites;
 }
 
@@ -382,6 +384,12 @@ export async function activateVersion(user: string, domain: string, index: numbe
   if (!activated) {
     return { ok: false, error: 'Failed to activate version', status: 500 };
   }
+  // Update lastDeployedAt
+  const data = await storage.readSiteMetadata(user, domain);
+  if (data) {
+    data.lastDeployedAt = Date.now();
+    await storage.writeSiteMetadata(user, domain, data);
+  }
   await storage.deleteExtractedFiles(user, domain);
   return { ok: true, value: undefined };
 }
@@ -407,8 +415,8 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
     throw new Error('Domain already exists for this user');
   }
 
-  // Generate unique siteId
-  const siteId = crypto.randomUUID();
+  // Use domain as siteId
+  const siteId = domain;
 
   // Create initial site data
   const data = { ...storage.DEFAULT_DATA };
@@ -418,6 +426,7 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
   data.currentIndex = index;
+  data.lastDeployedAt = Date.now();
   // Set default subdomain as username-domain
   data.subdomain = `${user}-${domain}`;
   // Set default displayName as siteId
@@ -443,6 +452,8 @@ export async function uploadVersion(user: string, domain: string, zipData: Uint8
   const index = data.nextIndex;
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
+  data.currentIndex = index;
+  data.lastDeployedAt = Date.now();
 
   await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
@@ -480,8 +491,8 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
     throw err;
   }
 
-  // Generate unique siteId
-  const siteId = crypto.randomUUID();
+  // Use domain as siteId
+  const siteId = domain;
 
   // Create initial site data
   const data = { ...storage.DEFAULT_DATA };
@@ -492,6 +503,7 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
   data.currentIndex = index;
+  data.lastDeployedAt = Date.now();
   // Set default subdomain as username-domain
   data.subdomain = `${user}-${domain}`;
   // Set default displayName as siteId
@@ -544,6 +556,8 @@ export async function uploadVersionFromGithub(user: string, domain: string, repo
   const index = data.nextIndex;
   data.nextIndex = index + 1;
   data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
+  data.currentIndex = index;
+  data.lastDeployedAt = Date.now();
 
   await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await Deno.writeFile(storage.versionPath(user, domain, index), zipData);

@@ -41,7 +41,7 @@ export function ProfileSiteCard({ site }: ProfileSiteCardProps) {
       {/* Card footer */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 truncate">{site.domain}</h3>
+          <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 truncate">{site.displayName || site.domain}</h3>
         </div>
         <div className="flex flex-wrap gap-1.5 justify-end">
           <span className={`text-[12px] px-2 py-0.5 rounded-full ${badgeClass}`}>
