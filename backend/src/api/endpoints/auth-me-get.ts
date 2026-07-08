@@ -22,6 +22,7 @@ export async function authMe(req: Request): Promise<Response> {
       user: {
         username: result.user.username,
         displayName: result.user.displayName,
+        profilePicture: result.user.profilePicture,
       },
       session: result.session,
     },

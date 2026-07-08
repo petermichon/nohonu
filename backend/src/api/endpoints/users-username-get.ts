@@ -23,6 +23,7 @@ export function getUserByUsernameEndpoint(req: Request, path: string): Response 
       user: {
         username: user.username,
         displayName: user.displayName,
+        profilePicture: user.profilePicture,
       },
     },
     200,

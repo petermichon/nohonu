@@ -6,6 +6,8 @@ import { authLogin } from './endpoints/auth-login-post.ts';
 import { authLogout } from './endpoints/auth-logout-post.ts';
 import { authMe } from './endpoints/auth-me-get.ts';
 import { authDisplayName } from './endpoints/auth-displayname-patch.ts';
+import { uploadProfilePicture } from './endpoints/auth-profile-picture-post.ts';
+import { deleteProfilePicture } from './endpoints/auth-profile-picture-delete.ts';
 import { getSessions } from './endpoints/auth-sessions-get.ts';
 import { deleteSession as deleteSessionEndpoint } from './endpoints/auth-sessions-delete.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
@@ -43,6 +45,7 @@ import { deleteCover } from './endpoints/sites-cover-delete.ts';
 import { getVerificationToken } from './endpoints/sites-custom-domains-token-get.ts';
 import { getAllCustomDomains } from './endpoints/custom-domains-all-get.ts';
 import { getUserByUsernameEndpoint } from './endpoints/users-username-get.ts';
+import { getProfilePicture } from './endpoints/users-username-profile-picture-get.ts';
 import { createSite } from './endpoints/sites-create-post.ts';
 import { createSiteFromGithub } from './endpoints/sites-create-github-post.ts';
 import type { CtxRouteHandler, RouteContext } from './endpoints/sites-types.ts';
@@ -60,6 +63,8 @@ const routes: Record<string, Endpoint> = {
   '/auth/logout': { handler: authLogout, auth: true },
   '/auth/me': { handler: authMe, auth: true },
   '/auth/displayname': { handler: authDisplayName, auth: true },
+  '/auth/profile-picture': { handler: uploadProfilePicture, auth: true },
+  '/auth/profile-picture/delete': { handler: deleteProfilePicture, auth: true },
   '/auth/sessions': { handler: getSessions, auth: true },
   '/auth/sessions/delete': { handler: deleteSessionEndpoint, auth: true },
   '/check-domain': { handler: checkDomain, auth: true },
@@ -226,6 +231,14 @@ function matchRoute(path: string): Endpoint | undefined {
       return undefined;
     }
     return { handler: (req) => getUserSites(req, username), auth: true };
+  }
+  if (path.startsWith('/users/') && path.endsWith('/profile-picture')) {
+    // /users/:username/profile-picture
+    const username = path.split('/')[2];
+    if (!username) {
+      return undefined;
+    }
+    return { handler: (req) => getProfilePicture(req, username), auth: true };
   }
   if (path.startsWith('/users/') && path.split('/').length === 4) {
     // /users/:username/:domain

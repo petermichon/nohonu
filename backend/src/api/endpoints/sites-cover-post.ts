@@ -14,7 +14,8 @@ export async function uploadCover(req: Request, { domain }: RouteContext): Promi
   }
 
   const body = await req.arrayBuffer();
-  if (body.byteLength > 5_242_880) { // 5MB limit
+  if (body.byteLength > 5_242_880) {
+    // 5MB limit
     return error('Image too large, max 5MB', 400);
   }
 

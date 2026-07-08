@@ -102,17 +102,39 @@ export function useUserSites(username: string | undefined) {
       const data = await res.json();
       return (data.sites ?? []) as Site[];
     },
-    retry: false,
-    enabled: !!username,
   });
-
-  const refreshUserSites = () => queryClient.invalidateQueries({ queryKey: ['user-sites', username] });
 
   return {
     sites: query.data ?? [],
     loading: query.isLoading,
-    error: query.error ? (query.error.message === 'not-found' ? 'not-found' : 'connection') : false,
-    refreshUserSites,
+    error: query.error ? 'connection' : false,
+    refreshUserSites: () => queryClient.invalidateQueries({ queryKey: ['user-sites', username] }),
+  };
+}
+
+export function useUser(username: string | undefined) {
+  const { apiFetch } = useApi();
+
+  const query = useQuery({
+    queryKey: ['user', username],
+    queryFn: async () => {
+      if (!username) return null;
+      const res = await apiFetch(`/users/${username}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error('not-found');
+        }
+        throw new Error('connection');
+      }
+      const data = await res.json();
+      return data.user as { username: string; displayName: string; profilePicture?: string } | null;
+    },
+  });
+
+  return {
+    user: query.data,
+    loading: query.isLoading,
+    error: query.error ? 'connection' : false,
   };
 }
 

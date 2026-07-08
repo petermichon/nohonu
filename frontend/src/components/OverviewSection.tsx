@@ -51,10 +51,13 @@ export function OverviewSection({
 
     setUploadingCover(true);
     try {
+      // Process image to 4:3 aspect ratio
+      const processedFile = await processImageTo4to3(file);
+
       const res = await apiFetch(`/sites/${site.domain}/cover`, {
         method: 'POST',
-        headers: { 'Content-Type': file.type },
-        body: file,
+        headers: { 'Content-Type': processedFile.type },
+        body: processedFile,
       });
       if (!res.ok) {
         const data = await res.json();
@@ -67,6 +70,80 @@ export function OverviewSection({
     } finally {
       setUploadingCover(false);
     }
+  };
+
+  const processImageTo4to3 = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+
+        const targetRatio = 4 / 3;
+        const currentRatio = img.width / img.height;
+
+        let cropX = 0,
+          cropY = 0,
+          cropWidth,
+          cropHeight;
+
+        if (currentRatio > targetRatio) {
+          // Image is wider than 4:3, crop sides
+          cropHeight = img.height;
+          cropWidth = Math.round(img.height * targetRatio);
+          cropX = Math.round((img.width - cropWidth) / 2);
+          cropY = 0;
+        } else if (currentRatio < targetRatio) {
+          // Image is taller than 4:3, crop from top
+          cropWidth = img.width;
+          cropHeight = Math.round(img.width / targetRatio);
+          cropX = 0;
+          cropY = 0;
+        } else {
+          // Already 4:3, no cropping needed
+          cropX = 0;
+          cropY = 0;
+          cropWidth = img.width;
+          cropHeight = img.height;
+        }
+
+        // Create canvas for cropping
+        const canvas = document.createElement('canvas');
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+
+        // Draw cropped image
+        ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+        // Convert to blob
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to process image'));
+              return;
+            }
+            const processedFile = new File([blob], file.name, { type: 'image/jpeg' });
+            resolve(processedFile);
+          },
+          'image/jpeg',
+          0.85
+        );
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = url;
+    });
   };
 
   const handleCoverDelete = async () => {
@@ -214,7 +291,7 @@ export function OverviewSection({
             ) : !isReadOnly ? (
               <div className="w-full aspect-[16/9] rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex flex-col items-center justify-center gap-3 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
                 <ImageIcon className="w-8 h-8 text-zinc-400 dark:text-zinc-600" />
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">Add a cover image</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">Add a cover image (4:3 ratio)</p>
                 <label className="cursor-pointer">
                   <input
                     type="file"

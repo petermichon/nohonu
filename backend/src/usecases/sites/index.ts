@@ -73,9 +73,9 @@ export async function listSites(user: string): Promise<Array<{ siteId: string; d
   );
 }
 
-export async function listAllSites(): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number }[]> {
+export async function listAllSites(username?: string): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }[]> {
   const users = await storage.listUsers();
-  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number }[] = [];
+  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }[] = [];
 
   for (const user of users) {
     const domains = await storage.listDomains(user);
@@ -94,6 +94,7 @@ export async function listAllSites(): Promise<{ user: string; siteId: string; do
         coverImage: data?.coverImage,
         lastDeployedAt: data?.lastDeployedAt,
         starCount: data?.starCount,
+        isStarred: username ? data?.starredBy?.includes(username) : undefined,
       });
     }
   }

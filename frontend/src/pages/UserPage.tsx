@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
-import { useSites, useDomains, useUserSites, useSessions, useDeleteSession } from '../lib/api.ts';
+import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
@@ -45,7 +45,15 @@ export default function UserPage() {
   const accentColorValues = getAccentColorValues();
   const { username } = useParams({ from: '/u/$username' });
   const location = useLocation();
-  const { displayName, username: loggedInUsername, setDisplayName, apiBase, apiKey, sessionId } = useConnection();
+  const {
+    displayName,
+    username: loggedInUsername,
+    setDisplayName,
+    apiBase,
+    apiKey,
+    sessionId,
+    profilePicture,
+  } = useConnection();
   const { apiFetch } = useApi();
   const { refreshSites } = useSites();
   const { showToast } = useToast();
@@ -58,6 +66,7 @@ export default function UserPage() {
   const { domains, loading: domainsLoading } = useDomains();
   const { sessions, loading: sessionsLoading } = useSessions();
   const { deleteSession } = useDeleteSession();
+  const { user: publicUser } = useUser(isOwnProfile ? undefined : username);
 
   const handleToggleStar = async (domain: string, isStarred: boolean) => {
     try {
@@ -77,6 +86,58 @@ export default function UserPage() {
     }
   };
 
+  const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image must be less than 5MB');
+      return;
+    }
+
+    setUploadingProfilePicture(true);
+    try {
+      const res = await apiFetch('/auth/profile-picture', {
+        method: 'POST',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast(data.error || 'Failed to upload profile picture');
+        return;
+      }
+      // Force refresh to get updated profile picture
+      window.location.reload();
+    } catch {
+      showToast('Failed to upload profile picture');
+    } finally {
+      setUploadingProfilePicture(false);
+    }
+  };
+
+  const handleDeleteProfilePicture = async () => {
+    try {
+      const res = await apiFetch('/auth/profile-picture/delete', {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast(data.error || 'Failed to delete profile picture');
+        return;
+      }
+      // Force refresh to get updated profile picture
+      window.location.reload();
+    } catch {
+      showToast('Failed to delete profile picture');
+    }
+  };
+
   const sites = isOwnProfile ? privateSites : publicSites;
   const loading = isOwnProfile ? privateLoading : publicLoading;
   const error = isOwnProfile ? privateError : publicError;
@@ -89,6 +150,7 @@ export default function UserPage() {
   const [passwordStatus, setPasswordStatus] = useState<'idle' | 'saved' | 'error'>('idle');
   const [editingDisplayName, setEditingDisplayName] = useState('');
   const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+  const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
   const activeTab = (
     location.pathname.endsWith('/domains')
       ? 'domains'
@@ -238,14 +300,24 @@ export default function UserPage() {
         {/* Header */}
         <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div
-              className={`w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center
-              justify-center shrink-0`}
-            >
-              <User className={`w-8 h-8 ${accentColorValues.textDark}`} />
-            </div>
+            {(isOwnProfile ? profilePicture : publicUser?.profilePicture) ? (
+              <img
+                src={`${apiBase}/users/${username}/profile-picture`}
+                alt={isOwnProfile ? displayName || username : publicUser?.displayName || username}
+                className="w-16 h-16 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <div
+                className={`w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center
+                justify-center shrink-0`}
+              >
+                <User className={`w-8 h-8 ${accentColorValues.textDark}`} />
+              </div>
+            )}
             <div>
-              <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{displayName || username}</h1>
+              <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">
+                {isOwnProfile ? displayName || username : publicUser?.displayName || username}
+              </h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">@{username}</p>
             </div>
           </div>
@@ -663,6 +735,44 @@ export default function UserPage() {
                   Profile
                 </h2>
                 <div className="space-y-4 max-w-md">
+                  <div>
+                    <label className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Profile Picture</label>
+                    <div className="flex items-center gap-4">
+                      {profilePicture ? (
+                        <img
+                          src={`${apiBase}/users/${username}/profile-picture`}
+                          alt={displayName || username}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className={`w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center justify-center`}
+                        >
+                          <User className={`w-8 h-8 ${accentColorValues.textDark}`} />
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <label className="px-3 py-2 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer">
+                          {uploadingProfilePicture ? 'Uploading...' : 'Upload'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleProfilePictureUpload}
+                            className="hidden"
+                            disabled={uploadingProfilePicture}
+                          />
+                        </label>
+                        {profilePicture && (
+                          <button
+                            onClick={handleDeleteProfilePicture}
+                            className="px-3 py-2 text-sm bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 font-medium rounded-lg cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                   <div>
                     <label htmlFor="displayName" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
                       Display Name

@@ -4,12 +4,14 @@ import { hashPassword, verifyPassword } from './password.ts';
 import { SITES_DIR } from '../../shared/paths.ts';
 
 const USER_FILE = (username: string) => `${SITES_DIR}/${username}/user.json`;
+const PROFILE_PICTURE_FILE = (username: string) => `${SITES_DIR}/${username}/profile.jpg`;
 
 export interface User {
   passwordHash: string;
   username: string;
   displayName: string;
   createdAt: number;
+  profilePicture?: string;
 }
 
 function loadUserFile(username: string): User | null {
@@ -65,4 +67,26 @@ export function updateDisplayName(username: string, displayName: string): void {
   }
   user.displayName = displayName;
   saveUserFile(username, user);
+}
+
+export function setProfilePicture(username: string): void {
+  const user = loadUserFile(username);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  user.profilePicture = 'profile.jpg';
+  saveUserFile(username, user);
+}
+
+export function removeProfilePicture(username: string): void {
+  const user = loadUserFile(username);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  user.profilePicture = undefined;
+  saveUserFile(username, user);
+}
+
+export function getProfilePicturePath(username: string): string {
+  return PROFILE_PICTURE_FILE(username);
 }
