@@ -18,7 +18,7 @@ import {
   Layout,
   Settings,
 } from 'lucide-react';
-import { useLogout } from '../lib/api.ts';
+import { useLogout, useSites, useServers, useDomains } from '../lib/api.ts';
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
@@ -109,6 +109,9 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
 export function TopBar() {
   const { displayName, username, disconnect } = useConnection();
   const { logout } = useLogout();
+  const { sites } = useSites();
+  const { servers } = useServers();
+  const { domains } = useDomains();
   const location = useLocation();
   const navigate = useNavigate();
   const userName = displayName || username || 'Connect';
@@ -159,9 +162,19 @@ export function TopBar() {
   const profileOptions: ProfileOption[] = username
     ? [
         { route: '/u/$username', label: 'Profile', icon: User, divider: false },
-        { route: '/u/$username/sites', label: 'Sites', icon: Layout, divider: false },
-        { route: '/u/$username/domains', label: 'Domains', icon: Globe, divider: false },
-        { route: '/u/$username/servers', label: 'Servers', icon: Server, divider: true },
+        {
+          route: '/u/$username/sites',
+          label: `Sites ${sites.length}`,
+          icon: Layout,
+          divider: false,
+        },
+        { route: '/u/$username/domains', label: `Domains ${domains.length}`, icon: Globe, divider: false },
+        {
+          route: '/u/$username/servers',
+          label: `Servers ${servers.length}`,
+          icon: Server,
+          divider: true,
+        },
         { route: '/u/$username/settings', label: 'Settings', icon: Settings, divider: false },
       ]
     : [{ route: '/account', label: 'Settings', icon: Settings, divider: false }];

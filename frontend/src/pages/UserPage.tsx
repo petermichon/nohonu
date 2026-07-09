@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
-import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser } from '../lib/api.ts';
+import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser, useServers } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
@@ -57,6 +57,7 @@ export default function UserPage() {
   const { apiFetch } = useApi();
   const { refreshSites } = useSites();
   const { showToast } = useToast();
+  const { servers } = useServers();
 
   // Use public sites for viewing others' profiles or when not logged in
   // Only use private sites when logged in and viewing own profile
@@ -347,6 +348,7 @@ export default function UserPage() {
             >
               <Layout className="w-4 h-4" />
               Sites
+              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal">{userSites.length}</span>
             </Link>
             <Link
               to="/u/$username/domains"
@@ -359,6 +361,7 @@ export default function UserPage() {
             >
               <Globe className="w-4 h-4" />
               Domains
+              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal">{domains.length}</span>
             </Link>
             <Link
               to="/u/$username/servers"
@@ -371,6 +374,7 @@ export default function UserPage() {
             >
               <Server className="w-4 h-4" />
               Servers
+              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal">{servers.length}</span>
             </Link>
             {isOwnProfile && (
               <Link
@@ -437,35 +441,6 @@ export default function UserPage() {
         {/* Overview section */}
         {activeTab === 'overview' && !loading && !error && (
           <section className="max-w-7xl mx-auto px-6 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                    <Layout className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                  </div>
-                  <h3 className="text-sm font-medium text-zinc-950 dark:text-zinc-100">Sites</h3>
-                </div>
-                <p className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50">{userSites.length}</p>
-              </div>
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                    <Globe className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                  </div>
-                  <h3 className="text-sm font-medium text-zinc-950 dark:text-zinc-100">Domains</h3>
-                </div>
-                <p className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50">{domains.length}</p>
-              </div>
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                    <Server className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                  </div>
-                  <h3 className="text-sm font-medium text-zinc-950 dark:text-zinc-100">Servers</h3>
-                </div>
-                <p className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50">0</p>
-              </div>
-            </div>
             {userSites.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-4">Recent sites</h2>
