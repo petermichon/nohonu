@@ -3,7 +3,9 @@ services:
     build:
       dockerfile: deploy/Dockerfile.caddy
       context: ..
-    network_mode: 'host'
+    ports:
+      - '80:80'
+      - '443:443'
     environment:
       DOMAIN: ${DOMAIN:-localhost}
       OVH_ENDPOINT: ${OVH_ENDPOINT}
@@ -19,18 +21,15 @@ services:
   backend:
     build:
       context: ../backend
+    ports:
+      - '127.0.0.1:8081:8080'
     environment:
       PORT: '8080'
       SITES_DIR: /data
       API_KEY: ${API_KEY:-}
     volumes:
       - data:/data
-    networks:
-      - app
     restart: unless-stopped
-
-networks:
-  app:
 
 volumes:
   data:
