@@ -880,7 +880,7 @@ export default function UserPage() {
                   ) : sessions.length === 0 ? (
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">No active sessions</p>
                   ) : (
-                    sessions.map((session) => (
+                    [...sessions].sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()).map((session) => (
                       <div
                         key={session.id}
                         className="flex items-center justify-between w-full py-4 pr-4 overflow-hidden"
