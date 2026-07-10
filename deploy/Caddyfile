@@ -1,12 +1,12 @@
 {
 	on_demand_tls {
-		ask http://backend:8080/check-custom-domain
+		ask http://localhost:8080/check-custom-domain
 	}
 }
 
 {$DOMAIN:localhost} {
 	handle_path /api/* {
-		reverse_proxy backend:8080
+		reverse_proxy localhost:8080
 	}
 
 	handle {
@@ -17,7 +17,7 @@
 }
 
 *.{$DOMAIN:localhost} {
-	reverse_proxy backend:8080
+	reverse_proxy localhost:8080
 	tls {
 		dns ovh
 	}
@@ -27,5 +27,5 @@ https:// {
 	tls {
 		on_demand
 	}
-	reverse_proxy backend:8080
+	reverse_proxy localhost:8080
 }
