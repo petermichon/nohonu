@@ -292,18 +292,6 @@ function Signup() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="relative text-center text-sm text-zinc-400 dark:text-zinc-500 h-16 flex items-center justify-center shrink-0">
-        <Link to="/legal" className="hover:text-zinc-600 dark:hover:text-zinc-400">
-          Legal
-        </Link>
-        <Link to="/legal/privacy-policy" className="hover:text-zinc-600 dark:hover:text-zinc-400 ml-2">
-          Privacy
-        </Link>
-        <Link to="/legal/terms-of-service" className="hover:text-zinc-600 dark:hover:text-zinc-400 ml-2">
-          Terms
-        </Link>
-      </footer>
     </div>
   );
 }

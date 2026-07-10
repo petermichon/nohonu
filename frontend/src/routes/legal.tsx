@@ -1,6 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router';
-import Legal from '../pages/Legal';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/legal')({
-  component: Legal,
+  component: () => <Outlet />,
 });

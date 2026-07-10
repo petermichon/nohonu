@@ -52,7 +52,7 @@ export default function Legal() {
           <Link
             key={to}
             to={to}
-            className="flex items-start gap-4 py-3 hover:opacity-70 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 w-fit"
+            className="flex items-start gap-4 py-3 hover:opacity-70 w-fit"
           >
             <div className="shrink-0 w-10 h-10 flex items-center justify-center">
               <Icon className="w-6 h-6 text-zinc-500 dark:text-zinc-400" />
@@ -65,9 +65,6 @@ export default function Legal() {
         ))}
       </div>
 
-      <div className="text-center text-xs text-zinc-400 dark:text-zinc-500 py-8">
-        &copy; {new Date().getFullYear()} Nohonu
-      </div>
     </div>
   );
 }

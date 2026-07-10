@@ -33,14 +33,12 @@ interface FooterLink {
 
 export function Footer() {
   const legalLinks: FooterLink[] = [
-    { label: 'Privacy Policy', href: '/legal/privacy-policy' },
-    { label: 'Terms of Service', href: '/legal/terms-of-service' },
-    { label: 'Copyright Policy', href: '/legal/copyright-policy' },
-    { label: 'Legal Notice', href: '/legal/legal-notice' },
+    { label: 'Privacy', href: '/legal/privacy-policy' },
+    { label: 'Terms', href: '/legal/terms-of-service' },
+    { label: 'Legal', href: '/legal/legal-notice' },
   ];
 
   const projectLinks: FooterLink[] = [
-    { label: 'About', href: '/about' },
     { label: 'Docs', href: '/docs' },
   ];
 
@@ -56,14 +54,14 @@ export function Footer() {
   ];
 
   return (
-    <footer className="py-16">
+    <footer className="py-12">
       <div className="border-t border-zinc-200 dark:border-zinc-900"></div>
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-16">
-          <div className="flex items-center gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6 pt-12">
+          <div className="flex items-center gap-4 justify-self-center md:justify-self-start">
             <Link to="/" className="flex items-center gap-2">
               <span
-                className="font-bold text-[18px] text-zinc-950 dark:text-zinc-50 tracking-tight"
+                className="font-bold text-[18px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 tracking-tight"
                 style={{ fontFamily: "'Outfit Variable', sans-serif" }}
               >
                 nohonu
@@ -76,21 +74,21 @@ export function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-zinc-500 hover:text-zinc-950 dark:hover:text-zinc-100 "
+                  className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
                 >
                   {link.icon && <link.icon className="w-5 h-5" />}
                 </a>
               ))}
             </div>
           </div>
-          <div className="flex flex-wrap justify-center md:justify-end items-center gap-x-3 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400 justify-self-center">
             {[...projectLinks, ...legalLinks].map((link) => (
               <Link key={link.href} to={link.href} className="hover:text-zinc-950 dark:hover:text-zinc-100 whitespace-nowrap">
                 {link.label}
               </Link>
             ))}
-            <span className="text-[13px] text-zinc-400 dark:text-zinc-600">© 2026 Nohonu</span>
           </div>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 justify-self-center md:justify-self-end">© 2026 Nohonu</span>
         </div>
       </div>
     </footer>
