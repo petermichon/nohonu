@@ -57,7 +57,7 @@ export default function UserPage() {
   const { apiFetch } = useApi();
   const { refreshSites } = useSites();
   const { showToast } = useToast();
-  const { servers } = useServers();
+  useServers();
 
   // Use public sites for viewing others' profiles or when not logged in
   // Only use private sites when logged in and viewing own profile
@@ -348,7 +348,9 @@ export default function UserPage() {
             >
               <Layout className="w-4 h-4" />
               Sites
-              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal">{userSites.length}</span>
+              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal tabular-nums">
+                <span className={loading ? 'invisible' : ''}>{userSites.length}</span>
+              </span>
             </Link>
             <Link
               to="/u/$username/domains"
@@ -361,7 +363,9 @@ export default function UserPage() {
             >
               <Globe className="w-4 h-4" />
               Domains
-              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal">{domains.length}</span>
+              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal tabular-nums">
+                <span className={domainsLoading ? 'invisible' : ''}>{domains.length}</span>
+              </span>
             </Link>
             <Link
               to="/u/$username/servers"
@@ -374,7 +378,6 @@ export default function UserPage() {
             >
               <Server className="w-4 h-4" />
               Servers
-              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal">{servers.length}</span>
             </Link>
             {isOwnProfile && (
               <Link
@@ -419,18 +422,18 @@ export default function UserPage() {
         )}
 
         {/* Loading state */}
-        {loading && (
+        {loading && activeTab === 'overview' && (
           <section className="max-w-7xl mx-auto px-6 py-8">
+            <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-4">Recent sites</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden"
-                >
-                  <div className="w-full h-48 bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
-                  <div className="p-6 space-y-3">
+                <div key={i} className="flex flex-col gap-4">
+                  <div className="rounded-3xl overflow-hidden">
+                    <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                  </div>
+                  <div className="flex items-center justify-between">
                     <div className="h-5 w-32 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
-                    <div className="h-4 w-24 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                    <div className="h-5 w-14 bg-zinc-100 dark:bg-zinc-800 rounded-full animate-pulse" />
                   </div>
                 </div>
               ))}
@@ -570,7 +573,7 @@ export default function UserPage() {
         )}
 
         {/* Domains section */}
-        {activeTab === 'domains' && (
+        {activeTab === 'domains' && !domainsLoading && (
           <section className="max-w-7xl mx-auto px-6 py-8">
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-zinc-500 dark:text-zinc-400">

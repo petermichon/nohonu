@@ -15,7 +15,6 @@ function Login() {
   const [username, setUsernameState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particleCount = 250;
@@ -53,7 +52,7 @@ function Login() {
       : accentColorValues.textColor === 'inverted'
         ? 'text-zinc-100 dark:text-zinc-950'
         : 'text-zinc-950'
-  } cursor-pointer transition-colors`;
+  } cursor-pointer`;
   const accentColorRef = useRef(accentColor);
   const themeRef = useRef(resolvedTheme);
   const particlesRef = useRef<{
@@ -224,7 +223,7 @@ function Login() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsernameState(e.target.value)}
-                className={`${inputBaseClass} focus:ring-zinc-950 dark:focus:ring-zinc-100`}
+                className={`${inputBaseClass} ${accentColorValues.focus}`}
                 placeholder="Username"
                 required
                 autoComplete="username"
@@ -237,7 +236,7 @@ function Login() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`${inputBaseClass} pr-12 focus:ring-zinc-950 dark:focus:ring-zinc-100`}
+                className={`${inputBaseClass} pr-12 ${accentColorValues.focus}`}
                 placeholder="Password"
                 required
                 autoComplete="current-password"
@@ -245,7 +244,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer"
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,47 +272,6 @@ function Login() {
                   </svg>
                 )}
               </button>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400 cursor-pointer select-none">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-                      rememberMe
-                        ? `${accentColorValues.bg} border-${accentColorValues.gradient}`
-                        : 'bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-600'
-                    }`}
-                  >
-                    {rememberMe && (
-                      <svg
-                        className={`w-3 h-3 ${
-                          accentColorValues.textColor === 'light'
-                            ? 'text-white'
-                            : accentColorValues.textColor === 'inverted'
-                              ? 'text-zinc-100 dark:text-zinc-950'
-                              : 'text-zinc-950'
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                Remember me
-              </label>
-              <span className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 cursor-pointer">
-                Forgot password?
-              </span>
             </div>
 
             <button

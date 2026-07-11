@@ -52,7 +52,7 @@ function Signup() {
       : accentColorValues.textColor === 'inverted'
         ? 'text-zinc-100 dark:text-zinc-950'
         : 'text-zinc-950'
-  } cursor-pointer transition-colors`;
+  } cursor-pointer`;
   const accentColorRef = useRef(accentColor);
   const themeRef = useRef(resolvedTheme);
   const particlesRef = useRef<{
@@ -244,7 +244,7 @@ function Signup() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer"
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

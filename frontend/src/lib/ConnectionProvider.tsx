@@ -34,12 +34,13 @@ function load(): Connection {
     const apiKey = localStorage.getItem('apiKey');
     const sessionId = localStorage.getItem('sessionId');
     const username = localStorage.getItem('username');
+    const displayName = localStorage.getItem('displayName');
     return {
       apiBase: apiBase ?? DEFAULT.apiBase,
       apiKey: apiKey ?? DEFAULT.apiKey,
       sessionId: sessionId ?? DEFAULT.sessionId,
       username: username ?? DEFAULT.username,
-      displayName: DEFAULT.displayName,
+      displayName: displayName || username || DEFAULT.displayName,
       profilePicture: DEFAULT.profilePicture,
     };
   } catch {
@@ -64,10 +65,12 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           const res = await fetch(`${connection.apiBase}/auth/me`, { headers });
           if (res.ok) {
             const data = await res.json();
+            const displayName = data.user?.displayName || connection.username;
+            localStorage.setItem('displayName', displayName);
             setConnectionState((prev) => ({
               ...prev,
               username: data.user?.username || '',
-              displayName: data.user?.displayName || '',
+              displayName,
               profilePicture: data.user?.profilePicture,
             }));
           }
@@ -106,6 +109,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   };
 
   const setDisplayName = (displayName: string) => {
+    localStorage.setItem('displayName', displayName);
     setConnectionState((prev) => ({ ...prev, displayName }));
   };
 
@@ -113,6 +117,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('apiKey');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('username');
+    localStorage.removeItem('displayName');
     setConnectionState((prev) => ({
       ...prev,
       apiKey: '',

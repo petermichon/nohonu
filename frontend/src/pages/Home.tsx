@@ -208,9 +208,18 @@ function Home() {
             <div className="flex items-center gap-6 mb-6">
               {loading ? (
                 <>
-                  <div className="h-8 w-24 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
-                  <div className="h-8 w-24 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
-                  <div className="h-8 w-24 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                    <div className="h-5 w-16 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                    <div className="h-5 w-16 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3.5 h-3.5 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                    <div className="h-5 w-24 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                  </div>
                 </>
               ) : sites.length > 0 ? (
                 <>
@@ -255,16 +264,21 @@ function Home() {
 
           {/* Loading state */}
           {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden"
-                >
-                  <div className="w-full h-32 bg-stone-100 dark:bg-stone-800 animate-pulse" />
-                  <div className="p-3 space-y-2">
-                    <div className="h-4 w-24 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
-                    <div className="h-3 w-16 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+                <div key={i} className="flex flex-col gap-4">
+                  <div className="rounded-xl overflow-hidden">
+                    <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                      <div className="h-4 w-20 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-4 w-10 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                      <div className="h-4 w-10 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                    </div>
                   </div>
                 </div>
               ))}

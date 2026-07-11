@@ -29,7 +29,7 @@
 
 html {
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 
 /* Text selection color */
