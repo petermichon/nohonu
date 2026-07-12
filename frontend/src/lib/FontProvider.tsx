@@ -42,7 +42,8 @@ export type Font =
   | 'figtree'
   | 'epilogue'
   | 'geist'
-  | 'expletus-sans';
+  | 'expletus-sans'
+  | 'urbanist';
 
 export const fontNames: Partial<Record<Font, string>> = {
   'noto-sans': 'Noto Sans Variable',
@@ -68,6 +69,7 @@ export const fontNames: Partial<Record<Font, string>> = {
   epilogue: 'Epilogue Variable',
   geist: 'Geist Variable',
   'expletus-sans': 'Expletus Sans Variable',
+  urbanist: 'Urbanist Variable',
 };
 
 const fontFamilies: Record<Font, string> = {
@@ -109,6 +111,7 @@ const fontFamilies: Record<Font, string> = {
   epilogue: "'Epilogue Variable'",
   geist: "'Geist Variable'",
   'expletus-sans': "'Expletus Sans Variable'",
+  urbanist: "'Urbanist Variable'",
   'sans-serif': 'sans-serif',
   serif: 'serif',
   cursive: 'cursive',

@@ -211,6 +211,7 @@ export function TopBar() {
           { value: 'monospace', label: 'Monospace', divider: true },
           { value: 'outfit', label: 'Outfit' },
           { value: 'mona-sans', label: 'Mona Sans' },
+          { value: 'urbanist', label: 'Urbanist' },
           { value: 'inter', label: 'Inter' },
           { value: 'noto-sans', label: 'Noto Sans' },
           { value: 'roboto', label: 'Roboto' },

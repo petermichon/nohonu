@@ -31,5 +31,6 @@ export async function getSiteInfo(req: Request, { domain }: RouteContext): Promi
     subdomainBase,
     displayName: info.displayName,
     account: info.account,
+    coverImage: info.coverImage,
   });
 }

@@ -1,8 +1,9 @@
-import { ExternalLink, Power, Eye, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { ExternalLink, Power, Eye, X, Image as ImageIcon } from 'lucide-react';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useApi } from '../lib/api.ts';
 import { useToast } from '../lib/ToastContext.tsx';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Site } from '../lib/types.ts';
 
 interface OverviewSectionProps {
@@ -32,6 +33,7 @@ export function OverviewSection({
   const accentColorValues = getAccentColorValues();
   const { apiFetch, apiBase } = useApi();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const [uploadingCover, setUploadingCover] = useState(false);
   const [deletingCover, setDeletingCover] = useState(false);
 
@@ -64,7 +66,7 @@ export function OverviewSection({
         throw new Error(data.error || 'Failed to upload cover');
       }
       showToast('Cover image uploaded', true);
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ['site', site.domain] });
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to upload cover', false);
     } finally {
@@ -157,7 +159,7 @@ export function OverviewSection({
         throw new Error(data.error || 'Failed to delete cover');
       }
       showToast('Cover image removed', true);
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ['site', site.domain] });
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to delete cover', false);
     } finally {
@@ -270,12 +272,23 @@ export function OverviewSection({
 
           {/* Cover Image Section */}
           <div>
+            {!isReadOnly && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverUpload}
+                disabled={uploadingCover}
+                className="hidden"
+                id="coverUpload"
+              />
+            )}
             {coverUrl ? (
-              <div className="relative group">
+              <div className="relative group w-full max-w-xs">
                 <img
                   src={coverUrl || undefined}
                   alt="Site cover"
-                  className="w-full aspect-[16/9] object-cover rounded-2xl"
+                  className="w-full aspect-4/3 object-cover rounded-2xl cursor-pointer"
+                  onClick={() => !isReadOnly && document.getElementById('coverUpload')?.click()}
                 />
                 {!isReadOnly && (
                   <button
@@ -288,25 +301,17 @@ export function OverviewSection({
                   </button>
                 )}
               </div>
-            ) : !isReadOnly ? (
-              <div className="w-full aspect-[16/9] rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex flex-col items-center justify-center gap-3 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
-                <ImageIcon className="w-8 h-8 text-zinc-400 dark:text-zinc-600" />
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">Add a cover image (4:3 ratio)</p>
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleCoverUpload}
-                    disabled={uploadingCover}
-                    className="hidden"
-                  />
-                  <span className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <Upload className="w-4 h-4" />
-                    {uploadingCover ? 'Uploading...' : 'Upload image'}
-                  </span>
-                </label>
+            ) : (
+              <div
+                className="w-full max-w-xs aspect-4/3 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+                onClick={() => !isReadOnly && document.getElementById('coverUpload')?.click()}
+              >
+                <ImageIcon className="w-6 h-6 text-zinc-400 dark:text-zinc-500" />
+                <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                  {isReadOnly ? 'No cover image' : uploadingCover ? 'Uploading...' : 'Add a cover image'}
+                </p>
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       );

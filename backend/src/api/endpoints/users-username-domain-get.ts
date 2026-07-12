@@ -31,5 +31,6 @@ export async function getPublicSiteInfo(req: Request, username: string, domain: 
     subdomainBase,
     displayName: info.displayName,
     account: info.account,
+    coverImage: info.coverImage,
   });
 }

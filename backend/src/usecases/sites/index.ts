@@ -137,10 +137,10 @@ export async function checkDomain(user: string, rawDomain: string): Promise<bool
   return !!data && data.currentIndex !== null;
 }
 
-export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string; siteId: string; displayName?: string; account?: string } | null> {
+export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string; siteId: string; displayName?: string; account?: string; coverImage?: string } | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) return null;
-  return { enabled: data.enabled, subdomain: data.subdomain, siteId: data.siteId, displayName: data.displayName, account: data.account };
+  return { enabled: data.enabled, subdomain: data.subdomain, siteId: data.siteId, displayName: data.displayName, account: data.account, coverImage: data.coverImage };
 }
 
 export async function downloadActiveVersion(user: string, domain: string): Promise<{ file: Deno.FsFile; filename: string } | null> {

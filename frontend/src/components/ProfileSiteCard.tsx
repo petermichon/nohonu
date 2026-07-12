@@ -33,7 +33,7 @@ export function ProfileSiteCard({ site }: ProfileSiteCardProps) {
             <Globe className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />
           </div>
         )}
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-start p-4">
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-end justify-start p-4">
           <span className="text-white text-sm font-medium">View site</span>
         </div>
       </div>
