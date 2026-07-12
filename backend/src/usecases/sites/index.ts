@@ -117,6 +117,19 @@ export async function checkSite(user: string, domain: string): Promise<{ exists:
   };
 }
 
+export async function checkSubdomain(subdomain: string): Promise<boolean> {
+  if (!subdomain || !VALID_DOMAIN.test(subdomain)) return false;
+  const users = await storage.listUsers();
+  for (const user of users) {
+    const domains = await storage.listDomains(user);
+    for (const domain of domains) {
+      const data = await storage.readSiteMetadata(user, domain);
+      if (data?.subdomain === subdomain) return true;
+    }
+  }
+  return false;
+}
+
 export async function checkDomain(user: string, rawDomain: string): Promise<boolean> {
   const domain = rawDomain.replace(/\.petermichon\.fr$/, '');
   if (!VALID_DOMAIN.test(domain)) return false;
@@ -456,8 +469,8 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
     throw new Error('Domain already exists for this user');
   }
 
-  // Use domain as siteId
-  const siteId = domain;
+  // Use user-domain as siteId for uniqueness across users
+  const siteId = `${user}-${domain}`;
 
   // Create initial site data
   const data = { ...storage.DEFAULT_DATA };
@@ -470,8 +483,8 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
   data.lastDeployedAt = Date.now();
   // Set default subdomain as username-domain
   data.subdomain = `${user}-${domain}`;
-  // Set default displayName as siteId
-  data.displayName = siteId;
+  // Set default displayName as domain
+  data.displayName = domain;
 
   // Create directories and files
   await Deno.mkdir(domainDir(user, domain), { recursive: true });
@@ -532,8 +545,8 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
     throw err;
   }
 
-  // Use domain as siteId
-  const siteId = domain;
+  // Use user-domain as siteId for uniqueness across users
+  const siteId = `${user}-${domain}`;
 
   // Create initial site data
   const data = { ...storage.DEFAULT_DATA };
@@ -547,8 +560,8 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   data.lastDeployedAt = Date.now();
   // Set default subdomain as username-domain
   data.subdomain = `${user}-${domain}`;
-  // Set default displayName as siteId
-  data.displayName = siteId;
+  // Set default displayName as domain
+  data.displayName = domain;
 
   // Create directories and files
   await Deno.mkdir(domainDir(user, domain), { recursive: true });

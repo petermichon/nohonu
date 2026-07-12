@@ -444,14 +444,23 @@ export default function UserPage() {
         {/* Overview section */}
         {activeTab === 'overview' && !loading && !error && (
           <section className="max-w-7xl mx-auto px-6 py-8">
-            {userSites.length > 0 && (
+            {userSites.length > 0 ? (
               <div>
                 <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-4">Recent sites</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {userSites.slice(0, 3).map((site) => (
-                    <ProfileSiteCard key={site.domain} site={site} />
+                    <ProfileSiteCard key={site.siteId} site={site} />
                   ))}
                 </div>
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No sites yet</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+                  {isOwnProfile
+                    ? 'Deploy your first site to get started.'
+                    : `@${username} hasn't published any sites yet.`}
+                </p>
               </div>
             )}
           </section>
@@ -518,7 +527,7 @@ export default function UserPage() {
             <div className="overflow-hidden">
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {userSites.map((site) => (
-                  <div key={site.domain} className="flex items-center gap-4 px-6 py-4">
+                  <div key={site.siteId} className="flex items-center gap-4 px-6 py-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1">
                         <Link

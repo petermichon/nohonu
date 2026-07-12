@@ -53,12 +53,12 @@ export async function readSiteMetadata(user: string, domain: string): Promise<Si
     
     // Set siteId if not set (for backward compatibility)
     if (!data.siteId) {
-      data.siteId = crypto.randomUUID();
+      data.siteId = `${user}-${domain}`;
     }
     
-    // Set displayName to siteId if not set or if it's set to domain (for backward compatibility)
+    // Set displayName to domain if not set or if it was set to domain (for backward compatibility)
     if (!data.displayName || data.displayName === domain) {
-      data.displayName = data.siteId;
+      data.displayName = domain;
     }
     
     // Set account to user if not set (for backward compatibility)

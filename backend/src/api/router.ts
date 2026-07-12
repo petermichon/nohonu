@@ -12,6 +12,7 @@ import { getSessions } from './endpoints/auth-sessions-get.ts';
 import { deleteSession as deleteSessionEndpoint } from './endpoints/auth-sessions-delete.ts';
 import { checkDomain } from './endpoints/check-domain-get.ts';
 import { checkCustomDomain } from './endpoints/check-custom-domain-get.ts';
+import { checkSubdomain } from './endpoints/check-subdomain-get.ts';
 import { serveStatic } from './endpoints/get.ts';
 import { listSites } from './endpoints/sites-list-get.ts';
 import { listExploreSites } from './endpoints/explore-sites-get.ts';
@@ -69,6 +70,7 @@ const routes: Record<string, Endpoint> = {
   '/auth/sessions/delete': { handler: deleteSessionEndpoint, auth: true },
   '/check-domain': { handler: checkDomain, auth: true },
   '/check-custom-domain': { handler: checkCustomDomain, auth: true },
+  '/check-subdomain': { handler: checkSubdomain, auth: true },
   '/custom-domains': { handler: getAllCustomDomains, auth: true },
   '/explore/sites': { handler: listExploreSites, auth: true },
 };
@@ -238,7 +240,7 @@ function matchRoute(path: string): Endpoint | undefined {
     if (!username) {
       return undefined;
     }
-    return { handler: (req) => getProfilePicture(req, username), auth: true };
+    return { handler: (req) => getProfilePicture(req, username), auth: false };
   }
   if (path.startsWith('/users/') && path.split('/').length === 4) {
     // /users/:username/:domain
@@ -267,6 +269,7 @@ export function routeRequest(path: string): 'auth' | 'api' | 'static' {
     path === '/health' ||
     path === '/check-domain' ||
     path === '/check-custom-domain' ||
+    path === '/check-subdomain' ||
     path === '/custom-domains' ||
     path === '/explore/sites'
   ) {
@@ -311,17 +314,19 @@ async function handleApiService(req: Request, path: string, info: Deno.ServeHand
   const start = Date.now();
   const route = matchRoute(path);
 
-  // Check auth for API requests (now async for session validation)
-  const authError = await requireAuth(req);
-  if (authError) {
-    console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
-    return authError;
-  }
-
   if (!route) {
     const response = error('API endpoint not found', 404);
     console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
     return response;
+  }
+
+  // Check auth for API requests (now async for session validation)
+  if (route.auth !== false) {
+    const authError = await requireAuth(req);
+    if (authError) {
+      console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
+      return authError;
+    }
   }
 
   let response: Response;

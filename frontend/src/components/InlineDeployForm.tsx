@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe, Check, X } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useConnection } from '../lib/ConnectionProvider.tsx';
 
 type UploadMode = 'file' | 'github';
 
@@ -11,7 +12,8 @@ interface InlineDeployFormProps {
 }
 
 export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
-  const { apiFetch, host } = useApi();
+  const { apiFetch, hostWithPort } = useApi();
+  const { username } = useConnection();
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
@@ -23,6 +25,15 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const [githubRepo, setGithubRepo] = useState('');
   const [githubBranch, setGithubBranch] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: subdomainResult, isFetching: subdomainChecking } = useQuery({
+    queryKey: ['check-subdomain', newSubdomain],
+    queryFn: async () => {
+      const res = await apiFetch(`/check-subdomain?subdomain=${encodeURIComponent(newSubdomain)}`);
+      return { subdomain: newSubdomain, taken: res.ok };
+    },
+    enabled: !!newSubdomain,
+  });
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -108,7 +119,10 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         .slice(0, -4)
         .toLowerCase()
         .replace(/[^a-z0-9-]/g, '');
-      if (derived) setNewDomain(derived);
+      if (derived) {
+        setNewDomain(derived);
+        setNewSubdomain(username ? `${username}-${derived}` : '');
+      }
     }
   };
 
@@ -120,8 +134,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   };
 
   const handleUpload = () => {
-    if (!selectedFile || !newDomain) {
-      setUploadError(!newDomain ? 'Enter a domain' : 'Select a .zip file');
+    if (!selectedFile || !newDomain || !newSubdomain) {
+      setUploadError(!newDomain ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Select a .zip file');
       return;
     }
     setUploadError(null);
@@ -129,8 +143,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   };
 
   const handleFetchGithub = () => {
-    if (!githubRepo.includes('/') || !newDomain) {
-      setUploadError(!newDomain ? 'Enter a domain' : 'Repo format: owner/repo');
+    if (!githubRepo.includes('/') || !newDomain || !newSubdomain) {
+      setUploadError(!newDomain ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Repo format: owner/repo');
       return;
     }
     setUploadError(null);
@@ -155,60 +169,27 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           <button
             type="button"
             onClick={() => setUploadMode('file')}
-            className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors ${
-              uploadMode === 'file'
-                ? 'text-zinc-950 dark:text-zinc-100'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
-          >
-            <Upload className="w-4 h-4" />
-            File Upload
-          </button>
-          <button
-            type="button"
-            onClick={() => setUploadMode('github')}
-            className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors ${
-              uploadMode === 'github'
-                ? 'text-zinc-950 dark:text-zinc-100'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
+             className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${
+               uploadMode === 'file'
+                 ? 'text-zinc-950 dark:text-zinc-100'
+                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+             }`}
+           >
+             <Upload className="w-4 h-4" />
+             File Upload
+           </button>
+           <button
+             type="button"
+             onClick={() => setUploadMode('github')}
+             className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${
+               uploadMode === 'github'
+                 ? 'text-zinc-950 dark:text-zinc-100'
+                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+             }`}
           >
             <GitBranch className="w-4 h-4" />
             GitHub
           </button>
-        </div>
-
-        {/* Domain input */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <input
-              type="text"
-              id="domain"
-              name="domain"
-              value={newDomain}
-              onChange={(e) => setNewDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-              placeholder="deployment-name"
-              className="w-full pl-10 pr-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              autoFocus
-            />
-          </div>
-        </div>
-
-        {/* Subdomain input */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              id="subdomain"
-              name="subdomain"
-              value={newSubdomain}
-              onChange={(e) => setNewSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-              placeholder="subdomain (optional)"
-              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-            />
-          </div>
-          <span className="text-zinc-400 dark:text-zinc-500 text-sm shrink-0">.{host}</span>
         </div>
 
         {/* File upload or GitHub inputs */}
@@ -236,7 +217,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         ) : (
           (() => {
             const baseClasses =
-              'border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 p-8 cursor-pointer transition-colors';
+              'border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 p-8 cursor-pointer';
             const draggingClasses = 'border-zinc-400 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900/30';
             const selectedClasses = 'border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/20';
             const defaultClasses =
@@ -294,6 +275,56 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           })()
         )}
 
+        {/* Domain input */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <input
+              type="text"
+              id="domain"
+              name="domain"
+              value={newDomain}
+              onChange={(e) => {
+                const domain = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                setNewDomain(domain);
+                setNewSubdomain(username ? `${username}-${domain}` : '');
+              }}
+              placeholder="deployment-name"
+              className="w-full pl-10 pr-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+            />
+          </div>
+        </div>
+
+        {/* Subdomain input */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              id="subdomain"
+              name="subdomain"
+              value={newSubdomain}
+              onChange={(e) => {
+                const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                setNewSubdomain(val);
+              }}
+              placeholder="subdomain"
+              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+            />
+          </div>
+          <span className="text-zinc-400 dark:text-zinc-500 text-sm shrink-0">.{hostWithPort}</span>
+        </div>
+        <div className="h-4">
+          {subdomainResult && subdomainResult.subdomain === newSubdomain && subdomainResult.taken ? (
+            <span className="text-sm text-red-500 flex items-center gap-1">
+              <X className="w-3.5 h-3.5" /> {subdomainResult.subdomain}.{hostWithPort} already taken
+            </span>
+          ) : subdomainResult && subdomainResult.subdomain === newSubdomain ? (
+            <span className="text-sm text-green-600 flex items-center gap-1">
+              <Check className="w-3.5 h-3.5" /> Available at {subdomainResult.subdomain}.{hostWithPort}
+            </span>
+          ) : null}
+        </div>
+
         {/* Error message */}
         {uploadError && (
           <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
@@ -308,8 +339,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={
             uploadMode === 'github'
-              ? fetchGithubMutation.isPending || !githubRepo || !newDomain
-              : uploadMutation.isPending || !selectedFile || !newDomain
+              ? fetchGithubMutation.isPending || !githubRepo || !newDomain || !newSubdomain || subdomainChecking || subdomainResult?.taken
+              : uploadMutation.isPending || !selectedFile || !newDomain || !newSubdomain || subdomainChecking || subdomainResult?.taken
           }
           className={`w-full py-3 ${
             accentColorValues.textColor === 'light'
@@ -317,9 +348,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               : accentColorValues.textColor === 'inverted'
                 ? 'text-zinc-100 dark:text-zinc-950'
                 : 'text-zinc-950'
-          } text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto ${
+          } text-sm font-medium rounded-full flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto ${
             accentColorValues.bg
-          } hover:opacity-90 disabled:opacity-40 transition-opacity`}
+          }           hover:opacity-90 disabled:opacity-40`}
         >
           {uploadMutation.isPending || fetchGithubMutation.isPending ? (
             <>
