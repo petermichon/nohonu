@@ -3,10 +3,8 @@ import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useState, useEffect } from 'react';
 
 export default function Account() {
-  const { apiBase, apiKey, setApiBase, setApiKey } = useConnection();
-  const [url, setUrl] = useState(apiBase);
+  const { apiBase, apiKey, setApiKey } = useConnection();
   const [key, setKey] = useState(apiKey);
-  const [urlStatus, setUrlStatus] = useState<'idle' | 'checking' | 'valid' | 'unreachable'>('idle');
   const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'open'>('idle');
   const [isServerOpen, setIsServerOpen] = useState(false);
 
@@ -25,30 +23,9 @@ export default function Account() {
     checkServerSecurity();
   }, [apiBase, apiKey]);
 
-  const saveUrl = async () => {
-    setUrlStatus('checking');
-    const base = url.replace(/\/$/, '');
-    try {
-      const res = await fetch(`${base}/auth`, {
-        headers: apiKey ? { 'X-Api-Key': apiKey } : {},
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) {
-        setApiBase(base);
-        setIsServerOpen(!data.secured);
-        setUrlStatus('valid');
-        setTimeout(() => setUrlStatus('idle'), 800);
-      } else {
-        setUrlStatus('unreachable');
-      }
-    } catch {
-      setUrlStatus('unreachable');
-    }
-  };
-
   const saveKey = async () => {
     setKeyStatus('checking');
-    const base = url.replace(/\/$/, '');
+    const base = apiBase.replace(/\/$/, '');
     try {
       const res = await fetch(`${base}/auth`, {
         headers: key ? { 'X-Api-Key': key } : {},
@@ -72,13 +49,6 @@ export default function Account() {
     } catch {
       setKeyStatus('invalid');
     }
-  };
-
-  const urlStatusMsg: Record<typeof urlStatus, string | null> = {
-    idle: null,
-    checking: null,
-    valid: null,
-    unreachable: 'Cannot reach server',
   };
 
   const keyStatusMsg: Record<typeof keyStatus, string | null> = {
@@ -106,68 +76,6 @@ export default function Account() {
               e.preventDefault();
             }}
           >
-            <div>
-              <label htmlFor="apiUrl" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                API URL
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  id="apiUrl"
-                  name="apiUrl"
-                  value={url}
-                  onChange={(e) => {
-                    setUrl(e.target.value);
-                    setUrlStatus('idle');
-                  }}
-                  placeholder="https://localhost/api"
-                  className="flex-1 px-3 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400"
-                />
-                <button
-                  type="button"
-                  onClick={saveUrl}
-                  disabled={urlStatus === 'checking'}
-                  className="px-4 py-2 text-sm bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-700 dark:hover:bg-zinc-300 disabled:opacity-50 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer disabled:cursor-auto"
-                >
-                  {urlStatus === 'checking' ? 'Checking…' : urlStatus === 'valid' ? 'Saved' : 'Save'}
-                </button>
-              </div>
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUrl('http://localhost:8080');
-                    setUrlStatus('idle');
-                  }}
-                  className="px-3 py-1.5 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-md cursor-pointer"
-                >
-                  http://localhost:8080
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUrl('https://localhost/api');
-                    setUrlStatus('idle');
-                  }}
-                  className="px-3 py-1.5 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-md cursor-pointer"
-                >
-                  https://localhost/api
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUrl('https://nohonu.com/api');
-                    setUrlStatus('idle');
-                  }}
-                  className="px-3 py-1.5 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-md cursor-pointer"
-                >
-                  https://nohonu.com/api
-                </button>
-              </div>
-              {urlStatusMsg[urlStatus] && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">{urlStatusMsg[urlStatus]}</p>
-              )}
-            </div>
             <div>
               <label htmlFor="apiKey" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
                 API Key

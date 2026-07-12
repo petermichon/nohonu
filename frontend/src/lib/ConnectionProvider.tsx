@@ -1,5 +1,8 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
+const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
+console.log('API URL:', API_BASE);
+
 interface Connection {
   apiBase: string;
   apiKey: string;
@@ -10,8 +13,6 @@ interface Connection {
 }
 
 interface ConnectionContextType extends Connection {
-  setConnection: (c: Connection) => void;
-  setApiBase: (url: string) => void;
   setApiKey: (key: string) => void;
   setSessionId: (sessionId: string) => void;
   setUsername: (username: string) => void;
@@ -20,7 +21,7 @@ interface ConnectionContextType extends Connection {
 }
 
 const DEFAULT: Connection = {
-  apiBase: 'https://nohonu.com/api',
+  apiBase: API_BASE,
   apiKey: '',
   sessionId: '',
   username: '',
@@ -30,13 +31,12 @@ const DEFAULT: Connection = {
 
 function load(): Connection {
   try {
-    const apiBase = localStorage.getItem('apiBase');
     const apiKey = localStorage.getItem('apiKey');
     const sessionId = localStorage.getItem('sessionId');
     const username = localStorage.getItem('username');
     const displayName = localStorage.getItem('displayName');
     return {
-      apiBase: apiBase ?? DEFAULT.apiBase,
+      apiBase: API_BASE,
       apiKey: apiKey ?? DEFAULT.apiKey,
       sessionId: sessionId ?? DEFAULT.sessionId,
       username: username ?? DEFAULT.username,
@@ -82,17 +82,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     fetchUserData();
   }, [connection.sessionId, connection.apiBase, connection.apiKey]);
 
-  const setConnection = (c: Connection) => {
-    localStorage.setItem('apiBase', c.apiBase);
-    localStorage.setItem('apiKey', c.apiKey);
-    setConnectionState(c);
-  };
-
-  const setApiBase = (url: string) => {
-    localStorage.setItem('apiBase', url);
-    setConnectionState((prev) => ({ ...prev, apiBase: url }));
-  };
-
   const setApiKey = (key: string) => {
     localStorage.setItem('apiKey', key);
     setConnectionState((prev) => ({ ...prev, apiKey: key }));
@@ -132,8 +121,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     <ConnectionContext.Provider
       value={{
         ...connection,
-        setConnection,
-        setApiBase,
         setApiKey,
         setSessionId,
         setUsername,

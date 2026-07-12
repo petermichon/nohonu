@@ -3,13 +3,6 @@ import { Settings } from 'lucide-react';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useClickOutside } from '../lib/useClickOutside.ts';
 
-const urlStatusMsg: Record<'idle' | 'checking' | 'valid' | 'unreachable', string | null> = {
-  idle: null,
-  checking: null,
-  valid: null,
-  unreachable: 'Cannot reach server',
-};
-
 const keyStatusMsg: Record<'idle' | 'checking' | 'valid' | 'invalid' | 'open', string | null> = {
   idle: null,
   checking: null,
@@ -19,11 +12,9 @@ const keyStatusMsg: Record<'idle' | 'checking' | 'valid' | 'invalid' | 'open', s
 };
 
 export function SettingsPopover() {
-  const { apiBase, apiKey, setApiBase, setApiKey } = useConnection();
+  const { apiBase, apiKey, setApiKey } = useConnection();
   const [open, setOpen] = useState(false);
-  const [url, setUrl] = useState(apiBase);
   const [key, setKey] = useState(apiKey);
-  const [urlStatus, setUrlStatus] = useState<'idle' | 'checking' | 'valid' | 'unreachable'>('idle');
   const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'open'>('idle');
   const [isServerOpen, setIsServerOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -44,30 +35,9 @@ export function SettingsPopover() {
     checkServerSecurity();
   }, [apiBase, apiKey]);
 
-  const saveUrl = async () => {
-    setUrlStatus('checking');
-    const base = url.replace(/\/$/, '');
-    try {
-      const res = await fetch(`${base}/auth`, {
-        headers: apiKey ? { 'X-Api-Key': apiKey } : {},
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) {
-        setApiBase(base);
-        setIsServerOpen(!data.secured);
-        setUrlStatus('valid');
-        setTimeout(() => setUrlStatus('idle'), 800);
-      } else {
-        setUrlStatus('unreachable');
-      }
-    } catch {
-      setUrlStatus('unreachable');
-    }
-  };
-
   const saveKey = async () => {
     setKeyStatus('checking');
-    const base = url.replace(/\/$/, '');
+    const base = apiBase.replace(/\/$/, '');
     try {
       const res = await fetch(`${base}/auth`, {
         headers: key ? { 'X-Api-Key': key } : {},
@@ -104,9 +74,7 @@ export function SettingsPopover() {
       <button
         type="button"
         onClick={() => {
-          setUrl(apiBase);
           setKey(apiKey);
-          setUrlStatus('idle');
           setKeyStatus('idle');
           setOpen((o) => !o);
         }}
@@ -121,36 +89,6 @@ export function SettingsPopover() {
             Connection
           </p>
           <div className="grid gap-3">
-            <div>
-              <label htmlFor="popoverApiUrl" className="text-xs text-zinc-500 dark:text-zinc-400 mb-1 block">
-                API URL
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  id="popoverApiUrl"
-                  name="apiUrl"
-                  value={url}
-                  onChange={(e) => {
-                    setUrl(e.target.value);
-                    setUrlStatus('idle');
-                  }}
-                  placeholder="https://localhost/api"
-                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
-                />
-                <button
-                  type="button"
-                  onClick={saveUrl}
-                  disabled={urlStatus === 'checking'}
-                  className="px-3 py-2 text-xs bg-stone-900 dark:bg-stone-100 hover:bg-stone-700 dark:hover:bg-stone-300 disabled:opacity-50 text-white dark:text-zinc-950 rounded-lg cursor-pointer disabled:cursor-auto"
-                >
-                  {urlStatus === 'checking' ? '…' : urlStatus === 'valid' ? '✓' : 'Save'}
-                </button>
-              </div>
-              {urlStatusMsg[urlStatus] && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">{urlStatusMsg[urlStatus]}</p>
-              )}
-            </div>
             <div>
               <label htmlFor="popoverApiKey" className="text-xs text-zinc-500 dark:text-zinc-400 mb-1 block">
                 API Key
