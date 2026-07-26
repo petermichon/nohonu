@@ -1,7 +1,7 @@
 import { CORS, extractClientIp } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
 
-export async function serveStatic(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
+export async function serveStatic(req: Request, path: string, info: { remoteAddr: { hostname?: string } }): Promise<Response> {
   if (req.method !== 'GET') {
     return new Response('Method not allowed', { status: 405, headers: CORS });
   }
@@ -14,10 +14,10 @@ export async function serveStatic(req: Request, path: string, info: Deno.ServeHa
   if (!result) return new Response('Site not found', { status: 404, headers: CORS });
 
   if (result.contentType === 'text/html') {
-    const ip = extractClientIp(req, info.remoteAddr as Deno.NetAddr);
+    const ip = extractClientIp(req, info.remoteAddr);
     sites.recordPageHit(resolved.domain, ip);
   }
 
   const responseHeaders = { ...CORS, 'Content-Type': result.contentType };
-  return new Response(result.file.readable, { headers: responseHeaders });
+  return new Response(result.data as BodyInit, { headers: responseHeaders });
 }

@@ -1,4 +1,6 @@
-import { CORS, requireAuth, error, ensureDomain } from '../shared/http.ts';
+import { Router } from 'express';
+import type { Request as ExpressReq, Response as ExpressRes } from 'express';
+import { requireAuth } from '../shared/http.ts';
 import { health } from './endpoints/health-get.ts';
 import { auth } from './endpoints/auth-get.ts';
 import { authRegister } from './endpoints/auth-register-post.ts';
@@ -49,352 +51,241 @@ import { getUserByUsernameEndpoint } from './endpoints/users-username-get.ts';
 import { getProfilePicture } from './endpoints/users-username-profile-picture-get.ts';
 import { createSite } from './endpoints/sites-create-post.ts';
 import { createSiteFromGithub } from './endpoints/sites-create-github-post.ts';
-import type { CtxRouteHandler, RouteContext } from './endpoints/sites-types.ts';
+import type { RouteContext } from './endpoints/sites-types.ts';
 
-type Endpoint = {
-  handler: (req: Request, path: string, info: Deno.ServeHandlerInfo) => Promise<Response> | Response;
-  auth?: boolean;
-};
+export const router = Router();
 
-const routes: Record<string, Endpoint> = {
-  '/health': { handler: health, auth: true },
-  '/auth': { handler: auth, auth: true },
-  '/auth/register': { handler: authRegister, auth: true },
-  '/auth/login': { handler: authLogin, auth: true },
-  '/auth/logout': { handler: authLogout, auth: true },
-  '/auth/me': { handler: authMe, auth: true },
-  '/auth/displayname': { handler: authDisplayName, auth: true },
-  '/auth/profile-picture': { handler: uploadProfilePicture, auth: true },
-  '/auth/profile-picture/delete': { handler: deleteProfilePicture, auth: true },
-  '/auth/sessions': { handler: getSessions, auth: true },
-  '/auth/sessions/delete': { handler: deleteSessionEndpoint, auth: true },
-  '/check-domain': { handler: checkDomain, auth: true },
-  '/check-custom-domain': { handler: checkCustomDomain, auth: true },
-  '/check-subdomain': { handler: checkSubdomain, auth: true },
-  '/custom-domains': { handler: getAllCustomDomains, auth: true },
-  '/explore/sites': { handler: listExploreSites, auth: true },
-};
-
-const SITE_GET_ROUTES: [string, CtxRouteHandler][] = [
-  ['', getSiteInfo],
-  ['download', downloadSite],
-  ['icon', getSiteIcon],
-  ['cover', getSiteCover],
-  ['meta', getSiteMeta],
-  ['stats', getSiteStats],
-  ['visitors', getSiteVisitors],
-  ['uptime', getSiteUptime],
-  ['repos', getSiteRepos],
-  ['versions', listSiteVersions],
-  ['versions/download', downloadSiteVersion],
-];
-
-async function handleSiteRoute(req: Request, path: string): Promise<Response> {
-  const url = new URL(req.url);
-
-  if (path === '/sites' && req.method === 'GET') {
-    return await listSites(req);
-  }
-
-  if (!path.startsWith('/sites/')) {
-    return error('Endpoint not found', 404);
-  }
-
-  const parts = path.split('/').filter(Boolean);
-  const domain = parts[1];
-  const action = parts[2];
-  const subAction = parts[3];
-  const customDomain = parts[3];
-  const verifyAction = parts[4];
-  const timestamp = parseInt(parts[3] || '', 10);
-
-  if (!domain) {
-    return error('Domain is required', 400);
-  }
-
-  const domainCheck = ensureDomain(domain);
-  if (domainCheck instanceof Response) {
-    return domainCheck;
-  }
-
-  let parsedTimestamp: number | undefined;
-  if (isNaN(timestamp)) {
-    parsedTimestamp = undefined;
-  } else {
-    parsedTimestamp = timestamp;
-  }
-
-  // For custom-domains, customDomain is in parts[3], verify action is in parts[4]
-  // For versions, subAction is the timestamp
-  const ctx: RouteContext = {
-    domain,
-    action,
-    subAction: action === 'custom-domains' ? verifyAction : subAction,
-    customDomain: action === 'custom-domains' ? customDomain : undefined,
-    timestamp: parsedTimestamp,
-    url,
-  };
-
-  if (req.method === 'GET') {
-    const compareAction = action ?? '';
-    const route = SITE_GET_ROUTES.find(([routeAction]) => {
-      return routeAction === compareAction;
-    });
-
-    if (route) {
-      return route[1](req, ctx);
-    }
-
-    // Custom domains GET
-    if (action === 'custom-domains') {
-      if (subAction === 'token') {
-        return getVerificationToken(req, ctx);
-      }
-      return getCustomDomains(req, ctx);
-    }
-  }
-
-  if (req.method === 'DELETE') {
-    if (action === 'versions') {
-      return deleteVersion(req, ctx);
-    }
-    if (action === 'custom-domains') {
-      return deleteCustomDomain(req, ctx);
-    }
-    if (action === 'cover') {
-      return deleteCover(req, ctx);
-    }
-    if (!action) {
-      return deleteSite(req, ctx);
-    }
-  }
-
-  if (req.method === 'POST') {
-    // Create new site (first version)
-    if (!action) {
-      // Check if it's GitHub create or file upload
-      const contentType = req.headers.get('Content-Type');
-      if (contentType?.includes('application/json')) {
-        return createSiteFromGithub(req, ctx);
-      }
-      return createSite(req, ctx);
-    }
-    // Add versions to existing site
-    if (action === 'versions') {
-      if (verifyAction === 'activate') {
-        return activateVersion(req, ctx);
-      }
-      if (subAction === 'github') {
-        return fetchGithub(req, ctx);
-      }
-      if (!subAction) {
-        return upload(req, ctx);
-      }
-    }
-    if (action === 'custom-domains') {
-      if (verifyAction === 'verify') {
-        return verifyCustomDomain(req, ctx);
-      }
-      if (!subAction) {
-        return addCustomDomain(req, ctx);
-      }
-    }
-    if (action === 'cover') {
-      return uploadCover(req, ctx);
-    }
-  }
-
-  if (req.method === 'PATCH') {
-    if (action === 'toggle') {
-      return toggleSite(req, ctx);
-    }
-    if (action === 'star') {
-      return toggleStar(req, ctx);
-    }
-    if (action === 'meta') {
-      return updateMeta(req, ctx);
-    }
-  }
-
-  return error('Endpoint not found', 404);
-}
-
-function matchRoute(path: string): Endpoint | undefined {
-  if (routes[path]) {
-    return routes[path];
-  }
-  if (path === '/sites' || path.startsWith('/sites/')) {
-    return { handler: handleSiteRoute, auth: true };
-  }
-  if (path.startsWith('/users/') && path.endsWith('/sites')) {
-    // /users/:username/sites
-    const username = path.split('/')[2];
-    if (!username) {
-      return undefined;
-    }
-    return { handler: (req) => getUserSites(req, username), auth: true };
-  }
-  if (path.startsWith('/users/') && path.endsWith('/profile-picture')) {
-    // /users/:username/profile-picture
-    const username = path.split('/')[2];
-    if (!username) {
-      return undefined;
-    }
-    return { handler: (req) => getProfilePicture(req, username), auth: false };
-  }
-  if (path.startsWith('/users/') && path.split('/').length === 4) {
-    // /users/:username/:domain
-    const parts = path.split('/');
-    const username = parts[2];
-    const domain = parts[3];
-    if (!username || !domain) {
-      return undefined;
-    }
-    return { handler: (req) => getPublicSiteInfo(req, username, domain), auth: true };
-  }
-  if (path.startsWith('/users/')) {
-    return { handler: getUserByUsernameEndpoint, auth: true };
-  }
-  return undefined;
-}
-
-// Virtual reverse proxy - routes requests to appropriate service
-export function routeRequest(path: string): 'auth' | 'api' | 'static' {
-  if (path.startsWith('/auth')) {
-    return 'auth';
-  }
-  if (
-    path.startsWith('/sites') ||
-    path.startsWith('/users') ||
-    path === '/health' ||
-    path === '/check-domain' ||
-    path === '/check-custom-domain' ||
-    path === '/check-subdomain' ||
-    path === '/custom-domains' ||
-    path === '/explore/sites'
-  ) {
-    return 'api';
-  }
-  return 'static';
-}
-
-// AuthService - handles /auth/* endpoints (requires API key for dev protection)
-async function handleAuthService(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
-  const start = Date.now();
-  const route = matchRoute(path);
-
-  // Check API key for auth endpoints (dev protection)
-  const authError = await requireAuth(req);
-  if (authError) {
-    console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
-    return authError;
-  }
-
-  if (!route) {
-    const response = error('Auth endpoint not found', 404);
-    console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
-    return response;
-  }
-
-  let response: Response;
-  try {
-    response = await route.handler(req, path, info);
-  } catch (err) {
-    console.error('Error in auth endpoint:', err);
-    response = new Response('Internal server error', { status: 500, headers: CORS });
-  }
-
-  const finalResponse = addCorsHeaders(response);
-  console.log(`${req.method} ${path} ${finalResponse.status} ${Date.now() - start}ms`);
-  return finalResponse;
-}
-
-// ApiService - handles protected endpoints (requires auth)
-async function handleApiService(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
-  const start = Date.now();
-  const route = matchRoute(path);
-
-  if (!route) {
-    const response = error('API endpoint not found', 404);
-    console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
-    return response;
-  }
-
-  // Check auth for API requests (now async for session validation)
-  if (route.auth !== false) {
-    const authError = await requireAuth(req);
-    if (authError) {
-      console.log(`${req.method} ${path} ${authError.status} ${Date.now() - start}ms`);
-      return authError;
-    }
-  }
-
-  let response: Response;
-  try {
-    response = await route.handler(req, path, info);
-  } catch (err) {
-    console.error('Error in API endpoint:', err);
-    response = new Response('Internal server error', { status: 500, headers: CORS });
-  }
-
-  const finalResponse = addCorsHeaders(response);
-  console.log(`${req.method} ${path} ${finalResponse.status} ${Date.now() - start}ms`);
-  return finalResponse;
-}
-
-// StaticService - handles static file serving (no auth)
-async function handleStaticService(req: Request, path: string, info: Deno.ServeHandlerInfo): Promise<Response> {
-  const start = Date.now();
-  let response: Response;
-  try {
-    response = await serveStatic(req, path, info);
-  } catch (err) {
-    console.error('Error in static endpoint:', err);
-    response = new Response('Internal server error', { status: 500, headers: CORS });
-  }
-  console.log(`${req.method} ${path} ${response.status} ${Date.now() - start}ms`);
-  return response;
-}
-
-function addCorsHeaders(response: Response): Response {
-  let headers: Headers;
-  try {
-    headers = new Headers(response.headers);
-    for (const [key, value] of Object.entries(CORS)) {
-      if (!headers.has(key)) {
+function toWebRequest(req: ExpressReq): Request {
+  const url = new URL(req.originalUrl, `http://${req.headers.host ?? 'localhost'}`);
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (value) {
+      if (Array.isArray(value)) {
+        for (const v of value) headers.append(key, v);
+      } else {
         headers.set(key, value);
       }
     }
-  } catch {
-    headers = new Headers(CORS);
   }
+  const rawBody = (req.method !== 'GET' && req.method !== 'HEAD') ? (req.body as Buffer | undefined) : undefined;
+  const body = rawBody ? new Uint8Array(rawBody) : undefined;
+  return new Request(url, { method: req.method, headers, body });
+}
 
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
+async function sendWebResponse(expressRes: ExpressRes, webResponse: Response): Promise<void> {
+  webResponse.headers.forEach((value, key) => {
+    expressRes.setHeader(key, value);
   });
-}
-
-export async function handler(req: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
-  const url = new URL(req.url);
-  const path = url.pathname;
-
-  if (req.method === 'OPTIONS') {
-    return new Response(undefined, { headers: CORS });
-  }
-
-  // Virtual reverse proxy - route to appropriate service
-  const service = routeRequest(path);
-
-  switch (service) {
-    case 'auth':
-      return handleAuthService(req, path, info);
-    case 'api':
-      return handleApiService(req, path, info);
-    case 'static':
-      return handleStaticService(req, path, info);
-    default:
-      return error('Invalid route', 500);
+  const body = await webResponse.arrayBuffer();
+  if (body.byteLength > 0) {
+    expressRes.status(webResponse.status).send(Buffer.from(body));
+  } else {
+    expressRes.status(webResponse.status).end();
   }
 }
+
+function buildCtx(req: ExpressReq): RouteContext {
+  const p = req.params as Record<string, string | undefined>;
+  const domain = p['domain'] ?? '';
+  const action = p['action'];
+  const subAction = p['subAction'];
+  const timestamp = p['timestamp'] ? parseInt(p['timestamp'], 10) : undefined;
+  return {
+    domain,
+    action,
+    subAction,
+    customDomain: action === 'custom-domains' ? subAction : undefined,
+    timestamp,
+    url: new URL(req.originalUrl, `http://${req.headers.host ?? 'localhost'}`),
+  };
+}
+
+function wrap(fn: (req: Request) => Response | Promise<Response>): (req: ExpressReq, res: ExpressRes) => Promise<void> {
+  return async (req, res) => {
+    const webReq = toWebRequest(req);
+    const authError = await requireAuth(webReq);
+    if (authError) {
+      await sendWebResponse(res, authError);
+      return;
+    }
+    try {
+      const response = await fn(webReq);
+      await sendWebResponse(res, response);
+    } catch (err) {
+      console.error('Unhandled error:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+function wrapCtx(fn: (req: Request, ctx: RouteContext) => Response | Promise<Response>): (req: ExpressReq, res: ExpressRes) => Promise<void> {
+  return async (req, res) => {
+    const webReq = toWebRequest(req);
+    const authError = await requireAuth(webReq);
+    if (authError) {
+      await sendWebResponse(res, authError);
+      return;
+    }
+    try {
+      const ctx = buildCtx(req);
+      const response = await fn(webReq, ctx);
+      await sendWebResponse(res, response);
+    } catch (err) {
+      console.error('Unhandled error:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+function wrapStrParam(fn: (req: Request, param: string) => Response | Promise<Response>, paramName: string): (req: ExpressReq, res: ExpressRes) => Promise<void> {
+  return async (req, res) => {
+    const webReq = toWebRequest(req);
+    const authError = await requireAuth(webReq);
+    if (authError) {
+      await sendWebResponse(res, authError);
+      return;
+    }
+    try {
+      const param = (req.params as Record<string, string>)[paramName] ?? '';
+      const response = await fn(webReq, param);
+      await sendWebResponse(res, response);
+    } catch (err) {
+      console.error('Unhandled error:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+// Health
+router.get('/health', wrap(health));
+
+// Auth
+router.get('/auth', wrap(auth));
+router.post('/auth/register', wrap(authRegister));
+router.post('/auth/login', wrap(authLogin));
+router.post('/auth/logout', wrap(authLogout));
+router.get('/auth/me', wrap(authMe));
+router.patch('/auth/displayname', wrap(authDisplayName));
+router.post('/auth/profile-picture', wrap(uploadProfilePicture));
+router.delete('/auth/profile-picture/delete', wrap(deleteProfilePicture));
+router.get('/auth/sessions', wrap(getSessions));
+router.delete('/auth/sessions/delete', wrap(deleteSessionEndpoint));
+
+// Domain checks
+router.get('/check-domain', wrap(checkDomain));
+router.get('/check-custom-domain', wrap(checkCustomDomain));
+router.get('/check-subdomain', wrap(checkSubdomain));
+
+// Custom domains (global)
+router.get('/custom-domains', wrap(getAllCustomDomains));
+
+// Explore
+router.get('/explore/sites', wrap(listExploreSites));
+
+// Sites list
+router.get('/sites', wrap(listSites));
+
+// Site routes - GET
+router.get('/sites/:domain', wrapCtx(getSiteInfo));
+router.get('/sites/:domain/download', wrapCtx(downloadSite));
+router.get('/sites/:domain/icon', wrapCtx(getSiteIcon));
+router.get('/sites/:domain/cover', wrapCtx(getSiteCover));
+router.get('/sites/:domain/meta', wrapCtx(getSiteMeta));
+router.get('/sites/:domain/stats', wrapCtx(getSiteStats));
+router.get('/sites/:domain/visitors', wrapCtx(getSiteVisitors));
+router.get('/sites/:domain/uptime', wrapCtx(getSiteUptime));
+router.get('/sites/:domain/repos', wrapCtx(getSiteRepos));
+
+// Site versions
+router.get('/sites/:domain/versions', wrapCtx(listSiteVersions));
+router.get('/sites/:domain/versions/download', wrapCtx(downloadSiteVersion));
+
+// Site custom domains - GET
+router.get('/sites/:domain/custom-domains', wrapCtx(getCustomDomains));
+router.get('/sites/:domain/custom-domains/token', wrapCtx(getVerificationToken));
+
+// Site routes - POST
+router.post('/sites/:domain', async (req: ExpressReq, res: ExpressRes) => {
+  const webReq = toWebRequest(req);
+  const authError = await requireAuth(webReq);
+  if (authError) { await sendWebResponse(res, authError); return; }
+  try {
+    const ctx = buildCtx(req);
+    const contentType = req.headers['content-type'] ?? '';
+    const fn = contentType.includes('application/json') ? createSiteFromGithub : createSite;
+    const response = await fn(webReq, ctx);
+    await sendWebResponse(res, response);
+  } catch (err) {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.post('/sites/:domain/versions', wrapCtx(upload));
+router.post('/sites/:domain/versions/github', wrapCtx(fetchGithub));
+router.post('/sites/:domain/versions/:timestamp/activate', wrapCtx(activateVersion));
+router.post('/sites/:domain/custom-domains', wrapCtx(addCustomDomain));
+router.post('/sites/:domain/custom-domains/verify', wrapCtx(verifyCustomDomain));
+router.post('/sites/:domain/cover', wrapCtx(uploadCover));
+
+// Site routes - DELETE
+router.delete('/sites/:domain', wrapCtx(deleteSite));
+router.delete('/sites/:domain/versions/:timestamp', wrapCtx(deleteVersion));
+router.delete('/sites/:domain/custom-domains/:subAction', wrapCtx(deleteCustomDomain));
+router.delete('/sites/:domain/cover', wrapCtx(deleteCover));
+
+// Site routes - PATCH
+router.patch('/sites/:domain/toggle', wrapCtx(toggleSite));
+router.patch('/sites/:domain/star', wrapCtx(toggleStar));
+router.patch('/sites/:domain/meta', wrapCtx(updateMeta));
+
+// User routes
+router.get('/users/:username/sites', wrapStrParam(getUserSites, 'username'));
+router.get('/users/:username/profile-picture', async (req: ExpressReq, res: ExpressRes) => {
+  try {
+    const webReq = toWebRequest(req);
+    const username = (req.params as Record<string, string>)['username'] ?? '';
+    const response = await getProfilePicture(webReq, username);
+    await sendWebResponse(res, response);
+  } catch (err) {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.get('/users/:username/:domain', async (req: ExpressReq, res: ExpressRes) => {
+  const webReq = toWebRequest(req);
+  const authError = await requireAuth(webReq);
+  if (authError) { await sendWebResponse(res, authError); return; }
+  try {
+    const p = req.params as Record<string, string | undefined>;
+    const response = await getPublicSiteInfo(webReq, p['username'] ?? '', p['domain'] ?? '');
+    await sendWebResponse(res, response);
+  } catch (err) {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.get('/users/:username', async (req: ExpressReq, res: ExpressRes) => {
+  const webReq = toWebRequest(req);
+  const authError = await requireAuth(webReq);
+  if (authError) { await sendWebResponse(res, authError); return; }
+  try {
+    const response = await getUserByUsernameEndpoint(webReq, req.path);
+    await sendWebResponse(res, response);
+  } catch (err) {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Static file serving - must be last (catch-all)
+router.get('/{*path}', async (req: ExpressReq, res: ExpressRes) => {
+  try {
+    const webReq = toWebRequest(req);
+    const remoteAddr = { hostname: req.ip ?? req.socket.remoteAddress ?? '' };
+    const response = await serveStatic(webReq, req.path, { remoteAddr });
+    await sendWebResponse(res, response);
+  } catch (err) {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});

@@ -1,5 +1,5 @@
-// ponytail: per-user JSON file storage for sessions - simple, upgrade to KV/Redis if scale needed
-
+import * as fs from 'node:fs';
+import * as fsp from 'node:fs/promises';
 import { SITES_DIR } from '../../shared/paths.ts';
 
 function getUserSessionsFile(username: string): string {
@@ -10,6 +10,7 @@ export interface Session {
   id: string;
   username: string;
   userAgent?: string;
+  deviceInfo?: string;
   createdAt: number;
   lastActive: number;
 }
@@ -20,9 +21,10 @@ interface SessionsData {
 
 function loadUserSessions(username: string): SessionsData {
   try {
-    const data = Deno.readTextFileSync(getUserSessionsFile(username));
+    const data = fs.readFileSync(getUserSessionsFile(username), 'utf-8');
     return JSON.parse(data);
   } catch {
+    // ignore
     return { sessions: [] };
   }
 }
@@ -30,11 +32,12 @@ function loadUserSessions(username: string): SessionsData {
 function saveUserSessions(username: string, data: SessionsData): void {
   const userDir = `${SITES_DIR}/${username}`;
   try {
-    Deno.mkdirSync(userDir, { recursive: true });
+    fs.mkdirSync(userDir, { recursive: true });
   } catch {
-    // directory already exists
+    // ignore
+
   }
-  Deno.writeTextFileSync(getUserSessionsFile(username), JSON.stringify(data, null, 2));
+  fs.writeFileSync(getUserSessionsFile(username), JSON.stringify(data, null, 2));
 }
 
 export function createSession(username: string, userAgent?: string): Session {
@@ -53,60 +56,70 @@ export function createSession(username: string, userAgent?: string): Session {
   return session;
 }
 
-export async function getSession(id: string): Promise<Session | null> {
-  // Need to scan all user directories to find the session
-  // ponytail: inefficient but works for small scale, add index if needed
+async function scanAllUsers(): Promise<string[]> {
+  const users: string[] = [];
   try {
-    for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.isDirectory) {
-        const username = entry.name;
-        const data = loadUserSessions(username);
-        const session = data.sessions.find((s) => s.id === id);
-        if (session) return session;
+    const entries = await fsp.readdir(SITES_DIR, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        users.push(entry.name);
       }
     }
   } catch {
-    // SITES_DIR doesn't exist or other error
+    // ignore
+
+  }
+  return users;
+}
+
+export async function getSession(id: string): Promise<Session | null> {
+  try {
+    const users = await scanAllUsers();
+    for (const username of users) {
+      const data = loadUserSessions(username);
+      const session = data.sessions.find((s) => s.id === id);
+      if (session) return session;
+    }
+  } catch {
+    // ignore
+
   }
   return null;
 }
 
 export async function updateSessionActivity(id: string): Promise<void> {
-  // Find which user owns this session
   try {
-    for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.isDirectory) {
-        const username = entry.name;
-        const data = loadUserSessions(username);
-        const session = data.sessions.find((s) => s.id === id);
-        if (session) {
-          session.lastActive = Date.now();
-          saveUserSessions(username, data);
-          return;
-        }
+    const users = await scanAllUsers();
+    for (const username of users) {
+      const data = loadUserSessions(username);
+      const session = data.sessions.find((s) => s.id === id);
+      if (session) {
+        session.lastActive = Date.now();
+        saveUserSessions(username, data);
+        return;
       }
     }
   } catch {
-    // SITES_DIR doesn't exist or other error
+    // ignore
+
   }
 }
 
 export async function deleteSession(id: string): Promise<void> {
   try {
-    for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.isDirectory) {
-        const username = entry.name;
-        const data = loadUserSessions(username);
-        const filtered = data.sessions.filter((s) => s.id !== id);
-        if (filtered.length !== data.sessions.length) {
-          data.sessions = filtered;
-          saveUserSessions(username, data);
-          return;
-        }
+    const users = await scanAllUsers();
+    for (const username of users) {
+      const data = loadUserSessions(username);
+      const filtered = data.sessions.filter((s) => s.id !== id);
+      if (filtered.length !== data.sessions.length) {
+        data.sessions = filtered;
+        saveUserSessions(username, data);
+        return;
       }
     }
   } catch {
-    // SITES_DIR doesn't exist or other error
+    // ignore
+
   }
 }
 
@@ -124,18 +137,17 @@ export function getUserSessions(username: string): Session[] {
 export async function cleanupExpiredSessions(maxAgeMs: number = 30 * 24 * 60 * 60 * 1000): Promise<void> {
   const now = Date.now();
   try {
-    for await (const entry of Deno.readDir(SITES_DIR)) {
-      if (entry.isDirectory) {
-        const username = entry.name;
-        const data = loadUserSessions(username);
-        const filtered = data.sessions.filter((s) => now - s.lastActive < maxAgeMs);
-        if (filtered.length !== data.sessions.length) {
-          data.sessions = filtered;
-          saveUserSessions(username, data);
-        }
+    const users = await scanAllUsers();
+    for (const username of users) {
+      const data = loadUserSessions(username);
+      const filtered = data.sessions.filter((s) => now - s.lastActive < maxAgeMs);
+      if (filtered.length !== data.sessions.length) {
+        data.sessions = filtered;
+        saveUserSessions(username, data);
       }
     }
   } catch {
-    // SITES_DIR doesn't exist or other error
+    // ignore
+
   }
 }

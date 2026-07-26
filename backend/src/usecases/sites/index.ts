@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult, domainDir, coverImagePath } from '../../shared/paths.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
@@ -143,12 +144,12 @@ export async function getSiteInfo(user: string, domain: string): Promise<{ enabl
   return { enabled: data.enabled, subdomain: data.subdomain, siteId: data.siteId, displayName: data.displayName, account: data.account, coverImage: data.coverImage };
 }
 
-export async function downloadActiveVersion(user: string, domain: string): Promise<{ file: Deno.FsFile; filename: string } | null> {
-  const data = await storage.readSiteMetadata(user, domain);
-  if (!data || !data.enabled || data.currentIndex === null) return null;
-  const file = await storage.openActiveVersion(user, domain);
-  if (!file) return null;
-  return { file, filename: `${domain}.zip` };
+export async function downloadActiveVersion(user: string, domain: string): Promise<{ data: Uint8Array; filename: string } | null> {
+  const meta = await storage.readSiteMetadata(user, domain);
+  if (!meta || !meta.enabled || meta.currentIndex === null) return null;
+  const data = await storage.readActiveVersion(user, domain);
+  if (!data) return null;
+  return { data, filename: `${domain}.zip` };
 }
 
 export async function getSiteIcon(user: string, domain: string): Promise<{ data: Uint8Array; contentType: string } | null> {
@@ -406,7 +407,7 @@ export async function listVersions(user: string, domain: string): Promise<{ vers
   for (const [key, entry] of Object.entries(data.versions)) {
     const index = parseInt(key, 10);
     try {
-      const stat = await Deno.stat(storage.versionPath(user, domain, index));
+      const stat = await fs.stat(storage.versionPath(user, domain, index));
       versions.push({ index, size: stat.size, source: entry.source, createdAt: entry.createdAt });
     } catch {
       // file missing, skip
@@ -419,12 +420,12 @@ export async function listVersions(user: string, domain: string): Promise<{ vers
   return { versions, current: data.currentIndex };
 }
 
-export async function downloadVersion(user: string, domain: string, index: number): Promise<{ file: Deno.FsFile; filename: string } | null> {
+export async function downloadVersion(user: string, domain: string, index: number): Promise<{ data: Uint8Array; filename: string } | null> {
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
   if (!(await storage.versionExists(user, domain, index))) return null;
-  const file = await storage.openVersion(user, domain, index);
-  return { file, filename: `${domain}-${index}.zip` };
+  const data = await storage.readVersion(user, domain, index);
+  return { data, filename: `${domain}-${index}.zip` };
 }
 
 export async function activateVersion(user: string, domain: string, index: number): Promise<UsecaseResult<void>> {
@@ -487,9 +488,9 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
   data.displayName = domain;
 
   // Create directories and files
-  await Deno.mkdir(domainDir(user, domain), { recursive: true });
-  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
-  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await fs.mkdir(domainDir(user, domain), { recursive: true });
+  await fs.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
   return { index, siteId };
@@ -509,8 +510,8 @@ export async function uploadVersion(user: string, domain: string, zipData: Uint8
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
 
-  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
-  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await fs.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
   return { index };
@@ -564,9 +565,9 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   data.displayName = domain;
 
   // Create directories and files
-  await Deno.mkdir(domainDir(user, domain), { recursive: true });
-  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
-  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await fs.mkdir(domainDir(user, domain), { recursive: true });
+  await fs.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
   return { index, siteId, repo, branch: ref };
@@ -613,8 +614,8 @@ export async function uploadVersionFromGithub(user: string, domain: string, repo
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
 
-  await Deno.mkdir(storage.versionsDir(user, domain), { recursive: true });
-  await Deno.writeFile(storage.versionPath(user, domain, index), zipData);
+  await fs.mkdir(storage.versionsDir(user, domain), { recursive: true });
+  await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
   return { index, repo, branch: ref };
@@ -624,12 +625,12 @@ export function recordPageHit(domain: string, ip: string): void {
   analytics.recordHit(domain, ip);
 }
 
-export async function serveSiteFile(user: string, domain: string, filePath: string): Promise<{ file: Deno.FsFile; contentType: string } | null> {
-  const data = await storage.readSiteMetadata(user, domain);
-  if (!data) return null;
+export async function serveSiteFile(user: string, domain: string, filePath: string): Promise<{ data: Uint8Array; contentType: string } | null> {
+  const siteData = await storage.readSiteMetadata(user, domain);
+  if (!siteData) return null;
 
   if (!(await storage.extractedSiteExists(user, domain))) {
-    if (!data.enabled || data.currentIndex === null) return null;
+    if (!siteData.enabled || siteData.currentIndex === null) return null;
 
     try {
       const { readZip } = await import('../../shared/zip.ts');
@@ -642,12 +643,15 @@ export async function serveSiteFile(user: string, domain: string, filePath: stri
     }
   }
 
-  const file = await storage.readExtractedFile(user, domain, filePath);
-  if (!file) return null;
+  const fileHandle = await storage.readExtractedFile(user, domain, filePath);
+  if (!fileHandle) return null;
+
+  const data = await fileHandle.readFile();
+  await fileHandle.close();
 
   const parts = filePath.split('.');
   const ext = parts.pop() ?? '';
-  return { file, contentType: getContentType(ext) };
+  return { data, contentType: getContentType(ext) };
 }
 
 export async function resolveDomainAndServe(host: string, path: string): Promise<{ user: string; domain: string; filePath: string } | null> {
@@ -734,7 +738,7 @@ export async function getSiteCover(user: string, domain: string): Promise<Uint8A
   if (!data || !data.coverImage) return null;
 
   try {
-    return await Deno.readFile(coverImagePath(user, domain));
+    return await fs.readFile(coverImagePath(user, domain));
   } catch {
     return null;
   }
@@ -747,7 +751,7 @@ export async function uploadSiteCover(user: string, domain: string, imageData: U
   }
 
   try {
-    await Deno.writeFile(coverImagePath(user, domain), imageData);
+    await fs.writeFile(coverImagePath(user, domain), imageData);
     data.coverImage = 'cover.jpg';
     await storage.writeSiteMetadata(user, domain, data);
     return { ok: true, value: undefined };
@@ -764,7 +768,7 @@ export async function deleteSiteCover(user: string, domain: string): Promise<Use
   }
 
   try {
-    await Deno.remove(coverImagePath(user, domain));
+    await fs.rm(coverImagePath(user, domain), { force: true });
   } catch {
     // File might not exist, that's ok
   }

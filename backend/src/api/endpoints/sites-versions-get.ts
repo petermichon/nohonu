@@ -20,7 +20,7 @@ export async function getSiteVersions(
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${result.filename}"`,
     };
-    return new Response(result.file.readable, { headers });
+    return new Response(result.data as BodyInit, { headers });
   }
 
   const result = await sites.listVersions(username, domain);

@@ -1,3 +1,5 @@
+import * as dns from 'node:dns/promises';
+
 async function generateVerificationToken(domain: string): Promise<string> {
   const data = new TextEncoder().encode(domain);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -11,13 +13,12 @@ export async function verifyCustomDomain(domain: string, customDomain: string): 
   const txtRecordName = `_nohonu.${customDomain}`;
   
   try {
-    const records = await Deno.resolveDns(txtRecordName, 'TXT');
+    const records = await dns.resolveTxt(txtRecordName);
     if (!records || records.length === 0) {
       return false;
     }
     
     for (const record of records) {
-      // TXT records are returned as arrays of strings
       for (const value of record) {
         if (value === expectedToken) {
           return true;

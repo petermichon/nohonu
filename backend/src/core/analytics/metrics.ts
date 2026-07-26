@@ -1,8 +1,9 @@
+import * as fs from 'node:fs/promises';
 import { domainDir } from '../../shared/paths.ts';
 
 export const SLOT_MS = 60 * 1000;
-export const STATS_SLOTS = 86400; // 60 days of data (86400 minutes)
-export const UPTIME_SLOTS = 86400; // 60 days of data (86400 minutes)
+export const STATS_SLOTS = 86400;
+export const UPTIME_SLOTS = 86400;
 export const MAX_VISITORS_PER_DOMAIN = 500;
 
 function analyticsPath(user: string, domain: string): string {
@@ -22,7 +23,7 @@ type AnalyticsSnapshot = {
 export async function loadAnalytics(user: string, domain: string): Promise<void> {
   let content: string;
   try {
-    content = await Deno.readTextFile(analyticsPath(user, domain));
+    content = await fs.readFile(analyticsPath(user, domain), 'utf-8');
   } catch {
     return;
   }
@@ -61,7 +62,7 @@ export async function saveAnalytics(user: string, domain: string): Promise<void>
   const domainUptime = uptime.get(domain);
   if (domainUptime) snapshot.uptime = Object.fromEntries(domainUptime);
   try {
-    await Deno.writeTextFile(analyticsPath(user, domain), JSON.stringify(snapshot));
+    await fs.writeFile(analyticsPath(user, domain), JSON.stringify(snapshot));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`Failed to save analytics snapshot for ${user}/${domain}: ${message}`);

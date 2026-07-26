@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { error, json } from '../../shared/http.ts';
 import * as users from '../../core/auth/users.ts';
 
@@ -9,9 +10,7 @@ export async function deleteProfilePicture(req: Request): Promise<Response> {
 
   try {
     const profilePicturePath = users.getProfilePicturePath(username);
-    await Deno.remove(profilePicturePath).catch(() => {
-      // File might not exist, that's ok
-    });
+    await fs.rm(profilePicturePath, { force: true });
     users.removeProfilePicture(username);
     return json({ success: true });
   } catch (err) {

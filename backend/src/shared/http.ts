@@ -1,7 +1,7 @@
 import { VALID_DOMAIN } from './paths.ts';
 import * as sessions from '../core/auth/sessions.ts';
 
-const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? '*';
+const ALLOWED_ORIGIN = process.env['ALLOWED_ORIGIN'] ?? '*';
 
 export const CORS = {
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
@@ -9,7 +9,7 @@ export const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key, X-Account, X-Session-Id, X-Username',
 };
 
-export const API_KEY = Deno.env.get('API_KEY');
+export const API_KEY = process.env['API_KEY'];
 
 export async function requireAuth(req: Request): Promise<Response | undefined> {
   // Check API key first (for dev/admin access)
@@ -48,7 +48,7 @@ export function validateDomain(domain: unknown): domain is string {
   return typeof domain === 'string' && VALID_DOMAIN.test(domain);
 }
 
-export function extractClientIp(req: Request, remoteAddr: Deno.NetAddr): string {
+export function extractClientIp(req: Request, remoteAddr: { hostname?: string } | null): string {
   const forwarded = req.headers.get('x-forwarded-for');
   const realIp = req.headers.get('x-real-ip');
   if (forwarded) return forwarded.split(',')[0]?.trim() ?? 'unknown';

@@ -1,5 +1,4 @@
-// ponytail: JSON file storage - simple, no database dependency, upgrade to KV/Postgres if scale needed
-
+import * as fs from 'node:fs';
 import { hashPassword, verifyPassword } from './password.ts';
 import { SITES_DIR } from '../../shared/paths.ts';
 
@@ -16,7 +15,7 @@ export interface User {
 
 function loadUserFile(username: string): User | null {
   try {
-    const data = Deno.readTextFileSync(USER_FILE(username));
+    const data = fs.readFileSync(USER_FILE(username), 'utf-8');
     return JSON.parse(data);
   } catch {
     return null;
@@ -25,12 +24,11 @@ function loadUserFile(username: string): User | null {
 
 function saveUserFile(username: string, user: User): void {
   const userDir = `${SITES_DIR}/${username}`;
-  Deno.mkdirSync(userDir, { recursive: true });
-  Deno.writeTextFileSync(USER_FILE(username), JSON.stringify(user, null, 2));
+  fs.mkdirSync(userDir, { recursive: true });
+  fs.writeFileSync(USER_FILE(username), JSON.stringify(user, null, 2));
 }
 
 export async function createUser(password: string, username: string): Promise<User> {
-  // Check username uniqueness
   if (loadUserFile(username)) {
     throw new Error('Username already exists');
   }

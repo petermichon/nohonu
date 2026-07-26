@@ -1,12 +1,14 @@
-import { handler } from './src/api/router.ts';
+import * as fs from 'node:fs/promises';
+import express from 'express';
+import cors from 'cors';
+import { router } from './src/api/router.ts';
 import { scheduleUptimeChecks } from './scheduler.ts';
 import { loadAnalytics, saveAnalytics } from './src/core/analytics/metrics.ts';
 import { SITES_DIR } from './src/shared/paths.ts';
 import { listUsers, listDomains } from './src/core/sites/storage.ts';
 
-await Deno.mkdir(SITES_DIR, { recursive: true });
+await fs.mkdir(SITES_DIR, { recursive: true });
 
-// Load analytics for all sites
 const users = await listUsers();
 for (const user of users) {
   const domains = await listDomains(user);
@@ -17,17 +19,26 @@ for (const user of users) {
 
 scheduleUptimeChecks();
 
-const port = parseInt(Deno.env.get('PORT') ?? '8080');
-const server = Deno.serve({ port }, handler);
+const app = express();
+app.disable('x-powered-by');
+app.use(cors());
+app.use(express.raw({ type: '*/*', limit: '50mb' }));
 
-Deno.addSignalListener('SIGTERM', async () => {
-  await server.shutdown();
-  // Save analytics for all sites
-  const users = await listUsers();
-  for (const user of users) {
+app.use(router);
+
+const port = parseInt(process.env['PORT'] ?? '8080');
+const server = app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
+
+process.on('SIGTERM', async () => {
+  server.close();
+  const siteUsers = await listUsers();
+  for (const user of siteUsers) {
     const domains = await listDomains(user);
     for (const domain of domains) {
       await saveAnalytics(user, domain);
     }
   }
+  process.exit(0);
 });

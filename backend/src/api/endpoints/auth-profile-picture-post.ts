@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { error, json } from '../../shared/http.ts';
 import * as users from '../../core/auth/users.ts';
 
@@ -13,13 +14,13 @@ export async function uploadProfilePicture(req: Request): Promise<Response> {
   }
 
   const body = await req.arrayBuffer();
-  if (body.byteLength > 5_242_880) { // 5MB limit
+  if (body.byteLength > 5_242_880) {
     return error('Image too large, max 5MB', 400);
   }
 
   try {
     const profilePicturePath = users.getProfilePicturePath(username);
-    await Deno.writeFile(profilePicturePath, new Uint8Array(body));
+    await fs.writeFile(profilePicturePath, new Uint8Array(body));
     users.setProfilePicture(username);
     return json({ success: true });
   } catch (err) {

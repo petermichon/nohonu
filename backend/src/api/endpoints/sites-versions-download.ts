@@ -19,5 +19,5 @@ export async function downloadSiteVersion(req: Request, { domain, timestamp: ind
     'Content-Type': 'application/zip',
     'Content-Disposition': `attachment; filename="${result.filename}"`,
   };
-  return new Response(result.file.readable, { headers });
+  return new Response(result.data as BodyInit, { headers });
 }

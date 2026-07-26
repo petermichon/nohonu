@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { CORS } from '../../shared/http.ts';
 import * as users from '../../core/auth/users.ts';
 
@@ -13,7 +14,7 @@ export async function getProfilePicture(req: Request, username: string): Promise
 
   try {
     const profilePicturePath = users.getProfilePicturePath(username);
-    const file = await Deno.readFile(profilePicturePath);
+    const file = await fs.readFile(profilePicturePath);
     return new Response(file, {
       headers: { ...CORS, 'Content-Type': 'image/jpeg' },
     });
