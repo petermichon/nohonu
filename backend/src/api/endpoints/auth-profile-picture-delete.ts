@@ -11,7 +11,7 @@ export async function deleteProfilePicture(req: Request): Promise<Response> {
   try {
     const profilePicturePath = users.getProfilePicturePath(username);
     await fs.rm(profilePicturePath, { force: true });
-    users.removeProfilePicture(username);
+    await users.removeProfilePicture(username);
     return json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

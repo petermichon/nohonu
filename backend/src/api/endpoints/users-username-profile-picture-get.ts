@@ -7,7 +7,7 @@ export async function getProfilePicture(req: Request, username: string): Promise
     return new Response('Method not allowed', { status: 405, headers: CORS });
   }
 
-  const user = users.getUserByUsername(username);
+  const user = await users.getUserByUsername(username);
   if (!user || !user.profilePicture) {
     return new Response('Not Found', { status: 404, headers: CORS });
   }

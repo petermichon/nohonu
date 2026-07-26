@@ -21,7 +21,7 @@ export async function uploadProfilePicture(req: Request): Promise<Response> {
   try {
     const profilePicturePath = users.getProfilePicturePath(username);
     await fs.writeFile(profilePicturePath, new Uint8Array(body));
-    users.setProfilePicture(username);
+    await users.setProfilePicture(username);
     return json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

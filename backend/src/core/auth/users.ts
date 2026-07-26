@@ -1,8 +1,7 @@
-import * as fs from 'node:fs';
 import { hashPassword, verifyPassword } from './password.ts';
+import { db } from '../../db.ts';
 import { SITES_DIR } from '../../shared/paths.ts';
 
-const USER_FILE = (username: string) => `${SITES_DIR}/${username}/user.json`;
 const PROFILE_PICTURE_FILE = (username: string) => `${SITES_DIR}/${username}/profile.jpg`;
 
 export interface User {
@@ -13,76 +12,69 @@ export interface User {
   profilePicture?: string;
 }
 
-function loadUserFile(username: string): User | null {
-  try {
-    const data = fs.readFileSync(USER_FILE(username), 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return null;
-  }
-}
-
-function saveUserFile(username: string, user: User): void {
-  const userDir = `${SITES_DIR}/${username}`;
-  fs.mkdirSync(userDir, { recursive: true });
-  fs.writeFileSync(USER_FILE(username), JSON.stringify(user, null, 2));
-}
-
 export async function createUser(password: string, username: string): Promise<User> {
-  if (loadUserFile(username)) {
+  const existing = await db.user.findUnique({ where: { username } });
+  if (existing) {
     throw new Error('Username already exists');
   }
 
   const passwordHash = await hashPassword(password);
-  const user: User = {
-    passwordHash,
-    username,
-    displayName: username,
-    createdAt: Date.now(),
+  const user = await db.user.create({
+    data: {
+      username,
+      passwordHash,
+      displayName: username,
+      createdAt: Date.now(),
+    },
+  });
+
+  return {
+    passwordHash: user.passwordHash,
+    username: user.username,
+    displayName: user.displayName,
+    createdAt: user.createdAt,
+    profilePicture: user.profilePicture ?? undefined,
   };
-
-  saveUserFile(username, user);
-
-  return user;
 }
 
 export async function validateUser(username: string, password: string): Promise<User | null> {
-  const user = loadUserFile(username);
+  const user = await db.user.findUnique({ where: { username } });
   if (!user) return null;
 
   const valid = await verifyPassword(password, user.passwordHash);
-  return valid ? user : null;
+  return valid
+    ? {
+        passwordHash: user.passwordHash,
+        username: user.username,
+        displayName: user.displayName,
+        createdAt: user.createdAt,
+        profilePicture: user.profilePicture ?? undefined,
+      }
+    : null;
 }
 
-export function getUserByUsername(username: string): User | null {
-  return loadUserFile(username);
+export async function getUserByUsername(username: string): Promise<User | null> {
+  const user = await db.user.findUnique({ where: { username } });
+  if (!user) return null;
+  return {
+    passwordHash: user.passwordHash,
+    username: user.username,
+    displayName: user.displayName,
+    createdAt: user.createdAt,
+    profilePicture: user.profilePicture ?? undefined,
+  };
 }
 
-export function updateDisplayName(username: string, displayName: string): void {
-  const user = loadUserFile(username);
-  if (!user) {
-    throw new Error('User not found');
-  }
-  user.displayName = displayName;
-  saveUserFile(username, user);
+export async function updateDisplayName(username: string, displayName: string): Promise<void> {
+  await db.user.update({ where: { username }, data: { displayName } });
 }
 
-export function setProfilePicture(username: string): void {
-  const user = loadUserFile(username);
-  if (!user) {
-    throw new Error('User not found');
-  }
-  user.profilePicture = 'profile.jpg';
-  saveUserFile(username, user);
+export async function setProfilePicture(username: string): Promise<void> {
+  await db.user.update({ where: { username }, data: { profilePicture: 'profile.jpg' } });
 }
 
-export function removeProfilePicture(username: string): void {
-  const user = loadUserFile(username);
-  if (!user) {
-    throw new Error('User not found');
-  }
-  user.profilePicture = undefined;
-  saveUserFile(username, user);
+export async function removeProfilePicture(username: string): Promise<void> {
+  await db.user.update({ where: { username }, data: { profilePicture: null } });
 }
 
 export function getProfilePicturePath(username: string): string {

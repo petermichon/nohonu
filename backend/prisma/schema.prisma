@@ -8,8 +8,7 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  username       String    @unique
+  username       String    @id
   passwordHash   String
   displayName    String
   createdAt      Int
@@ -64,12 +63,10 @@ model Version {
   branch    String?
   createdAt Int
 
-  siteId     String
-  siteUser   String
-  siteDomain String
-  site       Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId String
+  site   Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  @@index([siteId])
+  @@unique([siteId, index])
 }
 
 model CustomDomain {

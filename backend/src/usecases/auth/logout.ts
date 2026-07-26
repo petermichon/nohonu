@@ -4,6 +4,6 @@ export async function logout(sessionId: string): Promise<void> {
   await sessions.deleteSession(sessionId);
 }
 
-export function logoutAll(userId: string): void {
-  sessions.deleteAllUserSessions(userId);
+export async function logoutAll(userId: string): Promise<void> {
+  await sessions.deleteAllUserSessions(userId);
 }

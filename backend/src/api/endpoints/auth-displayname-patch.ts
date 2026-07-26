@@ -30,7 +30,7 @@ export async function authDisplayName(req: Request): Promise<Response> {
   }
 
   try {
-    usersUc.updateDisplayName(session.username, displayName);
+    await usersUc.updateDisplayName(session.username, displayName);
     return json({ success: true }, 200);
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : 'Failed to update display name' }, 500);

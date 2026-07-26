@@ -12,7 +12,7 @@ export interface RegisterResult {
 export async function register(password: string, username: string, userAgent?: string): Promise<RegisterResult> {
   try {
     const user = await users.createUser(password, username);
-    const session = sessions.createSession(user.username, userAgent);
+    const session = await sessions.createSession(user.username, userAgent);
 
     return {
       success: true,

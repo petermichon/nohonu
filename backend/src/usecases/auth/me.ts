@@ -21,7 +21,7 @@ export async function me(sessionId: string): Promise<MeResult> {
     return { error: 'Invalid session' };
   }
 
-  const user = users.getUserByUsername(session.username);
+  const user = await users.getUserByUsername(session.username);
 
   if (!user) {
     return { error: 'User not found' };

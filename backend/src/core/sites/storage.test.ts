@@ -4,12 +4,21 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 const TEMP_BASE = await fs.mkdtemp(path.join(os.tmpdir(), 'nohonu_test_'));
+const TEST_DB = path.join(TEMP_BASE, 'test.db');
 process.env['SITES_DIR'] = TEMP_BASE;
+process.env['DATABASE_URL'] = `file:${TEST_DB}`;
+
+// Push schema to test database
+import { execSync } from 'node:child_process';
+const backendDir = path.resolve(import.meta.dirname, '../../..');
+execSync(`npx prisma db push --accept-data-loss --schema="${backendDir}/prisma/schema.prisma"`, { cwd: backendDir, stdio: 'pipe', env: { ...process.env, DATABASE_URL: `file:${TEST_DB}`, PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes' } });
 
 const storageModule = await import('./storage.ts');
 const extractFiles = storageModule.extractFiles;
 const writeSiteMetadata = storageModule.writeSiteMetadata;
 const DEFAULT_DATA = storageModule.DEFAULT_DATA;
+
+import { db } from '../../db.ts';
 
 async function readExtracted(user: string, domain: string, filePath: string): Promise<string | undefined> {
   const fullPath = `${TEMP_BASE}/${user}/${domain}/extracted/${filePath}`;
@@ -29,9 +38,18 @@ async function pathExists(p: string): Promise<boolean> {
   }
 }
 
+async function createUser(username: string): Promise<void> {
+  await db.user.upsert({
+    where: { username },
+    update: {},
+    create: { username, passwordHash: '', displayName: username, createdAt: Date.now() },
+  });
+}
+
 async function setupDomain(user: string, domain: string): Promise<void> {
   const domainDir = `${TEMP_BASE}/${user}/${domain}`;
   await fs.mkdir(domainDir, { recursive: true });
+  await createUser(user);
   await writeSiteMetadata(user, domain, DEFAULT_DATA);
 }
 

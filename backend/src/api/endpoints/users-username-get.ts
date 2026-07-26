@@ -1,7 +1,7 @@
 import { json, checkMethod } from '../../shared/http.ts';
 import { getUserByUsername } from '../../core/auth/users.ts';
 
-export function getUserByUsernameEndpoint(req: Request, path: string): Response {
+export async function getUserByUsernameEndpoint(req: Request, path: string): Promise<Response> {
   const methodError = checkMethod(req, 'GET');
   if (methodError) return methodError;
 
@@ -12,7 +12,7 @@ export function getUserByUsernameEndpoint(req: Request, path: string): Response 
     return json({ error: 'Username required' }, 400);
   }
 
-  const user = getUserByUsername(username);
+  const user = await getUserByUsername(username);
 
   if (!user) {
     return json({ error: 'User not found' }, 404);

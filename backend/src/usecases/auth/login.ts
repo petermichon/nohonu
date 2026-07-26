@@ -19,7 +19,7 @@ export async function login(username: string, password: string, userAgent?: stri
     };
   }
 
-  const session = sessions.createSession(user.username, userAgent);
+  const session = await sessions.createSession(user.username, userAgent);
 
   return {
     success: true,

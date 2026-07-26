@@ -17,7 +17,7 @@ export async function getSessions(req: Request): Promise<Response> {
   }
 
   // Get all sessions for this user
-  const userSessions = sessions.getUserSessions(session.username);
+  const userSessions = await sessions.getUserSessions(session.username);
 
   return json({ sessions: userSessions });
 }

@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch main.ts",
-    "start": "tsx main.ts",
+"db:deploy": "prisma migrate deploy",
+"dev": "npm run db:deploy && tsx watch main.ts",
+"start": "npm run db:deploy && tsx main.ts",
     "test": "vitest run"
   },
   "dependencies": {

@@ -21,14 +21,14 @@ export async function requireAuth(req: Request): Promise<Response | undefined> {
   const sessionId = req.headers.get('X-Session-Id');
   if (sessionId) {
     const session = await sessions.getSession(sessionId);
-    if (session) {
-      // Update last activity
-      await sessions.updateSessionActivity(sessionId);
-      return undefined;
+    if (!session) {
+      return error('Invalid session', 401);
     }
+    await sessions.updateSessionActivity(sessionId);
+    return undefined;
   }
 
-  // If no API key env var and no valid session, allow (dev mode)
+  // If no API key env var and no session provided, allow (dev mode)
   if (!API_KEY) {
     return undefined;
   }
