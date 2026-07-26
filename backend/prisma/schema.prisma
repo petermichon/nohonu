@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id             String    @id @default(uuid())
+  username       String    @unique
+  passwordHash   String
+  displayName    String
+  createdAt      Int
+  profilePicture String?
+
+  sessions      Session[]
+  siteOwnership Site[]
+}
+
+model Session {
+  id        String @id
+  username  String
+  userAgent String?
+  deviceInfo String?
+  createdAt Int
+  lastActive Int
+
+  user User @relation(fields: [username], references: [username], onDelete: Cascade)
+}
+
+model Site {
+  id          String  @id @default(uuid())
+  siteId      String
+  domain      String
+  userUsername String
+  nextIndex   Int     @default(1)
+  currentIndex Int?
+  enabled     Boolean @default(true)
+  account     String?
+  displayName String?
+  subdomain   String?
+  coverImage  String?
+  lastDeployedAt Int?
+  starCount   Int     @default(0)
+  extracted   Boolean @default(false)
+
+  user User @relation(fields: [userUsername], references: [username], onDelete: Cascade)
+
+  versions      Version[]
+  customDomains CustomDomain[]
+  repoHistories RepoHistory[]
+  starredBy     StarredBy[]
+
+  @@unique([userUsername, domain])
+}
+
+model Version {
+  id        String @id @default(uuid())
+  index     Int
+  type      String
+  repo      String?
+  branch    String?
+  createdAt Int
+
+  siteId     String
+  siteUser   String
+  siteDomain String
+  site       Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+model CustomDomain {
+  id        String  @id @default(uuid())
+  domain    String
+  verified  Boolean @default(false)
+
+  siteId     String
+  site       Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, domain])
+}
+
+model RepoHistory {
+  id      String @id @default(uuid())
+  repo    String
+  branch  String
+  lastUsed Int
+
+  siteId     String
+  site       Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+model StarredBy {
+  id       String @id @default(uuid())
+  username String
+
+  siteId     String
+  site       Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, username])
+  @@index([siteId])
+}
