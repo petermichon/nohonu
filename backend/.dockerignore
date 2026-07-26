@@ -1,4 +1,7 @@
-sites/
+node_modules/
+data/
+deno.json
+deno.lock
 .prettierrc
 .prettierignore
 README.md

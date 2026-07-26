@@ -1,5 +1,5 @@
-import { SLOT_MS, saveAnalytics, recordUptime } from './src/core/analytics/metrics.ts';
-import * as sites from './src/usecases/sites/index.ts';
+import { SLOT_MS, saveAnalytics, recordUptime } from './core/analytics/metrics.ts';
+import * as sites from './usecases/sites/index.ts';
 
 async function checkAndRecord(user: string, domain: string): Promise<void> {
   const status = await sites.checkSite(user, domain);

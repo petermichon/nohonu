@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import express from 'express';
 import cors from 'cors';
 import { router } from './src/api/router.ts';
-import { scheduleUptimeChecks } from './scheduler.ts';
+import { scheduleUptimeChecks } from './src/scheduler.ts';
 import { loadAnalytics, saveAnalytics } from './src/core/analytics/metrics.ts';
 import { SITES_DIR } from './src/shared/paths.ts';
 import { listUsers, listDomains } from './src/core/sites/storage.ts';

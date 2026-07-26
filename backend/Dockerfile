@@ -1,15 +1,16 @@
-FROM denoland/deno:2.3.3
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY deno.json deno.lock main.ts scheduler.ts ./
-COPY src/ src/
+COPY package.json package-lock.json ./
+RUN npm ci
 
-RUN deno cache --frozen main.ts
+COPY tsconfig.json main.ts ./
+COPY src/ src/
 
 ENV PORT=8080
 ENV SITES_DIR=/data/sites
 
 EXPOSE 8080
 
-CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write=/data", "--no-prompt", "main.ts"]
+CMD ["node", "--import", "tsx", "main.ts"]
