@@ -293,14 +293,14 @@ function SitePage() {
           </div>
         </div>
 
-        {/* Navigation tabs */}
-        <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
+          {/* Navigation tabs */}
+          <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 p-1">
           <Link
             to="/u/$username/$sitename"
             params={{ username: actualUsername || '', sitename: actualDomain }}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
               activeTab === 'overview'
-                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
@@ -310,9 +310,9 @@ function SitePage() {
           <Link
             to="/u/$username/$sitename/$section"
             params={{ username: actualUsername || '', sitename: actualDomain, section: 'analytics' }}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
               activeTab === 'analytics'
-                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
@@ -322,9 +322,9 @@ function SitePage() {
           <Link
             to="/u/$username/$sitename/$section"
             params={{ username: actualUsername || '', sitename: actualDomain, section: 'domains' }}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
               activeTab === 'domains'
-                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
@@ -334,9 +334,9 @@ function SitePage() {
           <Link
             to="/u/$username/$sitename/$section"
             params={{ username: actualUsername || '', sitename: actualDomain, section: 'versions' }}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
               activeTab === 'versions'
-                ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
             }`}
           >
@@ -347,9 +347,9 @@ function SitePage() {
             <Link
               to="/u/$username/$sitename/$section"
               params={{ username: actualUsername || '', sitename: actualDomain, section: 'settings' }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
                 activeTab === 'settings'
-                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             >

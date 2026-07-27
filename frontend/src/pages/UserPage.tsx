@@ -327,13 +327,13 @@ export default function UserPage() {
           </div>
 
           {/* Navigation tabs */}
-          <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
+          <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 p-1">
             <Link
               to="/u/$username"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
                 activeTab === 'overview'
-                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             >
@@ -343,9 +343,9 @@ export default function UserPage() {
             <Link
               to="/u/$username/sites"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
                 activeTab === 'sites'
-                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             >
@@ -358,9 +358,9 @@ export default function UserPage() {
             <Link
               to="/u/$username/stars"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
                 activeTab === 'stars'
-                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             >
@@ -373,9 +373,9 @@ export default function UserPage() {
             <Link
               to="/u/$username/domains"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
                 activeTab === 'domains'
-                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             >
@@ -388,9 +388,9 @@ export default function UserPage() {
             <Link
               to="/u/$username/servers"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
                 activeTab === 'servers'
-                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             >
@@ -401,9 +401,9 @@ export default function UserPage() {
               <Link
                 to="/u/$username/settings"
                 params={{ username }}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
                   activeTab === 'settings'
-                    ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                    ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                     : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
                 }`}
               >
