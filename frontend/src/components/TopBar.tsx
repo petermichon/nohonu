@@ -13,6 +13,7 @@ import {
   Palette,
   LogIn,
   LogOut,
+  Star,
   Globe,
   Server,
   Layout,
@@ -69,7 +70,7 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
       <button
         type="button"
         onClick={onBack}
-        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
       >
         <ChevronLeft className="w-4 h-4" />
         {backLabel}
@@ -80,7 +81,7 @@ function MenuSection({ onBack, backLabel, options, currentValue, onSelect }: Men
           <button
             type="button"
             onClick={() => onSelect(value)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
           >
             {Icon === null ? (
               <span className="w-4 h-4 shrink-0" />
@@ -160,19 +161,9 @@ export function TopBar() {
   const profileOptions: ProfileOption[] = username
     ? [
         { route: '/u/$username', label: 'Profile', icon: User, divider: false },
-        {
-          route: '/u/$username/sites',
-          label: 'Sites',
-          icon: Layout,
-          divider: false,
-        },
-        { route: '/u/$username/domains', label: 'Domains', icon: Globe, divider: false },
-        {
-          route: '/u/$username/servers',
-          label: 'Servers',
-          icon: Server,
-          divider: true,
-        },
+        { route: '/u/$username/sites', label: 'Sites', icon: Layout, divider: false },
+        { route: '/u/$username/stars', label: 'Stars', icon: Star, divider: false },
+        { route: '/u/$username/domains', label: 'Domains', icon: Globe, divider: true },
         { route: '/u/$username/settings', label: 'Settings', icon: Settings, divider: false },
       ]
     : [{ route: '/account', label: 'Settings', icon: Settings, divider: false }];
@@ -387,7 +378,7 @@ export function TopBar() {
                       <button
                         type="button"
                         disabled
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400"
                       >
                         <ChevronLeft className="w-4 h-4 text-zinc-400 dark:text-zinc-600" />
                         Settings
@@ -396,7 +387,7 @@ export function TopBar() {
                       <button
                         type="button"
                         onClick={() => setMenuView('theme')}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         {theme === 'system' ? (
                           browserTheme === 'dark' ? (
@@ -414,7 +405,7 @@ export function TopBar() {
                       <button
                         type="button"
                         onClick={() => setMenuView('language')}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <Languages className="w-4 h-4" />
                         <span>Language</span>
@@ -422,7 +413,7 @@ export function TopBar() {
                       <button
                         type="button"
                         onClick={() => setMenuView('font')}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <Type className="w-4 h-4" />
                         <span>Font</span>
@@ -430,7 +421,7 @@ export function TopBar() {
                       <button
                         type="button"
                         onClick={() => setMenuView('accent')}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <Palette className="w-4 h-4" />
                         <span>Accent Color</span>
@@ -442,7 +433,7 @@ export function TopBar() {
                           setIsMenuOpen(false);
                           setMenuView('main');
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <Settings className="w-4 h-4" />
                         <span>Settings</span>
@@ -454,7 +445,7 @@ export function TopBar() {
                           setIsMenuOpen(false);
                           setMenuView('main');
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <Scale className="w-4 h-4" />
                         <span>Legal</span>
@@ -465,7 +456,7 @@ export function TopBar() {
                           setIsMenuOpen(false);
                           setMenuView('main');
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <Info className="w-4 h-4" />
                         <span>About</span>
@@ -576,7 +567,7 @@ export function TopBar() {
                         onClick={() => {
                           setIsProfileOpen(false);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         {Icon && <Icon className="w-4 h-4" />}
                         <span>{label}</span>
@@ -595,7 +586,7 @@ export function TopBar() {
                           setIsProfileOpen(false);
                           navigate({ to: '/' });
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Sign out</span>
@@ -609,7 +600,7 @@ export function TopBar() {
                         onClick={() => {
                           setIsProfileOpen(false);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50"
                       >
                         <LogIn className="w-4 h-4" />
                         <span>Log in</span>

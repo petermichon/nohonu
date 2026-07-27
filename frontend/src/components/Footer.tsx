@@ -54,10 +54,9 @@ export function Footer() {
   ];
 
   return (
-    <footer className="py-12">
-      <div className="border-t border-zinc-200 dark:border-zinc-900"></div>
+    <footer className="py-8">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6 pt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6">
           <div className="flex items-center gap-4 justify-self-center md:justify-self-start">
             <Link to="/" className="flex items-center gap-2">
               <span

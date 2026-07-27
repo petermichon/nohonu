@@ -5,7 +5,6 @@ import {
   AlertCircle,
   Layout,
   Globe,
-  Server,
   Check,
   X,
   Plus,
@@ -17,7 +16,7 @@ import {
 } from 'lucide-react';
 import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
-import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser, useServers, useUserStars } from '../lib/api.ts';
+import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser, useUserStars } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
@@ -57,7 +56,6 @@ export default function UserPage() {
   const { apiFetch } = useApi();
   const { refreshSites } = useSites();
   const { showToast } = useToast();
-  useServers();
 
   // Use public sites for viewing others' profiles or when not logged in
   // Only use private sites when logged in and viewing own profile
@@ -156,16 +154,14 @@ export default function UserPage() {
   const activeTab = (
     location.pathname.endsWith('/domains')
       ? 'domains'
-      : location.pathname.endsWith('/servers')
-        ? 'servers'
-        : location.pathname.endsWith('/settings')
-          ? 'settings'
-          : location.pathname.endsWith('/sites')
-            ? 'sites'
-            : location.pathname.endsWith('/stars')
-              ? 'stars'
-              : 'overview'
-  ) as 'overview' | 'sites' | 'domains' | 'servers' | 'settings' | 'stars';
+      : location.pathname.endsWith('/settings')
+        ? 'settings'
+        : location.pathname.endsWith('/sites')
+          ? 'sites'
+          : location.pathname.endsWith('/stars')
+            ? 'stars'
+            : 'overview'
+  ) as 'overview' | 'sites' | 'domains' | 'settings' | 'stars';
 
   // Verify custom domain mutation
   const verifyDomainMutation = useMutation({
@@ -384,18 +380,6 @@ export default function UserPage() {
               <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal tabular-nums">
                 <span className={domainsLoading ? 'invisible' : ''}>{domains.length}</span>
               </span>
-            </Link>
-            <Link
-              to="/u/$username/servers"
-              params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
-                activeTab === 'servers'
-                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-            >
-              <Server className="w-4 h-4" />
-              Servers
             </Link>
             {isOwnProfile && (
               <Link
@@ -777,21 +761,6 @@ export default function UserPage() {
                 ))}
               </div>
             )}
-          </section>
-        )}
-
-        {/* Servers section */}
-        {activeTab === 'servers' && (
-          <section className="max-w-7xl mx-auto px-6 py-8">
-            <div className="text-center py-20">
-              <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Server className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
-              </div>
-              <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No servers</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
-                @{username} hasn't configured any servers yet.
-              </p>
-            </div>
           </section>
         )}
 

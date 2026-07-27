@@ -35,7 +35,9 @@ function RootLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-zinc-950">
       <TopBar />
-      <Outlet />
+      <div className="flex-1">
+        <Outlet />
+      </div>
       <Footer />
       <GlobalToast />
     </div>
