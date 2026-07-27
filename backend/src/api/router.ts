@@ -19,6 +19,7 @@ import { serveStatic } from './endpoints/get.ts';
 import { listSites } from './endpoints/sites-list-get.ts';
 import { listExploreSites } from './endpoints/explore-sites-get.ts';
 import { getUserSites } from './endpoints/users-username-sites-get.ts';
+import { getUserStars } from './endpoints/users-username-stars-get.ts';
 import { getPublicSiteInfo } from './endpoints/users-username-domain-get.ts';
 import { getSiteInfo } from './endpoints/sites-info-get.ts';
 import { downloadSite } from './endpoints/sites-info-download.ts';
@@ -251,6 +252,7 @@ router.get('/users/:username/profile-picture', async (req: ExpressReq, res: Expr
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+router.get('/users/:username/stars', wrapStrParam(getUserStars, 'username'));
 router.get('/users/:username/:domain', async (req: ExpressReq, res: ExpressRes) => {
   const webReq = toWebRequest(req);
   const authError = await requireAuth(webReq);

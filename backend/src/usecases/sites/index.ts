@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult, domainDir, coverImagePath } from '../../shared/paths.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
+import { db } from '../../db.ts';
 
 // Custom domain registry cache: Map<customDomain, internalDomain>
 let customDomainCache: Map<string, string> | null = null;
@@ -101,6 +102,20 @@ export async function listAllSites(username?: string): Promise<{ user: string; s
   }
 
   return allSites;
+}
+
+export async function listStarredSites(username: string): Promise<{ user: string; domain: string; displayName?: string; coverImage?: string; starCount?: number }[]> {
+  const starred = await db.starredBy.findMany({
+    where: { username },
+    include: { site: { select: { userUsername: true, domain: true, displayName: true, coverImage: true, starCount: true } } },
+  });
+  return starred.map((s) => ({
+    user: s.site.userUsername,
+    domain: s.site.domain,
+    displayName: s.site.displayName ?? undefined,
+    coverImage: s.site.coverImage ?? undefined,
+    starCount: s.site.starCount,
+  }));
 }
 
 export async function setSiteAccount(user: string, domain: string, account: string): Promise<void> {

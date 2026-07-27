@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
-import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser, useServers } from '../lib/api.ts';
+import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser, useServers, useUserStars } from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
@@ -68,6 +68,7 @@ export default function UserPage() {
   const { sessions, loading: sessionsLoading } = useSessions();
   const { deleteSession } = useDeleteSession();
   const { user: publicUser } = useUser(isOwnProfile ? undefined : username);
+  const { stars: userStars, loading: starsLoading, refreshStars } = useUserStars(username);
 
   const handleToggleStar = async (domain: string, isStarred: boolean) => {
     try {
@@ -81,7 +82,7 @@ export default function UserPage() {
         showToast(data.error || 'Failed to update star');
         return;
       }
-      await refreshSites();
+      await Promise.all([refreshSites(), refreshStars()]);
     } catch {
       showToast('Failed to update star');
     }
@@ -161,8 +162,10 @@ export default function UserPage() {
           ? 'settings'
           : location.pathname.endsWith('/sites')
             ? 'sites'
-            : 'overview'
-  ) as 'overview' | 'sites' | 'domains' | 'servers' | 'settings';
+            : location.pathname.endsWith('/stars')
+              ? 'stars'
+              : 'overview'
+  ) as 'overview' | 'sites' | 'domains' | 'servers' | 'settings' | 'stars';
 
   // Verify custom domain mutation
   const verifyDomainMutation = useMutation({
@@ -353,6 +356,21 @@ export default function UserPage() {
               </span>
             </Link>
             <Link
+              to="/u/$username/stars"
+              params={{ username }}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                activeTab === 'stars'
+                  ? 'text-zinc-950 dark:text-zinc-50 border-b-2 border-zinc-950 dark:border-zinc-50'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
+            >
+              <Star className="w-4 h-4" />
+              Stars
+              <span className="text-sm text-zinc-400 dark:text-zinc-500 font-normal tabular-nums">
+                <span className={starsLoading ? 'invisible' : ''}>{userStars.length}</span>
+              </span>
+            </Link>
+            <Link
               to="/u/$username/domains"
               params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
@@ -463,6 +481,71 @@ export default function UserPage() {
                 </p>
               </div>
             )}
+          </section>
+        )}
+
+        {/* Stars section */}
+        {activeTab === 'stars' && !starsLoading && userStars.length > 0 && (
+          <section className="max-w-7xl mx-auto px-6 py-8">
+            <div className="mb-6">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                {userStars.length === 1 ? '1 star' : `${userStars.length} stars`}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {userStars.map((star: Record<string, any>) => (
+                <div
+                  key={`${star.user}-${star.domain}`}
+                  className="relative group bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl p-4"
+                >
+                  <Link
+                    to="/u/$username/$domain"
+                    params={{ username: star.user, domain: star.domain }}
+                    className="block"
+                  >
+                    <h3 className="font-medium text-zinc-950 dark:text-zinc-100 truncate">
+                      {star.displayName || star.domain}
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate mt-1">
+                      @{star.user}/{star.domain}
+                    </p>
+                  </Link>
+                  <div className="flex items-center justify-between mt-2">
+                    {star.starCount != null && (
+                      <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                        {star.starCount} {star.starCount === 1 ? 'star' : 'stars'}
+                      </span>
+                    )}
+                    {loggedInUsername && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleToggleStar(star.domain, true);
+                        }}
+                        className="shrink-0 flex items-center gap-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full px-2 py-1 cursor-pointer transition-colors"
+                      >
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Stars empty state */}
+        {activeTab === 'stars' && !starsLoading && userStars.length === 0 && (
+          <section className="max-w-7xl mx-auto px-6 py-8">
+            <div className="text-center py-20">
+              <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Star className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
+              </div>
+              <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No stars yet</h3>
+              <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
+                @{username} hasn't starred any sites yet.
+              </p>
+            </div>
           </section>
         )}
 
