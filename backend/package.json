@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-"db:deploy": "prisma migrate deploy",
-"dev": "npm run db:deploy && tsx watch main.ts",
-"start": "npm run db:deploy && tsx main.ts",
+"db:push": "prisma generate && prisma db push --accept-data-loss",
+"dev": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes npm run db:push && tsx watch main.ts",
+"start": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes npm run db:push && tsx main.ts",
     "test": "vitest run"
   },
   "dependencies": {

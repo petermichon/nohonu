@@ -19,7 +19,7 @@ model User {
 }
 
 model Session {
-  id        String @id
+  id        String @id @default(uuid())
   username  String
   userAgent String?
   deviceInfo String?
@@ -70,7 +70,7 @@ model Version {
 }
 
 model CustomDomain {
-  id        String  @id @default(uuid())
+  id        Int     @id @default(autoincrement())
   domain    String
   verified  Boolean @default(false)
 
@@ -81,7 +81,7 @@ model CustomDomain {
 }
 
 model RepoHistory {
-  id      String @id @default(uuid())
+  id      Int    @id @default(autoincrement())
   repo    String
   branch  String
   lastUsed Int
@@ -93,7 +93,7 @@ model RepoHistory {
 }
 
 model StarredBy {
-  id       String @id @default(uuid())
+  id       Int    @id @default(autoincrement())
   username String
 
   siteId     String

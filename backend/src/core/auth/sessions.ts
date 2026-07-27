@@ -45,10 +45,7 @@ export async function getSession(id: string): Promise<Session | null> {
 }
 
 export async function updateSessionActivity(id: string): Promise<void> {
-  await db.session.update({
-    where: { id },
-    data: { lastActive: Date.now() },
-  });
+  await db.session.updateMany({ where: { id }, data: { lastActive: Date.now() } });
 }
 
 export async function deleteSession(id: string): Promise<void> {
