@@ -354,7 +354,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             text-sm font-medium rounded-full flex items-center justify-center gap-2
               cursor-pointer disabled:cursor-auto ${
             accentColorValues.bg
-          }           hover:opacity-90 disabled:opacity-40`}
+          }           disabled:opacity-40`}
         >
           {uploadMutation.isPending || fetchGithubMutation.isPending ? (
             <>

@@ -63,7 +63,7 @@ export function DangerZoneSection({ site, actionLoading, onRequestDelete }: Dang
               type="button"
               onClick={onRequestDelete}
               disabled={actionLoading || !site || site.enabled || !allowDeletion}
-              className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 shrink-0 hover:opacity-80"
+              className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 shrink-0 hover:brightness-90"
               style={{ color: `rgb(${accentColorValues.rgb})` }}
             >
               <Trash2 className="w-4 h-4" />

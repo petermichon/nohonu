@@ -255,7 +255,7 @@ export function TopBar() {
   }));
 
   return (
-    <header className="h-16 shrink-0 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
+    <header className="h-16 shrink-0 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-30">
       <div className="h-full flex items-center justify-between gap-2 max-w-7xl mx-auto px-3 sm:px-6">
         <div className="flex items-center h-full">
           <Link to="/" className="flex items-center gap-2 relative group">

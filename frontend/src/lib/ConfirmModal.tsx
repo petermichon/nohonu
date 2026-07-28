@@ -55,7 +55,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, action, domain, loadi
   const Icon = loading ? Loader2 : ICON_MAP[action];
   const iconClass = isDanger ? accentColorValues.text : 'text-zinc-600 dark:text-zinc-400';
   const btnClass = isDanger
-    ? `${accentColorValues.bg} hover:opacity-90`
+    ? `${accentColorValues.bg}`
     : 'bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600';
 
   // Determine button text color based on accent color

@@ -60,7 +60,7 @@ export function Footer() {
           <div className="flex items-center gap-4 justify-self-center md:justify-self-start">
             <Link to="/" className="flex items-center gap-2">
               <span
-                className="font-bold text-[18px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 tracking-tight"
+                className="font-bold text-[18px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 tracking-tight"
                 style={{ fontFamily: "'Outfit Variable', sans-serif" }}
               >
                 nohonu
@@ -73,7 +73,7 @@ export function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
+                  className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
                 >
                   {link.icon && <link.icon className="w-5 h-5" />}
                 </a>

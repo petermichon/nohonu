@@ -52,7 +52,7 @@ export default function Legal() {
           <Link
             key={to}
             to={to}
-            className="flex items-start gap-4 py-3 hover:opacity-70 w-fit"
+            className="flex items-start gap-4 py-3 hover:brightness-90 w-fit"
           >
             <div className="shrink-0 w-10 h-10 flex items-center justify-center">
               <Icon className="w-6 h-6 text-zinc-500 dark:text-zinc-400" />

@@ -45,7 +45,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '9, 9, 11',
   },
   red: {
-    bg: 'bg-red-500 hover:bg-red-500/90',
+    bg: 'bg-red-500 hover:brightness-90',
     bgLight: 'bg-red-100 dark:bg-red-900/30',
     bgLighter: 'bg-red-50 dark:bg-red-900/40',
     dot: 'bg-red-400',
@@ -66,7 +66,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   orange: {
-    bg: 'bg-orange-500 hover:bg-orange-500/90',
+    bg: 'bg-orange-500 hover:brightness-90',
     bgLight: 'bg-orange-100 dark:bg-orange-900/30',
     bgLighter: 'bg-orange-50 dark:bg-orange-900/40',
     dot: 'bg-orange-400',
@@ -87,7 +87,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   amber: {
-    bg: 'bg-amber-500 hover:bg-amber-500/90',
+    bg: 'bg-amber-500 hover:brightness-90',
     bgLight: 'bg-amber-100 dark:bg-amber-900/30',
     bgLighter: 'bg-amber-50 dark:bg-amber-900/40',
     dot: 'bg-amber-400',
@@ -108,7 +108,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '9, 9, 11',
   },
   yellow: {
-    bg: 'bg-yellow-500 hover:bg-yellow-500/90',
+    bg: 'bg-yellow-500 hover:brightness-90',
     bgLight: 'bg-yellow-100 dark:bg-yellow-900/30',
     bgLighter: 'bg-yellow-50 dark:bg-yellow-900/40',
     dot: 'bg-yellow-400',
@@ -129,7 +129,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '9, 9, 11',
   },
   lime: {
-    bg: 'bg-lime-500 hover:bg-lime-500/90',
+    bg: 'bg-lime-500 hover:brightness-90',
     bgLight: 'bg-lime-100 dark:bg-lime-900/30',
     bgLighter: 'bg-lime-50 dark:bg-lime-900/40',
     dot: 'bg-lime-400',
@@ -150,7 +150,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '9, 9, 11',
   },
   green: {
-    bg: 'bg-green-500 hover:bg-green-500/90',
+    bg: 'bg-green-500 hover:brightness-90',
     bgLight: 'bg-green-100 dark:bg-green-900/30',
     bgLighter: 'bg-green-50 dark:bg-green-900/40',
     dot: 'bg-green-400',
@@ -171,7 +171,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   emerald: {
-    bg: 'bg-emerald-500 hover:bg-emerald-500/90',
+    bg: 'bg-emerald-500 hover:brightness-90',
     bgLight: 'bg-emerald-100 dark:bg-emerald-900/30',
     bgLighter: 'bg-emerald-50 dark:bg-emerald-900/40',
     dot: 'bg-emerald-400',
@@ -192,7 +192,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   teal: {
-    bg: 'bg-teal-500 hover:bg-teal-500/90',
+    bg: 'bg-teal-500 hover:brightness-90',
     bgLight: 'bg-teal-100 dark:bg-teal-900/30',
     bgLighter: 'bg-teal-50 dark:bg-teal-900/40',
     dot: 'bg-teal-400',
@@ -213,7 +213,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '9, 9, 11',
   },
   cyan: {
-    bg: 'bg-cyan-500 hover:bg-cyan-500/90',
+    bg: 'bg-cyan-500 hover:brightness-90',
     bgLight: 'bg-cyan-100 dark:bg-cyan-900/30',
     bgLighter: 'bg-cyan-50 dark:bg-cyan-900/40',
     dot: 'bg-cyan-400',
@@ -234,7 +234,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '9, 9, 11',
   },
   sky: {
-    bg: 'bg-sky-500 hover:bg-sky-500/90',
+    bg: 'bg-sky-500 hover:brightness-90',
     bgLight: 'bg-sky-100 dark:bg-sky-900/30',
     bgLighter: 'bg-sky-50 dark:bg-sky-900/40',
     dot: 'bg-sky-400',
@@ -255,7 +255,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '9, 9, 11',
   },
   blue: {
-    bg: 'bg-blue-500 hover:bg-blue-500/90',
+    bg: 'bg-blue-500 hover:brightness-90',
     bgLight: 'bg-blue-100 dark:bg-blue-900/30',
     bgLighter: 'bg-blue-50 dark:bg-blue-900/40',
     dot: 'bg-blue-400',
@@ -276,7 +276,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   indigo: {
-    bg: 'bg-indigo-500 hover:bg-indigo-500/90',
+    bg: 'bg-indigo-500 hover:brightness-90',
     bgLight: 'bg-indigo-100 dark:bg-indigo-900/30',
     bgLighter: 'bg-indigo-50 dark:bg-indigo-900/40',
     dot: 'bg-indigo-400',
@@ -297,7 +297,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   violet: {
-    bg: 'bg-violet-500 hover:bg-violet-500/90',
+    bg: 'bg-violet-500 hover:brightness-90',
     bgLight: 'bg-violet-100 dark:bg-violet-900/30',
     bgLighter: 'bg-violet-50 dark:bg-violet-900/40',
     dot: 'bg-violet-400',
@@ -318,7 +318,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   purple: {
-    bg: 'bg-purple-500 hover:bg-purple-500/90',
+    bg: 'bg-purple-500 hover:brightness-90',
     bgLight: 'bg-purple-100 dark:bg-purple-900/30',
     bgLighter: 'bg-purple-50 dark:bg-purple-900/40',
     dot: 'bg-purple-400',
@@ -339,7 +339,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   fuchsia: {
-    bg: 'bg-fuchsia-500 hover:bg-fuchsia-500/90',
+    bg: 'bg-fuchsia-500 hover:brightness-90',
     bgLight: 'bg-fuchsia-100 dark:bg-fuchsia-900/30',
     bgLighter: 'bg-fuchsia-50 dark:bg-fuchsia-900/40',
     dot: 'bg-fuchsia-400',
@@ -360,7 +360,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   pink: {
-    bg: 'bg-pink-500 hover:bg-pink-500/90',
+    bg: 'bg-pink-500 hover:brightness-90',
     bgLight: 'bg-pink-100 dark:bg-pink-900/30',
     bgLighter: 'bg-pink-50 dark:bg-pink-900/40',
     dot: 'bg-pink-400',
@@ -381,7 +381,7 @@ export const ACCENT_COLORS = {
     selectionTextColor: '250, 250, 250',
   },
   rose: {
-    bg: 'bg-rose-500 hover:bg-rose-500/90',
+    bg: 'bg-rose-500 hover:brightness-90',
     bgLight: 'bg-rose-100 dark:bg-rose-900/30',
     bgLighter: 'bg-rose-50 dark:bg-rose-900/40',
     dot: 'bg-rose-400',
