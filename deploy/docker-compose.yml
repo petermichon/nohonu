@@ -26,6 +26,7 @@ services:
     environment:
       PORT: '8080'
       SITES_DIR: /data
+      DATABASE_URL: file:/data/nohonu.db
       API_KEY: ${API_KEY:-}
     volumes:
       - data:/data

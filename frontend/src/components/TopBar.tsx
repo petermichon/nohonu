@@ -24,6 +24,7 @@ import { useTheme } from '../lib/ThemeProvider.tsx';
 import { useLanguage } from '../lib/LanguageProvider.tsx';
 import { useFont, getFontFamily, type Font } from '../lib/FontProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
+import { Tooltip } from './Tooltip.tsx';
 import { useAccentColor, type AccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 import { useState } from 'react';
 
@@ -353,6 +354,11 @@ export function TopBar() {
               nohonu
             </span>
           </Link>
+          <Tooltip content="This site is in active development" position="bottom">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 leading-none mt-0.5 ml-1 cursor-default">
+              Beta
+            </span>
+          </Tooltip>
           <div className="hidden sm:flex items-center h-full ml-5">
             {username && (
               <NavButton to={`/u/${username}`} label="Profile" isActive={location.pathname === `/u/${username}`} />

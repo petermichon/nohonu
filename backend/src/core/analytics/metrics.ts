@@ -62,6 +62,8 @@ export async function saveAnalytics(user: string, domain: string): Promise<void>
   const domainUptime = uptime.get(domain);
   if (domainUptime) snapshot.uptime = Object.fromEntries(domainUptime);
   try {
+    const dir = domainDir(user, domain);
+    await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(analyticsPath(user, domain), JSON.stringify(snapshot));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

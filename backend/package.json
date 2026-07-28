@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-"db:push": "prisma generate && prisma db push --accept-data-loss",
-"dev": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes npm run db:push && tsx watch main.ts",
-"start": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes npm run db:push && tsx main.ts",
+    "db:push": "prisma generate && prisma db push --accept-data-loss",
+    "dev": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes npm run db:push && tsx watch main.ts",
+    "start": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes npm run db:push && tsx main.ts",
     "test": "vitest run"
   },
   "dependencies": {

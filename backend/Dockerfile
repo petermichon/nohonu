@@ -7,10 +7,16 @@ RUN npm ci
 
 COPY tsconfig.json main.ts ./
 COPY src/ src/
+COPY prisma/ prisma/
+
+RUN npx prisma generate
 
 ENV PORT=8080
 ENV SITES_DIR=/data/sites
 
 EXPOSE 8080
 
-CMD ["node", "--import", "tsx", "main.ts"]
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+CMD ["./entrypoint.sh"]
