@@ -43,11 +43,15 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@libsql/client@~0.17.4",
+        "npm:@prisma/adapter-libsql@^7.9.0",
+        "npm:@prisma/client@^7.9.0",
         "npm:@types/cors@^2.8.19",
         "npm:@types/express@^5.0.3",
         "npm:@types/node@^22.15.3",
         "npm:cors@^2.8.6",
         "npm:express@^5.1.0",
+        "npm:prisma@^7.9.0",
         "npm:tsx@^4.19.4",
         "npm:vitest@^3.1.3"
       ]
