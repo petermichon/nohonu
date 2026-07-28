@@ -179,7 +179,8 @@ function Home() {
             <div className="flex items-center gap-3">
               <Link
                 to={sessionId ? '/deploy' : '/signup'}
-                className={`inline-flex items-center justify-center gap-2 px-6 h-[46px] rounded-full text-sm font-medium ${
+                className={`inline-flex items-center justify-center gap-2 px-6 h-[46px] rounded-full
+                  text-sm font-medium ${
                   accentColorValues.textColor === 'light'
                     ? 'text-white'
                     : accentColorValues.textColor === 'inverted'

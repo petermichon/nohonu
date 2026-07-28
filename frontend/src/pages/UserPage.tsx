@@ -327,7 +327,8 @@ export default function UserPage() {
             <Link
               to="/u/$username"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
+                transition-colors cursor-pointer rounded-full ${
                 activeTab === 'overview'
                   ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -339,7 +340,8 @@ export default function UserPage() {
             <Link
               to="/u/$username/sites"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
+                transition-colors cursor-pointer rounded-full ${
                 activeTab === 'sites'
                   ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -354,7 +356,8 @@ export default function UserPage() {
             <Link
               to="/u/$username/stars"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
+                transition-colors cursor-pointer rounded-full ${
                 activeTab === 'stars'
                   ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -369,7 +372,8 @@ export default function UserPage() {
             <Link
               to="/u/$username/domains"
               params={{ username }}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
+                transition-colors cursor-pointer rounded-full ${
                 activeTab === 'domains'
                   ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -385,7 +389,8 @@ export default function UserPage() {
               <Link
                 to="/u/$username/settings"
                 params={{ username }}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
+                transition-colors cursor-pointer rounded-full ${
                   activeTab === 'settings'
                     ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                     : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -477,7 +482,7 @@ export default function UserPage() {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {userStars.map((star: Record<string, any>) => (
+              {userStars.map((star: { user: string; domain: string; createdAt: string }) => (
                 <div
                   key={`${star.user}-${star.domain}`}
                   className="relative group bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl p-4"
@@ -785,7 +790,8 @@ export default function UserPage() {
                         />
                       ) : (
                         <div
-                          className={`w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center justify-center`}
+                          className={`w-16 h-16 rounded-full ${accentColorValues.bgLight}
+                            flex items-center justify-center`}
                         >
                           <User className={`w-8 h-8 ${accentColorValues.textDark}`} />
                         </div>
@@ -944,7 +950,9 @@ export default function UserPage() {
                   ) : sessions.length === 0 ? (
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">No active sessions</p>
                   ) : (
-                    [...sessions].sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()).map((session) => (
+                    [...sessions].sort(
+                      (a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()
+                    ).map((session) => (
                       <div
                         key={session.id}
                         className="flex items-center justify-between w-full py-4 pr-4 overflow-hidden"

@@ -1,8 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
-console.log('API URL:', API_BASE);
-
 interface Connection {
   apiBase: string;
   apiKey: string;
@@ -80,7 +78,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       }
     };
     fetchUserData();
-  }, [connection.sessionId, connection.apiBase, connection.apiKey]);
+  }, [connection.sessionId, connection.apiBase, connection.apiKey, connection.username]);
 
   const setApiKey = (key: string) => {
     localStorage.setItem('apiKey', key);

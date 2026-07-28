@@ -85,10 +85,10 @@ export function OverviewSection({
         const targetRatio = 4 / 3;
         const currentRatio = img.width / img.height;
 
-        let cropX = 0,
-          cropY = 0,
-          cropWidth,
-          cropHeight;
+        let cropX: number,
+          cropY: number,
+          cropWidth: number,
+          cropHeight: number;
 
         if (currentRatio > targetRatio) {
           // Image is wider than 4:3, crop sides

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { SLOT_MS } from '../lib/types.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { ChartHeader, formatChartTime, ChartFooter } from './ChartHeader.tsx';
 import type { UptimeSlot, UptimeRange } from '../lib/types.ts';
@@ -84,7 +83,9 @@ export function UptimeChart({ uptime, allUptime, range, onRangeChange, onReload,
           <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barCategoryGap={2}>
             <XAxis dataKey="slot" hide />
             <Tooltip
-              content={({ active, payload }: { active?: boolean; payload?: Array<{ payload: { up: boolean | null; time: string } }> }) =>
+              content={({ active, payload }:
+                { active?: boolean; payload?: Array<{ payload: { up: boolean | null; time: string } }> }
+              ) =>
                 active && payload?.length ? (
                   <div className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-md whitespace-nowrap">
                     <p className={`text-xs font-semibold ${

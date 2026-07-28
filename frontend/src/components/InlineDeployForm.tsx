@@ -339,8 +339,10 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={
             uploadMode === 'github'
-              ? fetchGithubMutation.isPending || !githubRepo || !newDomain || !newSubdomain || subdomainChecking || subdomainResult?.taken
-              : uploadMutation.isPending || !selectedFile || !newDomain || !newSubdomain || subdomainChecking || subdomainResult?.taken
+              ? fetchGithubMutation.isPending || !githubRepo || !newDomain || !newSubdomain
+                || subdomainChecking || subdomainResult?.taken
+              : uploadMutation.isPending || !selectedFile || !newDomain || !newSubdomain
+                || subdomainChecking || subdomainResult?.taken
           }
           className={`w-full py-3 ${
             accentColorValues.textColor === 'light'
@@ -348,7 +350,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
               : accentColorValues.textColor === 'inverted'
                 ? 'text-zinc-100 dark:text-zinc-950'
                 : 'text-zinc-950'
-          } text-sm font-medium rounded-full flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto ${
+          }
+            text-sm font-medium rounded-full flex items-center justify-center gap-2
+              cursor-pointer disabled:cursor-auto ${
             accentColorValues.bg
           }           hover:opacity-90 disabled:opacity-40`}
         >

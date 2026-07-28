@@ -15,7 +15,6 @@ import {
   LogOut,
   Star,
   Globe,
-  Server,
   Layout,
   Settings,
 } from 'lucide-react';
