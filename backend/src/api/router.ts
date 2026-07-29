@@ -1,57 +1,65 @@
 import { Router } from 'express';
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { requireAuth } from '../shared/http.ts';
-import { health } from './endpoints/health-get.ts';
-import { auth } from './endpoints/auth-get.ts';
-import { authRegister } from './endpoints/auth-register-post.ts';
-import { authLogin } from './endpoints/auth-login-post.ts';
-import { authLogout } from './endpoints/auth-logout-post.ts';
-import { authMe } from './endpoints/auth-me-get.ts';
-import { authDisplayName } from './endpoints/auth-displayname-patch.ts';
-import { uploadProfilePicture } from './endpoints/auth-profile-picture-post.ts';
-import { deleteProfilePicture } from './endpoints/auth-profile-picture-delete.ts';
-import { getSessions } from './endpoints/auth-sessions-get.ts';
-import { deleteSession as deleteSessionEndpoint } from './endpoints/auth-sessions-delete.ts';
-import { checkDomain } from './endpoints/check-domain-get.ts';
-import { checkCustomDomain } from './endpoints/check-custom-domain-get.ts';
-import { checkSubdomain } from './endpoints/check-subdomain-get.ts';
-import { serveStatic } from './endpoints/get.ts';
-import { listSites } from './endpoints/sites-list-get.ts';
-import { listExploreSites } from './endpoints/explore-sites-get.ts';
-import { getUserSites } from './endpoints/users-username-sites-get.ts';
-import { getUserStars } from './endpoints/users-username-stars-get.ts';
-import { getPublicSiteInfo } from './endpoints/users-username-domain-get.ts';
-import { getSiteInfo } from './endpoints/sites-info-get.ts';
-import { downloadSite } from './endpoints/sites-info-download.ts';
-import { getSiteIcon } from './endpoints/sites-info-icon.ts';
-import { getSiteCover } from './endpoints/sites-info-cover.ts';
-import { getSiteMeta } from './endpoints/sites-info-meta.ts';
-import { getSiteStats } from './endpoints/sites-info-stats.ts';
-import { getSiteVisitors } from './endpoints/sites-info-visitors.ts';
-import { getSiteUptime } from './endpoints/sites-info-uptime.ts';
-import { getSiteRepos } from './endpoints/sites-info-repos.ts';
-import { listSiteVersions } from './endpoints/sites-versions-list-get.ts';
-import { downloadSiteVersion } from './endpoints/sites-versions-download.ts';
-import { upload } from './endpoints/sites-versions-upload-post.ts';
-import { fetchGithub } from './endpoints/sites-versions-github-post.ts';
-import { deleteVersion } from './endpoints/sites-versions-delete.ts';
-import { activateVersion } from './endpoints/sites-versions-activate-post.ts';
-import { deleteSite } from './endpoints/sites-delete.ts';
-import { toggleSite } from './endpoints/sites-toggle-patch.ts';
-import { toggleStar } from './endpoints/sites-star-patch.ts';
-import { updateMeta } from './endpoints/sites-meta-patch.ts';
-import { getCustomDomains } from './endpoints/sites-custom-domains-get.ts';
-import { addCustomDomain } from './endpoints/sites-custom-domains-post.ts';
-import { deleteCustomDomain } from './endpoints/sites-custom-domains-delete.ts';
-import { verifyCustomDomain } from './endpoints/sites-custom-domains-verify-post.ts';
-import { uploadCover } from './endpoints/sites-cover-post.ts';
-import { deleteCover } from './endpoints/sites-cover-delete.ts';
-import { getVerificationToken } from './endpoints/sites-custom-domains-token-get.ts';
-import { getAllCustomDomains } from './endpoints/custom-domains-all-get.ts';
-import { getUserByUsernameEndpoint } from './endpoints/users-username-get.ts';
-import { getProfilePicture } from './endpoints/users-username-profile-picture-get.ts';
-import { createSite } from './endpoints/sites-create-post.ts';
-import { createSiteFromGithub } from './endpoints/sites-create-github-post.ts';
+import { health } from './endpoints/health.ts';
+import {
+  auth,
+  authRegister,
+  authLogin,
+  authLogout,
+  authMe,
+  authDisplayName,
+  uploadProfilePicture,
+  deleteProfilePicture,
+  getSessions,
+  deleteSession as deleteSessionEndpoint,
+} from './endpoints/auth.ts';
+import { checkDomain, checkCustomDomain, checkSubdomain } from './endpoints/check.ts';
+import {
+  getAllCustomDomains,
+  getCustomDomains,
+  addCustomDomain,
+  deleteCustomDomain,
+  verifyCustomDomain,
+  getVerificationToken,
+} from './endpoints/custom-domains.ts';
+import {
+  listSites,
+  listExploreSites,
+  getSiteInfo,
+  downloadSite,
+  getSiteIcon,
+  getSiteCover,
+  getSiteMeta,
+  getSiteStats,
+  getSiteVisitors,
+  getSiteUptime,
+  getSiteRepos,
+  createSite,
+  createSiteFromGithub,
+  deleteSite,
+  toggleSite,
+  toggleStar,
+  updateMeta,
+  uploadCover,
+  deleteCover,
+  serveStatic,
+} from './endpoints/sites.ts';
+import {
+  listSiteVersions,
+  upload,
+  fetchGithub,
+  downloadSiteVersion,
+  deleteVersion,
+  activateVersion,
+} from './endpoints/versions.ts';
+import {
+  getUserByUsernameEndpoint,
+  getPublicSiteInfo,
+  getUserSites,
+  getUserStars,
+  getProfilePicture,
+} from './endpoints/users.ts';
 import type { RouteContext } from './endpoints/sites-types.ts';
 
 export const router = Router();
