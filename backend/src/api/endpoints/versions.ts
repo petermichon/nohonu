@@ -1,7 +1,7 @@
 import { error, json, parseJson } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
-import type { RouteContext } from './sites-types.ts';
+import type { RouteContext } from '../route-context.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 function validateRepo(repo: unknown): repo is string {

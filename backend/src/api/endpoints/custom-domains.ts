@@ -1,26 +1,14 @@
 import { error, json, parseJson } from '../../shared/http.ts';
 import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
-import * as storage from '../../core/sites/storage.ts';
-import type { RouteContext } from './sites-types.ts';
+import type { RouteContext } from '../route-context.ts';
 
 export async function getAllCustomDomains(req: Request): Promise<Response> {
   try {
-    const account = req.headers.get('X-Account');
-    const allCustomDomains = await sites.getAllCustomDomains();
+    const account = req.headers.get('X-Account') || undefined;
+    const allCustomDomains = await sites.getAllCustomDomains(account);
 
-    let filteredDomains = allCustomDomains;
-    if (account) {
-      filteredDomains = [];
-      for (const cd of allCustomDomains) {
-        const siteData = await storage.readSiteMetadata(cd.user, cd.siteDomain);
-        if (siteData?.account === account) {
-          filteredDomains.push(cd);
-        }
-      }
-    }
-
-    return json({ customDomains: filteredDomains });
+    return json({ customDomains: allCustomDomains });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to get custom domains';
     return error(message, 500);

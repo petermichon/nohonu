@@ -1,12 +1,12 @@
-import * as fs from 'node:fs/promises';
-import { json, checkMethod, error } from '../../shared/http.ts';
+import { json, checkMethod } from '../../shared/http.ts';
 import * as authUc from '../../usecases/auth/index.ts';
 import * as loginUc from '../../usecases/auth/login.ts';
 import * as logoutUc from '../../usecases/auth/logout.ts';
 import * as meUc from '../../usecases/auth/me.ts';
 import * as registerUc from '../../usecases/auth/register.ts';
-import * as usersUc from '../../core/auth/users.ts';
-import * as sessions from '../../core/auth/sessions.ts';
+import * as displayNameUc from '../../usecases/auth/updateDisplayName.ts';
+import * as sessionUc from '../../usecases/auth/sessions.ts';
+import * as profilePictureUc from '../../usecases/auth/profilePicture.ts';
 
 export function auth(req: Request): Response {
   const methodError = checkMethod(req, 'GET');
@@ -136,15 +136,8 @@ export async function authDisplayName(req: Request): Promise<Response> {
   if (methodError) return methodError;
 
   const sessionId = req.headers.get('X-Session-Id');
-
   if (!sessionId) {
     return json({ error: 'Session ID required' }, 401);
-  }
-
-  const session = await sessions.getSession(sessionId);
-
-  if (!session) {
-    return json({ error: 'Invalid session' }, 401);
   }
 
   const body = await req.json().catch(() => ({}));
@@ -158,56 +151,43 @@ export async function authDisplayName(req: Request): Promise<Response> {
     return json({ error: 'Display name too long (max 50 characters)' }, 400);
   }
 
-  try {
-    await usersUc.updateDisplayName(session.username, displayName);
-    return json({ success: true }, 200);
-  } catch (error) {
-    return json({ error: error instanceof Error ? error.message : 'Failed to update display name' }, 500);
+  const result = await displayNameUc.updateDisplayName(sessionId, displayName);
+  if (!result.success) {
+    return json({ error: result.error || 'Failed to update display name' }, 401);
   }
+
+  return json({ success: true }, 200);
 }
 
 export async function uploadProfilePicture(req: Request): Promise<Response> {
   const username = req.headers.get('X-Username');
   if (!username) {
-    return error('Missing username', 401);
+    return json({ error: 'Missing username' }, 401);
   }
 
-  const contentType = req.headers.get('Content-Type');
-  if (!contentType?.startsWith('image/')) {
-    return error('Invalid content type, must be an image', 400);
-  }
-
+  const contentType = req.headers.get('Content-Type') || '';
   const body = await req.arrayBuffer();
-  if (body.byteLength > 5_242_880) {
-    return error('Image too large, max 5MB', 400);
+
+  const result = await profilePictureUc.uploadProfilePicture(username, contentType, body);
+  if (!result.success) {
+    return json({ error: result.error }, 400);
   }
 
-  try {
-    const profilePicturePath = usersUc.getProfilePicturePath(username);
-    await fs.writeFile(profilePicturePath, new Uint8Array(body));
-    await usersUc.setProfilePicture(username);
-    return json({ success: true });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return error(`Failed to upload profile picture: ${message}`, 500);
-  }
+  return json({ success: true });
 }
 
 export async function deleteProfilePicture(req: Request): Promise<Response> {
   const username = req.headers.get('X-Username');
   if (!username) {
-    return error('Missing username', 401);
+    return json({ error: 'Missing username' }, 401);
   }
 
-  try {
-    const profilePicturePath = usersUc.getProfilePicturePath(username);
-    await fs.rm(profilePicturePath, { force: true });
-    await usersUc.removeProfilePicture(username);
-    return json({ success: true });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return error(`Failed to delete profile picture: ${message}`, 500);
+  const result = await profilePictureUc.deleteProfilePicture(username);
+  if (!result.success) {
+    return json({ error: result.error }, 500);
   }
+
+  return json({ success: true });
 }
 
 export async function getSessions(req: Request): Promise<Response> {
@@ -219,14 +199,12 @@ export async function getSessions(req: Request): Promise<Response> {
     return json({ error: 'Session ID required' }, 400);
   }
 
-  const session = await sessions.getSession(sessionId);
-  if (!session) {
-    return json({ error: 'Invalid session' }, 401);
+  const result = await sessionUc.listSessions(sessionId);
+  if (!result.success) {
+    return json({ error: result.error }, result.status);
   }
 
-  const userSessions = await sessions.getUserSessions(session.username);
-
-  return json({ sessions: userSessions });
+  return json({ sessions: result.sessions });
 }
 
 export async function deleteSession(req: Request): Promise<Response> {
@@ -238,31 +216,16 @@ export async function deleteSession(req: Request): Promise<Response> {
     return json({ error: 'Session ID required' }, 400);
   }
 
-  const currentSession = await sessions.getSession(sessionId);
-  if (!currentSession) {
-    return json({ error: 'Invalid session' }, 401);
-  }
-
   const url = new URL(req.url);
   const sessionToDelete = url.searchParams.get('id');
   if (!sessionToDelete) {
     return json({ error: 'Session ID to delete is required' }, 400);
   }
 
-  if (sessionToDelete === sessionId) {
-    return json({ error: 'Cannot delete current session, use logout instead' }, 400);
+  const result = await sessionUc.deleteSession(sessionId, sessionToDelete);
+  if (!result.success) {
+    return json({ error: result.error }, result.status ?? 400);
   }
-
-  const targetSession = await sessions.getSession(sessionToDelete);
-  if (!targetSession) {
-    return json({ error: 'Session not found' }, 404);
-  }
-
-  if (targetSession.username !== currentSession.username) {
-    return json({ error: 'Cannot delete sessions from other users' }, 403);
-  }
-
-  await sessions.deleteSession(sessionToDelete);
 
   return json({ success: true });
 }

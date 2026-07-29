@@ -1,66 +1,14 @@
 import { Router } from 'express';
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { requireAuth } from '../shared/http.ts';
+import { requireAuth } from '../usecases/requireAuth.ts';
 import { health } from './endpoints/health.ts';
-import {
-  auth,
-  authRegister,
-  authLogin,
-  authLogout,
-  authMe,
-  authDisplayName,
-  uploadProfilePicture,
-  deleteProfilePicture,
-  getSessions,
-  deleteSession as deleteSessionEndpoint,
-} from './endpoints/auth.ts';
-import { checkDomain, checkCustomDomain, checkSubdomain } from './endpoints/check.ts';
-import {
-  getAllCustomDomains,
-  getCustomDomains,
-  addCustomDomain,
-  deleteCustomDomain,
-  verifyCustomDomain,
-  getVerificationToken,
-} from './endpoints/custom-domains.ts';
-import {
-  listSites,
-  listExploreSites,
-  getSiteInfo,
-  downloadSite,
-  getSiteIcon,
-  getSiteCover,
-  getSiteMeta,
-  getSiteStats,
-  getSiteVisitors,
-  getSiteUptime,
-  getSiteRepos,
-  createSite,
-  createSiteFromGithub,
-  deleteSite,
-  toggleSite,
-  toggleStar,
-  updateMeta,
-  uploadCover,
-  deleteCover,
-  serveStatic,
-} from './endpoints/sites.ts';
-import {
-  listSiteVersions,
-  upload,
-  fetchGithub,
-  downloadSiteVersion,
-  deleteVersion,
-  activateVersion,
-} from './endpoints/versions.ts';
-import {
-  getUserByUsernameEndpoint,
-  getPublicSiteInfo,
-  getUserSites,
-  getUserStars,
-  getProfilePicture,
-} from './endpoints/users.ts';
-import type { RouteContext } from './endpoints/sites-types.ts';
+import * as auth from './endpoints/auth.ts';
+import * as check from './endpoints/check.ts';
+import * as customDomains from './endpoints/custom-domains.ts';
+import * as sites from './endpoints/sites.ts';
+import * as versions from './endpoints/versions.ts';
+import * as users from './endpoints/users.ts';
+import { buildCtx, type RouteContext } from './route-context.ts';
 
 export const router = Router();
 
@@ -91,22 +39,6 @@ async function sendWebResponse(expressRes: ExpressRes, webResponse: Response): P
   } else {
     expressRes.status(webResponse.status).end();
   }
-}
-
-function buildCtx(req: ExpressReq): RouteContext {
-  const p = req.params as Record<string, string | undefined>;
-  const domain = p['domain'] ?? '';
-  const action = p['action'];
-  const subAction = p['subAction'];
-  const timestamp = p['timestamp'] ? parseInt(p['timestamp'], 10) : undefined;
-  return {
-    domain,
-    action,
-    subAction,
-    customDomain: action === 'custom-domains' ? subAction : undefined,
-    timestamp,
-    url: new URL(req.originalUrl, `http://${req.headers.host ?? 'localhost'}`),
-  };
 }
 
 function wrap(fn: (req: Request) => Response | Promise<Response>): (req: ExpressReq, res: ExpressRes) => Promise<void> {
@@ -169,49 +101,49 @@ function wrapStrParam(fn: (req: Request, param: string) => Response | Promise<Re
 router.get('/health', wrap(health));
 
 // Auth
-router.get('/auth', wrap(auth));
-router.post('/auth/register', wrap(authRegister));
-router.post('/auth/login', wrap(authLogin));
-router.post('/auth/logout', wrap(authLogout));
-router.get('/auth/me', wrap(authMe));
-router.patch('/auth/displayname', wrap(authDisplayName));
-router.post('/auth/profile-picture', wrap(uploadProfilePicture));
-router.delete('/auth/profile-picture/delete', wrap(deleteProfilePicture));
-router.get('/auth/sessions', wrap(getSessions));
-router.delete('/auth/sessions/delete', wrap(deleteSessionEndpoint));
+router.get('/auth', wrap(auth.auth));
+router.post('/auth/register', wrap(auth.authRegister));
+router.post('/auth/login', wrap(auth.authLogin));
+router.post('/auth/logout', wrap(auth.authLogout));
+router.get('/auth/me', wrap(auth.authMe));
+router.patch('/auth/displayname', wrap(auth.authDisplayName));
+router.post('/auth/profile-picture', wrap(auth.uploadProfilePicture));
+router.delete('/auth/profile-picture/delete', wrap(auth.deleteProfilePicture));
+router.get('/auth/sessions', wrap(auth.getSessions));
+router.delete('/auth/sessions/delete', wrap(auth.deleteSession));
 
 // Domain checks
-router.get('/check-domain', wrap(checkDomain));
-router.get('/check-custom-domain', wrap(checkCustomDomain));
-router.get('/check-subdomain', wrap(checkSubdomain));
+router.get('/check-domain', wrap(check.checkDomain));
+router.get('/check-custom-domain', wrap(check.checkCustomDomain));
+router.get('/check-subdomain', wrap(check.checkSubdomain));
 
 // Custom domains (global)
-router.get('/custom-domains', wrap(getAllCustomDomains));
+router.get('/custom-domains', wrap(customDomains.getAllCustomDomains));
 
 // Explore
-router.get('/explore/sites', wrap(listExploreSites));
+router.get('/explore/sites', wrap(sites.listExploreSites));
 
 // Sites list
-router.get('/sites', wrap(listSites));
+router.get('/sites', wrap(sites.listSites));
 
 // Site routes - GET
-router.get('/sites/:domain', wrapCtx(getSiteInfo));
-router.get('/sites/:domain/download', wrapCtx(downloadSite));
-router.get('/sites/:domain/icon', wrapCtx(getSiteIcon));
-router.get('/sites/:domain/cover', wrapCtx(getSiteCover));
-router.get('/sites/:domain/meta', wrapCtx(getSiteMeta));
-router.get('/sites/:domain/stats', wrapCtx(getSiteStats));
-router.get('/sites/:domain/visitors', wrapCtx(getSiteVisitors));
-router.get('/sites/:domain/uptime', wrapCtx(getSiteUptime));
-router.get('/sites/:domain/repos', wrapCtx(getSiteRepos));
+router.get('/sites/:domain', wrapCtx(sites.getSiteInfo));
+router.get('/sites/:domain/download', wrapCtx(sites.downloadSite));
+router.get('/sites/:domain/icon', wrapCtx(sites.getSiteIcon));
+router.get('/sites/:domain/cover', wrapCtx(sites.getSiteCover));
+router.get('/sites/:domain/meta', wrapCtx(sites.getSiteMeta));
+router.get('/sites/:domain/stats', wrapCtx(sites.getSiteStats));
+router.get('/sites/:domain/visitors', wrapCtx(sites.getSiteVisitors));
+router.get('/sites/:domain/uptime', wrapCtx(sites.getSiteUptime));
+router.get('/sites/:domain/repos', wrapCtx(sites.getSiteRepos));
 
 // Site versions
-router.get('/sites/:domain/versions', wrapCtx(listSiteVersions));
-router.get('/sites/:domain/versions/download', wrapCtx(downloadSiteVersion));
+router.get('/sites/:domain/versions', wrapCtx(versions.listSiteVersions));
+router.get('/sites/:domain/versions/download', wrapCtx(versions.downloadSiteVersion));
 
 // Site custom domains - GET
-router.get('/sites/:domain/custom-domains', wrapCtx(getCustomDomains));
-router.get('/sites/:domain/custom-domains/token', wrapCtx(getVerificationToken));
+router.get('/sites/:domain/custom-domains', wrapCtx(customDomains.getCustomDomains));
+router.get('/sites/:domain/custom-domains/token', wrapCtx(customDomains.getVerificationToken));
 
 // Site routes - POST
 router.post('/sites/:domain', async (req: ExpressReq, res: ExpressRes) => {
@@ -221,7 +153,7 @@ router.post('/sites/:domain', async (req: ExpressReq, res: ExpressRes) => {
   try {
     const ctx = buildCtx(req);
     const contentType = req.headers['content-type'] ?? '';
-    const fn = contentType.includes('application/json') ? createSiteFromGithub : createSite;
+    const fn = contentType.includes('application/json') ? sites.createSiteFromGithub : sites.createSite;
     const response = await fn(webReq, ctx);
     await sendWebResponse(res, response);
   } catch (err) {
@@ -229,45 +161,45 @@ router.post('/sites/:domain', async (req: ExpressReq, res: ExpressRes) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-router.post('/sites/:domain/versions', wrapCtx(upload));
-router.post('/sites/:domain/versions/github', wrapCtx(fetchGithub));
-router.post('/sites/:domain/versions/:timestamp/activate', wrapCtx(activateVersion));
-router.post('/sites/:domain/custom-domains', wrapCtx(addCustomDomain));
-router.post('/sites/:domain/custom-domains/verify', wrapCtx(verifyCustomDomain));
-router.post('/sites/:domain/cover', wrapCtx(uploadCover));
+router.post('/sites/:domain/versions', wrapCtx(versions.upload));
+router.post('/sites/:domain/versions/github', wrapCtx(versions.fetchGithub));
+router.post('/sites/:domain/versions/:timestamp/activate', wrapCtx(versions.activateVersion));
+router.post('/sites/:domain/custom-domains', wrapCtx(customDomains.addCustomDomain));
+router.post('/sites/:domain/custom-domains/verify', wrapCtx(customDomains.verifyCustomDomain));
+router.post('/sites/:domain/cover', wrapCtx(sites.uploadCover));
 
 // Site routes - DELETE
-router.delete('/sites/:domain', wrapCtx(deleteSite));
-router.delete('/sites/:domain/versions/:timestamp', wrapCtx(deleteVersion));
-router.delete('/sites/:domain/custom-domains/:subAction', wrapCtx(deleteCustomDomain));
-router.delete('/sites/:domain/cover', wrapCtx(deleteCover));
+router.delete('/sites/:domain', wrapCtx(sites.deleteSite));
+router.delete('/sites/:domain/versions/:timestamp', wrapCtx(versions.deleteVersion));
+router.delete('/sites/:domain/custom-domains/:subAction', wrapCtx(customDomains.deleteCustomDomain));
+router.delete('/sites/:domain/cover', wrapCtx(sites.deleteCover));
 
 // Site routes - PATCH
-router.patch('/sites/:domain/toggle', wrapCtx(toggleSite));
-router.patch('/sites/:domain/star', wrapCtx(toggleStar));
-router.patch('/sites/:domain/meta', wrapCtx(updateMeta));
+router.patch('/sites/:domain/toggle', wrapCtx(sites.toggleSite));
+router.patch('/sites/:domain/star', wrapCtx(sites.toggleStar));
+router.patch('/sites/:domain/meta', wrapCtx(sites.updateMeta));
 
 // User routes
-router.get('/users/:username/sites', wrapStrParam(getUserSites, 'username'));
+router.get('/users/:username/sites', wrapStrParam(users.getUserSites, 'username'));
 router.get('/users/:username/profile-picture', async (req: ExpressReq, res: ExpressRes) => {
   try {
     const webReq = toWebRequest(req);
     const username = (req.params as Record<string, string>)['username'] ?? '';
-    const response = await getProfilePicture(webReq, username);
+    const response = await users.getProfilePicture(webReq, username);
     await sendWebResponse(res, response);
   } catch (err) {
     console.error('Unhandled error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-router.get('/users/:username/stars', wrapStrParam(getUserStars, 'username'));
+router.get('/users/:username/stars', wrapStrParam(users.getUserStars, 'username'));
 router.get('/users/:username/:domain', async (req: ExpressReq, res: ExpressRes) => {
   const webReq = toWebRequest(req);
   const authError = await requireAuth(webReq);
   if (authError) { await sendWebResponse(res, authError); return; }
   try {
     const p = req.params as Record<string, string | undefined>;
-    const response = await getPublicSiteInfo(webReq, p['username'] ?? '', p['domain'] ?? '');
+    const response = await users.getPublicSiteInfo(webReq, p['username'] ?? '', p['domain'] ?? '');
     await sendWebResponse(res, response);
   } catch (err) {
     console.error('Unhandled error:', err);
@@ -279,7 +211,7 @@ router.get('/users/:username', async (req: ExpressReq, res: ExpressRes) => {
   const authError = await requireAuth(webReq);
   if (authError) { await sendWebResponse(res, authError); return; }
   try {
-    const response = await getUserByUsernameEndpoint(webReq, req.path);
+    const response = await users.getUserByUsernameEndpoint(webReq, req.path);
     await sendWebResponse(res, response);
   } catch (err) {
     console.error('Unhandled error:', err);
@@ -292,7 +224,7 @@ router.get('/{*path}', async (req: ExpressReq, res: ExpressRes) => {
   try {
     const webReq = toWebRequest(req);
     const remoteAddr = { hostname: req.ip ?? req.socket.remoteAddress ?? '' };
-    const response = await serveStatic(webReq, req.path, { remoteAddr });
+    const response = await sites.serveStatic(webReq, req.path, { remoteAddr });
     await sendWebResponse(res, response);
   } catch (err) {
     console.error('Unhandled error:', err);

@@ -1,8 +1,6 @@
-import * as fs from 'node:fs/promises';
 import { json, checkMethod, error, CORS } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
-import * as storage from '../../core/sites/storage.ts';
-import * as users from '../../core/auth/users.ts';
+import * as publicUser from '../../usecases/auth/publicUser.ts';
 import { SUBDOMAIN_BASE } from '../../shared/paths.ts';
 
 export async function getUserByUsernameEndpoint(req: Request, path: string): Promise<Response> {
@@ -16,27 +14,17 @@ export async function getUserByUsernameEndpoint(req: Request, path: string): Pro
     return json({ error: 'Username required' }, 400);
   }
 
-  const user = await users.getUserByUsername(username);
+  const user = await publicUser.getPublicUser(username);
 
   if (!user) {
     return json({ error: 'User not found' }, 404);
   }
 
-  return json(
-    {
-      user: {
-        username: user.username,
-        displayName: user.displayName,
-        profilePicture: user.profilePicture,
-      },
-    },
-    200,
-  );
+  return json({ user }, 200);
 }
 
 export async function getPublicSiteInfo(req: Request, username: string, domain: string): Promise<Response> {
-  const userList = await storage.listUsers();
-  if (!userList.includes(username)) {
+  if (!(await publicUser.userExists(username))) {
     return error('User not found', 404);
   }
 
@@ -66,8 +54,7 @@ export async function getPublicSiteInfo(req: Request, username: string, domain: 
 }
 
 export async function getUserSites(_req: Request, username: string): Promise<Response> {
-  const userList = await storage.listUsers();
-  if (!userList.includes(username)) {
+  if (!(await publicUser.userExists(username))) {
     return error('User not found', 404);
   }
 
@@ -76,8 +63,7 @@ export async function getUserSites(_req: Request, username: string): Promise<Res
 }
 
 export async function getUserStars(_req: Request, username: string): Promise<Response> {
-  const userList = await storage.listUsers();
-  if (!userList.includes(username)) {
+  if (!(await publicUser.userExists(username))) {
     return error('User not found', 404);
   }
 
@@ -90,18 +76,12 @@ export async function getProfilePicture(req: Request, username: string): Promise
     return new Response('Method not allowed', { status: 405, headers: CORS });
   }
 
-  const user = await users.getUserByUsername(username);
-  if (!user || !user.profilePicture) {
+  const file = await publicUser.getProfilePictureFile(username);
+  if (!file) {
     return new Response('Not Found', { status: 404, headers: CORS });
   }
 
-  try {
-    const profilePicturePath = users.getProfilePicturePath(username);
-    const file = await fs.readFile(profilePicturePath);
-    return new Response(file, {
-      headers: { ...CORS, 'Content-Type': 'image/jpeg' },
-    });
-  } catch {
-    return new Response('Not Found', { status: 404, headers: CORS });
-  }
+  return new Response(file as BodyInit, {
+    headers: { ...CORS, 'Content-Type': 'image/jpeg' },
+  });
 }

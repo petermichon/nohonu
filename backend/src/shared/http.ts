@@ -1,5 +1,4 @@
 import { VALID_DOMAIN } from './paths.ts';
-import * as sessions from '../core/auth/sessions.ts';
 
 const ALLOWED_ORIGIN = process.env['ALLOWED_ORIGIN'] ?? '*';
 
@@ -8,33 +7,6 @@ export const CORS = {
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key, X-Account, X-Session-Id, X-Username',
 };
-
-export const API_KEY = process.env['API_KEY'];
-
-export async function requireAuth(req: Request): Promise<Response | undefined> {
-  // Check API key first (for dev/admin access)
-  if (API_KEY && req.headers.get('X-Api-Key') === API_KEY) {
-    return undefined;
-  }
-
-  // Check session (for user web UI access)
-  const sessionId = req.headers.get('X-Session-Id');
-  if (sessionId) {
-    const session = await sessions.getSession(sessionId);
-    if (!session) {
-      return error('Invalid session', 401);
-    }
-    await sessions.updateSessionActivity(sessionId);
-    return undefined;
-  }
-
-  // If no API key env var and no session provided, allow (dev mode)
-  if (!API_KEY) {
-    return undefined;
-  }
-
-  return error('Unauthorized', 401);
-}
 
 export function json(data: unknown, status = 200): Response {
   return Response.json(data, { status, headers: CORS });

@@ -1,4 +1,4 @@
-import { API_KEY } from '../../shared/http.ts';
+import { API_KEY } from '../requireAuth.ts';
 
 export function checkAuth(providedKey: string | null): { secured: boolean; valid: boolean } {
   if (!API_KEY) return { secured: false, valid: false };
