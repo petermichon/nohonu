@@ -30,10 +30,12 @@
   },
   "permissions": {
     "dev": {
+      "sys": true,
+      "ffi": true,
       "net": true,
       "env": true,
-      "read": ["./data"],
-      "write": ["./data"]
+      "read": true,
+      "write": true
     },
     "test": {
       "read": true,
