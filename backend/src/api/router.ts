@@ -12,6 +12,15 @@ import * as users from './endpoints/users.ts';
 
 export const router = Router();
 
+const API_KEY = process.env['API_KEY'];
+
+if (API_KEY) {
+  router.use((req, res, next) => {
+    if (req.headers['x-api-key'] === API_KEY) return next();
+    res.status(401).json({ error: 'Unauthorized' });
+  });
+}
+
 // Health
 router.get('/health', wrap(health.health));
 
