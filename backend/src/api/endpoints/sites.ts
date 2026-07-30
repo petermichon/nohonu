@@ -306,7 +306,7 @@ export async function deleteCover(req: Request, { domain }: RouteContext): Promi
   return json({ success: true });
 }
 
-export async function serveStatic(req: Request, path: string, info: { remoteAddr: { hostname?: string } }): Promise<Response> {
+export async function serveStatic(req: Request, path: string): Promise<Response> {
   if (req.method !== 'GET') {
     return new Response('Method not allowed', { status: 405, headers: CORS });
   }
@@ -319,7 +319,7 @@ export async function serveStatic(req: Request, path: string, info: { remoteAddr
   if (!result) return new Response('Site not found', { status: 404, headers: CORS });
 
   if (result.contentType === 'text/html') {
-    const ip = extractClientIp(req, info.remoteAddr);
+    const ip = extractClientIp(req, null);
     sites.recordPageHit(resolved.domain, ip);
   }
 

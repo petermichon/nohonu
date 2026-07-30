@@ -3,9 +3,6 @@ import { wrap } from './wrap.ts';
 import { wrapCtx } from './wrap-ctx.ts';
 import { wrapStrParam } from './wrap-str-param.ts';
 import { API_KEY } from './api-key.ts';
-import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { toWebRequest } from './to-web-request.ts';
-import { sendWebResponse } from './send-web-response.ts';
 import * as health from './endpoints/health.ts';
 import * as auth from './endpoints/auth.ts';
 import * as check from './endpoints/check.ts';
@@ -99,13 +96,4 @@ router.get('/users/:username/:domain', wrapCtx(users.getPublicSiteInfo));
 router.get('/users/:username', wrapStrParam(users.getUserByUsernameEndpoint, 'username'));
 
 // Static file serving - must be last (catch-all)
-router.get('/{*path}', async (req: ExpressReq, res: ExpressRes) => {
-  try {
-    const remoteAddr = { hostname: req.ip ?? req.socket.remoteAddress ?? '' };
-    const response = await sites.serveStatic(toWebRequest(req), req.path, { remoteAddr });
-    await sendWebResponse(res, response);
-  } catch (err) {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+router.get('/{*path}', wrapStrParam(sites.serveStatic, 'path'));
