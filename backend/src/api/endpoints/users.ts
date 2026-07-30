@@ -2,13 +2,7 @@ import { json, checkMethod, error, CORS } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import * as publicUser from '../../usecases/auth/publicUser.ts';
 import { SUBDOMAIN_BASE } from '../../shared/paths.ts';
-
-// === Params
-
-function extractUsernameFromPath(path: string): string | null {
-  const parts = path.split('/').filter(Boolean);
-  return parts[1] || null;
-}
+import type { RouteContext } from '../route-context.ts';
 
 // === Responses
 
@@ -37,11 +31,10 @@ function publicSiteInfoResponse(req: Request, domain: string, info: NonNullable<
 
 // === Handlers
 
-export async function getUserByUsernameEndpoint(req: Request, path: string): Promise<Response> {
+export async function getUserByUsernameEndpoint(req: Request, username: string): Promise<Response> {
   const methodError = checkMethod(req, 'GET');
   if (methodError) return methodError;
 
-  const username = extractUsernameFromPath(path);
   if (!username) return json({ error: 'Username required' }, 400);
 
   const user = await publicUser.getPublicUser(username);
@@ -49,13 +42,15 @@ export async function getUserByUsernameEndpoint(req: Request, path: string): Pro
   return json({ user }, 200);
 }
 
-export async function getPublicSiteInfo(req: Request, username: string, domain: string): Promise<Response> {
+export async function getPublicSiteInfo(req: Request, ctx: RouteContext): Promise<Response> {
+  const username = ctx.username;
+  if (!username) return userNotFound();
   if (!(await publicUser.userExists(username))) return userNotFound();
 
-  const info = await sites.getSiteInfo(username, domain);
+  const info = await sites.getSiteInfo(username, ctx.domain);
   if (!info) return siteNotFound();
 
-  return publicSiteInfoResponse(req, domain, info);
+  return publicSiteInfoResponse(req, ctx.domain, info);
 }
 
 export async function getUserSites(_req: Request, username: string): Promise<Response> {

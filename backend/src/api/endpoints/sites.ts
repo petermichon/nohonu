@@ -234,6 +234,11 @@ export async function createSite(req: Request, ctx: RouteContext): Promise<Respo
   }
 }
 
+export async function createSiteDispatch(req: Request, ctx: RouteContext): Promise<Response> {
+  const contentType = req.headers.get('Content-Type') || '';
+  return contentType.includes('application/json') ? createSiteFromGithub(req, ctx) : createSite(req, ctx);
+}
+
 export async function createSiteFromGithub(req: Request, ctx: RouteContext): Promise<Response> {
   const params = await extractCreateGithubParams(req, ctx);
   if (params instanceof Response) return params;

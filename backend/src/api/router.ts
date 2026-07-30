@@ -1,7 +1,11 @@
 import { Router } from 'express';
+import { wrap } from './wrap.ts';
+import { wrapCtx } from './wrap-ctx.ts';
+import { wrapStrParam } from './wrap-str-param.ts';
+import { API_KEY } from './api-key.ts';
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { wrap, wrapCtx, wrapStrParam, requireAuth, toWebRequest, sendWebResponse } from './wrappers.ts';
-import { buildCtx } from './route-context.ts';
+import { toWebRequest } from './to-web-request.ts';
+import { sendWebResponse } from './send-web-response.ts';
 import * as health from './endpoints/health.ts';
 import * as auth from './endpoints/auth.ts';
 import * as check from './endpoints/check.ts';
@@ -11,8 +15,6 @@ import * as versions from './endpoints/versions.ts';
 import * as users from './endpoints/users.ts';
 
 export const router = Router();
-
-const API_KEY = process.env['API_KEY'];
 
 if (API_KEY) {
   router.use((req, res, next) => {
@@ -70,21 +72,7 @@ router.get('/sites/:domain/custom-domains', wrapCtx(customDomains.getCustomDomai
 router.get('/sites/:domain/custom-domains/token', wrapCtx(customDomains.getVerificationToken));
 
 // Site routes - POST
-router.post('/sites/:domain', async (req: ExpressReq, res: ExpressRes) => {
-  const webReq = toWebRequest(req);
-  const authError = await requireAuth(webReq);
-  if (authError) { await sendWebResponse(res, authError); return; }
-  try {
-    const ctx = buildCtx(req);
-    const contentType = req.headers['content-type'] ?? '';
-    const fn = contentType.includes('application/json') ? sites.createSiteFromGithub : sites.createSite;
-    const response = await fn(webReq, ctx);
-    await sendWebResponse(res, response);
-  } catch (err) {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+router.post('/sites/:domain', wrapCtx(sites.createSiteDispatch));
 router.post('/sites/:domain/versions', wrapCtx(versions.upload));
 router.post('/sites/:domain/versions/github', wrapCtx(versions.fetchGithub));
 router.post('/sites/:domain/versions/:timestamp/activate', wrapCtx(versions.activateVersion));
@@ -105,50 +93,16 @@ router.patch('/sites/:domain/meta', wrapCtx(sites.updateMeta));
 
 // User routes
 router.get('/users/:username/sites', wrapStrParam(users.getUserSites, 'username'));
-router.get('/users/:username/profile-picture', async (req: ExpressReq, res: ExpressRes) => {
-  try {
-    const webReq = toWebRequest(req);
-    const username = (req.params as Record<string, string>)['username'] ?? '';
-    const response = await users.getProfilePicture(webReq, username);
-    await sendWebResponse(res, response);
-  } catch (err) {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+router.get('/users/:username/profile-picture', wrapStrParam(users.getProfilePicture, 'username'));
 router.get('/users/:username/stars', wrapStrParam(users.getUserStars, 'username'));
-router.get('/users/:username/:domain', async (req: ExpressReq, res: ExpressRes) => {
-  const webReq = toWebRequest(req);
-  const authError = await requireAuth(webReq);
-  if (authError) { await sendWebResponse(res, authError); return; }
-  try {
-    const p = req.params as Record<string, string | undefined>;
-    const response = await users.getPublicSiteInfo(webReq, p['username'] ?? '', p['domain'] ?? '');
-    await sendWebResponse(res, response);
-  } catch (err) {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-router.get('/users/:username', async (req: ExpressReq, res: ExpressRes) => {
-  const webReq = toWebRequest(req);
-  const authError = await requireAuth(webReq);
-  if (authError) { await sendWebResponse(res, authError); return; }
-  try {
-    const response = await users.getUserByUsernameEndpoint(webReq, req.path);
-    await sendWebResponse(res, response);
-  } catch (err) {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+router.get('/users/:username/:domain', wrapCtx(users.getPublicSiteInfo));
+router.get('/users/:username', wrapStrParam(users.getUserByUsernameEndpoint, 'username'));
 
 // Static file serving - must be last (catch-all)
 router.get('/{*path}', async (req: ExpressReq, res: ExpressRes) => {
   try {
-    const webReq = toWebRequest(req);
     const remoteAddr = { hostname: req.ip ?? req.socket.remoteAddress ?? '' };
-    const response = await sites.serveStatic(webReq, req.path, { remoteAddr });
+    const response = await sites.serveStatic(toWebRequest(req), req.path, { remoteAddr });
     await sendWebResponse(res, response);
   } catch (err) {
     console.error('Unhandled error:', err);
