@@ -670,8 +670,7 @@ export function recordPageHit(domain: string, ip: string): void {
   analytics.recordHit(domain, ip);
 }
 
-export async function serveSiteFile(sessionId: string, domain: string, filePath: string): Promise<{ data: Uint8Array; contentType: string } | null> {
-  const user = await requireSession(sessionId);
+export async function serveSiteFile(user: string, domain: string, filePath: string): Promise<{ data: Uint8Array; contentType: string } | null> {
   const siteData = await storage.readSiteMetadata(user, domain);
   if (!siteData) return null;
 
