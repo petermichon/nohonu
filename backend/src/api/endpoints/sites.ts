@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson, p } from '../../shared/http.ts';
+import { json, parseJson } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
 
@@ -267,8 +267,7 @@ export async function deleteCover(req: ExpressReq, res: ExpressRes): Promise<voi
 
 export async function serveStatic(req: ExpressReq, res: ExpressRes): Promise<void> {
   const host = req.get('Host') ?? '';
-  const path = p(req, 'path');
-  const resolved = await sites.resolveDomainAndServe(host, path);
+  const resolved = await sites.resolveDomainAndServe(host, req.path);
   if (!resolved) { res.status(404).end(); return; }
 
   const result = await sites.serveSiteFile(resolved.user, resolved.domain, resolved.filePath);
