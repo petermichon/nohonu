@@ -112,19 +112,17 @@ export async function authDisplayName(req: ExpressReq, res: ExpressRes): Promise
 }
 
 export async function uploadProfilePicture(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
   const contentType = req.get('Content-Type') || '';
   const raw = req.body instanceof Buffer ? req.body : Buffer.alloc(0);
-  const result = await profile.uploadProfilePicture(username, contentType, raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
+  const result = await profile.uploadProfilePicture(sessionId, contentType, raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
   if (!result.success) { json(res, { error: result.error }, 400); return; }
   json(res, { success: true });
 }
 
 export async function deleteProfilePicture(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
-  const result = await profile.deleteProfilePicture(username);
+  const sessionId = req.get('X-Session-Id') || '';
+  const result = await profile.deleteProfilePicture(sessionId);
   if (!result.success) { json(res, { error: result.error }, 500); return; }
   json(res, { success: true });
 }

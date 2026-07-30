@@ -12,54 +12,54 @@ function domainFrom(req: ExpressReq): string { return (req.params as Record<stri
 
 // === Params
 
-type CreateSiteParams = { username: string; domain: string; zipData: Uint8Array; subdomain?: string };
+type CreateSiteParams = { sessionId: string; domain: string; zipData: Uint8Array; subdomain?: string };
 function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | undefined {
-  const username = req.user!;
-  if (!username) return;
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) return;
 
   const buffer = req.body instanceof Buffer ? req.body : undefined;
   if (!buffer || buffer.length === 0) return;
   if (buffer.length > MAX_ZIP_BYTES) return;
 
-  return { username, domain: domainFrom(req), zipData: new Uint8Array(buffer) };
+  return { sessionId, domain: domainFrom(req), zipData: new Uint8Array(buffer) };
 }
 
-type CreateGithubParams = { username: string; domain: string; repo: string; ref: string; subdomain?: string };
+type CreateGithubParams = { sessionId: string; domain: string; repo: string; ref: string; subdomain?: string };
 async function extractCreateGithubParams(req: ExpressReq): Promise<CreateGithubParams | undefined> {
-  const username = req.user!;
-  if (!username) return;
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) return;
 
   const body = await parseJson<{ repo?: unknown; branch?: unknown; subdomain?: unknown }>(req);
   if (!body || !validateRepo(body.repo)) return;
 
   const subdomain = typeof body.subdomain === 'string' ? body.subdomain : undefined;
-  return { username, domain: domainFrom(req), repo: body.repo, ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main', subdomain };
+  return { sessionId, domain: domainFrom(req), repo: body.repo, ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main', subdomain };
 }
 
-type ToggleStarParams = { username: string; domain: string; starred: boolean };
+type ToggleStarParams = { sessionId: string; domain: string; starred: boolean };
 async function extractToggleStarParams(req: ExpressReq): Promise<ToggleStarParams | undefined> {
-  const username = req.user!;
-  if (!username) return;
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) return;
 
   const body = await parseJson<{ starred?: boolean }>(req);
-  return { username, domain: domainFrom(req), starred: body?.starred === true };
+  return { sessionId, domain: domainFrom(req), starred: body?.starred === true };
 }
 
-type UpdateMetaParams = { username: string; domain: string; meta: { subdomain?: string; displayName?: string } };
+type UpdateMetaParams = { sessionId: string; domain: string; meta: { subdomain?: string; displayName?: string } };
 async function extractUpdateMetaParams(req: ExpressReq): Promise<UpdateMetaParams | undefined> {
-  const username = req.user!;
-  if (!username) return;
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) return;
 
   const body = await parseJson<{ subdomain?: string; displayName?: string }>(req);
   if (!body) return;
 
-  return { username, domain: domainFrom(req), meta: body };
+  return { sessionId, domain: domainFrom(req), meta: body };
 }
 
-type UploadCoverParams = { username: string; domain: string; data: Uint8Array };
+type UploadCoverParams = { sessionId: string; domain: string; data: Uint8Array };
 function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefined {
-  const username = req.user!;
-  if (!username) return;
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) return;
 
   const contentType = req.get('Content-Type') || '';
   if (!contentType.startsWith('image/')) return;
@@ -67,16 +67,16 @@ function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefine
   const buffer = req.body instanceof Buffer ? req.body : undefined;
   if (!buffer || buffer.byteLength > 5_242_880) return;
 
-  return { username, domain: domainFrom(req), data: new Uint8Array(buffer) };
+  return { sessionId, domain: domainFrom(req), data: new Uint8Array(buffer) };
 }
 
 // === Handlers
 
 export async function listSites(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
-  json(res, { sites: await sites.listSites(username) });
+  json(res, { sites: await sites.listSites(sessionId) });
 }
 
 export async function listExploreSites(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -85,10 +85,10 @@ export async function listExploreSites(req: ExpressReq, res: ExpressRes): Promis
 }
 
 export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const info = await sites.getSiteInfo(username, domainFrom(req));
+  const info = await sites.getSiteInfo(sessionId, domainFrom(req));
   if (!info) { json(res, { error: 'Site not found' }, 404); return; }
 
   json(res, {
@@ -143,10 +143,10 @@ export async function getSiteCover(req: ExpressReq, res: ExpressRes): Promise<vo
 }
 
 export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const meta = await sites.getSiteMeta(username, domainFrom(req));
+  const meta = await sites.getSiteMeta(sessionId, domainFrom(req));
   if (!meta) { json(res, { error: 'Site not found' }, 404); return; }
   json(res, { domain: domainFrom(req), subdomain: meta.subdomain });
 }
@@ -169,10 +169,10 @@ export function getSiteUptime(req: ExpressReq, res: ExpressRes): void {
 }
 
 export async function getSiteRepos(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const result = await sites.getSiteRepos(username, domainFrom(req));
+  const result = await sites.getSiteRepos(sessionId, domainFrom(req));
   if (!result) { json(res, { error: 'Site not found' }, 404); return; }
   json(res, { domain: domainFrom(req), history: result.history });
 }
@@ -191,7 +191,7 @@ async function createSiteRaw(req: ExpressReq, res: ExpressRes): Promise<void> {
   if (!params) { json(res, { error: 'Missing zip file' }, 400); return; }
 
   try {
-    const result = await sites.createSite(params.username, params.domain, params.zipData, params.subdomain);
+    const result = await sites.createSite(params.sessionId, params.domain, params.zipData, params.subdomain);
     json(res, { success: true, domain: params.domain, index: result.index }, 201);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create site';
@@ -204,7 +204,7 @@ async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<v
   if (!params) { json(res, { error: 'Invalid repo format. Use owner/repo' }, 400); return; }
 
   try {
-    const result = await sites.createSiteFromGithub(params.username, params.domain, params.repo, params.ref, params.subdomain);
+    const result = await sites.createSiteFromGithub(params.sessionId, params.domain, params.repo, params.ref, params.subdomain);
     json(res, { domain: params.domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create site from GitHub';
@@ -213,18 +213,18 @@ async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<v
 }
 
 export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
-  await sites.deleteSite(username, domainFrom(req));
+  await sites.deleteSite(sessionId, domainFrom(req));
   json(res, { domain: domainFrom(req) });
 }
 
 export async function toggleSite(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const result = await sites.toggleSite(username, domainFrom(req));
+  const result = await sites.toggleSite(sessionId, domainFrom(req));
   if (!result.ok) { json(res, { error: result.error }, result.status); return; }
   json(res, { domain: domainFrom(req), enabled: result.value.enabled });
 }
@@ -233,7 +233,7 @@ export async function toggleStar(req: ExpressReq, res: ExpressRes): Promise<void
   const params = await extractToggleStarParams(req);
   if (!params) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const result = await sites.toggleStar(params.username, params.domain, params.starred);
+  const result = await sites.toggleStar(params.sessionId, params.domain, params.starred);
   if (!result.ok) { json(res, { error: result.error }, result.status); return; }
   json(res, { domain: params.domain, starred: result.value.starred, starCount: result.value.starCount });
 }
@@ -242,7 +242,7 @@ export async function updateMeta(req: ExpressReq, res: ExpressRes): Promise<void
   const params = await extractUpdateMetaParams(req);
   if (!params) { json(res, { error: 'Missing username or body' }, 400); return; }
 
-  const result = await sites.updateSiteMeta(params.username, params.domain, params.meta);
+  const result = await sites.updateSiteMeta(params.sessionId, params.domain, params.meta);
   if (!result.ok) { json(res, { error: result.error }, result.status); return; }
   json(res, { domain: params.domain, subdomain: params.meta.subdomain, displayName: params.meta.displayName });
 }
@@ -251,16 +251,16 @@ export async function uploadCover(req: ExpressReq, res: ExpressRes): Promise<voi
   const params = extractUploadCoverParams(req);
   if (!params) { json(res, { error: 'Invalid image' }, 400); return; }
 
-  const result = await sites.uploadSiteCover(params.username, params.domain, params.data);
+  const result = await sites.uploadSiteCover(params.sessionId, params.domain, params.data);
   if (!result.ok) { json(res, { error: result.error }, result.status); return; }
   json(res, { success: true });
 }
 
 export async function deleteCover(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const result = await sites.deleteSiteCover(username, domainFrom(req));
+  const result = await sites.deleteSiteCover(sessionId, domainFrom(req));
   if (!result.ok) { json(res, { error: result.error }, result.status); return; }
   json(res, { success: true });
 }

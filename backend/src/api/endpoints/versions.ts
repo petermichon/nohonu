@@ -17,27 +17,27 @@ function indexFrom(req: ExpressReq): number | undefined {
 
 // === Params
 
-type UploadParams = { username: string; domain: string; zipData: Uint8Array };
+type UploadParams = { sessionId: string; domain: string; zipData: Uint8Array };
 function extractUploadParams(req: ExpressReq): UploadParams | undefined {
-  const username = req.user!;
-  if (!username) return;
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) return;
 
   const buffer = req.body instanceof Buffer ? req.body : undefined;
   if (!buffer || buffer.length === 0) return;
   if (buffer.length > MAX_ZIP_BYTES) return;
 
-  return { username, domain: domainFrom(req), zipData: new Uint8Array(buffer) };
+  return { sessionId, domain: domainFrom(req), zipData: new Uint8Array(buffer) };
 }
 
-type GithubParams = { username: string; domain: string; repo: string; ref: string };
+type GithubParams = { sessionId: string; domain: string; repo: string; ref: string };
 async function extractGithubParams(req: ExpressReq): Promise<GithubParams | undefined> {
-  const username = req.user!;
-  if (!username) return;
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) return;
 
   const body = await parseJson<{ repo?: unknown; branch?: unknown }>(req);
   if (!body || !validateRepo(body.repo)) return;
 
-  return { username, domain: domainFrom(req), repo: body.repo, ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main' };
+  return { sessionId, domain: domainFrom(req), repo: body.repo, ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main' };
 }
 
 // === Handlers
@@ -57,7 +57,7 @@ export async function upload(req: ExpressReq, res: ExpressRes): Promise<void> {
   if (!params) { json(res, { error: 'Missing zip file' }, 400); return; }
 
   try {
-    const result = await sites.uploadVersion(params.username, params.domain, params.zipData);
+    const result = await sites.uploadVersion(params.sessionId, params.domain, params.zipData);
     json(res, { success: true, domain: params.domain, index: result.index });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to upload version';
@@ -70,7 +70,7 @@ export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<voi
   if (!params) { json(res, { error: 'Invalid repo format. Use owner/repo' }, 400); return; }
 
   try {
-    const result = await sites.uploadVersionFromGithub(params.username, params.domain, params.repo, params.ref);
+    const result = await sites.uploadVersionFromGithub(params.sessionId, params.domain, params.repo, params.ref);
     json(res, { domain: params.domain, index: result.index, repo: result.repo, branch: result.branch });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to upload version from GitHub';
@@ -79,13 +79,13 @@ export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<voi
 }
 
 export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
   const idx = indexFrom(req);
   if (idx === undefined) { json(res, { error: 'Version timestamp required' }, 400); return; }
 
-  const result = await sites.downloadVersion(username, domainFrom(req), idx);
+  const result = await sites.downloadVersion(sessionId, domainFrom(req), idx);
   if (!result) { json(res, { error: 'Version not found' }, 404); return; }
 
   res.set('Content-Type', 'application/zip');
@@ -94,25 +94,25 @@ export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Pro
 }
 
 export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
   const idx = indexFrom(req);
   if (idx === undefined) { json(res, { error: 'Invalid index' }, 400); return; }
 
-  const result = await sites.deleteVersion(username, domainFrom(req), idx);
+  const result = await sites.deleteVersion(sessionId, domainFrom(req), idx);
   if (!result.ok) { json(res, { error: result.error }, result.status); return; }
   json(res, { domain: domainFrom(req), index: idx });
 }
 
 export async function activateVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = req.user!;
-  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+  const sessionId = req.get('X-Session-Id') || '';
+  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
 
   const idx = indexFrom(req);
   if (idx === undefined) { json(res, { error: 'Invalid index' }, 400); return; }
 
-  const result = await sites.activateVersion(username, domainFrom(req), idx);
+  const result = await sites.activateVersion(sessionId, domainFrom(req), idx);
   if (!result.ok) { json(res, { error: result.error }, result.status); return; }
   json(res, { domain: domainFrom(req), index: idx });
 }

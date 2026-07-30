@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as sessions from '../../core/auth/sessions.ts';
 import * as users from '../../core/auth/users.ts';
+import { requireSession } from '../../core/auth/requireSession.ts';
 
 export interface ProfileResult {
   success: boolean;
@@ -28,10 +29,11 @@ export async function updateDisplayName(
 }
 
 export async function uploadProfilePicture(
-  username: string,
+  sessionId: string,
   contentType: string,
   data: ArrayBuffer,
 ): Promise<ProfileResult> {
+  const username = await requireSession(sessionId);
   if (!contentType.startsWith('image/')) {
     return { success: false, error: 'Invalid content type, must be an image' };
   }
@@ -51,7 +53,8 @@ export async function uploadProfilePicture(
   }
 }
 
-export async function deleteProfilePicture(username: string): Promise<ProfileResult> {
+export async function deleteProfilePicture(sessionId: string): Promise<ProfileResult> {
+  const username = await requireSession(sessionId);
   try {
     const profilePicturePath = users.getProfilePicturePath(username);
     await fs.rm(profilePicturePath, { force: true });
