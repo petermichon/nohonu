@@ -120,13 +120,6 @@ export async function listStarredSites(username: string): Promise<{ user: string
   }));
 }
 
-export async function setSiteAccount(user: string, domain: string, account: string): Promise<void> {
-  const data = await storage.readSiteMetadata(user, domain);
-  if (!data) return;
-  data.account = account || undefined;
-  await storage.writeSiteMetadata(user, domain, data);
-}
-
 export async function checkSite(user: string, domain: string): Promise<{ exists: boolean; enabled: boolean }> {
   const data = await storage.readSiteMetadata(user, domain);
   return {
@@ -503,7 +496,7 @@ export async function deleteVersion(user: string, domain: string, index: number)
   return { ok: true, value: undefined };
 }
 
-export async function createSite(user: string, domain: string, zipData: Uint8Array): Promise<{ index: number; siteId: string }> {
+export async function createSite(user: string, domain: string, zipData: Uint8Array, subdomain?: string): Promise<{ index: number; siteId: string }> {
   // Check if domain already exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (existingData) {
@@ -522,12 +515,9 @@ export async function createSite(user: string, domain: string, zipData: Uint8Arr
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
-  // Set default subdomain as username-domain
-  data.subdomain = `${user}-${domain}`;
-  // Set default displayName as domain
+  data.subdomain = subdomain || `${user}-${domain}`;
   data.displayName = domain;
 
-  // Create directories and files
   await fs.mkdir(domainDir(user, domain), { recursive: true });
   await fs.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await fs.writeFile(storage.versionPath(user, domain, index), zipData);
@@ -557,7 +547,7 @@ export async function uploadVersion(user: string, domain: string, zipData: Uint8
   return { index };
 }
 
-export async function createSiteFromGithub(user: string, domain: string, repo: string, ref: string): Promise<{ index: number; siteId: string; repo: string; branch: string }> {
+export async function createSiteFromGithub(user: string, domain: string, repo: string, ref: string, subdomain?: string): Promise<{ index: number; siteId: string; repo: string; branch: string }> {
   // Check if domain already exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (existingData) {
@@ -599,12 +589,9 @@ export async function createSiteFromGithub(user: string, domain: string, repo: s
   data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
-  // Set default subdomain as username-domain
-  data.subdomain = `${user}-${domain}`;
-  // Set default displayName as domain
+  data.subdomain = subdomain || `${user}-${domain}`;
   data.displayName = domain;
 
-  // Create directories and files
   await fs.mkdir(domainDir(user, domain), { recursive: true });
   await fs.mkdir(storage.versionsDir(user, domain), { recursive: true });
   await fs.writeFile(storage.versionPath(user, domain, index), zipData);

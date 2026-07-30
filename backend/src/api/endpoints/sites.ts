@@ -227,11 +227,7 @@ export async function createSite(req: Request, ctx: RouteContext): Promise<Respo
   if (params instanceof Response) return params;
 
   try {
-    const result = await sites.createSite(params.username, params.domain, params.zipData);
-    await sites.setSiteAccount(params.username, params.domain, params.username);
-    if (params.subdomain) {
-      await sites.updateSiteMeta(params.username, params.domain, { subdomain: params.subdomain });
-    }
+    const result = await sites.createSite(params.username, params.domain, params.zipData, params.subdomain);
     return createSiteResponse(result, params.domain);
   } catch (err) {
     return createSiteError(err);
@@ -243,11 +239,7 @@ export async function createSiteFromGithub(req: Request, ctx: RouteContext): Pro
   if (params instanceof Response) return params;
 
   try {
-    const result = await sites.createSiteFromGithub(params.username, params.domain, params.repo, params.ref);
-    await sites.setSiteAccount(params.username, params.domain, params.username);
-    if (params.subdomain) {
-      await sites.updateSiteMeta(params.username, params.domain, { subdomain: params.subdomain });
-    }
+    const result = await sites.createSiteFromGithub(params.username, params.domain, params.repo, params.ref, params.subdomain);
     return json({ domain: params.domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create site from GitHub';
