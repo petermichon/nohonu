@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { API_KEY } from './api-key.ts';
 import * as health from './endpoints/health.ts';
 import * as auth from './endpoints/auth.ts';
 import * as check from './endpoints/check.ts';
@@ -9,6 +8,8 @@ import * as versions from './endpoints/versions.ts';
 import * as users from './endpoints/users.ts';
 
 export const router = Router();
+
+const API_KEY = process.env['API_KEY'];
 
 if (API_KEY) {
   router.use((req, res, next) => {
