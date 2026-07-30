@@ -51,6 +51,23 @@ export function assert(condition: boolean, message: string): void {
   }
 }
 
+/** Require a header value or return error response */
+export function requireHeader(req: Request, name: string, errorMessage?: string): string | Response {
+  const value = req.headers.get(name);
+  if (!value) return error(errorMessage || `${name} header is required`, 401);
+  return value;
+}
+
+/** Require X-Username header */
+export function requireUsername(req: Request): string | Response {
+  return requireHeader(req, 'X-Username', 'Missing username');
+}
+
+/** Require X-Session-Id header */
+export function requireSessionId(req: Request): string | Response {
+  return requireHeader(req, 'X-Session-Id', 'Session ID required');
+}
+
 /** Parse JSON body with error handling */
 export async function parseJson<T>(req: Request): Promise<Response | T> {
   try {
