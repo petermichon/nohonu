@@ -1,125 +1,118 @@
-import { error, json, parseJson, requireUsername } from '../../shared/http.ts';
+import type { Request as ExpressReq, Response as ExpressRes } from 'express';
+import { json, parseJson, p, requireUsername } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
-import type { RouteContext } from '../route-context.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 function validateRepo(repo: unknown): repo is string {
   return typeof repo === 'string' && GITHUB_REPO_REGEX.test(repo);
 }
 
+function domainFrom(req: ExpressReq): string { return p(req, 'domain'); }
+function indexFrom(req: ExpressReq): number | undefined {
+  const val = p(req, 'timestamp');
+  if (!val || isNaN(Number(val))) return undefined;
+  return Number(val);
+}
+
 // === Params
 
 type UploadParams = { username: string; domain: string; zipData: Uint8Array };
-async function extractUploadParams(req: Request, { domain }: RouteContext): Promise<UploadParams | Response> {
+function extractUploadParams(req: ExpressReq): UploadParams | undefined {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) return;
 
-  const formData = await req.formData();
-  const zipFile = formData.get('zip');
-  if (!(zipFile instanceof File)) return error('Missing zip file');
-  if (zipFile.size > MAX_ZIP_BYTES) return error(`Zip file too large (max ${MAX_ZIP_BYTES} bytes)`, 413);
+  const buffer = req.body instanceof Buffer ? req.body : undefined;
+  if (!buffer || buffer.length === 0) return;
+  if (buffer.length > MAX_ZIP_BYTES) return;
 
-  const buffer = await zipFile.arrayBuffer();
-  return { username, domain, zipData: new Uint8Array(buffer) };
+  return { username, domain: domainFrom(req), zipData: new Uint8Array(buffer) };
 }
 
 type GithubParams = { username: string; domain: string; repo: string; ref: string };
-async function extractGithubParams(req: Request, { domain }: RouteContext): Promise<GithubParams | Response> {
+async function extractGithubParams(req: ExpressReq): Promise<GithubParams | undefined> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) return;
 
   const body = await parseJson<{ repo?: unknown; branch?: unknown }>(req);
-  if (body instanceof Response) return body;
+  if (!body || !validateRepo(body.repo)) return;
 
-  const repo = body.repo;
-  if (!validateRepo(repo)) return error('Invalid repo format. Use owner/repo');
-
-  const ref = typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main';
-  return { username, domain, repo, ref };
-}
-
-function requireVersionIndex(index: number | undefined): number | Response {
-  if (index === undefined || isNaN(index)) return error('Invalid index');
-  return index;
+  return { username, domain: domainFrom(req), repo: body.repo, ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main' };
 }
 
 // === Handlers
 
-export async function listSiteVersions(_req: Request, { domain }: RouteContext): Promise<Response> {
+export async function listSiteVersions(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const domain = domainFrom(req);
   const user = await sites.findUserForDomain(domain);
-  if (!user) return json({ domain, versions: [], current: null });
+  if (!user) { json(res, { domain, versions: [], current: null }); return; }
 
   const result = await sites.listVersions(user, domain);
-  if (!result) return json({ domain, versions: [], current: null });
-  return json({ domain, versions: result.versions, current: result.current });
+  if (!result) { json(res, { domain, versions: [], current: null }); return; }
+  json(res, { domain, versions: result.versions, current: result.current });
 }
 
-export async function upload(req: Request, ctx: RouteContext): Promise<Response> {
-  const params = await extractUploadParams(req, ctx);
-  if (params instanceof Response) return params;
+export async function upload(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const params = extractUploadParams(req);
+  if (!params) { json(res, { error: 'Missing zip file' }, 400); return; }
 
   try {
     const result = await sites.uploadVersion(params.username, params.domain, params.zipData);
-    return json({ success: true, domain: params.domain, index: result.index });
+    json(res, { success: true, domain: params.domain, index: result.index });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to upload version';
-    return error(message, message === 'Site not found' ? 404 : 500);
+    json(res, { error: message }, message === 'Site not found' ? 404 : 500);
   }
 }
 
-export async function fetchGithub(req: Request, ctx: RouteContext): Promise<Response> {
-  const params = await extractGithubParams(req, ctx);
-  if (params instanceof Response) return params;
+export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const params = await extractGithubParams(req);
+  if (!params) { json(res, { error: 'Invalid repo format. Use owner/repo' }, 400); return; }
 
   try {
     const result = await sites.uploadVersionFromGithub(params.username, params.domain, params.repo, params.ref);
-    return json({ domain: params.domain, index: result.index, repo: result.repo, branch: result.branch });
+    json(res, { domain: params.domain, index: result.index, repo: result.repo, branch: result.branch });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to upload version from GitHub';
-    const status = message.includes('404') ? 404 : message === 'Site not found' ? 404 : 502;
-    return error(message, status);
+    json(res, { error: message }, message.includes('404') ? 404 : message === 'Site not found' ? 404 : 502);
   }
 }
 
-export async function downloadSiteVersion(req: Request, { domain, timestamp: index }: RouteContext): Promise<Response> {
+export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const versionIndex = requireVersionIndex(index);
-  if (versionIndex instanceof Response) return versionIndex;
+  const idx = indexFrom(req);
+  if (idx === undefined) { json(res, { error: 'Version timestamp required' }, 400); return; }
 
-  const result = await sites.downloadVersion(username, domain, versionIndex);
-  if (!result) return error('Version not found', 404);
+  const result = await sites.downloadVersion(username, domainFrom(req), idx);
+  if (!result) { json(res, { error: 'Version not found' }, 404); return; }
 
-  return new Response(result.data as BodyInit, {
-    headers: {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${result.filename}"`,
-    },
-  });
+  res.set('Content-Type', 'application/zip');
+  res.set('Content-Disposition', `attachment; filename="${result.filename}"`);
+  res.send(Buffer.from(result.data));
 }
 
-export async function deleteVersion(req: Request, { domain, timestamp: index }: RouteContext): Promise<Response> {
+export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const versionIndex = requireVersionIndex(index);
-  if (versionIndex instanceof Response) return versionIndex;
+  const idx = indexFrom(req);
+  if (idx === undefined) { json(res, { error: 'Invalid index' }, 400); return; }
 
-  const result = await sites.deleteVersion(username, domain, versionIndex);
-  if (!result.ok) return error(result.error, result.status);
-  return json({ domain, index: versionIndex });
+  const result = await sites.deleteVersion(username, domainFrom(req), idx);
+  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  json(res, { domain: domainFrom(req), index: idx });
 }
 
-export async function activateVersion(req: Request, { domain, timestamp: index }: RouteContext): Promise<Response> {
+export async function activateVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const versionIndex = requireVersionIndex(index);
-  if (versionIndex instanceof Response) return versionIndex;
+  const idx = indexFrom(req);
+  if (idx === undefined) { json(res, { error: 'Invalid index' }, 400); return; }
 
-  const result = await sites.activateVersion(username, domain, versionIndex);
-  if (!result.ok) return error(result.error, result.status);
-  return json({ domain, index: versionIndex });
+  const result = await sites.activateVersion(username, domainFrom(req), idx);
+  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  json(res, { domain: domainFrom(req), index: idx });
 }

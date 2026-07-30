@@ -1,55 +1,28 @@
-import { error, checkMethod } from '../../shared/http.ts';
+import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import * as sites from '../../usecases/sites/index.ts';
 import { getCustomDomainCache } from '../../usecases/sites/index.ts';
 
-// === Params
+export async function checkDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const rawDomain = req.query.domain as string || '';
+  const user = req.query.user as string || '';
 
-function extractDomainParams(req: Request): { domain: string; user: string } | Response {
-  const url = new URL(req.url);
-  const domain = url.searchParams.get('domain') ?? '';
-  const user = url.searchParams.get('user') ?? '';
-  return { domain, user };
+  const exists = await sites.checkDomain(user, rawDomain);
+  res.status(exists ? 200 : 404).end();
 }
 
-function extractCustomDomainParam(req: Request): string | Response {
-  const url = new URL(req.url);
-  const domain = url.searchParams.get('domain');
-  if (!domain) return error('domain query parameter is required', 400);
-  return domain;
-}
-
-function extractSubdomainParam(req: Request): string | Response {
-  const url = new URL(req.url);
-  const subdomain = url.searchParams.get('subdomain');
-  if (!subdomain) return error('subdomain query parameter is required', 400);
-  return subdomain;
-}
-
-// === Handlers
-
-export async function checkDomain(req: Request): Promise<Response> {
-  const methodError = checkMethod(req, 'GET');
-  if (methodError) return new Response(undefined, { status: 405 });
-
-  const params = extractDomainParams(req);
-  if (params instanceof Response) return params;
-  const exists = await sites.checkDomain(params.user, params.domain);
-  return new Response(undefined, { status: exists ? 200 : 404 });
-}
-
-export async function checkCustomDomain(req: Request): Promise<Response> {
-  const params = extractCustomDomainParam(req);
-  if (params instanceof Response) return params;
+export async function checkCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const domain = req.query.domain as string;
+  if (!domain) { res.status(400).json({ error: 'domain query parameter is required' }); return; }
 
   const cache = await getCustomDomainCache();
-  if (cache.get(params)) return new Response('OK', { status: 200 });
-  return error('Domain not found', 404);
+  if (cache.get(domain)) { res.status(200).send('OK'); return; }
+  res.status(404).json({ error: 'Domain not found' });
 }
 
-export async function checkSubdomain(req: Request): Promise<Response> {
-  const subdomain = extractSubdomainParam(req);
-  if (subdomain instanceof Response) return subdomain;
+export async function checkSubdomain(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const subdomain = req.query.subdomain as string;
+  if (!subdomain) { res.status(400).json({ error: 'subdomain query parameter is required' }); return; }
 
   const exists = await sites.checkSubdomain(subdomain);
-  return new Response(undefined, { status: exists ? 200 : 404 });
+  res.status(exists ? 200 : 404).end();
 }

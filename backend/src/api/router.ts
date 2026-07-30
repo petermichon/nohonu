@@ -1,7 +1,4 @@
 import { Router } from 'express';
-import { wrap } from './wrap.ts';
-import { wrapCtx } from './wrap-ctx.ts';
-import { wrapStrParam } from './wrap-str-param.ts';
 import { API_KEY } from './api-key.ts';
 import * as health from './endpoints/health.ts';
 import * as auth from './endpoints/auth.ts';
@@ -21,79 +18,79 @@ if (API_KEY) {
 }
 
 // Health
-router.get('/health', wrap(health.health));
+router.get('/health', health.health);
 
 // Auth
-router.get('/auth', wrap(auth.auth));
-router.post('/auth/register', wrap(auth.authRegister));
-router.post('/auth/login', wrap(auth.authLogin));
-router.post('/auth/logout', wrap(auth.authLogout));
-router.get('/auth/me', wrap(auth.authMe));
-router.patch('/auth/displayname', wrap(auth.authDisplayName));
-router.post('/auth/profile-picture', wrap(auth.uploadProfilePicture));
-router.delete('/auth/profile-picture/delete', wrap(auth.deleteProfilePicture));
-router.get('/auth/sessions', wrap(auth.getSessions));
-router.delete('/auth/sessions/delete', wrap(auth.deleteSession));
+router.get('/auth', auth.auth);
+router.post('/auth/register', auth.authRegister);
+router.post('/auth/login', auth.authLogin);
+router.post('/auth/logout', auth.authLogout);
+router.get('/auth/me', auth.authMe);
+router.patch('/auth/displayname', auth.authDisplayName);
+router.post('/auth/profile-picture', auth.uploadProfilePicture);
+router.delete('/auth/profile-picture/delete', auth.deleteProfilePicture);
+router.get('/auth/sessions', auth.getSessions);
+router.delete('/auth/sessions/delete', auth.deleteSession);
 
 // Domain checks
-router.get('/check-domain', wrap(check.checkDomain));
-router.get('/check-custom-domain', wrap(check.checkCustomDomain));
-router.get('/check-subdomain', wrap(check.checkSubdomain));
+router.get('/check-domain', check.checkDomain);
+router.get('/check-custom-domain', check.checkCustomDomain);
+router.get('/check-subdomain', check.checkSubdomain);
 
 // Custom domains (global)
-router.get('/custom-domains', wrap(customDomains.getAllCustomDomains));
+router.get('/custom-domains', customDomains.getAllCustomDomains);
 
 // Explore
-router.get('/explore/sites', wrap(sites.listExploreSites));
+router.get('/explore/sites', sites.listExploreSites);
 
 // Sites list
-router.get('/sites', wrap(sites.listSites));
+router.get('/sites', sites.listSites);
 
 // Site routes - GET
-router.get('/sites/:domain', wrapCtx(sites.getSiteInfo));
-router.get('/sites/:domain/download', wrapCtx(sites.downloadSite));
-router.get('/sites/:domain/icon', wrapCtx(sites.getSiteIcon));
-router.get('/sites/:domain/cover', wrapCtx(sites.getSiteCover));
-router.get('/sites/:domain/meta', wrapCtx(sites.getSiteMeta));
-router.get('/sites/:domain/stats', wrapCtx(sites.getSiteStats));
-router.get('/sites/:domain/visitors', wrapCtx(sites.getSiteVisitors));
-router.get('/sites/:domain/uptime', wrapCtx(sites.getSiteUptime));
-router.get('/sites/:domain/repos', wrapCtx(sites.getSiteRepos));
+router.get('/sites/:domain', sites.getSiteInfo);
+router.get('/sites/:domain/download', sites.downloadSite);
+router.get('/sites/:domain/icon', sites.getSiteIcon);
+router.get('/sites/:domain/cover', sites.getSiteCover);
+router.get('/sites/:domain/meta', sites.getSiteMeta);
+router.get('/sites/:domain/stats', sites.getSiteStats);
+router.get('/sites/:domain/visitors', sites.getSiteVisitors);
+router.get('/sites/:domain/uptime', sites.getSiteUptime);
+router.get('/sites/:domain/repos', sites.getSiteRepos);
 
 // Site versions
-router.get('/sites/:domain/versions', wrapCtx(versions.listSiteVersions));
-router.get('/sites/:domain/versions/download', wrapCtx(versions.downloadSiteVersion));
+router.get('/sites/:domain/versions', versions.listSiteVersions);
+router.get('/sites/:domain/versions/download', versions.downloadSiteVersion);
 
 // Site custom domains - GET
-router.get('/sites/:domain/custom-domains', wrapCtx(customDomains.getCustomDomains));
-router.get('/sites/:domain/custom-domains/token', wrapCtx(customDomains.getVerificationToken));
+router.get('/sites/:domain/custom-domains', customDomains.getCustomDomains);
+router.get('/sites/:domain/custom-domains/token', customDomains.getVerificationToken);
 
 // Site routes - POST
-router.post('/sites/:domain', wrapCtx(sites.createSiteDispatch));
-router.post('/sites/:domain/versions', wrapCtx(versions.upload));
-router.post('/sites/:domain/versions/github', wrapCtx(versions.fetchGithub));
-router.post('/sites/:domain/versions/:timestamp/activate', wrapCtx(versions.activateVersion));
-router.post('/sites/:domain/custom-domains', wrapCtx(customDomains.addCustomDomain));
-router.post('/sites/:domain/custom-domains/verify', wrapCtx(customDomains.verifyCustomDomain));
-router.post('/sites/:domain/cover', wrapCtx(sites.uploadCover));
+router.post('/sites/:domain', sites.createSiteDispatch);
+router.post('/sites/:domain/versions', versions.upload);
+router.post('/sites/:domain/versions/github', versions.fetchGithub);
+router.post('/sites/:domain/versions/:timestamp/activate', versions.activateVersion);
+router.post('/sites/:domain/custom-domains', customDomains.addCustomDomain);
+router.post('/sites/:domain/custom-domains/verify', customDomains.verifyCustomDomain);
+router.post('/sites/:domain/cover', sites.uploadCover);
 
 // Site routes - DELETE
-router.delete('/sites/:domain', wrapCtx(sites.deleteSite));
-router.delete('/sites/:domain/versions/:timestamp', wrapCtx(versions.deleteVersion));
-router.delete('/sites/:domain/custom-domains/:subAction', wrapCtx(customDomains.deleteCustomDomain));
-router.delete('/sites/:domain/cover', wrapCtx(sites.deleteCover));
+router.delete('/sites/:domain', sites.deleteSite);
+router.delete('/sites/:domain/versions/:timestamp', versions.deleteVersion);
+router.delete('/sites/:domain/custom-domains/:subAction', customDomains.deleteCustomDomain);
+router.delete('/sites/:domain/cover', sites.deleteCover);
 
 // Site routes - PATCH
-router.patch('/sites/:domain/toggle', wrapCtx(sites.toggleSite));
-router.patch('/sites/:domain/star', wrapCtx(sites.toggleStar));
-router.patch('/sites/:domain/meta', wrapCtx(sites.updateMeta));
+router.patch('/sites/:domain/toggle', sites.toggleSite);
+router.patch('/sites/:domain/star', sites.toggleStar);
+router.patch('/sites/:domain/meta', sites.updateMeta);
 
 // User routes
-router.get('/users/:username/sites', wrapStrParam(users.getUserSites, 'username'));
-router.get('/users/:username/profile-picture', wrapStrParam(users.getProfilePicture, 'username'));
-router.get('/users/:username/stars', wrapStrParam(users.getUserStars, 'username'));
-router.get('/users/:username/:domain', wrapCtx(users.getPublicSiteInfo));
-router.get('/users/:username', wrapStrParam(users.getUserByUsernameEndpoint, 'username'));
+router.get('/users/:username/sites', users.getUserSites);
+router.get('/users/:username/profile-picture', users.getProfilePicture);
+router.get('/users/:username/stars', users.getUserStars);
+router.get('/users/:username/:domain', users.getPublicSiteInfo);
+router.get('/users/:username', users.getUserByUsernameEndpoint);
 
 // Static file serving - must be last (catch-all)
-router.get('/{*path}', wrapStrParam(sites.serveStatic, 'path'));
+router.get('/{*path}', sites.serveStatic);

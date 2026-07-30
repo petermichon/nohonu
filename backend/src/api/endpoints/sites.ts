@@ -1,329 +1,283 @@
-import { error, json, parseJson, CORS, extractClientIp, requireUsername } from '../../shared/http.ts';
-import { MAX_ZIP_BYTES, SUBDOMAIN_BASE } from '../../shared/paths.ts';
+import type { Request as ExpressReq, Response as ExpressRes } from 'express';
+import { json, parseJson, p, requireUsername } from '../../shared/http.ts';
+import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
-import type { RouteContext } from '../route-context.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 function validateRepo(repo: unknown): repo is string {
   return typeof repo === 'string' && GITHUB_REPO_REGEX.test(repo);
 }
 
+function domainFrom(req: ExpressReq): string { return (req.params as Record<string, string>)['domain'] || ''; }
+
 // === Params
 
-function subdomainBaseFromRequest(req: Request): string {
-  let base = SUBDOMAIN_BASE;
-  if (base === 'localhost:8080') {
-    const url = new URL(req.url);
-    const port = url.port;
-    base = port ? `${url.hostname}:${port}` : url.hostname;
-  }
-  return base;
-}
-
 type CreateSiteParams = { username: string; domain: string; zipData: Uint8Array; subdomain?: string };
-async function extractCreateSiteParams(req: Request, { domain }: RouteContext): Promise<CreateSiteParams | Response> {
+function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | undefined {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) return;
 
-  const formData = await req.formData();
-  const zipFile = formData.get('zip');
-  if (!(zipFile instanceof File)) return error('Missing zip file');
-  if (zipFile.size > MAX_ZIP_BYTES) return error(`Zip file too large (max ${MAX_ZIP_BYTES} bytes)`, 413);
+  const buffer = req.body instanceof Buffer ? req.body : undefined;
+  if (!buffer || buffer.length === 0) return;
+  if (buffer.length > MAX_ZIP_BYTES) return;
 
-  const buffer = await zipFile.arrayBuffer();
-  const subdomain = formData.get('subdomain') as string | null || undefined;
-  return { username, domain, zipData: new Uint8Array(buffer), subdomain };
+  return { username, domain: domainFrom(req), zipData: new Uint8Array(buffer) };
 }
 
 type CreateGithubParams = { username: string; domain: string; repo: string; ref: string; subdomain?: string };
-async function extractCreateGithubParams(req: Request, { domain }: RouteContext): Promise<CreateGithubParams | Response> {
+async function extractCreateGithubParams(req: ExpressReq): Promise<CreateGithubParams | undefined> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) return;
 
   const body = await parseJson<{ repo?: unknown; branch?: unknown; subdomain?: unknown }>(req);
-  if (body instanceof Response) return body;
+  if (!body || !validateRepo(body.repo)) return;
 
-  const repo = body.repo;
-  if (!validateRepo(repo)) return error('Invalid repo format. Use owner/repo');
-
-  const ref = typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main';
   const subdomain = typeof body.subdomain === 'string' ? body.subdomain : undefined;
-  return { username, domain, repo, ref, subdomain };
+  return { username, domain: domainFrom(req), repo: body.repo, ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main', subdomain };
 }
 
 type ToggleStarParams = { username: string; domain: string; starred: boolean };
-async function extractToggleStarParams(req: Request, { domain }: RouteContext): Promise<ToggleStarParams | Response> {
+async function extractToggleStarParams(req: ExpressReq): Promise<ToggleStarParams | undefined> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) return;
 
-  const body = await req.json().catch(() => ({}));
-  return { username, domain, starred: body.starred === true };
+  const body = await parseJson<{ starred?: boolean }>(req);
+  return { username, domain: domainFrom(req), starred: body?.starred === true };
 }
 
 type UpdateMetaParams = { username: string; domain: string; meta: { subdomain?: string; displayName?: string } };
-async function extractUpdateMetaParams(req: Request, { domain }: RouteContext): Promise<UpdateMetaParams | Response> {
+async function extractUpdateMetaParams(req: ExpressReq): Promise<UpdateMetaParams | undefined> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) return;
 
   const body = await parseJson<{ subdomain?: string; displayName?: string }>(req);
-  if (body instanceof Response) return body;
+  if (!body) return;
 
-  return { username, domain, meta: body };
+  return { username, domain: domainFrom(req), meta: body };
 }
 
 type UploadCoverParams = { username: string; domain: string; data: Uint8Array };
-async function extractUploadCoverParams(req: Request, { domain }: RouteContext): Promise<UploadCoverParams | Response> {
+function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefined {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) return;
 
-  const contentType = req.headers.get('Content-Type');
-  if (!contentType?.startsWith('image/')) return error('Invalid content type, must be an image', 400);
+  const contentType = req.get('Content-Type') || '';
+  if (!contentType.startsWith('image/')) return;
 
-  const body = await req.arrayBuffer();
-  if (body.byteLength > 5_242_880) return error('Image too large, max 5MB', 400);
+  const buffer = req.body instanceof Buffer ? req.body : undefined;
+  if (!buffer || buffer.byteLength > 5_242_880) return;
 
-  return { username, domain, data: new Uint8Array(body) };
+  return { username, domain: domainFrom(req), data: new Uint8Array(buffer) };
 }
 
-// === Responses
+// === Handlers
 
-function siteInfoResponse(req: Request, domain: string, info: NonNullable<Awaited<ReturnType<typeof sites.getSiteInfo>>>): Response {
-  return json({
-    domain,
+export async function listSites(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = requireUsername(req);
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+
+  json(res, { sites: await sites.listSites(username) });
+}
+
+export async function listExploreSites(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = req.get('X-Username') || undefined;
+  json(res, { sites: await sites.listAllSites(username) });
+}
+
+export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = requireUsername(req);
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
+
+  const info = await sites.getSiteInfo(username, domainFrom(req));
+  if (!info) { json(res, { error: 'Site not found' }, 404); return; }
+
+  json(res, {
+    domain: domainFrom(req),
     siteId: info.siteId,
     enabled: info.enabled,
     subdomain: info.subdomain,
-    subdomainBase: subdomainBaseFromRequest(req),
+    subdomainBase: req.headers.host || 'localhost:8080',
     displayName: info.displayName,
     account: info.account,
     coverImage: info.coverImage,
   });
 }
 
-function createSiteResponse(result: Awaited<ReturnType<typeof sites.createSite>>, domain: string): Response {
-  return json({ success: true, domain, index: result.index }, 201);
-}
-
-function createSiteError(err: unknown): Response {
-  const message = err instanceof Error ? err.message : 'Failed to create site';
-  return error(message, message === 'Domain already exists for this user' ? 409 : 500);
-}
-
-// === Handlers
-
-export async function listSites(req: Request): Promise<Response> {
-  const username = requireUsername(req);
-  if (username instanceof Response) return username;
-
-  const siteList = await sites.listSites(username);
-  return json({ sites: siteList });
-}
-
-export async function listExploreSites(req: Request): Promise<Response> {
-  const username = req.headers.get('X-Username') || undefined;
-  const allSites = await sites.listAllSites(username);
-  return json({ sites: allSites });
-}
-
-export async function getSiteInfo(req: Request, { domain }: RouteContext): Promise<Response> {
-  const username = requireUsername(req);
-  if (username instanceof Response) return username;
-
-  const info = await sites.getSiteInfo(username, domain);
-  if (!info) return error('Site not found', 404);
-
-  return siteInfoResponse(req, domain, info);
-}
-
-export async function downloadSite(_req: Request, { domain }: RouteContext): Promise<Response> {
+export async function downloadSite(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const domain = domainFrom(req);
   const user = await sites.findUserForDomain(domain);
-  if (!user) return error('Site not found', 404);
+  if (!user) { json(res, { error: 'Site not found' }, 404); return; }
 
   const result = await sites.downloadActiveVersion(user, domain);
-  if (!result) return error('Site not found', 404);
+  if (!result) { json(res, { error: 'Site not found' }, 404); return; }
 
-  return new Response(result.data as BodyInit, {
-    headers: {
-      ...CORS,
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${result.filename}"`,
-    },
-  });
+  res.set('Content-Type', 'application/zip');
+  res.set('Content-Disposition', `attachment; filename="${result.filename}"`);
+  res.send(Buffer.from(result.data));
 }
 
-export async function getSiteIcon(_req: Request, { domain }: RouteContext): Promise<Response> {
+export async function getSiteIcon(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const domain = domainFrom(req);
   const user = await sites.findUserForDomain(domain);
-  if (!user) return new Response(undefined, { status: 404, headers: CORS });
+  if (!user) { res.status(404).end(); return; }
 
   const result = await sites.getSiteIcon(user, domain);
-  if (!result) return new Response(undefined, { status: 404, headers: CORS });
+  if (!result) { res.status(404).end(); return; }
 
-  return new Response(result.data.buffer as ArrayBuffer, {
-    headers: { ...CORS, 'Content-Type': result.contentType, 'Cache-Control': 'public, max-age=300' },
-  });
+  res.set('Content-Type', result.contentType);
+  res.set('Cache-Control', 'public, max-age=300');
+  res.send(Buffer.from(result.data.buffer));
 }
 
-export async function getSiteCover(_req: Request, { domain }: RouteContext): Promise<Response> {
+export async function getSiteCover(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const domain = domainFrom(req);
   const user = await sites.findUserForDomain(domain);
-  if (!user) return new Response(undefined, { status: 404, headers: CORS });
+  if (!user) { res.status(404).end(); return; }
 
   const result = await sites.getSiteCover(user, domain);
-  if (!result) return new Response(undefined, { status: 404, headers: CORS });
+  if (!result) { res.status(404).end(); return; }
 
-  return new Response(result.buffer as ArrayBuffer, {
-    headers: { ...CORS, 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=300' },
-  });
+  res.set('Content-Type', 'image/jpeg');
+  res.set('Cache-Control', 'public, max-age=300');
+  res.send(Buffer.from(result.buffer));
 }
 
-export async function getSiteMeta(req: Request, { domain }: RouteContext): Promise<Response> {
+export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const meta = await sites.getSiteMeta(username, domain);
-  if (!meta) return error('Site not found', 404);
-  return json({ domain, subdomain: meta.subdomain });
+  const meta = await sites.getSiteMeta(username, domainFrom(req));
+  if (!meta) { json(res, { error: 'Site not found' }, 404); return; }
+  json(res, { domain: domainFrom(req), subdomain: meta.subdomain });
 }
 
-export function getSiteStats(_req: Request, { domain, url }: RouteContext): Response {
-  const slotsParam = url.searchParams.get('slots') ?? '60';
-  const slots = parseInt(slotsParam, 10);
-  const count = isNaN(slots) ? 60 : slots;
-  const groupParam = url.searchParams.get('group') ?? '1';
-  const groupMinutes = parseInt(groupParam, 10);
-  const group = isNaN(groupMinutes) ? 1 : groupMinutes;
-
-  const stats = sites.getSiteStats(domain, count, group);
-  return json({ domain, stats });
+export function getSiteStats(req: ExpressReq, res: ExpressRes): void {
+  const slots = Math.min(parseInt(req.query.slots as string) || 60, 10080);
+  const group = Math.min(parseInt(req.query.group as string) || 1, 60);
+  const stats = sites.getSiteStats(domainFrom(req), slots, group);
+  json(res, { domain: domainFrom(req), stats });
 }
 
-export function getSiteVisitors(_req: Request, { domain }: RouteContext): Response {
-  const visitors = sites.getSiteVisitors(domain);
-  return json({ domain, visitors });
+export function getSiteVisitors(req: ExpressReq, res: ExpressRes): void {
+  json(res, { domain: domainFrom(req), visitors: sites.getSiteVisitors(domainFrom(req)) });
 }
 
-export function getSiteUptime(_req: Request, { domain, url }: RouteContext): Response {
-  const slotsParam = url.searchParams.get('slots') ?? '60';
-  const slots = parseInt(slotsParam, 10);
-  const count = isNaN(slots) ? 60 : slots;
-  const groupParam = url.searchParams.get('group') ?? '1';
-  const groupMinutes = parseInt(groupParam, 10);
-  const group = isNaN(groupMinutes) ? 1 : groupMinutes;
-
-  const uptime = sites.getSiteUptime(domain, count, group);
-  return json({ domain, uptime });
+export function getSiteUptime(req: ExpressReq, res: ExpressRes): void {
+  const slots = Math.min(parseInt(req.query.slots as string) || 60, 10080);
+  const group = Math.min(parseInt(req.query.group as string) || 1, 60);
+  json(res, { domain: domainFrom(req), uptime: sites.getSiteUptime(domainFrom(req), slots, group) });
 }
 
-export async function getSiteRepos(req: Request, { domain }: RouteContext): Promise<Response> {
+export async function getSiteRepos(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const result = await sites.getSiteRepos(username, domain);
-  if (!result) return error('Site not found', 404);
-  return json({ domain, history: result.history });
+  const result = await sites.getSiteRepos(username, domainFrom(req));
+  if (!result) { json(res, { error: 'Site not found' }, 404); return; }
+  json(res, { domain: domainFrom(req), history: result.history });
 }
 
-export async function createSite(req: Request, ctx: RouteContext): Promise<Response> {
-  const params = await extractCreateSiteParams(req, ctx);
-  if (params instanceof Response) return params;
+export async function createSiteDispatch(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const contentType = req.get('Content-Type') || '';
+  if (contentType.includes('application/json')) {
+    await createSiteFromGithub(req, res);
+  } else {
+    await createSiteRaw(req, res);
+  }
+}
+
+async function createSiteRaw(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const params = extractCreateSiteParams(req);
+  if (!params) { json(res, { error: 'Missing zip file' }, 400); return; }
 
   try {
     const result = await sites.createSite(params.username, params.domain, params.zipData, params.subdomain);
-    return createSiteResponse(result, params.domain);
+    json(res, { success: true, domain: params.domain, index: result.index }, 201);
   } catch (err) {
-    return createSiteError(err);
+    const message = err instanceof Error ? err.message : 'Failed to create site';
+    json(res, { error: message }, message === 'Domain already exists for this user' ? 409 : 500);
   }
 }
 
-export async function createSiteDispatch(req: Request, ctx: RouteContext): Promise<Response> {
-  const contentType = req.headers.get('Content-Type') || '';
-  return contentType.includes('application/json') ? createSiteFromGithub(req, ctx) : createSite(req, ctx);
-}
-
-export async function createSiteFromGithub(req: Request, ctx: RouteContext): Promise<Response> {
-  const params = await extractCreateGithubParams(req, ctx);
-  if (params instanceof Response) return params;
+async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const params = await extractCreateGithubParams(req);
+  if (!params) { json(res, { error: 'Invalid repo format. Use owner/repo' }, 400); return; }
 
   try {
     const result = await sites.createSiteFromGithub(params.username, params.domain, params.repo, params.ref, params.subdomain);
-    return json({ domain: params.domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
+    json(res, { domain: params.domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create site from GitHub';
-    const status = message.includes('404') ? 404 : message === 'Domain already exists for this user' ? 409 : 502;
-    return error(message, status);
+    json(res, { error: message }, message.includes('404') ? 404 : message === 'Domain already exists for this user' ? 409 : 502);
   }
 }
 
-export async function deleteSite(req: Request, { domain }: RouteContext): Promise<Response> {
+export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  await sites.deleteSite(username, domain);
-  return json({ domain });
+  await sites.deleteSite(username, domainFrom(req));
+  json(res, { domain: domainFrom(req) });
 }
 
-export async function toggleSite(req: Request, { domain }: RouteContext): Promise<Response> {
+export async function toggleSite(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const result = await sites.toggleSite(username, domain);
-  if (!result.ok) return error(result.error, result.status);
-  return json({ domain, enabled: result.value.enabled });
+  const result = await sites.toggleSite(username, domainFrom(req));
+  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  json(res, { domain: domainFrom(req), enabled: result.value.enabled });
 }
 
-export async function toggleStar(req: Request, ctx: RouteContext): Promise<Response> {
-  const params = await extractToggleStarParams(req, ctx);
-  if (params instanceof Response) return params;
+export async function toggleStar(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const params = await extractToggleStarParams(req);
+  if (!params) { json(res, { error: 'Missing username' }, 401); return; }
 
   const result = await sites.toggleStar(params.username, params.domain, params.starred);
-  if (!result.ok) return error(result.error, result.status);
-  return json({ domain: params.domain, starred: result.value.starred, starCount: result.value.starCount });
+  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  json(res, { domain: params.domain, starred: result.value.starred, starCount: result.value.starCount });
 }
 
-export async function updateMeta(req: Request, ctx: RouteContext): Promise<Response> {
-  const params = await extractUpdateMetaParams(req, ctx);
-  if (params instanceof Response) return params;
+export async function updateMeta(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const params = await extractUpdateMetaParams(req);
+  if (!params) { json(res, { error: 'Missing username or body' }, 400); return; }
 
   const result = await sites.updateSiteMeta(params.username, params.domain, params.meta);
-  if (!result.ok) return error(result.error, result.status);
-  return json({ domain: params.domain, subdomain: params.meta.subdomain, displayName: params.meta.displayName });
+  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  json(res, { domain: params.domain, subdomain: params.meta.subdomain, displayName: params.meta.displayName });
 }
 
-export async function uploadCover(req: Request, ctx: RouteContext): Promise<Response> {
-  const params = await extractUploadCoverParams(req, ctx);
-  if (params instanceof Response) return params;
+export async function uploadCover(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const params = extractUploadCoverParams(req);
+  if (!params) { json(res, { error: 'Invalid image' }, 400); return; }
 
   const result = await sites.uploadSiteCover(params.username, params.domain, params.data);
-  if (!result.ok) return error(result.error, result.status);
-  return json({ success: true });
+  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  json(res, { success: true });
 }
 
-export async function deleteCover(req: Request, { domain }: RouteContext): Promise<Response> {
+export async function deleteCover(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = requireUsername(req);
-  if (username instanceof Response) return username;
+  if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
-  const result = await sites.deleteSiteCover(username, domain);
-  if (!result.ok) return error(result.error, result.status);
-  return json({ success: true });
+  const result = await sites.deleteSiteCover(username, domainFrom(req));
+  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  json(res, { success: true });
 }
 
-export async function serveStatic(req: Request, path: string): Promise<Response> {
-  if (req.method !== 'GET') {
-    return new Response('Method not allowed', { status: 405, headers: CORS });
-  }
-
-  const host = req.headers.get('Host') ?? '';
+export async function serveStatic(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const host = req.get('Host') ?? '';
+  const path = p(req, 'path');
   const resolved = await sites.resolveDomainAndServe(host, path);
-  if (!resolved) return new Response('Not Found', { status: 404, headers: CORS });
+  if (!resolved) { res.status(404).end(); return; }
 
   const result = await sites.serveSiteFile(resolved.user, resolved.domain, resolved.filePath);
-  if (!result) return new Response('Site not found', { status: 404, headers: CORS });
+  if (!result) { res.status(404).end(); return; }
 
   if (result.contentType === 'text/html') {
-    const ip = extractClientIp(req, null);
-    sites.recordPageHit(resolved.domain, ip);
+    sites.recordPageHit(resolved.domain, req.ip || 'unknown');
   }
 
-  return new Response(result.data as BodyInit, {
-    headers: { ...CORS, 'Content-Type': result.contentType },
-  });
+  res.set('Content-Type', result.contentType);
+  res.send(Buffer.from(result.data));
 }

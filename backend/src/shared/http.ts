@@ -1,83 +1,63 @@
+import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { VALID_DOMAIN } from './paths.ts';
 
-const ALLOWED_ORIGIN = process.env['ALLOWED_ORIGIN'] ?? '*';
-
-export const CORS = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key, X-Account, X-Session-Id, X-Username',
-};
-
-export function json(data: unknown, status = 200): Response {
-  return Response.json(data, { status, headers: CORS });
+export function json(res: ExpressRes, data: unknown, status = 200): void {
+  res.status(status).json(data);
 }
 
-export function error(message: string, status = 400): Response {
-  return json({ error: message }, status);
+export function error(res: ExpressRes, message: string, status = 400): void {
+  res.status(status).json({ error: message });
+}
+
+export function p(req: ExpressReq, name: string): string {
+  return (req.params as Record<string, string>)[name] || '';
 }
 
 export function validateDomain(domain: unknown): domain is string {
   return typeof domain === 'string' && VALID_DOMAIN.test(domain);
 }
 
-export function extractClientIp(req: Request, remoteAddr: { hostname?: string } | null): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-  const realIp = req.headers.get('x-real-ip');
+function headerValue(val: string | string[] | undefined): string | undefined {
+  if (!val) return undefined;
+  return Array.isArray(val) ? val[0] : val;
+}
+
+export function extractClientIp(req: ExpressReq, remoteAddr: { hostname?: string } | null): string {
+  const forwarded = headerValue(req.headers['x-forwarded-for']);
+  const realIp = headerValue(req.headers['x-real-ip']);
   if (forwarded) return forwarded.split(',')[0]?.trim() ?? 'unknown';
   if (realIp) return realIp;
   if (remoteAddr?.hostname) return remoteAddr.hostname;
   return 'unknown';
 }
 
-/** Check request method and return 405 if mismatch */
-export function checkMethod(req: Request, allowed: string): Response | undefined {
-  if (req.method === allowed) {
-    return undefined;
-  }
-  return error('Method not allowed', 405);
+export function checkMethod(req: ExpressReq, allowed: string): boolean {
+  return req.method === allowed;
 }
 
-/** Validate domain and return error response if invalid */
-export function ensureDomain(domain: unknown): Response | string {
-  if (validateDomain(domain)) {
-    return domain;
-  }
-  return error('Invalid domain');
+export function ensureDomain(domain: unknown): string | null {
+  return validateDomain(domain) ? domain : null;
 }
 
 export function assert(condition: boolean, message: string): void {
-  if (!condition) {
-    console.error(`Assertion failed: ${message}`);
-  }
+  if (!condition) console.error(`Assertion failed: ${message}`);
 }
 
-/** Require a header value or return error response */
-export function requireHeader(req: Request, name: string, errorMessage?: string): string | Response {
-  const value = req.headers.get(name);
-  if (!value) return error(errorMessage || `${name} header is required`, 401);
-  return value;
+export function requireHeader(req: ExpressReq, name: string): string | undefined {
+  const value = req.headers[name.toLowerCase()];
+  if (!value) return undefined;
+  return Array.isArray(value) ? value[0] : value;
 }
 
-/** Require X-Username header */
-export function requireUsername(req: Request): string | Response {
-  return requireHeader(req, 'X-Username', 'Missing username');
+export function requireUsername(req: ExpressReq): string | undefined {
+  return requireHeader(req, 'X-Username');
 }
 
-/** Require X-Session-Id header */
-export function requireSessionId(req: Request): string | Response {
-  return requireHeader(req, 'X-Session-Id', 'Session ID required');
+export function requireSessionId(req: ExpressReq): string | undefined {
+  return requireHeader(req, 'X-Session-Id');
 }
 
-/** Parse JSON body with error handling */
-export async function parseJson<T>(req: Request): Promise<Response | T> {
-  try {
-    return (await req.json()) as T;
-  } catch {
-    return error('Invalid JSON');
-  }
-}
-
-/** Artificial delay for testing purposes */
-export async function delay(ms: number): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, ms));
+export async function parseJson<T>(req: ExpressReq): Promise<T | undefined> {
+  try { return JSON.parse(req.body?.toString() || '{}') as T; }
+  catch { return undefined; }
 }

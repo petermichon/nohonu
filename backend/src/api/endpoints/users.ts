@@ -1,77 +1,62 @@
-import { json, checkMethod, error, CORS } from '../../shared/http.ts';
+import type { Request as ExpressReq, Response as ExpressRes } from 'express';
+import { json, p, requireUsername } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import * as publicUser from '../../usecases/auth/publicUser.ts';
-import { SUBDOMAIN_BASE } from '../../shared/paths.ts';
-import type { RouteContext } from '../route-context.ts';
 
-// === Responses
+function userNotFound(res: ExpressRes) { json(res, { error: 'User not found' }, 404); }
 
-function userNotFound() { return json({ error: 'User not found' }, 404); }
-function siteNotFound() { return error('Site not found', 404); }
+export async function getUserByUsernameEndpoint(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = (req.params as Record<string, string>)['username'];
+  if (!username) { json(res, { error: 'Username required' }, 400); return; }
 
-function publicSiteInfoResponse(req: Request, domain: string, info: NonNullable<Awaited<ReturnType<typeof sites.getSiteInfo>>>): Response {
-  let subdomainBase = SUBDOMAIN_BASE;
-  if (subdomainBase === 'localhost:8080') {
-    const url = new URL(req.url);
-    const host = url.hostname;
-    const port = url.port;
-    subdomainBase = port ? `${host}:${port}` : host;
-  }
-  return json({
+  const user = await publicUser.getPublicUser(username);
+  if (!user) { userNotFound(res); return; }
+  json(res, { user }, 200);
+}
+
+export async function getPublicSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = (req.params as Record<string, string>)['username'] || '';
+  const domain = (req.params as Record<string, string>)['domain'] || '';
+  if (!username || !(await publicUser.userExists(username))) { userNotFound(res); return; }
+
+  const info = await sites.getSiteInfo(username, domain);
+  if (!info) { json(res, { error: 'Site not found' }, 404); return; }
+
+  json(res, {
     domain,
     siteId: info.siteId,
     enabled: info.enabled,
     subdomain: info.subdomain,
-    subdomainBase,
+    subdomainBase: req.headers.host || 'localhost:8080',
     displayName: info.displayName,
     account: info.account,
     coverImage: info.coverImage,
   });
 }
 
-// === Handlers
-
-export async function getUserByUsernameEndpoint(req: Request, username: string): Promise<Response> {
-  const methodError = checkMethod(req, 'GET');
-  if (methodError) return methodError;
-
-  if (!username) return json({ error: 'Username required' }, 400);
-
-  const user = await publicUser.getPublicUser(username);
-  if (!user) return userNotFound();
-  return json({ user }, 200);
-}
-
-export async function getPublicSiteInfo(req: Request, ctx: RouteContext): Promise<Response> {
-  const username = ctx.username;
-  if (!username) return userNotFound();
-  if (!(await publicUser.userExists(username))) return userNotFound();
-
-  const info = await sites.getSiteInfo(username, ctx.domain);
-  if (!info) return siteNotFound();
-
-  return publicSiteInfoResponse(req, ctx.domain, info);
-}
-
-export async function getUserSites(_req: Request, username: string): Promise<Response> {
-  if (!(await publicUser.userExists(username))) return userNotFound();
+export async function getUserSites(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = (req.params as Record<string, string>)['username'];
+  if (!username) { userNotFound(res); return; }
+  if (!(await publicUser.userExists(username))) { userNotFound(res); return; }
 
   const siteList = await sites.listSites(username);
-  return json({ sites: siteList });
+  json(res, { sites: siteList });
 }
 
-export async function getUserStars(_req: Request, username: string): Promise<Response> {
-  if (!(await publicUser.userExists(username))) return userNotFound();
+export async function getUserStars(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = (req.params as Record<string, string>)['username'];
+  if (!username) { userNotFound(res); return; }
+  if (!(await publicUser.userExists(username))) { userNotFound(res); return; }
 
   const starredSites = await sites.listStarredSites(username);
-  return json({ sites: starredSites });
+  json(res, { sites: starredSites });
 }
 
-export async function getProfilePicture(_req: Request, username: string): Promise<Response> {
+export async function getProfilePicture(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const username = (req.params as Record<string, string>)['username'] || '';
   const file = await publicUser.getProfilePictureFile(username);
-  if (!file) return new Response('Not Found', { status: 404, headers: CORS });
+  if (!file) { res.status(404).end(); return; }
 
-  return new Response(file as BodyInit, {
-    headers: { ...CORS, 'Content-Type': 'image/jpeg' },
-  });
+  res.set('Content-Type', 'image/jpeg');
+  res.send(Buffer.from(file));
 }
