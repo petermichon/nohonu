@@ -1,12 +1,8 @@
 import { json, checkMethod } from '../../shared/http.ts';
 import * as authUc from '../../usecases/auth/index.ts';
-import * as loginUc from '../../usecases/auth/login.ts';
-import * as logoutUc from '../../usecases/auth/logout.ts';
-import * as meUc from '../../usecases/auth/me.ts';
-import * as registerUc from '../../usecases/auth/register.ts';
-import * as displayNameUc from '../../usecases/auth/updateDisplayName.ts';
+import * as authModule from '../../usecases/auth/auth.ts';
+import * as profile from '../../usecases/auth/profile.ts';
 import * as sessionUc from '../../usecases/auth/sessions.ts';
-import * as profilePictureUc from '../../usecases/auth/profilePicture.ts';
 
 export function auth(req: Request): Response {
   const methodError = checkMethod(req, 'GET');
@@ -31,7 +27,7 @@ export async function authRegister(req: Request): Promise<Response> {
 
     const userAgent = req.headers.get('User-Agent') || undefined;
 
-    const result = await registerUc.register(password, username, userAgent);
+    const result = await authModule.register(password, username, userAgent);
 
     if (!result.success || !result.user) {
       return json({ error: result.error || 'Registration failed' }, 400);
@@ -66,7 +62,7 @@ export async function authLogin(req: Request): Promise<Response> {
 
     const userAgent = req.headers.get('User-Agent') || undefined;
 
-    const result = await loginUc.login(username, password, userAgent);
+    const result = await authModule.login(username, password, userAgent);
 
     if (!result.success || !result.user) {
       return json({ error: result.error || 'Login failed' }, 401);
@@ -97,7 +93,7 @@ export async function authLogout(req: Request): Promise<Response> {
     return json({ error: 'Session ID required' }, 400);
   }
 
-  await logoutUc.logout(sessionId);
+  await authModule.logout(sessionId);
 
   return json({ success: true }, 200);
 }
@@ -112,7 +108,7 @@ export async function authMe(req: Request): Promise<Response> {
     return json({ error: 'Session ID required' }, 401);
   }
 
-  const result = await meUc.me(sessionId);
+  const result = await authModule.me(sessionId);
 
   if (result.error || !result.user) {
     return json({ error: result.error || 'User not found' }, 401);
@@ -151,7 +147,7 @@ export async function authDisplayName(req: Request): Promise<Response> {
     return json({ error: 'Display name too long (max 50 characters)' }, 400);
   }
 
-  const result = await displayNameUc.updateDisplayName(sessionId, displayName);
+  const result = await profile.updateDisplayName(sessionId, displayName);
   if (!result.success) {
     return json({ error: result.error || 'Failed to update display name' }, 401);
   }
@@ -168,7 +164,7 @@ export async function uploadProfilePicture(req: Request): Promise<Response> {
   const contentType = req.headers.get('Content-Type') || '';
   const body = await req.arrayBuffer();
 
-  const result = await profilePictureUc.uploadProfilePicture(username, contentType, body);
+  const result = await profile.uploadProfilePicture(username, contentType, body);
   if (!result.success) {
     return json({ error: result.error }, 400);
   }
@@ -182,7 +178,7 @@ export async function deleteProfilePicture(req: Request): Promise<Response> {
     return json({ error: 'Missing username' }, 401);
   }
 
-  const result = await profilePictureUc.deleteProfilePicture(username);
+  const result = await profile.deleteProfilePicture(username);
   if (!result.success) {
     return json({ error: result.error }, 500);
   }

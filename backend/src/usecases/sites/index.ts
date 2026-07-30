@@ -1,5 +1,7 @@
 import * as fs from 'node:fs/promises';
+import * as dns from 'node:dns/promises';
 import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult, domainDir, coverImagePath } from '../../shared/paths.ts';
+import { readZip } from '../../shared/zip.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { db } from '../../db.ts';
@@ -171,7 +173,6 @@ export async function getSiteIcon(user: string, domain: string): Promise<{ data:
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || !data.enabled || data.currentIndex === null) return null;
 
-  const { readZip } = await import('../../shared/zip.ts');
   const zipData = await storage.readActiveVersion(user, domain);
   if (!zipData) return null;
 
@@ -323,8 +324,35 @@ export async function removeCustomDomain(user: string, domain: string, customDom
   return { ok: true, value: undefined };
 }
 
+async function dnsVerifyCustomDomain(domain: string, customDomain: string): Promise<boolean> {
+  const expectedToken = await generateVerificationToken(domain);
+  const txtRecordName = `_nohonu.${customDomain}`;
+
+  try {
+    const records = await dns.resolveTxt(txtRecordName);
+    if (!records || records.length === 0) return false;
+
+    for (const record of records) {
+      for (const value of record) {
+        if (value === expectedToken) return true;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error(`DNS lookup failed for ${txtRecordName}:`, error);
+    return false;
+  }
+}
+
+async function generateVerificationToken(domain: string): Promise<string> {
+  const data = new TextEncoder().encode(domain);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `nohonu-verify-${hashHex.substring(0, 16)}`;
+}
+
 export async function verifyCustomDomain(user: string, domain: string, customDomain: string): Promise<UsecaseResult<{ verified: boolean }>> {
-  const { verifyCustomDomain: dnsVerifyCustomDomain } = await import('./customDomains.ts');
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, error: 'Site not found', status: 404 };
@@ -334,9 +362,7 @@ export async function verifyCustomDomain(user: string, domain: string, customDom
     return { ok: false, error: 'Custom domain not found', status: 404 };
   }
   
-  const entry = data.customDomains.find((e) => {
-    return e.domain === customDomain;
-  });
+  const entry = data.customDomains.find((e) => e.domain === customDomain);
   if (!entry) {
     return { ok: false, error: 'Custom domain not found', status: 404 };
   }
@@ -347,13 +373,11 @@ export async function verifyCustomDomain(user: string, domain: string, customDom
   await storage.writeSiteMetadata(user, domain, data);
   invalidateCustomDomainCache();
   
-  const verified = isVerified;
-  return { ok: true, value: { verified } };
+  return { ok: true, value: { verified: isVerified } };
 }
 
 export async function getVerificationToken(domain: string): Promise<{ token: string }> {
-  const { getVerificationToken: dnsGetToken } = await import('./customDomains.ts');
-  const token = await dnsGetToken(domain);
+  const token = await generateVerificationToken(domain);
   return { token };
 }
 
@@ -649,7 +673,6 @@ export async function serveSiteFile(user: string, domain: string, filePath: stri
     if (!siteData.enabled || siteData.currentIndex === null) return null;
 
     try {
-      const { readZip } = await import('../../shared/zip.ts');
       const zipData = await storage.readActiveVersion(user, domain);
       if (!zipData) return null;
       const files = await readZip(zipData);
