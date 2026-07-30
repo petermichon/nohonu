@@ -55,8 +55,7 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
-export async function listSites(sessionId: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }>> {
-  const user = await requireSession(sessionId);
+export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }>> {
   const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
@@ -122,8 +121,7 @@ export async function listStarredSites(username: string): Promise<{ user: string
   }));
 }
 
-export async function checkSite(sessionId: string, domain: string): Promise<{ exists: boolean; enabled: boolean }> {
-  const user = await requireSession(sessionId);
+export async function checkSite(user: string, domain: string): Promise<{ exists: boolean; enabled: boolean }> {
   const data = await storage.readSiteMetadata(user, domain);
   return {
     exists: !!data && data.currentIndex !== null,
@@ -151,15 +149,13 @@ export async function checkDomain(user: string, rawDomain: string): Promise<bool
   return !!data && data.currentIndex !== null;
 }
 
-export async function getSiteInfo(sessionId: string, domain: string): Promise<{ enabled: boolean; subdomain?: string; siteId: string; displayName?: string; account?: string; coverImage?: string } | null> {
-  const user = await requireSession(sessionId);
+export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string; siteId: string; displayName?: string; account?: string; coverImage?: string } | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) return null;
   return { enabled: data.enabled, subdomain: data.subdomain, siteId: data.siteId, displayName: data.displayName, account: data.account, coverImage: data.coverImage };
 }
 
-export async function downloadActiveVersion(sessionId: string, domain: string): Promise<{ data: Uint8Array; filename: string } | null> {
-  const user = await requireSession(sessionId);
+export async function downloadActiveVersion(user: string, domain: string): Promise<{ data: Uint8Array; filename: string } | null> {
   const meta = await storage.readSiteMetadata(user, domain);
   if (!meta || !meta.enabled || meta.currentIndex === null) return null;
   const data = await storage.readActiveVersion(user, domain);
@@ -167,8 +163,7 @@ export async function downloadActiveVersion(sessionId: string, domain: string): 
   return { data, filename: `${domain}.zip` };
 }
 
-export async function getSiteIcon(sessionId: string, domain: string): Promise<{ data: Uint8Array; contentType: string } | null> {
-  const user = await requireSession(sessionId);
+export async function getSiteIcon(user: string, domain: string): Promise<{ data: Uint8Array; contentType: string } | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || !data.enabled || data.currentIndex === null) return null;
 
@@ -447,8 +442,7 @@ export async function deleteSite(sessionId: string, domain: string): Promise<voi
   analytics.clearDomain(domain);
 }
 
-export async function listVersions(sessionId: string, domain: string): Promise<{ versions: Array<{ index: number; size: number; source: { type: 'upload' } | { type: 'github'; repo: string; branch: string }; createdAt: number }>; current: number | null }> {
-  const user = await requireSession(sessionId);
+export async function listVersions(user: string, domain: string): Promise<{ versions: Array<{ index: number; size: number; source: { type: 'upload' } | { type: 'github'; repo: string; branch: string }; createdAt: number }>; current: number | null }> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) return { versions: [], current: null };
 
@@ -784,8 +778,7 @@ function getContentType(ext: string): string {
   return types[ext] ?? 'application/octet-stream';
 }
 
-export async function getSiteCover(sessionId: string, domain: string): Promise<Uint8Array | null> {
-  const user = await requireSession(sessionId);
+export async function getSiteCover(user: string, domain: string): Promise<Uint8Array | null> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || !data.coverImage) return null;
 
