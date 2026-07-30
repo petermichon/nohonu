@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson, p, requireUsername } from '../../shared/http.ts';
+import { json, parseJson, p } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
 
@@ -14,7 +14,7 @@ function domainFrom(req: ExpressReq): string { return (req.params as Record<stri
 
 type CreateSiteParams = { username: string; domain: string; zipData: Uint8Array; subdomain?: string };
 function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | undefined {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) return;
 
   const buffer = req.body instanceof Buffer ? req.body : undefined;
@@ -26,7 +26,7 @@ function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | undefined 
 
 type CreateGithubParams = { username: string; domain: string; repo: string; ref: string; subdomain?: string };
 async function extractCreateGithubParams(req: ExpressReq): Promise<CreateGithubParams | undefined> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) return;
 
   const body = await parseJson<{ repo?: unknown; branch?: unknown; subdomain?: unknown }>(req);
@@ -38,7 +38,7 @@ async function extractCreateGithubParams(req: ExpressReq): Promise<CreateGithubP
 
 type ToggleStarParams = { username: string; domain: string; starred: boolean };
 async function extractToggleStarParams(req: ExpressReq): Promise<ToggleStarParams | undefined> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) return;
 
   const body = await parseJson<{ starred?: boolean }>(req);
@@ -47,7 +47,7 @@ async function extractToggleStarParams(req: ExpressReq): Promise<ToggleStarParam
 
 type UpdateMetaParams = { username: string; domain: string; meta: { subdomain?: string; displayName?: string } };
 async function extractUpdateMetaParams(req: ExpressReq): Promise<UpdateMetaParams | undefined> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) return;
 
   const body = await parseJson<{ subdomain?: string; displayName?: string }>(req);
@@ -58,7 +58,7 @@ async function extractUpdateMetaParams(req: ExpressReq): Promise<UpdateMetaParam
 
 type UploadCoverParams = { username: string; domain: string; data: Uint8Array };
 function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefined {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) return;
 
   const contentType = req.get('Content-Type') || '';
@@ -73,7 +73,7 @@ function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefine
 // === Handlers
 
 export async function listSites(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   json(res, { sites: await sites.listSites(username) });
@@ -85,7 +85,7 @@ export async function listExploreSites(req: ExpressReq, res: ExpressRes): Promis
 }
 
 export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const info = await sites.getSiteInfo(username, domainFrom(req));
@@ -143,7 +143,7 @@ export async function getSiteCover(req: ExpressReq, res: ExpressRes): Promise<vo
 }
 
 export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const meta = await sites.getSiteMeta(username, domainFrom(req));
@@ -169,7 +169,7 @@ export function getSiteUptime(req: ExpressReq, res: ExpressRes): void {
 }
 
 export async function getSiteRepos(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const result = await sites.getSiteRepos(username, domainFrom(req));
@@ -213,7 +213,7 @@ async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<v
 }
 
 export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   await sites.deleteSite(username, domainFrom(req));
@@ -221,7 +221,7 @@ export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void
 }
 
 export async function toggleSite(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const result = await sites.toggleSite(username, domainFrom(req));
@@ -257,7 +257,7 @@ export async function uploadCover(req: ExpressReq, res: ExpressRes): Promise<voi
 }
 
 export async function deleteCover(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const result = await sites.deleteSiteCover(username, domainFrom(req));

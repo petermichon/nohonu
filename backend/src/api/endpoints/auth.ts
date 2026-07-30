@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson, requireSessionId, requireUsername } from '../../shared/http.ts';
+import { json, parseJson, requireSessionId } from '../../shared/http.ts';
 import * as authUc from '../../usecases/auth/index.ts';
 import * as authModule from '../../usecases/auth/auth.ts';
 import * as profile from '../../usecases/auth/profile.ts';
@@ -112,7 +112,7 @@ export async function authDisplayName(req: ExpressReq, res: ExpressRes): Promise
 }
 
 export async function uploadProfilePicture(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
   const contentType = req.get('Content-Type') || '';
   const raw = req.body instanceof Buffer ? req.body : Buffer.alloc(0);
@@ -122,7 +122,7 @@ export async function uploadProfilePicture(req: ExpressReq, res: ExpressRes): Pr
 }
 
 export async function deleteProfilePicture(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
   const result = await profile.deleteProfilePicture(username);
   if (!result.success) { json(res, { error: result.error }, 500); return; }

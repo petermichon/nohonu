@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson, p, requireUsername } from '../../shared/http.ts';
+import { json, parseJson, p } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
 
@@ -19,7 +19,7 @@ function indexFrom(req: ExpressReq): number | undefined {
 
 type UploadParams = { username: string; domain: string; zipData: Uint8Array };
 function extractUploadParams(req: ExpressReq): UploadParams | undefined {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) return;
 
   const buffer = req.body instanceof Buffer ? req.body : undefined;
@@ -31,7 +31,7 @@ function extractUploadParams(req: ExpressReq): UploadParams | undefined {
 
 type GithubParams = { username: string; domain: string; repo: string; ref: string };
 async function extractGithubParams(req: ExpressReq): Promise<GithubParams | undefined> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) return;
 
   const body = await parseJson<{ repo?: unknown; branch?: unknown }>(req);
@@ -79,7 +79,7 @@ export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<voi
 }
 
 export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const idx = indexFrom(req);
@@ -94,7 +94,7 @@ export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Pro
 }
 
 export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const idx = indexFrom(req);
@@ -106,7 +106,7 @@ export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<v
 }
 
 export async function activateVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const idx = indexFrom(req);

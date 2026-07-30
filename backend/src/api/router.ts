@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireSession } from './auth-middleware.ts';
 import * as health from './endpoints/health.ts';
 import * as auth from './endpoints/auth.ts';
 import * as check from './endpoints/check.ts';
@@ -18,80 +19,71 @@ if (API_KEY) {
   });
 }
 
-// Health
-router.get('/health', health.health);
+// ── Public ──
 
-// Auth
-router.get('/auth', auth.auth);
+router.get('/health', health.health);
 router.post('/auth/register', auth.authRegister);
 router.post('/auth/login', auth.authLogin);
-router.post('/auth/logout', auth.authLogout);
-router.get('/auth/me', auth.authMe);
-router.patch('/auth/displayname', auth.authDisplayName);
-router.post('/auth/profile-picture', auth.uploadProfilePicture);
-router.delete('/auth/profile-picture/delete', auth.deleteProfilePicture);
-router.get('/auth/sessions', auth.getSessions);
-router.delete('/auth/sessions/delete', auth.deleteSession);
+router.get('/auth', auth.auth);
 
-// Domain checks
 router.get('/check-domain', check.checkDomain);
 router.get('/check-custom-domain', check.checkCustomDomain);
 router.get('/check-subdomain', check.checkSubdomain);
-
-// Custom domains (global)
-router.get('/custom-domains', customDomains.getAllCustomDomains);
-
-// Explore
 router.get('/explore/sites', sites.listExploreSites);
-
-// Sites list
-router.get('/sites', sites.listSites);
-
-// Site routes - GET
-router.get('/sites/:domain', sites.getSiteInfo);
-router.get('/sites/:domain/download', sites.downloadSite);
-router.get('/sites/:domain/icon', sites.getSiteIcon);
-router.get('/sites/:domain/cover', sites.getSiteCover);
-router.get('/sites/:domain/meta', sites.getSiteMeta);
-router.get('/sites/:domain/stats', sites.getSiteStats);
-router.get('/sites/:domain/visitors', sites.getSiteVisitors);
-router.get('/sites/:domain/uptime', sites.getSiteUptime);
-router.get('/sites/:domain/repos', sites.getSiteRepos);
-
-// Site versions
-router.get('/sites/:domain/versions', versions.listSiteVersions);
-router.get('/sites/:domain/versions/download', versions.downloadSiteVersion);
-
-// Site custom domains - GET
-router.get('/sites/:domain/custom-domains', customDomains.getCustomDomains);
-router.get('/sites/:domain/custom-domains/token', customDomains.getVerificationToken);
-
-// Site routes - POST
-router.post('/sites/:domain', sites.createSiteDispatch);
-router.post('/sites/:domain/versions', versions.upload);
-router.post('/sites/:domain/versions/github', versions.fetchGithub);
-router.post('/sites/:domain/versions/:timestamp/activate', versions.activateVersion);
-router.post('/sites/:domain/custom-domains', customDomains.addCustomDomain);
-router.post('/sites/:domain/custom-domains/verify', customDomains.verifyCustomDomain);
-router.post('/sites/:domain/cover', sites.uploadCover);
-
-// Site routes - DELETE
-router.delete('/sites/:domain', sites.deleteSite);
-router.delete('/sites/:domain/versions/:timestamp', versions.deleteVersion);
-router.delete('/sites/:domain/custom-domains/:subAction', customDomains.deleteCustomDomain);
-router.delete('/sites/:domain/cover', sites.deleteCover);
-
-// Site routes - PATCH
-router.patch('/sites/:domain/toggle', sites.toggleSite);
-router.patch('/sites/:domain/star', sites.toggleStar);
-router.patch('/sites/:domain/meta', sites.updateMeta);
-
-// User routes
 router.get('/users/:username/sites', users.getUserSites);
 router.get('/users/:username/profile-picture', users.getProfilePicture);
 router.get('/users/:username/stars', users.getUserStars);
 router.get('/users/:username/:domain', users.getPublicSiteInfo);
 router.get('/users/:username', users.getUserByUsernameEndpoint);
-
-// Static file serving - must be last (catch-all)
 router.get('/{*path}', sites.serveStatic);
+
+// ── Auth-protected ──
+
+const authProtected = Router();
+authProtected.use(requireSession);
+authProtected.get('/me', auth.authMe);
+authProtected.post('/logout', auth.authLogout);
+authProtected.patch('/displayname', auth.authDisplayName);
+authProtected.post('/profile-picture', auth.uploadProfilePicture);
+authProtected.delete('/profile-picture/delete', auth.deleteProfilePicture);
+authProtected.get('/sessions', auth.getSessions);
+authProtected.delete('/sessions/delete', auth.deleteSession);
+router.use('/auth', authProtected);
+
+// ── Site-protected ──
+
+const siteProtected = Router();
+siteProtected.use(requireSession);
+siteProtected.get('/', sites.listSites);
+siteProtected.get('/:domain', sites.getSiteInfo);
+siteProtected.get('/:domain/download', sites.downloadSite);
+siteProtected.get('/:domain/icon', sites.getSiteIcon);
+siteProtected.get('/:domain/cover', sites.getSiteCover);
+siteProtected.get('/:domain/meta', sites.getSiteMeta);
+siteProtected.get('/:domain/repos', sites.getSiteRepos);
+siteProtected.get('/:domain/versions', versions.listSiteVersions);
+siteProtected.get('/:domain/versions/download', versions.downloadSiteVersion);
+siteProtected.get('/:domain/custom-domains', customDomains.getCustomDomains);
+siteProtected.get('/:domain/custom-domains/token', customDomains.getVerificationToken);
+siteProtected.post('/:domain', sites.createSiteDispatch);
+siteProtected.post('/:domain/versions', versions.upload);
+siteProtected.post('/:domain/versions/github', versions.fetchGithub);
+siteProtected.post('/:domain/versions/:timestamp/activate', versions.activateVersion);
+siteProtected.post('/:domain/custom-domains', customDomains.addCustomDomain);
+siteProtected.post('/:domain/custom-domains/verify', customDomains.verifyCustomDomain);
+siteProtected.post('/:domain/cover', sites.uploadCover);
+siteProtected.delete('/:domain', sites.deleteSite);
+siteProtected.delete('/:domain/versions/:timestamp', versions.deleteVersion);
+siteProtected.delete('/:domain/custom-domains/:subAction', customDomains.deleteCustomDomain);
+siteProtected.delete('/:domain/cover', sites.deleteCover);
+siteProtected.patch('/:domain/toggle', sites.toggleSite);
+siteProtected.patch('/:domain/star', sites.toggleStar);
+siteProtected.patch('/:domain/meta', sites.updateMeta);
+router.use('/sites', siteProtected);
+
+// ── Custom domains (need auth) ──
+
+const customDomainsProtected = Router();
+customDomainsProtected.use(requireSession);
+customDomainsProtected.get('/', customDomains.getAllCustomDomains);
+router.use('/custom-domains', customDomainsProtected);

@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, p, requireUsername } from '../../shared/http.ts';
+import { json, p } from '../../shared/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import * as publicUser from '../../usecases/auth/publicUser.ts';
 

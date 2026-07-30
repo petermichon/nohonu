@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson, p, requireUsername } from '../../shared/http.ts';
+import { json, parseJson, p } from '../../shared/http.ts';
 import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
 
@@ -20,7 +20,7 @@ export async function getAllCustomDomains(req: ExpressReq, res: ExpressRes): Pro
 }
 
 export async function getCustomDomains(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   try {
@@ -33,7 +33,7 @@ export async function getCustomDomains(req: ExpressReq, res: ExpressRes): Promis
 }
 
 export async function addCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const body = await parseJson<{ customDomain: string }>(req);
@@ -48,7 +48,7 @@ export async function addCustomDomain(req: ExpressReq, res: ExpressRes): Promise
 }
 
 export async function deleteCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const customDomain = requireCustomDomain(p(req, 'subAction'));
@@ -60,7 +60,7 @@ export async function deleteCustomDomain(req: ExpressReq, res: ExpressRes): Prom
 }
 
 export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
-  const username = requireUsername(req);
+  const username = req.user!;
   if (!username) { json(res, { error: 'Missing username' }, 401); return; }
 
   const customDomain = requireCustomDomain(p(req, 'subAction'));
