@@ -1,4 +1,4 @@
-import { json, checkMethod, parseJson, requireSessionId, requireUsername } from '../../shared/http.ts';
+import { json, parseJson, requireSessionId, requireUsername } from '../../shared/http.ts';
 import * as authUc from '../../usecases/auth/index.ts';
 import * as authModule from '../../usecases/auth/auth.ts';
 import * as profile from '../../usecases/auth/profile.ts';

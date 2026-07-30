@@ -2,7 +2,7 @@ import { Router } from 'express';
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { wrap, wrapCtx, wrapStrParam, requireAuth, toWebRequest, sendWebResponse } from './wrappers.ts';
 import { buildCtx } from './route-context.ts';
-import { health } from './endpoints/health.ts';
+import * as health from './endpoints/health.ts';
 import * as auth from './endpoints/auth.ts';
 import * as check from './endpoints/check.ts';
 import * as customDomains from './endpoints/custom-domains.ts';
@@ -13,7 +13,7 @@ import * as users from './endpoints/users.ts';
 export const router = Router();
 
 // Health
-router.get('/health', wrap(health));
+router.get('/health', wrap(health.health));
 
 // Auth
 router.get('/auth', wrap(auth.auth));
