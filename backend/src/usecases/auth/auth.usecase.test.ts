@@ -1,0 +1,206 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  checkAuth,
+  deleteProfilePicture,
+  deleteSession,
+  getProfilePictureFile,
+  getPublicUser,
+  listSessions,
+  login,
+  logout,
+  logoutAll,
+  me,
+  register,
+  registerUser,
+  resetTestState,
+  updateDisplayName,
+  uploadProfilePicture,
+  userExists,
+} from '../../test/setup.ts';
+
+beforeEach(async () => {
+  await resetTestState();
+});
+
+describe('checkAuth', () => {
+  it('accepts the configured API key', () => {
+    expect(checkAuth('test-api-key')).toEqual({ secured: true, valid: true });
+  });
+
+  it('rejects a wrong API key', () => {
+    expect(checkAuth('wrong-key')).toEqual({ secured: true, valid: false });
+  });
+
+  it('rejects a missing API key', () => {
+    expect(checkAuth(null)).toEqual({ secured: true, valid: false });
+  });
+});
+
+describe('register', () => {
+  it('creates a user and session, without exposing the password hash', async () => {
+    const result = await register('secret123', 'alice');
+    expect(result.success).toBe(true);
+    expect(result.user?.username).toBe('alice');
+    expect(result.session).toBeTruthy();
+    expect(result.user?.passwordHash).toBeUndefined();
+  });
+
+  it('rejects a duplicate username', async () => {
+    await register('secret123', 'alice');
+    const result = await register('secret456', 'alice');
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('login', () => {
+  it('returns a session for correct credentials', async () => {
+    await register('secret123', 'alice');
+    const result = await login('alice', 'secret123');
+    expect(result.success).toBe(true);
+    expect(result.user?.username).toBe('alice');
+    expect(result.session).toBeTruthy();
+  });
+
+  it('fails with a wrong password', async () => {
+    await register('secret123', 'alice');
+    const result = await login('alice', 'wrong');
+    expect(result.success).toBe(false);
+    expect(result.user).toBeUndefined();
+  });
+
+  it('fails for an unknown user', async () => {
+    const result = await login('nobody', 'secret123');
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('me', () => {
+  it('returns the session user', async () => {
+    const sessionId = await registerUser('bob');
+    const result = await me(sessionId);
+    expect(result.error).toBeUndefined();
+    expect(result.user?.username).toBe('bob');
+    expect(result.session?.id).toBe(sessionId);
+  });
+
+  it('fails for an invalid session', async () => {
+    const result = await me('not-a-session');
+    expect(result.error).toBe('Invalid session');
+  });
+});
+
+describe('logout', () => {
+  it('invalidates the session', async () => {
+    const sessionId = await registerUser('carol');
+    await logout(sessionId);
+    const result = await me(sessionId);
+    expect(result.error).toBe('Invalid session');
+  });
+});
+
+describe('logoutAll', () => {
+  it('invalidates every session of the user', async () => {
+    const first = await registerUser('karl');
+    const second = await login('karl', 'password123');
+    await logoutAll('karl');
+    expect((await me(first)).error).toBe('Invalid session');
+    expect((await me(second.session ?? '')).error).toBe('Invalid session');
+  });
+});
+
+describe('updateDisplayName', () => {
+  it('updates the display name', async () => {
+    const sessionId = await registerUser('dave');
+    const result = await updateDisplayName(sessionId, 'Dave');
+    expect(result.success).toBe(true);
+    expect((await getPublicUser('dave'))?.displayName).toBe('Dave');
+  });
+
+  it('fails for an invalid session', async () => {
+    const result = await updateDisplayName('bad-session', 'X');
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('profile picture', () => {
+  it('uploads, reads and deletes a picture', async () => {
+    const sessionId = await registerUser('erin');
+    const data = new Uint8Array([1, 2, 3, 4]);
+
+    const upload = await uploadProfilePicture(sessionId, 'image/jpeg', data.buffer);
+    expect(upload.success).toBe(true);
+    expect(await getProfilePictureFile('erin')).toEqual(data);
+
+    const del = await deleteProfilePicture(sessionId);
+    expect(del.success).toBe(true);
+    expect(await getProfilePictureFile('erin')).toBeNull();
+  });
+
+  it('rejects a non-image content type', async () => {
+    const sessionId = await registerUser('frank');
+    const result = await uploadProfilePicture(sessionId, 'text/plain', new Uint8Array([1]).buffer);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('public user', () => {
+  it('reports existence and public info without sensitive fields', async () => {
+    await registerUser('grace');
+    expect(await userExists('grace')).toBe(true);
+    expect(await userExists('nobody')).toBe(false);
+    expect(await getPublicUser('nobody')).toBeNull();
+
+    const publicUser = await getPublicUser('grace');
+    expect(publicUser?.username).toBe('grace');
+    expect(publicUser?.passwordHash).toBeUndefined();
+  });
+});
+
+describe('sessions', () => {
+  it('lists all sessions of the user', async () => {
+    const first = await registerUser('heidi');
+    await login('heidi', 'password123');
+
+    const result = await listSessions(first);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.length).toBe(2);
+    }
+  });
+
+  it('rejects an invalid session', async () => {
+    const result = await listSessions('not-a-session');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('unauthorized');
+    }
+  });
+
+  it('deletes another session of the same user', async () => {
+    const first = await registerUser('ivan');
+    const second = await login('ivan', 'password123');
+
+    const result = await deleteSession(first, second.session ?? '');
+    expect(result.ok).toBe(true);
+
+    const list = await listSessions(first);
+    expect(list.ok && list.value.length).toBe(1);
+  });
+
+  it('refuses to delete the current session', async () => {
+    const sessionId = await registerUser('judy');
+    const result = await deleteSession(sessionId, sessionId);
+    expect(result.ok).toBe(false);
+  });
+
+  it('refuses to delete another user session', async () => {
+    const owner = await registerUser('mallory');
+    const other = await registerUser('trent');
+
+    const result = await deleteSession(other, owner);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('forbidden');
+    }
+  });
+});
