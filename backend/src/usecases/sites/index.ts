@@ -736,6 +736,16 @@ export async function saveAnalytics(user: string, domain: string): Promise<void>
   await analytics.saveAnalytics(user, domain);
 }
 
+export function resetAnalytics(): void {
+  analytics.resetAnalytics();
+}
+
+export async function resetDatabase(): Promise<void> {
+  await storage.resetStorage();
+  resetAnalytics();
+  invalidateCustomDomainCache();
+}
+
 export async function serveSiteFile(user: string, domain: string, filePath: string): Promise<{ data: Uint8Array; contentType: string } | null> {
   const siteData = await storage.readSiteMetadata(user, domain);
   if (!siteData) return null;

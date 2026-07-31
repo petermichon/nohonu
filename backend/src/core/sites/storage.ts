@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
-import { domainDir } from '../../shared/paths.ts';
+import { domainDir, SITES_DIR } from '../../shared/paths.ts';
 import type { SiteData } from '../../shared/paths.ts';
 
 
@@ -395,4 +395,10 @@ export async function openActiveVersion(user: string, domain: string): Promise<f
   } catch {
     return undefined;
   }
+}
+
+export async function resetStorage(): Promise<void> {
+  await db.user.deleteMany();
+  await fs.rm(SITES_DIR, { recursive: true, force: true });
+  await fs.mkdir(SITES_DIR, { recursive: true });
 }

@@ -25,8 +25,6 @@ execSync(`npx prisma db push --accept-data-loss --schema="${backendDir}/prisma/s
 });
 
 // App modules must be imported dynamically, after DATABASE_URL/SITES_DIR are set.
-export const db = (await import('../db.ts')).db;
-
 export const register = (await import('../usecases/auth/register.ts')).register;
 export const login = (await import('../usecases/auth/login.ts')).login;
 export const logout = (await import('../usecases/auth/logout.ts')).logout;
@@ -44,16 +42,9 @@ export const deleteSession = (await import('../usecases/auth/delete-session.ts')
 export const checkAuth = (await import('../usecases/auth/check-auth.ts')).checkAuth;
 
 export const sites = await import('../usecases/sites/index.ts');
-export const metrics = await import('../core/analytics/metrics.ts');
 
 export async function resetTestState(): Promise<void> {
-  await db.user.deleteMany();
-  await fs.rm(SITES_TEST_DIR, { recursive: true, force: true });
-  await fs.mkdir(SITES_TEST_DIR, { recursive: true });
-  metrics.hits.clear();
-  metrics.visitors.clear();
-  metrics.uptime.clear();
-  sites.invalidateCustomDomainCache();
+  await sites.resetDatabase();
 }
 
 export async function registerUser(username = `user_${crypto.randomUUID().slice(0, 8)}`): Promise<string> {

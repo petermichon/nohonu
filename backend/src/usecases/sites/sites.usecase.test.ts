@@ -4,7 +4,6 @@ import type { Mock } from 'vitest';
 import {
   makeStoredZip,
   me,
-  metrics,
   registerUser,
   resetTestState,
   sites,
@@ -306,7 +305,8 @@ describe('analytics', () => {
     sites.recordPageHit('mysite', '1.2.3.4');
     sites.recordPageHit('mysite', '1.2.3.4');
 
-    expect(metrics.getTotalHits('mysite')).toBe(2);
+    const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(totalHits).toBe(2);
 
     const stats = sites.getSiteStats('mysite', 60);
     const lastSlot = stats[stats.length - 1];
@@ -410,7 +410,8 @@ describe('deleteSite', () => {
 
     expect(await sites.findUserForDomain('mysite')).toBeNull();
     expect((await sites.listMySites(sessionId)).some((s) => s.domain === 'mysite')).toBe(false);
-    expect(metrics.getTotalHits('mysite')).toBe(0);
+    const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(totalHits).toBe(0);
     expect(user).toBeTruthy();
   });
 });

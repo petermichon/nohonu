@@ -271,3 +271,9 @@ export function clearDomain(domain: string): void {
   visitors.delete(domain);
   uptime.delete(domain);
 }
+
+export function resetAnalytics(): void {
+  hits.clear();
+  visitors.clear();
+  uptime.clear();
+}
