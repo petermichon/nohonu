@@ -382,4 +382,174 @@ describe('github deploys', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.code).toBe('not_found');
   });
+
+  it('returns already_exists when the domain is taken', async () => {
+    const sessionId = await makeSite('quinn', 'ghsite');
+    fetchMock.mockResolvedValue(new Response(zip(), { status: 200 }));
+
+    const result = await sites.createSiteFromGithub(sessionId, 'ghsite', 'owner/repo', 'main');
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe('already_exists');
+  });
+});
+
+describe('deleteSite', () => {
+  it('removes the site, its files and analytics', async () => {
+    const sessionId = await makeSite('ryan', 'mysite');
+    const user = await username(sessionId);
+    sites.recordPageHit('mysite', '1.2.3.4');
+
+    await sites.deleteSite(sessionId, 'mysite');
+
+    expect(await sites.findUserForDomain('mysite')).toBeNull();
+    expect((await sites.listMySites(sessionId)).some((s) => s.domain === 'mysite')).toBe(false);
+    expect(metrics.getTotalHits('mysite')).toBe(0);
+    expect(user).toBeTruthy();
+  });
+});
+
+describe('listAllSites', () => {
+  it('lists sites across all users', async () => {
+    await makeSite('u1', 'site1');
+    await makeSite('u2', 'site2');
+
+    const all = await sites.listAllSites();
+    expect(all.map((s) => s.domain).sort()).toEqual(['site1', 'site2']);
+
+    const filtered = await sites.listAllSites('u1');
+    const site1 = filtered.find((s) => s.domain === 'site1');
+    expect(site1?.isStarred).toBe(false);
+  });
+});
+
+describe('downloadActiveVersion', () => {
+  it('downloads the active version zip', async () => {
+    const sessionId = await makeSite('sarah', 'mysite');
+    const user = await username(sessionId);
+
+    const result = await sites.downloadActiveVersion(user, 'mysite');
+    expect(result?.filename).toBe('mysite.zip');
+    expect(result?.data.length).toBeGreaterThan(0);
+  });
+
+  it('returns null for a disabled site', async () => {
+    const sessionId = await makeSite('sarah', 'mysite');
+    const user = await username(sessionId);
+    await sites.toggleSite(sessionId, 'mysite');
+
+    expect(await sites.downloadActiveVersion(user, 'mysite')).toBeNull();
+  });
+});
+
+describe('getSiteMeta and getMySiteInfo', () => {
+  it('returns the subdomain', async () => {
+    const sessionId = await makeSite('tina', 'mysite');
+    const meta = await sites.getSiteMeta(sessionId, 'mysite');
+    expect(meta?.subdomain).toBe('tina-mysite');
+
+    const info = await sites.getMySiteInfo(sessionId, 'mysite');
+    expect(info?.siteId).toBe('tina-mysite');
+  });
+
+  it('returns null for a missing site', async () => {
+    const sessionId = await registerUser('tina');
+    expect(await sites.getSiteMeta(sessionId, 'missing')).toBeNull();
+  });
+});
+
+describe('getSiteIcon', () => {
+  it('finds a favicon.ico in the archive', async () => {
+    const sessionId = await registerUser('uma');
+    const body = zip({ 'index.html': '<h1>hi</h1>', 'favicon.ico': 'ico' });
+    const created = await sites.createSite(sessionId, 'mysite', body);
+    expect(created.ok).toBe(true);
+
+    const icon = await sites.getSiteIcon(await username(sessionId), 'mysite');
+    expect(icon?.contentType).toBe('image/x-icon');
+    expect(new TextDecoder().decode(icon?.data)).toBe('ico');
+  });
+});
+
+describe('uptime and grouped stats', () => {
+  it('returns uptime slots and grouped stats', async () => {
+    await makeSite('victor', 'mysite');
+    metrics.recordUptime('mysite', true);
+    sites.recordPageHit('mysite', '1.2.3.4');
+
+    const uptime = sites.getSiteUptime('mysite', 5);
+    expect(uptime[uptime.length - 1]?.up).toBe(true);
+    expect(sites.getSiteUptime('mysite', 5)[0]?.up).toBeUndefined();
+
+    const grouped = sites.getSiteStats('mysite', 60, 5);
+    expect(grouped.length).toBeLessThanOrEqual(13);
+    expect(grouped.reduce((sum, p) => sum + p.count, 0)).toBe(1);
+  });
+});
+
+describe('account-filtered custom domains and subdomains', () => {
+  it('filters custom domains by account and checks subdomains', async () => {
+    const sessionId = await makeSite('wendy', 'mysite');
+    const user = await username(sessionId);
+    await sites.addCustomDomain(sessionId, 'mysite', 'example.com');
+    await sites.updateSiteMeta(sessionId, 'mysite', { subdomain: 'my-app' });
+
+    expect(await sites.checkSubdomain('my-app')).toBe(true);
+    expect(await sites.checkSubdomain('missing')).toBe(false);
+
+    const mine = await sites.getAllCustomDomains(user);
+    expect(mine.some((d) => d.customDomain === 'example.com')).toBe(true);
+    expect(await sites.getAllCustomDomains('someone-else')).toEqual([]);
+  });
+});
+
+describe('error paths', () => {
+  it('returns not_found for missing sites across operations', async () => {
+    const sessionId = await registerUser('xavier');
+
+    expect((await sites.toggleSite(sessionId, 'missing')).ok).toBe(false);
+    expect((await sites.addCustomDomain(sessionId, 'missing', 'example.com')).ok).toBe(false);
+    expect((await sites.removeCustomDomain(sessionId, 'missing', 'example.com')).ok).toBe(false);
+    expect((await sites.verifyCustomDomain(sessionId, 'missing', 'example.com')).ok).toBe(false);
+    expect((await sites.uploadSiteCover(sessionId, 'missing', new Uint8Array([1]))).ok).toBe(false);
+    expect((await sites.deleteSiteCover(sessionId, 'missing')).ok).toBe(false);
+    expect((await sites.activateVersion(sessionId, 'missing', 1)).ok).toBe(false);
+    expect((await sites.deleteVersion(sessionId, 'missing', 1)).ok).toBe(false);
+  });
+
+  it('returns not_found for missing versions', async () => {
+    const sessionId = await makeSite('xavier', 'mysite');
+    expect((await sites.activateVersion(sessionId, 'mysite', 99)).ok).toBe(false);
+    expect((await sites.deleteVersion(sessionId, 'mysite', 99)).ok).toBe(false);
+  });
+
+  it('returns empty results for a missing site', async () => {
+    const sessionId = await registerUser('xavier');
+    const user = await username(sessionId);
+
+    expect(await sites.serveSiteFile(user, 'missing', '/index.html')).toBeNull();
+    expect(await sites.listVersions(user, 'missing')).toEqual({ versions: [], current: null });
+    expect(sessionId).toBeTruthy();
+  });
+
+  it('treats a failed DNS lookup as unverified', async () => {
+    const sessionId = await makeSite('yolanda', 'mysite');
+    await sites.addCustomDomain(sessionId, 'mysite', 'example.com');
+
+    (dns.resolveTxt as Mock).mockRejectedValue(new Error('ENOTFOUND'));
+    const result = await sites.verifyCustomDomain(sessionId, 'mysite', 'example.com');
+    expect(result.ok && result.value.verified).toBe(false);
+  });
+
+  it('routes a verified custom domain to its site', async () => {
+    const sessionId = await makeSite('zane', 'mysite');
+    const user = await username(sessionId);
+    await sites.addCustomDomain(sessionId, 'mysite', 'example.com');
+
+    const token = await verificationToken('mysite');
+    (dns.resolveTxt as Mock).mockResolvedValue([[token]]);
+    await sites.verifyCustomDomain(sessionId, 'mysite', 'example.com');
+
+    const resolved = await sites.resolveDomainAndServe('example.com', '/');
+    expect(resolved).toEqual({ user, domain: 'mysite', filePath: '/index.html' });
+  });
 });
