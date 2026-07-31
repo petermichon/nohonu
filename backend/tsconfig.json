@@ -11,8 +11,7 @@
     "rootDir": ".",
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] },
+    "paths": { "@/*": ["./src/*"] },
     "types": ["node"]
   },
   "include": ["**/*.ts"],
