@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
-import { SiteData, domainDir } from '../../shared/paths.ts';
+import { domainDir } from '../../shared/paths.ts';
+import type { SiteData } from '../../shared/paths.ts';
 
 
 export function versionsDir(user: string, domain: string): string {
