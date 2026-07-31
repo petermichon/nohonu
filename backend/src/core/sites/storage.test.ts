@@ -60,6 +60,7 @@ async function cleanupDomain(user: string, domain: string): Promise<void> {
   } catch {
     // cleanup failure ignored
   }
+  await db.user.deleteMany({ where: { username: user } });
 }
 
 describe('extractFiles', () => {
