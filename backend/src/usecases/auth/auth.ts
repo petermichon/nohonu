@@ -1,30 +1,33 @@
-import * as users from '../../core/auth/users.ts';
+import * as users from '../../core/auth/users/index.ts';
 import * as sessions from '../../core/auth/sessions.ts';
-import type { User } from '../../core/auth/users.ts';
+import type { User } from '../../core/auth/users/index.ts';
+import type { AuthUser, MeSessionInfo } from './types.ts';
+
+function toAuthUser(user: User): AuthUser {
+  return {
+    username: user.username,
+    displayName: user.displayName,
+    profilePicture: user.profilePicture,
+  };
+}
 
 export interface LoginResult {
   success: boolean;
-  user?: User;
+  user?: AuthUser;
   session?: string;
   error?: string;
 }
 
 export interface RegisterResult {
   success: boolean;
-  user?: User;
+  user?: AuthUser;
   session?: string;
   error?: string;
 }
 
 export interface MeResult {
-  user?: User;
-  session?: {
-    id: string;
-    deviceInfo?: string;
-    userAgent?: string;
-    createdAt: number;
-    lastActive: number;
-  };
+  user?: AuthUser;
+  session?: MeSessionInfo;
   error?: string;
 }
 
@@ -37,7 +40,7 @@ export async function login(username: string, password: string, userAgent?: stri
 
   const session = await sessions.createSession(user.username, userAgent);
 
-  return { success: true, user, session: session.id };
+  return { success: true, user: toAuthUser(user), session: session.id };
 }
 
 export async function register(password: string, username: string, userAgent?: string): Promise<RegisterResult> {
@@ -45,7 +48,7 @@ export async function register(password: string, username: string, userAgent?: s
     const user = await users.createUser(password, username);
     const session = await sessions.createSession(user.username, userAgent);
 
-    return { success: true, user, session: session.id };
+    return { success: true, user: toAuthUser(user), session: session.id };
   } catch (error) {
     return {
       success: false,
@@ -78,7 +81,7 @@ export async function me(sessionId: string): Promise<MeResult> {
   await sessions.updateSessionActivity(sessionId);
 
   return {
-    user,
+    user: toAuthUser(user),
     session: {
       id: session.id,
       deviceInfo: session.deviceInfo,

@@ -4,6 +4,7 @@ import * as authUc from '../../usecases/auth/index.ts';
 import * as authModule from '../../usecases/auth/auth.ts';
 import * as profile from '../../usecases/auth/profile.ts';
 import * as sessionUc from '../../usecases/auth/sessions.ts';
+import { sendUsecaseError } from '../errors.ts';
 
 // === Params
 
@@ -179,11 +180,11 @@ export async function getSessions(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
   const result = await sessionUc.listSessions(sessionId);
-  if (!result.success) {
-    json(res, { error: result.error }, result.status);
+  if (!result.ok) {
+    sendUsecaseError(res, result);
     return;
   }
-  json(res, { sessions: result.sessions });
+  json(res, { sessions: result.value });
 }
 
 export async function deleteSession(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -198,8 +199,8 @@ export async function deleteSession(req: ExpressReq, res: ExpressRes): Promise<v
     return;
   }
   const result = await sessionUc.deleteSession(sessionId, sessionToDelete);
-  if (!result.success) {
-    json(res, { error: result.error }, result.status ?? 400);
+  if (!result.ok) {
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { success: true });

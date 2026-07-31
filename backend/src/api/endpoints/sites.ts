@@ -2,6 +2,7 @@ import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
+import { sendUsecaseError } from '../errors.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 function validateRepo(repo: unknown): repo is string {
@@ -242,13 +243,12 @@ async function createSiteRaw(req: ExpressReq, res: ExpressRes): Promise<void> {
     return;
   }
 
-  try {
-    const result = await sites.createSite(params.sessionId, params.domain, params.zipData, params.subdomain);
-    json(res, { success: true, domain: params.domain, index: result.index }, 201);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to create site';
-    json(res, { error: message }, message === 'Domain already exists for this user' ? 409 : 500);
+  const result = await sites.createSite(params.sessionId, params.domain, params.zipData, params.subdomain);
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
   }
+  json(res, { success: true, domain: params.domain, index: result.value.index }, 201);
 }
 
 async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -258,23 +258,19 @@ async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<v
     return;
   }
 
-  try {
-    const result = await sites.createSiteFromGithub(
-      params.sessionId,
-      params.domain,
-      params.repo,
-      params.ref,
-      params.subdomain,
-    );
-    json(res, { domain: params.domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to create site from GitHub';
-    json(
-      res,
-      { error: message },
-      message.includes('404') ? 404 : message === 'Domain already exists for this user' ? 409 : 502,
-    );
+  const result = await sites.createSiteFromGithub(
+    params.sessionId,
+    params.domain,
+    params.repo,
+    params.ref,
+    params.subdomain,
+  );
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
   }
+  const value = result.value;
+  json(res, { domain: params.domain, index: value.index, repo: value.repo, branch: value.branch }, 201);
 }
 
 export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -297,7 +293,7 @@ export async function toggleSite(req: ExpressReq, res: ExpressRes): Promise<void
 
   const result = await sites.toggleSite(sessionId, domainFrom(req));
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: domainFrom(req), enabled: result.value.enabled });
@@ -312,7 +308,7 @@ export async function toggleStar(req: ExpressReq, res: ExpressRes): Promise<void
 
   const result = await sites.toggleStar(params.sessionId, params.domain, params.starred);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: params.domain, starred: result.value.starred, starCount: result.value.starCount });
@@ -327,7 +323,7 @@ export async function updateMeta(req: ExpressReq, res: ExpressRes): Promise<void
 
   const result = await sites.updateSiteMeta(params.sessionId, params.domain, params.meta);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: params.domain, subdomain: params.meta.subdomain, displayName: params.meta.displayName });
@@ -342,7 +338,7 @@ export async function uploadCover(req: ExpressReq, res: ExpressRes): Promise<voi
 
   const result = await sites.uploadSiteCover(params.sessionId, params.domain, params.data);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { success: true });
@@ -357,7 +353,7 @@ export async function deleteCover(req: ExpressReq, res: ExpressRes): Promise<voi
 
   const result = await sites.deleteSiteCover(sessionId, domainFrom(req));
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { success: true });

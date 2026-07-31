@@ -2,6 +2,7 @@ import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, p } from '../../shared/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
+import { sendUsecaseError } from '../errors.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 function validateRepo(repo: unknown): repo is string {
@@ -72,13 +73,12 @@ export async function upload(req: ExpressReq, res: ExpressRes): Promise<void> {
     return;
   }
 
-  try {
-    const result = await sites.uploadVersion(params.sessionId, params.domain, params.zipData);
-    json(res, { success: true, domain: params.domain, index: result.index });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to upload version';
-    json(res, { error: message }, message === 'Site not found' ? 404 : 500);
+  const result = await sites.uploadVersion(params.sessionId, params.domain, params.zipData);
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
   }
+  json(res, { success: true, domain: params.domain, index: result.value.index });
 }
 
 export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -88,13 +88,13 @@ export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
 
-  try {
-    const result = await sites.uploadVersionFromGithub(params.sessionId, params.domain, params.repo, params.ref);
-    json(res, { domain: params.domain, index: result.index, repo: result.repo, branch: result.branch });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to upload version from GitHub';
-    json(res, { error: message }, message.includes('404') ? 404 : message === 'Site not found' ? 404 : 502);
+  const result = await sites.uploadVersionFromGithub(params.sessionId, params.domain, params.repo, params.ref);
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
   }
+  const value = result.value;
+  json(res, { domain: params.domain, index: value.index, repo: value.repo, branch: value.branch });
 }
 
 export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -136,7 +136,7 @@ export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<v
 
   const result = await sites.deleteVersion(sessionId, domainFrom(req), idx);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: domainFrom(req), index: idx });
@@ -157,7 +157,7 @@ export async function activateVersion(req: ExpressReq, res: ExpressRes): Promise
 
   const result = await sites.activateVersion(sessionId, domainFrom(req), idx);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: domainFrom(req), index: idx });

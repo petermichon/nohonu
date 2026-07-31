@@ -55,5 +55,3 @@ export function domainDir(user: string, domain: string): string {
 export function coverImagePath(user: string, domain: string): string {
   return `${domainDir(user, domain)}/cover.jpg`;
 }
-
-export type UsecaseResult<T> = { ok: true; value: T } | { ok: false; error: string; status: number };

@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as sessions from '../../core/auth/sessions.ts';
-import * as users from '../../core/auth/users.ts';
+import * as users from '../../core/auth/users/index.ts';
 import { requireSession } from '../../core/auth/requireSession.ts';
 
 export interface ProfileResult {

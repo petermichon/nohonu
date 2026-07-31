@@ -1,48 +1,48 @@
 import * as sessions from '../../core/auth/sessions.ts';
 import type { Session } from '../../core/auth/sessions.ts';
+import type { SessionInfo } from './types.ts';
+import type { UsecaseResult } from '../errors.ts';
 
-export interface ListSessionsResult {
-  success: true;
-  sessions: Session[];
+function toSessionInfo(session: Session): SessionInfo {
+  return {
+    id: session.id,
+    username: session.username,
+    userAgent: session.userAgent,
+    deviceInfo: session.deviceInfo,
+    createdAt: session.createdAt,
+    lastActive: session.lastActive,
+  };
 }
 
-export interface DeleteSessionResult {
-  success: boolean;
-  error?: string;
-  status?: number;
-}
-
-export async function listSessions(
-  sessionId: string,
-): Promise<ListSessionsResult | { success: false; error: string; status: number }> {
+export async function listSessions(sessionId: string): Promise<UsecaseResult<SessionInfo[]>> {
   const session = await sessions.getSession(sessionId);
   if (!session) {
-    return { success: false, error: 'Invalid session', status: 401 };
+    return { ok: false, code: 'unauthorized', message: 'Invalid session' };
   }
 
   const userSessions = await sessions.getUserSessions(session.username);
-  return { success: true, sessions: userSessions };
+  return { ok: true, value: userSessions.map(toSessionInfo) };
 }
 
-export async function deleteSession(currentSessionId: string, sessionToDeleteId: string): Promise<DeleteSessionResult> {
+export async function deleteSession(currentSessionId: string, sessionToDeleteId: string): Promise<UsecaseResult<void>> {
   const currentSession = await sessions.getSession(currentSessionId);
   if (!currentSession) {
-    return { success: false, error: 'Invalid session', status: 401 };
+    return { ok: false, code: 'unauthorized', message: 'Invalid session' };
   }
 
   if (sessionToDeleteId === currentSessionId) {
-    return { success: false, error: 'Cannot delete current session, use logout instead', status: 400 };
+    return { ok: false, code: 'invalid', message: 'Cannot delete current session, use logout instead' };
   }
 
   const targetSession = await sessions.getSession(sessionToDeleteId);
   if (!targetSession) {
-    return { success: false, error: 'Session not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Session not found' };
   }
 
   if (targetSession.username !== currentSession.username) {
-    return { success: false, error: 'Cannot delete sessions from other users', status: 403 };
+    return { ok: false, code: 'forbidden', message: 'Cannot delete sessions from other users' };
   }
 
   await sessions.deleteSession(sessionToDeleteId);
-  return { success: true };
+  return { ok: true, value: undefined };
 }

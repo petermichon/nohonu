@@ -2,6 +2,7 @@ import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, p } from '../../shared/http.ts';
 import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
+import { sendUsecaseError } from '../errors.ts';
 
 function requireCustomDomain(customDomain: string | undefined): string | undefined {
   if (!customDomain) return;
@@ -56,7 +57,7 @@ export async function addCustomDomain(req: ExpressReq, res: ExpressRes): Promise
 
   const result = await sites.addCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: p(req, 'domain') || '', customDomain, verified: false });
@@ -77,7 +78,7 @@ export async function deleteCustomDomain(req: ExpressReq, res: ExpressRes): Prom
 
   const result = await sites.removeCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: p(req, 'domain') || '', customDomain });
@@ -98,7 +99,7 @@ export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Prom
 
   const result = await sites.verifyCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
   if (!result.ok) {
-    json(res, { error: result.error }, result.status);
+    sendUsecaseError(res, result);
     return;
   }
   json(res, { domain: p(req, 'domain') || '', customDomain, verified: result.value.verified });

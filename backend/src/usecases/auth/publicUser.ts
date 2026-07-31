@@ -1,13 +1,8 @@
 import * as fs from 'node:fs/promises';
-import * as users from '../../core/auth/users.ts';
+import * as users from '../../core/auth/users/index.ts';
+import type { AuthUser } from './types.ts';
 
-export type PublicUserInfo = {
-  username: string;
-  displayName: string;
-  profilePicture?: string;
-};
-
-export async function getPublicUser(username: string): Promise<PublicUserInfo | null> {
+export async function getPublicUser(username: string): Promise<AuthUser | null> {
   const user = await users.getUserByUsername(username);
   if (!user) return null;
   return {

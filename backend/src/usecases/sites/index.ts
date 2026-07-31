@@ -1,11 +1,21 @@
 import * as fs from 'node:fs/promises';
 import * as dns from 'node:dns/promises';
-import { VALID_DOMAIN, MAX_ZIP_BYTES, UsecaseResult, domainDir, coverImagePath } from '../../shared/paths.ts';
+import { VALID_DOMAIN, MAX_ZIP_BYTES, domainDir, coverImagePath } from '../../shared/paths.ts';
 import { readZip } from '../../shared/zip.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { db } from '../../db.ts';
 import { requireSession } from '../../core/auth/requireSession.ts';
+import type { UsecaseResult } from '../errors.ts';
+import type { CustomDomain, PublicSiteSummary, RepoHistoryEntry, SiteSummary, VersionInfo, VersionSource } from './types.ts';
+
+async function getSessionUser(sessionId: string): Promise<UsecaseResult<string>> {
+  try {
+    return { ok: true, value: await requireSession(sessionId) };
+  } catch {
+    return { ok: false, code: 'unauthorized', message: 'Invalid session' };
+  }
+}
 
 // Custom domain registry cache: Map<customDomain, internalDomain>
 let customDomainCache: Map<string, string> | null = null;
@@ -60,7 +70,7 @@ export async function listMySites(sessionId: string): Promise<Awaited<ReturnType
   return listSites(user);
 }
 
-export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }>> {
+export async function listSites(user: string): Promise<SiteSummary[]> {
   const domains = await storage.listDomains(user);
   return Promise.all(
     domains.map(async (domain) => {
@@ -83,9 +93,9 @@ export async function listSites(user: string): Promise<Array<{ siteId: string; d
   );
 }
 
-export async function listAllSites(username?: string): Promise<{ user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }[]> {
+export async function listAllSites(username?: string): Promise<PublicSiteSummary[]> {
   const users = await storage.listUsers();
-  const allSites: { user: string; siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }[] = [];
+  const allSites: PublicSiteSummary[] = [];
 
   for (const user of users) {
     const domains = await storage.listDomains(user);
@@ -214,12 +224,12 @@ export async function updateSiteMeta(
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   if (updates.subdomain !== undefined) {
     if (!VALID_DOMAIN.test(updates.subdomain)) {
-      return { ok: false, error: 'Invalid subdomain', status: 400 };
+      return { ok: false, code: 'invalid', message: 'Invalid subdomain' };
     }
     data.subdomain = updates.subdomain;
   }
@@ -232,10 +242,12 @@ export async function updateSiteMeta(
   return { ok: true, value: undefined };
 }
 
-export async function getSiteRepos(sessionId: string, domain: string): Promise<{ history: Array<{ repo: string; branch: string; lastUsed: number }> } | null> {
+export async function getSiteRepos(sessionId: string, domain: string): Promise<{ history: RepoHistoryEntry[] } | null> {
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
-  return data ? { history: data.repoHistory } : null;
+  if (!data) return null;
+  const history = data.repoHistory.map(({ repo, branch, lastUsed }) => ({ repo, branch, lastUsed }));
+  return { history };
 }
 
 export function getSiteStats(domain: string, slots: number, groupMinutes = 1): { slot: number; count: number }[] {
@@ -256,11 +268,12 @@ export function getSiteUptime(domain: string, slots: number, groupMinutes = 1): 
   return analytics.getUptime(domain, slots, groupMinutes);
 }
 
-export async function getCustomDomains(sessionId: string, domain: string): Promise<{ domain: string; verified: boolean }[]> {
+export async function getCustomDomains(sessionId: string, domain: string): Promise<CustomDomain[]> {
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) return [];
-  return data.customDomains ?? [];
+  const customDomains = data.customDomains ?? [];
+  return customDomains.map(({ domain: d, verified }) => ({ domain: d, verified }));
 }
 
 export async function getAllCustomDomains(account?: string): Promise<{ user: string; siteDomain: string; customDomain: string; verified: boolean }[]> {
@@ -292,7 +305,7 @@ export async function addCustomDomain(sessionId: string, domain: string, customD
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
   
   if (!data.customDomains) {
@@ -301,7 +314,7 @@ export async function addCustomDomain(sessionId: string, domain: string, customD
   
   // Check for duplicate
   if (data.customDomains.some((entry) => { return entry.domain === customDomain; })) {
-    return { ok: false, error: 'Custom domain already exists', status: 409 };
+    return { ok: false, code: 'already_exists', message: 'Custom domain already exists' };
   }
   
   data.customDomains.push({ domain: customDomain, verified: false });
@@ -314,18 +327,18 @@ export async function removeCustomDomain(sessionId: string, domain: string, cust
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
   
   if (!data.customDomains) {
-    return { ok: false, error: 'Custom domain not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Custom domain not found' };
   }
   
   const filtered = data.customDomains.filter((entry) => {
     return entry.domain !== customDomain;
   });
   if (filtered.length === data.customDomains.length) {
-    return { ok: false, error: 'Custom domain not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Custom domain not found' };
   }
   
   data.customDomains = filtered;
@@ -366,16 +379,16 @@ export async function verifyCustomDomain(sessionId: string, domain: string, cust
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
   
   if (!data.customDomains) {
-    return { ok: false, error: 'Custom domain not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Custom domain not found' };
   }
   
   const entry = data.customDomains.find((e) => e.domain === customDomain);
   if (!entry) {
-    return { ok: false, error: 'Custom domain not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Custom domain not found' };
   }
   
   const isVerified = await dnsVerifyCustomDomain(domain, customDomain);
@@ -396,7 +409,7 @@ export async function toggleSite(sessionId: string, domain: string): Promise<Use
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   data.enabled = !data.enabled;
@@ -413,12 +426,12 @@ export async function toggleStar(sessionId: string, domain: string, starred: boo
   // Find the user that owns this site
   const siteOwner = await findUserForDomain(domain);
   if (!siteOwner) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   const data = await storage.readSiteMetadata(siteOwner, domain);
   if (!data) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   // Initialize arrays if not present
@@ -452,17 +465,20 @@ export async function deleteSite(sessionId: string, domain: string): Promise<voi
   analytics.clearDomain(domain);
 }
 
-export async function listVersions(user: string, domain: string): Promise<{ versions: Array<{ index: number; size: number; source: { type: 'upload' } | { type: 'github'; repo: string; branch: string }; createdAt: number }>; current: number | null }> {
+export async function listVersions(user: string, domain: string): Promise<{ versions: VersionInfo[]; current: number | null }> {
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) return { versions: [], current: null };
 
-  const versions = [];
+  const versions: VersionInfo[] = [];
 
   for (const [key, entry] of Object.entries(data.versions)) {
     const index = parseInt(key, 10);
     try {
       const stat = await fs.stat(storage.versionPath(user, domain, index));
-      versions.push({ index, size: stat.size, source: entry.source, createdAt: entry.createdAt });
+      const source: VersionSource = entry.source.type === 'github'
+        ? { type: 'github', repo: entry.source.repo, branch: entry.source.branch }
+        : { type: 'upload' };
+      versions.push({ index, size: stat.size, source, createdAt: entry.createdAt });
     } catch {
       // file missing, skip
     }
@@ -489,11 +505,11 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
   const exists = await storage.versionExists(user, domain, index);
   if (!exists) {
-    return { ok: false, error: 'Version not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Version not found' };
   }
   const activated = await storage.setCurrentVersion(user, domain, index);
   if (!activated) {
-    return { ok: false, error: 'Failed to activate version', status: 500 };
+    return { ok: false, code: 'internal', message: 'Failed to activate version' };
   }
   // Update lastDeployedAt
   const data = await storage.readSiteMetadata(user, domain);
@@ -511,21 +527,29 @@ export async function deleteVersion(sessionId: string, domain: string, index: nu
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
   const exists = await storage.versionExists(user, domain, index);
   if (!exists) {
-    return { ok: false, error: 'Version not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Version not found' };
   }
   const deleted = await storage.deleteVersionFile(user, domain, index);
   if (!deleted) {
-    return { ok: false, error: 'Failed to delete version', status: 500 };
+    return { ok: false, code: 'internal', message: 'Failed to delete version' };
   }
   return { ok: true, value: undefined };
 }
 
-export async function createSite(sessionId: string, domain: string, zipData: Uint8Array, subdomain?: string): Promise<{ index: number; siteId: string }> {
-  const user = await requireSession(sessionId);
+export async function createSite(
+  sessionId: string,
+  domain: string,
+  zipData: Uint8Array,
+  subdomain?: string,
+): Promise<UsecaseResult<{ index: number; siteId: string }>> {
+  const session = await getSessionUser(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
+
   // Check if domain already exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (existingData) {
-    throw new Error('Domain already exists for this user');
+    return { ok: false, code: 'already_exists', message: 'Domain already exists for this user' };
   }
 
   // Use user-domain as siteId for uniqueness across users
@@ -548,15 +572,18 @@ export async function createSite(sessionId: string, domain: string, zipData: Uin
   await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
-  return { index, siteId };
+  return { ok: true, value: { index, siteId } };
 }
 
-export async function uploadVersion(sessionId: string, domain: string, zipData: Uint8Array): Promise<{ index: number }> {
-  const user = await requireSession(sessionId);
+export async function uploadVersion(sessionId: string, domain: string, zipData: Uint8Array): Promise<UsecaseResult<{ index: number }>> {
+  const session = await getSessionUser(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
+
   // Check if domain exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (!existingData) {
-    throw new Error('Site not found');
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   const data = existingData;
@@ -570,15 +597,24 @@ export async function uploadVersion(sessionId: string, domain: string, zipData: 
   await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
-  return { index };
+  return { ok: true, value: { index } };
 }
 
-export async function createSiteFromGithub(sessionId: string, domain: string, repo: string, ref: string, subdomain?: string): Promise<{ index: number; siteId: string; repo: string; branch: string }> {
-  const user = await requireSession(sessionId);
+export async function createSiteFromGithub(
+  sessionId: string,
+  domain: string,
+  repo: string,
+  ref: string,
+  subdomain?: string,
+): Promise<UsecaseResult<{ index: number; siteId: string; repo: string; branch: string }>> {
+  const session = await getSessionUser(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
+
   // Check if domain already exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (existingData) {
-    throw new Error('Domain already exists for this user');
+    return { ok: false, code: 'already_exists', message: 'Domain already exists for this user' };
   }
 
   const githubUrl = `https://github.com/${repo}/archive/refs/heads/${ref}.zip`;
@@ -590,17 +626,19 @@ export async function createSiteFromGithub(sessionId: string, domain: string, re
     const response = await fetch(githubUrl, { redirect: 'follow', signal: abort.signal });
     clearTimeout(timeout);
 
-    if (response.status === 404) throw new Error('Repository or branch not found');
-    if (!response.ok) throw new Error(`GitHub error: ${response.status}`);
+    if (response.status === 404) return { ok: false, code: 'not_found', message: 'Repository or branch not found' };
+    if (!response.ok) return { ok: false, code: 'upstream_failed', message: `GitHub error: ${response.status}` };
 
     const rawBuffer = await response.arrayBuffer();
     if (rawBuffer.byteLength > MAX_ZIP_BYTES) {
-      throw new Error(`GitHub repo zip too large (max ${MAX_ZIP_BYTES} bytes)`);
+      return { ok: false, code: 'invalid', message: `GitHub repo zip too large (max ${MAX_ZIP_BYTES} bytes)` };
     }
     zipData = new Uint8Array(rawBuffer);
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') throw new Error('GitHub request timed out');
-    throw err;
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { ok: false, code: 'upstream_failed', message: 'GitHub request timed out' };
+    }
+    return { ok: false, code: 'upstream_failed', message: err instanceof Error ? err.message : 'Failed to fetch from GitHub' };
   }
 
   // Use user-domain as siteId for uniqueness across users
@@ -624,15 +662,23 @@ export async function createSiteFromGithub(sessionId: string, domain: string, re
   await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
-  return { index, siteId, repo, branch: ref };
+  return { ok: true, value: { index, siteId, repo, branch: ref } };
 }
 
-export async function uploadVersionFromGithub(sessionId: string, domain: string, repo: string, ref: string): Promise<{ index: number; repo: string; branch: string }> {
-  const user = await requireSession(sessionId);
+export async function uploadVersionFromGithub(
+  sessionId: string,
+  domain: string,
+  repo: string,
+  ref: string,
+): Promise<UsecaseResult<{ index: number; repo: string; branch: string }>> {
+  const session = await getSessionUser(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
+
   // Check if domain exists
   const existingData = await storage.readSiteMetadata(user, domain);
   if (!existingData) {
-    throw new Error('Site not found');
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   const githubUrl = `https://github.com/${repo}/archive/refs/heads/${ref}.zip`;
@@ -644,17 +690,19 @@ export async function uploadVersionFromGithub(sessionId: string, domain: string,
     const response = await fetch(githubUrl, { redirect: 'follow', signal: abort.signal });
     clearTimeout(timeout);
 
-    if (response.status === 404) throw new Error('Repository or branch not found');
-    if (!response.ok) throw new Error(`GitHub error: ${response.status}`);
+    if (response.status === 404) return { ok: false, code: 'not_found', message: 'Repository or branch not found' };
+    if (!response.ok) return { ok: false, code: 'upstream_failed', message: `GitHub error: ${response.status}` };
 
     const rawBuffer = await response.arrayBuffer();
     if (rawBuffer.byteLength > MAX_ZIP_BYTES) {
-      throw new Error(`GitHub repo zip too large (max ${MAX_ZIP_BYTES} bytes)`);
+      return { ok: false, code: 'invalid', message: `GitHub repo zip too large (max ${MAX_ZIP_BYTES} bytes)` };
     }
     zipData = new Uint8Array(rawBuffer);
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') throw new Error('GitHub request timed out');
-    throw err;
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { ok: false, code: 'upstream_failed', message: 'GitHub request timed out' };
+    }
+    return { ok: false, code: 'upstream_failed', message: err instanceof Error ? err.message : 'Failed to fetch from GitHub' };
   }
 
   const data = existingData;
@@ -673,7 +721,7 @@ export async function uploadVersionFromGithub(sessionId: string, domain: string,
   await fs.writeFile(storage.versionPath(user, domain, index), zipData);
   await storage.writeSiteMetadata(user, domain, data);
 
-  return { index, repo, branch: ref };
+  return { ok: true, value: { index, repo, branch: ref } };
 }
 
 export function recordPageHit(domain: string, ip: string): void {
@@ -802,7 +850,7 @@ export async function uploadSiteCover(sessionId: string, domain: string, imageDa
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   try {
@@ -812,7 +860,7 @@ export async function uploadSiteCover(sessionId: string, domain: string, imageDa
     return { ok: true, value: undefined };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    return { ok: false, error: `Failed to save cover image: ${message}`, status: 500 };
+    return { ok: false, code: 'internal', message: `Failed to save cover image: ${message}` };
   }
 }
 
@@ -820,7 +868,7 @@ export async function deleteSiteCover(sessionId: string, domain: string): Promis
   const user = await requireSession(sessionId);
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
-    return { ok: false, error: 'Site not found', status: 404 };
+    return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   try {
