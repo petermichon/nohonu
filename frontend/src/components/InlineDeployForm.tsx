@@ -35,15 +35,26 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     enabled: !!newSubdomain,
   });
 
+  const { data: domainResult, isFetching: domainChecking } = useQuery({
+    queryKey: ['check-domain', newDomain, username],
+    queryFn: async () => {
+      const res = await apiFetch(
+        `/check-domain?domain=${encodeURIComponent(newDomain)}&user=${encodeURIComponent(username ?? '')}`,
+      );
+      return { domain: newDomain, taken: res.ok };
+    },
+    enabled: !!newDomain,
+  });
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async ({ file, domain, subdomain }: { file: File; domain: string; subdomain: string }) => {
-      const formData = new FormData();
-      formData.append('zip', file);
-      if (subdomain) {
-        formData.append('subdomain', subdomain);
-      }
-      const res = await apiFetch(`/sites/${domain}`, { method: 'POST', body: formData });
+      const query = subdomain ? `?subdomain=${encodeURIComponent(subdomain)}` : '';
+      const res = await apiFetch(`/sites/${domain}${query}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/zip' },
+        body: file,
+      });
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.error || 'Upload failed');
@@ -294,6 +305,17 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             />
           </div>
         </div>
+        <div className="h-4">
+          {domainResult && domainResult.domain === newDomain && domainResult.taken ? (
+            <span className="text-sm text-red-500 flex items-center gap-1">
+              <X className="w-3.5 h-3.5" /> {newDomain} already taken
+            </span>
+          ) : domainResult && domainResult.domain === newDomain ? (
+            <span className="text-sm text-green-600 flex items-center gap-1">
+              <Check className="w-3.5 h-3.5" /> {newDomain} available
+            </span>
+          ) : null}
+        </div>
 
         {/* Subdomain input */}
         <div className="flex items-center gap-2">
@@ -340,9 +362,9 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           disabled={
             uploadMode === 'github'
               ? fetchGithubMutation.isPending || !githubRepo || !newDomain || !newSubdomain
-                || subdomainChecking || subdomainResult?.taken
+                || domainChecking || domainResult?.taken || subdomainChecking || subdomainResult?.taken
               : uploadMutation.isPending || !selectedFile || !newDomain || !newSubdomain
-                || subdomainChecking || subdomainResult?.taken
+                || domainChecking || domainResult?.taken || subdomainChecking || subdomainResult?.taken
           }
           className={`w-full py-3 ${
             accentColorValues.textColor === 'light'

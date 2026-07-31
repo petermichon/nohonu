@@ -49,6 +49,7 @@
         "npm:@types/cors@^2.8.19",
         "npm:@types/express@^5.0.3",
         "npm:@types/node@^22.15.3",
+        "npm:@vitest/coverage-v8@^3.2.7",
         "npm:cors@^2.8.6",
         "npm:express@^5.1.0",
         "npm:prisma@^7.9.1",

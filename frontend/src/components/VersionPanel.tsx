@@ -61,9 +61,11 @@ export function VersionPanel({
   // Upload version mutation
   const uploadVersionMutation = useMutation({
     mutationFn: async ({ file }: { file: File }) => {
-      const formData = new FormData();
-      formData.append('zip', file);
-      const res = await apiFetch(`/sites/${domain}/versions`, { method: 'POST', body: formData });
+      const res = await apiFetch(`/sites/${domain}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/zip' },
+        body: file,
+      });
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.error || 'Upload failed');

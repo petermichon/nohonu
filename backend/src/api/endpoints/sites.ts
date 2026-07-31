@@ -24,7 +24,8 @@ function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | undefined 
   if (!buffer || buffer.length === 0) return;
   if (buffer.length > MAX_ZIP_BYTES) return;
 
-  return { sessionId, domain: domainFrom(req), zipData: new Uint8Array(buffer) };
+  const subdomain = typeof req.query.subdomain === 'string' ? req.query.subdomain : undefined;
+  return { sessionId, domain: domainFrom(req), zipData: new Uint8Array(buffer), subdomain };
 }
 
 type CreateGithubParams = { sessionId: string; domain: string; repo: string; ref: string; subdomain?: string };
