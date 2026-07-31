@@ -8,10 +8,7 @@ export interface ProfileResult {
   error?: string;
 }
 
-export async function updateDisplayName(
-  sessionId: string,
-  displayName: string,
-): Promise<ProfileResult> {
+export async function updateDisplayName(sessionId: string, displayName: string): Promise<ProfileResult> {
   const session = await sessions.getSession(sessionId);
   if (!session) {
     return { success: false, error: 'Invalid session' };

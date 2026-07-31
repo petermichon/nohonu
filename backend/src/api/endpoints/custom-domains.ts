@@ -21,7 +21,10 @@ export async function getAllCustomDomains(req: ExpressReq, res: ExpressRes): Pro
 
 export async function getCustomDomains(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   try {
     const result = await sites.getCustomDomains(sessionId, p(req, 'domain') || '');
@@ -34,47 +37,80 @@ export async function getCustomDomains(req: ExpressReq, res: ExpressRes): Promis
 
 export async function addCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const body = await parseJson<{ customDomain: string }>(req);
-  if (!body || !body.customDomain) { json(res, { error: 'customDomain is required' }, 400); return; }
+  if (!body || !body.customDomain) {
+    json(res, { error: 'customDomain is required' }, 400);
+    return;
+  }
 
   const customDomain = requireCustomDomain(body.customDomain);
-  if (!customDomain) { json(res, { error: 'Invalid custom domain format' }, 400); return; }
+  if (!customDomain) {
+    json(res, { error: 'Invalid custom domain format' }, 400);
+    return;
+  }
 
   const result = await sites.addCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { domain: p(req, 'domain') || '', customDomain, verified: false });
 }
 
 export async function deleteCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const customDomain = requireCustomDomain(p(req, 'subAction'));
-  if (!customDomain) { json(res, { error: 'Invalid custom domain format' }, 400); return; }
+  if (!customDomain) {
+    json(res, { error: 'Invalid custom domain format' }, 400);
+    return;
+  }
 
   const result = await sites.removeCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { domain: p(req, 'domain') || '', customDomain });
 }
 
 export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const customDomain = requireCustomDomain(p(req, 'subAction'));
-  if (!customDomain) { json(res, { error: 'Invalid custom domain format' }, 400); return; }
+  if (!customDomain) {
+    json(res, { error: 'Invalid custom domain format' }, 400);
+    return;
+  }
 
   const result = await sites.verifyCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { domain: p(req, 'domain') || '', customDomain, verified: result.value.verified });
 }
 
 export async function getVerificationToken(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = p(req, 'domain') || '';
   const user = await sites.findUserForDomain(domain);
-  if (!user) { json(res, { error: 'Site not found' }, 404); return; }
+  if (!user) {
+    json(res, { error: 'Site not found' }, 404);
+    return;
+  }
 
   try {
     const result = await sites.getVerificationToken(domain);

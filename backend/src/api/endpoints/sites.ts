@@ -8,7 +8,9 @@ function validateRepo(repo: unknown): repo is string {
   return typeof repo === 'string' && GITHUB_REPO_REGEX.test(repo);
 }
 
-function domainFrom(req: ExpressReq): string { return (req.params as Record<string, string>)['domain'] || ''; }
+function domainFrom(req: ExpressReq): string {
+  return (req.params as Record<string, string>)['domain'] || '';
+}
 
 // === Params
 
@@ -33,7 +35,13 @@ async function extractCreateGithubParams(req: ExpressReq): Promise<CreateGithubP
   if (!body || !validateRepo(body.repo)) return;
 
   const subdomain = typeof body.subdomain === 'string' ? body.subdomain : undefined;
-  return { sessionId, domain: domainFrom(req), repo: body.repo, ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main', subdomain };
+  return {
+    sessionId,
+    domain: domainFrom(req),
+    repo: body.repo,
+    ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main',
+    subdomain,
+  };
 }
 
 type ToggleStarParams = { sessionId: string; domain: string; starred: boolean };
@@ -74,7 +82,10 @@ function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefine
 
 export async function listSites(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id');
-  if (!sessionId) { json(res, { error: 'Session required' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Session required' }, 401);
+    return;
+  }
   try {
     json(res, { sites: await sites.listMySites(sessionId) });
   } catch {
@@ -89,9 +100,15 @@ export async function listExploreSites(req: ExpressReq, res: ExpressRes): Promis
 
 export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id');
-  if (!sessionId) { json(res, { error: 'Session required' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Session required' }, 401);
+    return;
+  }
   const info = await sites.getMySiteInfo(sessionId, domainFrom(req));
-  if (!info) { json(res, { error: 'Site not found' }, 404); return; }
+  if (!info) {
+    json(res, { error: 'Site not found' }, 404);
+    return;
+  }
 
   json(res, {
     domain: domainFrom(req),
@@ -108,10 +125,16 @@ export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<voi
 export async function downloadSite(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
   const user = await sites.findUserForDomain(domain);
-  if (!user) { json(res, { error: 'Site not found' }, 404); return; }
+  if (!user) {
+    json(res, { error: 'Site not found' }, 404);
+    return;
+  }
 
   const result = await sites.downloadActiveVersion(user, domain);
-  if (!result) { json(res, { error: 'Site not found' }, 404); return; }
+  if (!result) {
+    json(res, { error: 'Site not found' }, 404);
+    return;
+  }
 
   res.set('Content-Type', 'application/zip');
   res.set('Content-Disposition', `attachment; filename="${result.filename}"`);
@@ -121,10 +144,16 @@ export async function downloadSite(req: ExpressReq, res: ExpressRes): Promise<vo
 export async function getSiteIcon(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
   const user = await sites.findUserForDomain(domain);
-  if (!user) { res.status(404).end(); return; }
+  if (!user) {
+    res.status(404).end();
+    return;
+  }
 
   const result = await sites.getSiteIcon(user, domain);
-  if (!result) { res.status(404).end(); return; }
+  if (!result) {
+    res.status(404).end();
+    return;
+  }
 
   res.set('Content-Type', result.contentType);
   res.set('Cache-Control', 'public, max-age=300');
@@ -134,10 +163,16 @@ export async function getSiteIcon(req: ExpressReq, res: ExpressRes): Promise<voi
 export async function getSiteCover(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
   const user = await sites.findUserForDomain(domain);
-  if (!user) { res.status(404).end(); return; }
+  if (!user) {
+    res.status(404).end();
+    return;
+  }
 
   const result = await sites.getSiteCover(user, domain);
-  if (!result) { res.status(404).end(); return; }
+  if (!result) {
+    res.status(404).end();
+    return;
+  }
 
   res.set('Content-Type', 'image/jpeg');
   res.set('Cache-Control', 'public, max-age=300');
@@ -146,10 +181,16 @@ export async function getSiteCover(req: ExpressReq, res: ExpressRes): Promise<vo
 
 export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const meta = await sites.getSiteMeta(sessionId, domainFrom(req));
-  if (!meta) { json(res, { error: 'Site not found' }, 404); return; }
+  if (!meta) {
+    json(res, { error: 'Site not found' }, 404);
+    return;
+  }
   json(res, { domain: domainFrom(req), subdomain: meta.subdomain });
 }
 
@@ -172,10 +213,16 @@ export function getSiteUptime(req: ExpressReq, res: ExpressRes): void {
 
 export async function getSiteRepos(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const result = await sites.getSiteRepos(sessionId, domainFrom(req));
-  if (!result) { json(res, { error: 'Site not found' }, 404); return; }
+  if (!result) {
+    json(res, { error: 'Site not found' }, 404);
+    return;
+  }
   json(res, { domain: domainFrom(req), history: result.history });
 }
 
@@ -190,7 +237,10 @@ export async function createSiteDispatch(req: ExpressReq, res: ExpressRes): Prom
 
 async function createSiteRaw(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = extractCreateSiteParams(req);
-  if (!params) { json(res, { error: 'Missing zip file' }, 400); return; }
+  if (!params) {
+    json(res, { error: 'Missing zip file' }, 400);
+    return;
+  }
 
   try {
     const result = await sites.createSite(params.sessionId, params.domain, params.zipData, params.subdomain);
@@ -203,20 +253,36 @@ async function createSiteRaw(req: ExpressReq, res: ExpressRes): Promise<void> {
 
 async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractCreateGithubParams(req);
-  if (!params) { json(res, { error: 'Invalid repo format. Use owner/repo' }, 400); return; }
+  if (!params) {
+    json(res, { error: 'Invalid repo format. Use owner/repo' }, 400);
+    return;
+  }
 
   try {
-    const result = await sites.createSiteFromGithub(params.sessionId, params.domain, params.repo, params.ref, params.subdomain);
+    const result = await sites.createSiteFromGithub(
+      params.sessionId,
+      params.domain,
+      params.repo,
+      params.ref,
+      params.subdomain,
+    );
     json(res, { domain: params.domain, index: result.index, repo: result.repo, branch: result.branch }, 201);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to create site from GitHub';
-    json(res, { error: message }, message.includes('404') ? 404 : message === 'Domain already exists for this user' ? 409 : 502);
+    json(
+      res,
+      { error: message },
+      message.includes('404') ? 404 : message === 'Domain already exists for this user' ? 409 : 502,
+    );
   }
 }
 
 export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   await sites.deleteSite(sessionId, domainFrom(req));
   json(res, { domain: domainFrom(req) });
@@ -224,56 +290,92 @@ export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void
 
 export async function toggleSite(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const result = await sites.toggleSite(sessionId, domainFrom(req));
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { domain: domainFrom(req), enabled: result.value.enabled });
 }
 
 export async function toggleStar(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractToggleStarParams(req);
-  if (!params) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!params) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const result = await sites.toggleStar(params.sessionId, params.domain, params.starred);
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { domain: params.domain, starred: result.value.starred, starCount: result.value.starCount });
 }
 
 export async function updateMeta(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractUpdateMetaParams(req);
-  if (!params) { json(res, { error: 'Missing username or body' }, 400); return; }
+  if (!params) {
+    json(res, { error: 'Missing username or body' }, 400);
+    return;
+  }
 
   const result = await sites.updateSiteMeta(params.sessionId, params.domain, params.meta);
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { domain: params.domain, subdomain: params.meta.subdomain, displayName: params.meta.displayName });
 }
 
 export async function uploadCover(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = extractUploadCoverParams(req);
-  if (!params) { json(res, { error: 'Invalid image' }, 400); return; }
+  if (!params) {
+    json(res, { error: 'Invalid image' }, 400);
+    return;
+  }
 
   const result = await sites.uploadSiteCover(params.sessionId, params.domain, params.data);
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { success: true });
 }
 
 export async function deleteCover(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) { json(res, { error: 'Missing username' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Missing username' }, 401);
+    return;
+  }
 
   const result = await sites.deleteSiteCover(sessionId, domainFrom(req));
-  if (!result.ok) { json(res, { error: result.error }, result.status); return; }
+  if (!result.ok) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { success: true });
 }
 
 export async function serveStatic(req: ExpressReq, res: ExpressRes): Promise<void> {
   const host = req.get('Host') ?? '';
   const resolved = await sites.resolveDomainAndServe(host, req.path);
-  if (!resolved) { res.status(404).end(); return; }
+  if (!resolved) {
+    res.status(404).end();
+    return;
+  }
 
   const result = await sites.serveSiteFile(resolved.user, resolved.domain, resolved.filePath);
-  if (!result) { res.status(404).end(); return; }
+  if (!result) {
+    res.status(404).end();
+    return;
+  }
 
   if (result.contentType === 'text/html') {
     sites.recordPageHit(resolved.domain, req.ip || 'unknown');

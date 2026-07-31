@@ -10,7 +10,7 @@ process.env['DATABASE_URL'] = `file:${TEST_DB}`;
 
 // Push schema to test database
 import { execSync } from 'node:child_process';
-const backendDir = path.resolve(import.meta.dirname, '../../..');
+const backendDir = path.resolve(import.meta.dirname ?? process.cwd(), '../../..');
 execSync(`npx prisma db push --accept-data-loss --schema="${backendDir}/prisma/schema.prisma"`, { cwd: backendDir, stdio: 'pipe', env: { ...process.env, DATABASE_URL: `file:${TEST_DB}`, PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes' } });
 
 const storageModule = await import('./storage.ts');

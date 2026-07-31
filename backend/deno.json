@@ -26,7 +26,7 @@
     "start": "deno run -P=dev --no-prompt main.ts",
     "format": "deno run -A npm:prettier --write .",
     "format:check": "deno run -A npm:prettier --check .",
-    "test": "deno test -P=test"
+    "test": "deno run -A npm:vitest run"
   },
   "permissions": {
     "dev": {

@@ -24,10 +24,7 @@ export async function listSessions(
   return { success: true, sessions: userSessions };
 }
 
-export async function deleteSession(
-  currentSessionId: string,
-  sessionToDeleteId: string,
-): Promise<DeleteSessionResult> {
+export async function deleteSession(currentSessionId: string, sessionToDeleteId: string): Promise<DeleteSessionResult> {
   const currentSession = await sessions.getSession(currentSessionId);
   if (!currentSession) {
     return { success: false, error: 'Invalid session', status: 401 };

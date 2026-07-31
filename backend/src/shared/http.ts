@@ -57,7 +57,10 @@ export function requireSessionId(req: ExpressReq): string | undefined {
   return requireHeader(req, 'X-Session-Id');
 }
 
-export async function parseJson<T>(req: ExpressReq): Promise<T | undefined> {
-  try { return JSON.parse(req.body?.toString() || '{}') as T; }
-  catch { return undefined; }
+export function parseJson<T>(req: ExpressReq): T | undefined {
+  try {
+    return JSON.parse(req.body?.toString() || '{}') as T;
+  } catch {
+    return undefined;
+  }
 }

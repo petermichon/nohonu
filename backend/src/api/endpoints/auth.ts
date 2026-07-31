@@ -28,7 +28,8 @@ async function extractDisplayNameParams(req: ExpressReq): Promise<DisplayNamePar
   const sessionId = requireSessionId(req);
   if (!sessionId) return undefined;
   const body = await parseJson<{ displayName?: string }>(req);
-  if (!body || typeof body.displayName !== 'string' || !body.displayName || body.displayName.length > 50) return undefined;
+  if (!body || typeof body.displayName !== 'string' || !body.displayName || body.displayName.length > 50)
+    return undefined;
   return { sessionId, displayName: body.displayName };
 }
 
@@ -39,10 +40,14 @@ function registerResponse(res: ExpressRes, result: authModule.RegisterResult): v
     json(res, { error: result.error || 'Registration failed' }, 400);
     return;
   }
-  json(res, {
-    user: { username: result.user.username, displayName: result.user.displayName },
-    session: result.session,
-  }, 201);
+  json(
+    res,
+    {
+      user: { username: result.user.username, displayName: result.user.displayName },
+      session: result.session,
+    },
+    201,
+  );
 }
 
 function loginResponse(res: ExpressRes, result: authModule.LoginResult): void {
@@ -50,10 +55,14 @@ function loginResponse(res: ExpressRes, result: authModule.LoginResult): void {
     json(res, { error: result.error || 'Login failed' }, 401);
     return;
   }
-  json(res, {
-    user: { username: result.user.username, displayName: result.user.displayName },
-    session: result.session,
-  }, 200);
+  json(
+    res,
+    {
+      user: { username: result.user.username, displayName: result.user.displayName },
+      session: result.session,
+    },
+    200,
+  );
 }
 
 function meResponse(res: ExpressRes, result: authModule.MeResult): void {
@@ -61,15 +70,23 @@ function meResponse(res: ExpressRes, result: authModule.MeResult): void {
     json(res, { error: result.error || 'User not found' }, 401);
     return;
   }
-  json(res, {
-    user: { username: result.user.username, displayName: result.user.displayName, profilePicture: result.user.profilePicture },
-    session: result.session,
-  }, 200);
+  json(
+    res,
+    {
+      user: {
+        username: result.user.username,
+        displayName: result.user.displayName,
+        profilePicture: result.user.profilePicture,
+      },
+      session: result.session,
+    },
+    200,
+  );
 }
 
 // === Handlers
 
-export async function auth(req: ExpressReq, res: ExpressRes): Promise<void> {
+export function auth(req: ExpressReq, res: ExpressRes): void {
   const key = req.get('X-Api-Key') || null;
   const result = authUc.checkAuth(key);
   json(res, result, result.secured && !result.valid ? 401 : 200);
@@ -77,37 +94,55 @@ export async function auth(req: ExpressReq, res: ExpressRes): Promise<void> {
 
 export async function authRegister(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractRegisterParams(req);
-  if (!params) { json(res, { error: 'Password and username are required' }, 400); return; }
+  if (!params) {
+    json(res, { error: 'Password and username are required' }, 400);
+    return;
+  }
   const result = await authModule.register(params.password, params.username, params.userAgent);
   registerResponse(res, result);
 }
 
 export async function authLogin(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractLoginParams(req);
-  if (!params) { json(res, { error: 'Username and password are required' }, 400); return; }
+  if (!params) {
+    json(res, { error: 'Username and password are required' }, 400);
+    return;
+  }
   const result = await authModule.login(params.username, params.password, params.userAgent);
   loginResponse(res, result);
 }
 
 export async function authLogout(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = requireSessionId(req);
-  if (!sessionId) { json(res, { error: 'Session ID required' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Session ID required' }, 401);
+    return;
+  }
   await authModule.logout(sessionId);
   json(res, { success: true }, 200);
 }
 
 export async function authMe(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = requireSessionId(req);
-  if (!sessionId) { json(res, { error: 'Session ID required' }, 401); return; }
+  if (!sessionId) {
+    json(res, { error: 'Session ID required' }, 401);
+    return;
+  }
   const result = await authModule.me(sessionId);
   meResponse(res, result);
 }
 
 export async function authDisplayName(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractDisplayNameParams(req);
-  if (!params) { json(res, { error: 'Display name required' }, 400); return; }
+  if (!params) {
+    json(res, { error: 'Display name required' }, 400);
+    return;
+  }
   const result = await profile.updateDisplayName(params.sessionId, params.displayName);
-  if (!result.success) { json(res, { error: result.error || 'Failed to update display name' }, 401); return; }
+  if (!result.success) {
+    json(res, { error: result.error || 'Failed to update display name' }, 401);
+    return;
+  }
   json(res, { success: true }, 200);
 }
 
@@ -115,32 +150,57 @@ export async function uploadProfilePicture(req: ExpressReq, res: ExpressRes): Pr
   const sessionId = req.get('X-Session-Id') || '';
   const contentType = req.get('Content-Type') || '';
   const raw = req.body instanceof Buffer ? req.body : Buffer.alloc(0);
-  const result = await profile.uploadProfilePicture(sessionId, contentType, raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
-  if (!result.success) { json(res, { error: result.error }, 400); return; }
+  const result = await profile.uploadProfilePicture(
+    sessionId,
+    contentType,
+    raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength),
+  );
+  if (!result.success) {
+    json(res, { error: result.error }, 400);
+    return;
+  }
   json(res, { success: true });
 }
 
 export async function deleteProfilePicture(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
   const result = await profile.deleteProfilePicture(sessionId);
-  if (!result.success) { json(res, { error: result.error }, 500); return; }
+  if (!result.success) {
+    json(res, { error: result.error }, 500);
+    return;
+  }
   json(res, { success: true });
 }
 
 export async function getSessions(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = requireSessionId(req);
-  if (!sessionId) { json(res, { error: 'Session ID required' }, 400); return; }
+  if (!sessionId) {
+    json(res, { error: 'Session ID required' }, 400);
+    return;
+  }
   const result = await sessionUc.listSessions(sessionId);
-  if (!result.success) { json(res, { error: result.error }, result.status); return; }
+  if (!result.success) {
+    json(res, { error: result.error }, result.status);
+    return;
+  }
   json(res, { sessions: result.sessions });
 }
 
 export async function deleteSession(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id');
-  if (!sessionId) { json(res, { error: 'Session ID required' }, 400); return; }
+  if (!sessionId) {
+    json(res, { error: 'Session ID required' }, 400);
+    return;
+  }
   const sessionToDelete = req.query.id as string;
-  if (!sessionToDelete) { json(res, { error: 'Session ID to delete is required' }, 400); return; }
+  if (!sessionToDelete) {
+    json(res, { error: 'Session ID to delete is required' }, 400);
+    return;
+  }
   const result = await sessionUc.deleteSession(sessionId, sessionToDelete);
-  if (!result.success) { json(res, { error: result.error }, result.status ?? 400); return; }
+  if (!result.success) {
+    json(res, { error: result.error }, result.status ?? 400);
+    return;
+  }
   json(res, { success: true });
 }

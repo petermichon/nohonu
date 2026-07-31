@@ -1,7 +1,5 @@
 import * as fs from 'node:fs/promises';
 import * as users from '../../core/auth/users.ts';
-import * as storage from '../../core/sites/storage.ts';
-import type { User } from '../../core/auth/users.ts';
 
 export type PublicUserInfo = {
   username: string;
