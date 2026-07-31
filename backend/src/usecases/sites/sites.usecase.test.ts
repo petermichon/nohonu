@@ -315,6 +315,13 @@ describe('analytics', () => {
     const visitors = sites.getSiteVisitors('mysite');
     expect(visitors).toEqual([{ ip: '1.2.3.4', count: 2, last: expect.any(Number) }]);
   });
+
+  it('persists analytics to disk', async () => {
+    const sessionId = await makeSite('olivia', 'mysite');
+    const user = await username(sessionId);
+    sites.recordPageHit('mysite', '1.2.3.4');
+    await expect(sites.saveAnalytics(user, 'mysite')).resolves.toBeUndefined();
+  });
 });
 
 describe('check helpers', () => {
@@ -473,7 +480,7 @@ describe('getSiteIcon', () => {
 describe('uptime and grouped stats', () => {
   it('returns uptime slots and grouped stats', async () => {
     await makeSite('victor', 'mysite');
-    metrics.recordUptime('mysite', true);
+    sites.recordUptime('mysite', true);
     sites.recordPageHit('mysite', '1.2.3.4');
 
     const uptime = sites.getSiteUptime('mysite', 5);

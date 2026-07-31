@@ -728,6 +728,14 @@ export function recordPageHit(domain: string, ip: string): void {
   analytics.recordHit(domain, ip);
 }
 
+export function recordUptime(domain: string, up: boolean): void {
+  analytics.recordUptime(domain, up);
+}
+
+export async function saveAnalytics(user: string, domain: string): Promise<void> {
+  await analytics.saveAnalytics(user, domain);
+}
+
 export async function serveSiteFile(user: string, domain: string, filePath: string): Promise<{ data: Uint8Array; contentType: string } | null> {
   const siteData = await storage.readSiteMetadata(user, domain);
   if (!siteData) return null;
