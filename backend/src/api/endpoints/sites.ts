@@ -1,6 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson } from '../../shared/http.ts';
-import { requireSession } from '../../core/auth/requireSession.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
 
@@ -74,11 +73,12 @@ function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefine
 // === Handlers
 
 export async function listSites(req: ExpressReq, res: ExpressRes): Promise<void> {
+  const sessionId = req.get('X-Session-Id');
+  if (!sessionId) { json(res, { error: 'Session required' }, 401); return; }
   try {
-    const user = await requireSession(req.get('X-Session-Id'));
-    json(res, { sites: await sites.listSites(user) });
+    json(res, { sites: await sites.listMySites(sessionId) });
   } catch {
-    json(res, { error: 'Session required' }, 401);
+    json(res, { error: 'Invalid session' }, 401);
   }
 }
 
@@ -88,11 +88,9 @@ export async function listExploreSites(req: ExpressReq, res: ExpressRes): Promis
 }
 
 export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
-  let user: string;
-  try { user = await requireSession(req.get('X-Session-Id')); }
-  catch { json(res, { error: 'Session required' }, 401); return; }
-
-  const info = await sites.getSiteInfo(user, domainFrom(req));
+  const sessionId = req.get('X-Session-Id');
+  if (!sessionId) { json(res, { error: 'Session required' }, 401); return; }
+  const info = await sites.getMySiteInfo(sessionId, domainFrom(req));
   if (!info) { json(res, { error: 'Site not found' }, 404); return; }
 
   json(res, {

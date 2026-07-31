@@ -55,6 +55,11 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
+export async function listMySites(sessionId: string): Promise<Awaited<ReturnType<typeof listSites>>> {
+  const user = await requireSession(sessionId);
+  return listSites(user);
+}
+
 export async function listSites(user: string): Promise<Array<{ siteId: string; domain: string; enabled: boolean; hits: number; uptime: number | undefined; account?: string; displayName?: string; subdomain?: string; coverImage?: string; lastDeployedAt?: number; starCount?: number; isStarred?: boolean }>> {
   const domains = await storage.listDomains(user);
   return Promise.all(
@@ -147,6 +152,11 @@ export async function checkDomain(user: string, rawDomain: string): Promise<bool
   if (!VALID_DOMAIN.test(domain)) return false;
   const data = await storage.readSiteMetadata(user, domain);
   return !!data && data.currentIndex !== null;
+}
+
+export async function getMySiteInfo(sessionId: string, domain: string): Promise<Awaited<ReturnType<typeof getSiteInfo>>> {
+  const user = await requireSession(sessionId);
+  return getSiteInfo(user, domain);
 }
 
 export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string; siteId: string; displayName?: string; account?: string; coverImage?: string } | null> {
