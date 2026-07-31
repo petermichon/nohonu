@@ -1,10 +1,17 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, requireSessionId } from '../../shared/http.ts';
-import * as authUc from '../../usecases/auth/index.ts';
-import * as authModule from '../../usecases/auth/auth.ts';
-import * as profile from '../../usecases/auth/profile.ts';
-import * as sessionUc from '../../usecases/auth/sessions.ts';
 import { sendUsecaseError } from '../errors.ts';
+import { checkAuth } from '../../usecases/auth/check-auth.ts';
+import { login } from '../../usecases/auth/login.ts';
+import { register } from '../../usecases/auth/register.ts';
+import { logout } from '../../usecases/auth/logout.ts';
+import { me } from '../../usecases/auth/me.ts';
+import { updateDisplayName } from '../../usecases/auth/update-display-name.ts';
+import { uploadProfilePicture as uploadProfilePictureUsecase } from '../../usecases/auth/upload-profile-picture.ts';
+import { deleteProfilePicture as deleteProfilePictureUsecase } from '../../usecases/auth/delete-profile-picture.ts';
+import { listSessions } from '../../usecases/auth/list-sessions.ts';
+import { deleteSession as deleteSessionUsecase } from '../../usecases/auth/delete-session.ts';
+import type { LoginResult, MeResult, RegisterResult } from '../../usecases/auth/types.ts';
 
 // === Params
 
@@ -36,7 +43,7 @@ async function extractDisplayNameParams(req: ExpressReq): Promise<DisplayNamePar
 
 // === Responses
 
-function registerResponse(res: ExpressRes, result: authModule.RegisterResult): void {
+function registerResponse(res: ExpressRes, result: RegisterResult): void {
   if (!result.success || !result.user) {
     json(res, { error: result.error || 'Registration failed' }, 400);
     return;
@@ -51,7 +58,7 @@ function registerResponse(res: ExpressRes, result: authModule.RegisterResult): v
   );
 }
 
-function loginResponse(res: ExpressRes, result: authModule.LoginResult): void {
+function loginResponse(res: ExpressRes, result: LoginResult): void {
   if (!result.success || !result.user) {
     json(res, { error: result.error || 'Login failed' }, 401);
     return;
@@ -66,7 +73,7 @@ function loginResponse(res: ExpressRes, result: authModule.LoginResult): void {
   );
 }
 
-function meResponse(res: ExpressRes, result: authModule.MeResult): void {
+function meResponse(res: ExpressRes, result: MeResult): void {
   if (result.error || !result.user) {
     json(res, { error: result.error || 'User not found' }, 401);
     return;
@@ -89,7 +96,7 @@ function meResponse(res: ExpressRes, result: authModule.MeResult): void {
 
 export function auth(req: ExpressReq, res: ExpressRes): void {
   const key = req.get('X-Api-Key') || null;
-  const result = authUc.checkAuth(key);
+  const result = checkAuth(key);
   json(res, result, result.secured && !result.valid ? 401 : 200);
 }
 
@@ -99,7 +106,7 @@ export async function authRegister(req: ExpressReq, res: ExpressRes): Promise<vo
     json(res, { error: 'Password and username are required' }, 400);
     return;
   }
-  const result = await authModule.register(params.password, params.username, params.userAgent);
+  const result = await register(params.password, params.username, params.userAgent);
   registerResponse(res, result);
 }
 
@@ -109,7 +116,7 @@ export async function authLogin(req: ExpressReq, res: ExpressRes): Promise<void>
     json(res, { error: 'Username and password are required' }, 400);
     return;
   }
-  const result = await authModule.login(params.username, params.password, params.userAgent);
+  const result = await login(params.username, params.password, params.userAgent);
   loginResponse(res, result);
 }
 
@@ -119,7 +126,7 @@ export async function authLogout(req: ExpressReq, res: ExpressRes): Promise<void
     json(res, { error: 'Session ID required' }, 401);
     return;
   }
-  await authModule.logout(sessionId);
+  await logout(sessionId);
   json(res, { success: true }, 200);
 }
 
@@ -129,7 +136,7 @@ export async function authMe(req: ExpressReq, res: ExpressRes): Promise<void> {
     json(res, { error: 'Session ID required' }, 401);
     return;
   }
-  const result = await authModule.me(sessionId);
+  const result = await me(sessionId);
   meResponse(res, result);
 }
 
@@ -139,7 +146,7 @@ export async function authDisplayName(req: ExpressReq, res: ExpressRes): Promise
     json(res, { error: 'Display name required' }, 400);
     return;
   }
-  const result = await profile.updateDisplayName(params.sessionId, params.displayName);
+  const result = await updateDisplayName(params.sessionId, params.displayName);
   if (!result.success) {
     json(res, { error: result.error || 'Failed to update display name' }, 401);
     return;
@@ -151,7 +158,7 @@ export async function uploadProfilePicture(req: ExpressReq, res: ExpressRes): Pr
   const sessionId = req.get('X-Session-Id') || '';
   const contentType = req.get('Content-Type') || '';
   const raw = req.body instanceof Buffer ? req.body : Buffer.alloc(0);
-  const result = await profile.uploadProfilePicture(
+  const result = await uploadProfilePictureUsecase(
     sessionId,
     contentType,
     raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength),
@@ -165,7 +172,7 @@ export async function uploadProfilePicture(req: ExpressReq, res: ExpressRes): Pr
 
 export async function deleteProfilePicture(req: ExpressReq, res: ExpressRes): Promise<void> {
   const sessionId = req.get('X-Session-Id') || '';
-  const result = await profile.deleteProfilePicture(sessionId);
+  const result = await deleteProfilePictureUsecase(sessionId);
   if (!result.success) {
     json(res, { error: result.error }, 500);
     return;
@@ -179,7 +186,7 @@ export async function getSessions(req: ExpressReq, res: ExpressRes): Promise<voi
     json(res, { error: 'Session ID required' }, 400);
     return;
   }
-  const result = await sessionUc.listSessions(sessionId);
+  const result = await listSessions(sessionId);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -198,7 +205,7 @@ export async function deleteSession(req: ExpressReq, res: ExpressRes): Promise<v
     json(res, { error: 'Session ID to delete is required' }, 400);
     return;
   }
-  const result = await sessionUc.deleteSession(sessionId, sessionToDelete);
+  const result = await deleteSessionUsecase(sessionId, sessionToDelete);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
