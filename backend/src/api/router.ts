@@ -54,7 +54,7 @@ router.get('/sites/:domain/visitors', sites.getSiteVisitors);
 router.get('/sites/:domain/uptime', sites.getSiteUptime);
 router.get('/sites/:domain/repos', sites.getSiteRepos);
 router.get('/sites/:domain/versions', versions.listSiteVersions);
-router.get('/sites/:domain/versions/download', versions.downloadSiteVersion);
+router.get('/sites/:domain/versions/:timestamp/download', versions.downloadSiteVersion);
 router.get('/sites/:domain/custom-domains', customDomains.getCustomDomains);
 router.get('/sites/:domain/custom-domains/token', customDomains.getVerificationToken);
 router.post('/sites/:domain', sites.createSiteDispatch);
