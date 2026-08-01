@@ -1,9 +1,9 @@
 import * as fs from 'node:fs/promises';
-import { getUserByUsername } from '../../core/auth/users/get-user-by-username.ts';
+import { db } from '../../db.ts';
 import { getProfilePicturePath } from '../../core/auth/users/get-profile-picture-path.ts';
 
 export async function getProfilePictureFile(username: string): Promise<Uint8Array | null> {
-  const user = await getUserByUsername(username);
+  const user = await db.user.findUnique({ where: { username } });
   if (!user || !user.profilePicture) return null;
 
   try {

@@ -1,30 +1,28 @@
-import { getSession } from '../../core/auth/sessions/get-session.ts';
-import { updateSessionActivity } from '../../core/auth/sessions/update-session-activity.ts';
-import { getUserByUsername } from '../../core/auth/users/get-user-by-username.ts';
+import { db } from '../../db.ts';
 import { toAuthUser } from './to-auth-user.ts';
 import type { MeResult } from './types.ts';
 
 export async function me(sessionId: string): Promise<MeResult> {
-  const session = await getSession(sessionId);
+  const session = await db.session.findUnique({ where: { id: sessionId } });
 
   if (!session) {
     return { error: 'Invalid session' };
   }
 
-  const user = await getUserByUsername(session.username);
+  const user = await db.user.findUnique({ where: { username: session.username } });
 
   if (!user) {
     return { error: 'User not found' };
   }
 
-  await updateSessionActivity(sessionId);
+  await db.session.updateMany({ where: { id: sessionId }, data: { lastActive: Date.now() } });
 
   return {
     user: toAuthUser(user),
     session: {
       id: session.id,
-      deviceInfo: session.deviceInfo,
-      userAgent: session.userAgent,
+      deviceInfo: session.deviceInfo ?? undefined,
+      userAgent: session.userAgent ?? undefined,
       createdAt: session.createdAt,
       lastActive: session.lastActive,
     },

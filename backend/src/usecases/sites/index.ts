@@ -5,7 +5,7 @@ import { readZip } from '../../shared/zip.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { db } from '../../db.ts';
-import { requireSession } from '../../core/auth/requireSession.ts';
+import { requireSession } from '../auth/require-session.ts';
 import type { UsecaseResult } from '../errors.ts';
 import type { CustomDomain, PublicSiteSummary, RepoHistoryEntry, SiteSummary, VersionInfo, VersionSource } from './types.ts';
 

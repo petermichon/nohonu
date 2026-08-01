@@ -1,12 +1,30 @@
-import { createSession } from '../../core/auth/sessions/create-session.ts';
-import { createUser } from '../../core/auth/users/create-user.ts';
+import { db } from '../../db.ts';
+import { hashPassword } from '../../core/auth/users/password.ts';
 import { toAuthUser } from './to-auth-user.ts';
 import type { RegisterResult } from './types.ts';
 
 export async function register(password: string, username: string, userAgent?: string): Promise<RegisterResult> {
   try {
-    const user = await createUser(password, username);
-    const session = await createSession(user.username, userAgent);
+    const existing = await db.user.findUnique({ where: { username } });
+    if (existing) {
+      return { success: false, error: 'Username already exists' };
+    }
+
+    const passwordHash = await hashPassword(password);
+    const user = await db.user.create({
+      data: { username, passwordHash, displayName: username, createdAt: Date.now() },
+    });
+
+    const session = await db.session.create({
+      data: {
+        id: crypto.randomUUID(),
+        username,
+        userAgent: userAgent ?? null,
+        deviceInfo: null,
+        createdAt: Date.now(),
+        lastActive: Date.now(),
+      },
+    });
 
     return { success: true, user: toAuthUser(user), session: session.id };
   } catch (error) {

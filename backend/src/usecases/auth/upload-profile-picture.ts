@@ -1,7 +1,6 @@
 import * as fs from 'node:fs/promises';
-import { requireSession } from '../../core/auth/requireSession.ts';
+import { db } from '../../db.ts';
 import { getProfilePicturePath } from '../../core/auth/users/get-profile-picture-path.ts';
-import { setProfilePicture } from '../../core/auth/users/set-profile-picture.ts';
 import type { ProfileResult } from './types.ts';
 
 export async function uploadProfilePicture(
@@ -9,7 +8,12 @@ export async function uploadProfilePicture(
   contentType: string,
   data: ArrayBuffer,
 ): Promise<ProfileResult> {
-  const username = await requireSession(sessionId);
+  const session = await db.session.findUnique({ where: { id: sessionId } });
+  if (!session) {
+    return { success: false, error: 'Invalid session' };
+  }
+  const username = session.username;
+
   if (!contentType.startsWith('image/')) {
     return { success: false, error: 'Invalid content type, must be an image' };
   }
@@ -23,7 +27,7 @@ export async function uploadProfilePicture(
     const dir = profilePicturePath.substring(0, profilePicturePath.lastIndexOf('/'));
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(profilePicturePath, new Uint8Array(data));
-    await setProfilePicture(username);
+    await db.user.update({ where: { username }, data: { profilePicture: 'profile.jpg' } });
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

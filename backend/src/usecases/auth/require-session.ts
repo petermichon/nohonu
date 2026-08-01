@@ -1,10 +1,9 @@
-import { getSession } from './sessions/get-session.ts';
-import { updateSessionActivity } from './sessions/update-session-activity.ts';
+import { db } from '../../db.ts';
 
 export async function requireSession(sessionId: string | undefined): Promise<string> {
   if (!sessionId) throw new Error('Session required');
-  const session = await getSession(sessionId);
+  const session = await db.session.findUnique({ where: { id: sessionId } });
   if (!session) throw new Error('Invalid session');
-  await updateSessionActivity(sessionId);
+  await db.session.updateMany({ where: { id: sessionId }, data: { lastActive: Date.now() } });
   return session.username;
 }

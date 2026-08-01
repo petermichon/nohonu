@@ -1,9 +1,8 @@
-import { getSession } from '../../core/auth/sessions/get-session.ts';
-import { deleteSession as deleteSessionRecord } from '../../core/auth/sessions/delete-session.ts';
+import { db } from '../../db.ts';
 import type { UsecaseResult } from '../errors.ts';
 
 export async function deleteSession(currentSessionId: string, sessionToDeleteId: string): Promise<UsecaseResult<void>> {
-  const currentSession = await getSession(currentSessionId);
+  const currentSession = await db.session.findUnique({ where: { id: currentSessionId } });
   if (!currentSession) {
     return { ok: false, code: 'unauthorized', message: 'Invalid session' };
   }
@@ -12,7 +11,7 @@ export async function deleteSession(currentSessionId: string, sessionToDeleteId:
     return { ok: false, code: 'invalid', message: 'Cannot delete current session, use logout instead' };
   }
 
-  const targetSession = await getSession(sessionToDeleteId);
+  const targetSession = await db.session.findUnique({ where: { id: sessionToDeleteId } });
   if (!targetSession) {
     return { ok: false, code: 'not_found', message: 'Session not found' };
   }
@@ -21,6 +20,6 @@ export async function deleteSession(currentSessionId: string, sessionToDeleteId:
     return { ok: false, code: 'forbidden', message: 'Cannot delete sessions from other users' };
   }
 
-  await deleteSessionRecord(sessionToDeleteId);
+  await db.session.deleteMany({ where: { id: sessionToDeleteId } });
   return { ok: true, value: undefined };
 }

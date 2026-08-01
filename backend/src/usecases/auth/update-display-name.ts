@@ -1,15 +1,14 @@
-import { getSession } from '../../core/auth/sessions/get-session.ts';
-import { updateDisplayName as updateUserDisplayName } from '../../core/auth/users/update-display-name.ts';
+import { db } from '../../db.ts';
 import type { ProfileResult } from './types.ts';
 
 export async function updateDisplayName(sessionId: string, displayName: string): Promise<ProfileResult> {
-  const session = await getSession(sessionId);
+  const session = await db.session.findUnique({ where: { id: sessionId } });
   if (!session) {
     return { success: false, error: 'Invalid session' };
   }
 
   try {
-    await updateUserDisplayName(session.username, displayName);
+    await db.user.update({ where: { username: session.username }, data: { displayName } });
     return { success: true };
   } catch (error) {
     return {

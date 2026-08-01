@@ -1,5 +1,5 @@
-import { deleteSession } from '../../core/auth/sessions/delete-session.ts';
+import { db } from '../../db.ts';
 
 export async function logout(sessionId: string): Promise<void> {
-  await deleteSession(sessionId);
+  await db.session.deleteMany({ where: { id: sessionId } });
 }
