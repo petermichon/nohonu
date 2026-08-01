@@ -1,5 +1,5 @@
 import { db } from '../../db.ts';
-import { hashPassword } from '../../core/auth/users/password.ts';
+import { hashPassword } from '../../shared/password.ts';
 import { toAuthUser } from './to-auth-user.ts';
 import type { RegisterResult } from './types.ts';
 

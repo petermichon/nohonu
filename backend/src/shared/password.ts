@@ -1,9 +1,8 @@
 // ponytail: PBKDF2 with SHA-256, 100k iterations - secure enough for web app, upgrade to argon2 if needed
 
-export async function hashPassword(password: string): Promise<string> {
+export async function deriveHash(password: string, salt: Uint8Array<ArrayBuffer>): Promise<string> {
   const encoder = new TextEncoder();
   const passwordData = encoder.encode(password);
-  const salt = crypto.getRandomValues(new Uint8Array(16));
 
   const key = await crypto.subtle.importKey('raw', passwordData, 'PBKDF2', false, ['deriveBits']);
 
@@ -19,6 +18,10 @@ export async function hashPassword(password: string): Promise<string> {
   combined.set(hash, salt.length);
 
   return btoa(String.fromCharCode(...combined));
+}
+
+export function hashPassword(password: string): Promise<string> {
+  return deriveHash(password, crypto.getRandomValues(new Uint8Array(16)));
 }
 
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {

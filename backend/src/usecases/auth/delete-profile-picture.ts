@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
-import { getProfilePicturePath } from '../../core/auth/users/get-profile-picture-path.ts';
+import { SITES_DIR, getProfilePicturePath } from '../../shared/paths.ts';
 import type { ProfileResult } from './types.ts';
 
 export async function deleteProfilePicture(sessionId: string): Promise<ProfileResult> {
@@ -11,7 +11,7 @@ export async function deleteProfilePicture(sessionId: string): Promise<ProfileRe
   const username = session.username;
 
   try {
-    const profilePicturePath = getProfilePicturePath(username);
+    const profilePicturePath = getProfilePicturePath(SITES_DIR, username);
     await fs.rm(profilePicturePath, { force: true });
     await db.user.update({ where: { username }, data: { profilePicture: null } });
     return { success: true };

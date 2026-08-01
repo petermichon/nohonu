@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
-import { getProfilePicturePath } from '../../core/auth/users/get-profile-picture-path.ts';
+import { SITES_DIR, getProfilePicturePath } from '../../shared/paths.ts';
 import type { ProfileResult } from './types.ts';
 
 export async function uploadProfilePicture(
@@ -23,7 +23,7 @@ export async function uploadProfilePicture(
   }
 
   try {
-    const profilePicturePath = getProfilePicturePath(username);
+    const profilePicturePath = getProfilePicturePath(SITES_DIR, username);
     const dir = profilePicturePath.substring(0, profilePicturePath.lastIndexOf('/'));
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(profilePicturePath, new Uint8Array(data));

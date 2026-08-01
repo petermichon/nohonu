@@ -1,5 +1,5 @@
 import { db } from '../../db.ts';
-import { verifyPassword } from '../../core/auth/users/password.ts';
+import { verifyPassword } from '../../shared/password.ts';
 import { toAuthUser } from './to-auth-user.ts';
 import type { LoginResult } from './types.ts';
 

@@ -55,3 +55,7 @@ export function domainDir(user: string, domain: string): string {
 export function coverImagePath(user: string, domain: string): string {
   return `${domainDir(user, domain)}/cover.jpg`;
 }
+
+export function getProfilePicturePath(sitesDir: string, username: string): string {
+  return `${sitesDir}/${username}/profile.jpg`;
+}
