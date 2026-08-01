@@ -1,4 +1,4 @@
-import * as storage from '../../core/health/storage.ts';
+import { db } from '../../db.ts';
 
 const startedAt = Date.now();
 
@@ -9,7 +9,16 @@ export function evaluateHealth(storageStatus: StorageStatus): HealthStatus {
   return storageStatus === 'ok' ? 'healthy' : 'degraded';
 }
 
+async function probeStorage(): Promise<StorageStatus> {
+  try {
+    await db.user.count();
+    return 'ok';
+  } catch {
+    return 'error';
+  }
+}
+
 export async function checkHealth(): Promise<{ status: HealthStatus; uptimeMs: number }> {
-  const storageStatus = await storage.probeStorage();
+  const storageStatus = await probeStorage();
   return { status: evaluateHealth(storageStatus), uptimeMs: Date.now() - startedAt };
 }
