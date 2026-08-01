@@ -4,7 +4,6 @@ import { VALID_DOMAIN, MAX_ZIP_BYTES, domainDir, coverImagePath } from '../../sh
 import { readZip } from '../../shared/zip.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
-import { db } from '../../db.ts';
 import { requireSession } from '../auth/require-session.ts';
 import type { UsecaseResult } from '../errors.ts';
 import type { CustomDomain, PublicSiteSummary, RepoHistoryEntry, SiteSummary, VersionInfo, VersionSource } from './types.ts';
@@ -120,20 +119,6 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
   }
 
   return allSites;
-}
-
-export async function listStarredSites(username: string): Promise<{ user: string; domain: string; displayName?: string; coverImage?: string; starCount?: number }[]> {
-  const starred = await db.starredBy.findMany({
-    where: { username },
-    include: { site: { select: { userUsername: true, domain: true, displayName: true, coverImage: true, starCount: true } } },
-  });
-  return starred.map((s) => ({
-    user: s.site.userUsername,
-    domain: s.site.domain,
-    displayName: s.site.displayName ?? undefined,
-    coverImage: s.site.coverImage ?? undefined,
-    starCount: s.site.starCount,
-  }));
 }
 
 export async function checkSite(user: string, domain: string): Promise<{ exists: boolean; enabled: boolean }> {

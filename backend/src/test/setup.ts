@@ -42,6 +42,7 @@ export const deleteSession = (await import('../usecases/auth/delete-session.ts')
 export const checkAuth = (await import('../usecases/auth/check-auth.ts')).checkAuth;
 
 export const sites = await import('../usecases/sites/index.ts');
+export const listStarredSites = (await import('../usecases/sites/list-starred-sites.ts')).listStarredSites;
 export const health = await import('../usecases/health/index.ts');
 
 export async function resetTestState(): Promise<void> {

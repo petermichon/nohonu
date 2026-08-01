@@ -4,6 +4,7 @@ import * as sites from '../../usecases/sites/index.ts';
 import { getPublicUser } from '../../usecases/auth/get-public-user.ts';
 import { userExists } from '../../usecases/auth/user-exists.ts';
 import { getProfilePictureFile } from '../../usecases/auth/get-profile-picture-file.ts';
+import { listStarredSites } from '../../usecases/sites/list-starred-sites.ts';
 
 function userNotFound(res: ExpressRes): void {
   json(res, { error: 'User not found' }, 404);
@@ -76,7 +77,7 @@ export async function getUserStars(req: ExpressReq, res: ExpressRes): Promise<vo
     return;
   }
 
-  const starredSites = await sites.listStarredSites(username);
+  const starredSites = await listStarredSites(username);
   json(res, { sites: starredSites });
 }
 

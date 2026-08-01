@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as dns from 'node:dns/promises';
 import type { Mock } from 'vitest';
 import {
+  listStarredSites,
   makeStoredZip,
   me,
   registerUser,
@@ -155,7 +156,7 @@ describe('toggleStar', () => {
     if (star.ok) expect(star.value.starCount).toBe(1);
 
     const info = await sites.getSiteInfo(owner, 'mysite');
-    const starred = await sites.listStarredSites(await username(fanSession));
+    const starred = await listStarredSites(await username(fanSession));
     expect(starred.some((s) => s.domain === 'mysite')).toBe(true);
     expect(info?.siteId).toBeTruthy();
 
