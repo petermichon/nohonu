@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as dns from 'node:dns/promises';
+import * as fs from 'node:fs/promises';
 import type { Mock } from 'vitest';
 import {
   listStarredSites,
@@ -9,6 +10,15 @@ import {
   resetTestState,
   sites,
 } from '../../test/setup.ts';
+
+async function pathExists(p: string): Promise<boolean> {
+  try {
+    await fs.stat(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 vi.mock('node:dns/promises', () => ({
   resolveTxt: vi.fn(),
@@ -296,6 +306,25 @@ describe('serving', () => {
 
     const viaPath = await sites.resolveDomainAndServe('localhost', '/mysite/page');
     expect(viaPath).toEqual({ user, domain: 'mysite', filePath: '/page' });
+  });
+
+  it('does not let a malicious zip escape the site directory', async () => {
+    const sessionId = await registerUser('traversal');
+    const user = await username(sessionId);
+    const body = zip({
+      'index.html': '<h1>ok</h1>',
+      '../../evil.txt': 'pwned',
+      '/abs.txt': 'abs',
+    });
+    const created = await sites.createSite(sessionId, 'mysite', body);
+    expect(created.ok).toBe(true);
+
+    const served = await sites.serveSiteFile(user, 'mysite', '/index.html');
+    expect(new TextDecoder().decode(served?.data)).toBe('<h1>ok</h1>');
+
+    const sitesDir = process.env['SITES_DIR'] ?? '';
+    expect(await pathExists(`${sitesDir}/evil.txt`)).toBe(false);
+    expect(await pathExists(`${sitesDir}/abs.txt`)).toBe(false);
   });
 });
 
