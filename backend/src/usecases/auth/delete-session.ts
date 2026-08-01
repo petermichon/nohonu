@@ -1,7 +1,7 @@
 import { db } from '../../db.ts';
-import type { UsecaseResult } from '../errors.ts';
+import type { Result } from '../errors.ts';
 
-export async function deleteSession(currentSessionId: string, sessionToDeleteId: string): Promise<UsecaseResult<void>> {
+export async function deleteSession(currentSessionId: string, sessionToDeleteId: string): Promise<Result<void>> {
   const currentSession = await db.session.findUnique({ where: { id: currentSessionId } });
   if (!currentSession) {
     return { ok: false, code: 'unauthorized', message: 'Invalid session' };

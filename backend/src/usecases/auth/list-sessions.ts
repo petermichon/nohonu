@@ -1,6 +1,6 @@
 import { db } from '../../db.ts';
 import type { SessionInfo } from './types.ts';
-import type { UsecaseResult } from '../errors.ts';
+import type { Result } from '../errors.ts';
 
 function toSessionInfo(session: {
   id: string;
@@ -20,7 +20,7 @@ function toSessionInfo(session: {
   };
 }
 
-export async function listSessions(sessionId: string): Promise<UsecaseResult<SessionInfo[]>> {
+export async function listSessions(sessionId: string): Promise<Result<SessionInfo[]>> {
   const session = await db.session.findUnique({ where: { id: sessionId } });
   if (!session) {
     return { ok: false, code: 'unauthorized', message: 'Invalid session' };

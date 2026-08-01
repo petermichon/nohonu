@@ -88,11 +88,12 @@ export async function listSites(req: ExpressReq, res: ExpressRes): Promise<void>
     json(res, { error: 'Session required' }, 401);
     return;
   }
-  try {
-    json(res, { sites: await sites.listMySites(sessionId) });
-  } catch {
-    json(res, { error: 'Invalid session' }, 401);
+  const result = await sites.listMySites(sessionId);
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
   }
+  json(res, { sites: result.value });
 }
 
 export async function listExploreSites(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -106,7 +107,12 @@ export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<voi
     json(res, { error: 'Session required' }, 401);
     return;
   }
-  const info = await sites.getMySiteInfo(sessionId, domainFrom(req));
+  const result = await sites.getMySiteInfo(sessionId, domainFrom(req));
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
+  }
+  const info = result.value;
   if (!info) {
     json(res, { error: 'Site not found' }, 404);
     return;
@@ -188,7 +194,12 @@ export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
 
-  const meta = await sites.getSiteMeta(sessionId, domainFrom(req));
+  const result = await sites.getSiteMeta(sessionId, domainFrom(req));
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
+  }
+  const meta = result.value;
   if (!meta) {
     json(res, { error: 'Site not found' }, 404);
     return;
@@ -221,11 +232,16 @@ export async function getSiteRepos(req: ExpressReq, res: ExpressRes): Promise<vo
   }
 
   const result = await sites.getSiteRepos(sessionId, domainFrom(req));
-  if (!result) {
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
+  }
+  const value = result.value;
+  if (!value) {
     json(res, { error: 'Site not found' }, 404);
     return;
   }
-  json(res, { domain: domainFrom(req), history: result.history });
+  json(res, { domain: domainFrom(req), history: value.history });
 }
 
 export async function createSiteDispatch(req: ExpressReq, res: ExpressRes): Promise<void> {
@@ -281,7 +297,11 @@ export async function deleteSite(req: ExpressReq, res: ExpressRes): Promise<void
     return;
   }
 
-  await sites.deleteSite(sessionId, domainFrom(req));
+  const result = await sites.deleteSite(sessionId, domainFrom(req));
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
+  }
   json(res, { domain: domainFrom(req) });
 }
 

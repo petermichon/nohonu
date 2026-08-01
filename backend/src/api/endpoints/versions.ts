@@ -111,14 +111,19 @@ export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Pro
   }
 
   const result = await sites.downloadVersion(sessionId, domainFrom(req), idx);
-  if (!result) {
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
+  }
+  const value = result.value;
+  if (!value) {
     json(res, { error: 'Version not found' }, 404);
     return;
   }
 
   res.set('Content-Type', 'application/zip');
-  res.set('Content-Disposition', `attachment; filename="${result.filename}"`);
-  res.send(Buffer.from(result.data));
+  res.set('Content-Disposition', `attachment; filename="${value.filename}"`);
+  res.send(Buffer.from(value.data));
 }
 
 export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<void> {

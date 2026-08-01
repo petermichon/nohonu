@@ -5,16 +5,8 @@ import { readZip } from '../../shared/zip.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { requireSession } from '../auth/require-session.ts';
-import type { UsecaseResult } from '../errors.ts';
+import type { Result } from '../errors.ts';
 import type { CustomDomain, PublicSiteSummary, RepoHistoryEntry, SiteSummary, VersionInfo, VersionSource } from './types.ts';
-
-async function getSessionUser(sessionId: string): Promise<UsecaseResult<string>> {
-  try {
-    return { ok: true, value: await requireSession(sessionId) };
-  } catch {
-    return { ok: false, code: 'unauthorized', message: 'Invalid session' };
-  }
-}
 
 // Custom domain registry cache: Map<customDomain, internalDomain>
 let customDomainCache: Map<string, string> | null = null;
@@ -64,9 +56,11 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   return null;
 }
 
-export async function listMySites(sessionId: string): Promise<Awaited<ReturnType<typeof listSites>>> {
-  const user = await requireSession(sessionId);
-  return listSites(user);
+export async function listMySites(sessionId: string): Promise<Result<SiteSummary[]>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
+  return { ok: true, value: await listSites(user) };
 }
 
 export async function listSites(user: string): Promise<SiteSummary[]> {
@@ -149,9 +143,14 @@ export async function checkDomain(user: string, rawDomain: string): Promise<bool
   return !!data && data.currentIndex !== null;
 }
 
-export async function getMySiteInfo(sessionId: string, domain: string): Promise<Awaited<ReturnType<typeof getSiteInfo>>> {
-  const user = await requireSession(sessionId);
-  return getSiteInfo(user, domain);
+export async function getMySiteInfo(
+  sessionId: string,
+  domain: string,
+): Promise<Result<Awaited<ReturnType<typeof getSiteInfo>>>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
+  return { ok: true, value: await getSiteInfo(user, domain) };
 }
 
 export async function getSiteInfo(user: string, domain: string): Promise<{ enabled: boolean; subdomain?: string; siteId: string; displayName?: string; account?: string; coverImage?: string } | null> {
@@ -191,22 +190,25 @@ export async function getSiteIcon(user: string, domain: string): Promise<{ data:
   return null;
 }
 
-// Get site metadata
-export async function getSiteMeta(sessionId: string, domain: string): Promise<{ subdomain?: string } | null> {
-  const user = await requireSession(sessionId);
+export async function getSiteMeta(sessionId: string, domain: string): Promise<Result<{ subdomain?: string } | null>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
-    return null;
+    return { ok: true, value: null };
   }
-  return { subdomain: data.subdomain };
+  return { ok: true, value: { subdomain: data.subdomain } };
 }
 
 export async function updateSiteMeta(
   sessionId: string,
   domain: string,
   updates: { subdomain?: string | undefined; displayName?: string | undefined },
-): Promise<UsecaseResult<void>> {
-  const user = await requireSession(sessionId);
+): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
@@ -227,12 +229,14 @@ export async function updateSiteMeta(
   return { ok: true, value: undefined };
 }
 
-export async function getSiteRepos(sessionId: string, domain: string): Promise<{ history: RepoHistoryEntry[] } | null> {
-  const user = await requireSession(sessionId);
+export async function getSiteRepos(sessionId: string, domain: string): Promise<Result<{ history: RepoHistoryEntry[] } | null>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
-  if (!data) return null;
+  if (!data) return { ok: true, value: null };
   const history = data.repoHistory.map(({ repo, branch, lastUsed }) => ({ repo, branch, lastUsed }));
-  return { history };
+  return { ok: true, value: { history } };
 }
 
 export function getSiteStats(domain: string, slots: number, groupMinutes = 1): { slot: number; count: number }[] {
@@ -253,12 +257,14 @@ export function getSiteUptime(domain: string, slots: number, groupMinutes = 1): 
   return analytics.getUptime(domain, slots, groupMinutes);
 }
 
-export async function getCustomDomains(sessionId: string, domain: string): Promise<CustomDomain[]> {
-  const user = await requireSession(sessionId);
+export async function getCustomDomains(sessionId: string, domain: string): Promise<Result<CustomDomain[]>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
-  if (!data) return [];
+  if (!data) return { ok: true, value: [] };
   const customDomains = data.customDomains ?? [];
-  return customDomains.map(({ domain: d, verified }) => ({ domain: d, verified }));
+  return { ok: true, value: customDomains.map(({ domain: d, verified }) => ({ domain: d, verified })) };
 }
 
 export async function getAllCustomDomains(account?: string): Promise<{ user: string; siteDomain: string; customDomain: string; verified: boolean }[]> {
@@ -286,8 +292,10 @@ export async function getAllCustomDomains(account?: string): Promise<{ user: str
   return allCustomDomains;
 }
 
-export async function addCustomDomain(sessionId: string, domain: string, customDomain: string): Promise<UsecaseResult<void>> {
-  const user = await requireSession(sessionId);
+export async function addCustomDomain(sessionId: string, domain: string, customDomain: string): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
@@ -308,8 +316,10 @@ export async function addCustomDomain(sessionId: string, domain: string, customD
   return { ok: true, value: undefined };
 }
 
-export async function removeCustomDomain(sessionId: string, domain: string, customDomain: string): Promise<UsecaseResult<void>> {
-  const user = await requireSession(sessionId);
+export async function removeCustomDomain(sessionId: string, domain: string, customDomain: string): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
@@ -360,8 +370,10 @@ async function generateVerificationToken(domain: string): Promise<string> {
   return `nohonu-verify-${hashHex.substring(0, 16)}`;
 }
 
-export async function verifyCustomDomain(sessionId: string, domain: string, customDomain: string): Promise<UsecaseResult<{ verified: boolean }>> {
-  const user = await requireSession(sessionId);
+export async function verifyCustomDomain(sessionId: string, domain: string, customDomain: string): Promise<Result<{ verified: boolean }>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
@@ -390,8 +402,10 @@ export async function getVerificationToken(domain: string): Promise<{ token: str
   return { token };
 }
 
-export async function toggleSite(sessionId: string, domain: string): Promise<UsecaseResult<{ enabled: boolean }>> {
-  const user = await requireSession(sessionId);
+export async function toggleSite(sessionId: string, domain: string): Promise<Result<{ enabled: boolean }>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
@@ -406,8 +420,10 @@ export async function toggleSite(sessionId: string, domain: string): Promise<Use
   return { ok: true, value: result };
 }
 
-export async function toggleStar(sessionId: string, domain: string, starred: boolean): Promise<UsecaseResult<{ starred: boolean; starCount: number }>> {
-  const user = await requireSession(sessionId);
+export async function toggleStar(sessionId: string, domain: string, starred: boolean): Promise<Result<{ starred: boolean; starCount: number }>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   // Find the user that owns this site
   const siteOwner = await findUserForDomain(domain);
   if (!siteOwner) {
@@ -444,10 +460,13 @@ export async function toggleStar(sessionId: string, domain: string, starred: boo
   return { ok: true, value: { starred: data.starredBy.includes(user), starCount: data.starCount } };
 }
 
-export async function deleteSite(sessionId: string, domain: string): Promise<void> {
-  const user = await requireSession(sessionId);
+export async function deleteSite(sessionId: string, domain: string): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   await storage.deleteSiteFiles(user, domain);
   analytics.clearDomain(domain);
+  return { ok: true, value: undefined };
 }
 
 export async function listVersions(user: string, domain: string): Promise<{ versions: VersionInfo[]; current: number | null }> {
@@ -475,17 +494,25 @@ export async function listVersions(user: string, domain: string): Promise<{ vers
   return { versions, current: data.currentIndex };
 }
 
-export async function downloadVersion(sessionId: string, domain: string, index: number): Promise<{ data: Uint8Array; filename: string } | null> {
-  const user = await requireSession(sessionId);
+export async function downloadVersion(
+  sessionId: string,
+  domain: string,
+  index: number,
+): Promise<Result<{ data: Uint8Array; filename: string } | null>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  if (!(await storage.versionExists(user, domain, index))) return null;
+  if (!(await storage.versionExists(user, domain, index))) return { ok: true, value: null };
   const data = await storage.readVersion(user, domain, index);
-  return { data, filename: `${domain}-${index}.zip` };
+  return { ok: true, value: { data, filename: `${domain}-${index}.zip` } };
 }
 
-export async function activateVersion(sessionId: string, domain: string, index: number): Promise<UsecaseResult<void>> {
-  const user = await requireSession(sessionId);
+export async function activateVersion(sessionId: string, domain: string, index: number): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
   const exists = await storage.versionExists(user, domain, index);
@@ -506,8 +533,10 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   return { ok: true, value: undefined };
 }
 
-export async function deleteVersion(sessionId: string, domain: string, index: number): Promise<UsecaseResult<void>> {
-  const user = await requireSession(sessionId);
+export async function deleteVersion(sessionId: string, domain: string, index: number): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
   const exists = await storage.versionExists(user, domain, index);
@@ -526,8 +555,8 @@ export async function createSite(
   domain: string,
   zipData: Uint8Array,
   subdomain?: string,
-): Promise<UsecaseResult<{ index: number; siteId: string }>> {
-  const session = await getSessionUser(sessionId);
+): Promise<Result<{ index: number; siteId: string }>> {
+  const session = await requireSession(sessionId);
   if (!session.ok) return session;
   const user = session.value;
 
@@ -560,8 +589,8 @@ export async function createSite(
   return { ok: true, value: { index, siteId } };
 }
 
-export async function uploadVersion(sessionId: string, domain: string, zipData: Uint8Array): Promise<UsecaseResult<{ index: number }>> {
-  const session = await getSessionUser(sessionId);
+export async function uploadVersion(sessionId: string, domain: string, zipData: Uint8Array): Promise<Result<{ index: number }>> {
+  const session = await requireSession(sessionId);
   if (!session.ok) return session;
   const user = session.value;
 
@@ -591,8 +620,8 @@ export async function createSiteFromGithub(
   repo: string,
   ref: string,
   subdomain?: string,
-): Promise<UsecaseResult<{ index: number; siteId: string; repo: string; branch: string }>> {
-  const session = await getSessionUser(sessionId);
+): Promise<Result<{ index: number; siteId: string; repo: string; branch: string }>> {
+  const session = await requireSession(sessionId);
   if (!session.ok) return session;
   const user = session.value;
 
@@ -655,8 +684,8 @@ export async function uploadVersionFromGithub(
   domain: string,
   repo: string,
   ref: string,
-): Promise<UsecaseResult<{ index: number; repo: string; branch: string }>> {
-  const session = await getSessionUser(sessionId);
+): Promise<Result<{ index: number; repo: string; branch: string }>> {
+  const session = await requireSession(sessionId);
   if (!session.ok) return session;
   const user = session.value;
 
@@ -849,8 +878,10 @@ export async function getSiteCover(user: string, domain: string): Promise<Uint8A
   }
 }
 
-export async function uploadSiteCover(sessionId: string, domain: string, imageData: Uint8Array): Promise<UsecaseResult<void>> {
-  const user = await requireSession(sessionId);
+export async function uploadSiteCover(sessionId: string, domain: string, imageData: Uint8Array): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
@@ -867,8 +898,10 @@ export async function uploadSiteCover(sessionId: string, domain: string, imageDa
   }
 }
 
-export async function deleteSiteCover(sessionId: string, domain: string): Promise<UsecaseResult<void>> {
-  const user = await requireSession(sessionId);
+export async function deleteSiteCover(sessionId: string, domain: string): Promise<Result<void>> {
+  const session = await requireSession(sessionId);
+  if (!session.ok) return session;
+  const user = session.value;
   const data = await storage.readSiteMetadata(user, domain);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };

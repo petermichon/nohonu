@@ -71,7 +71,8 @@ describe('createSite', () => {
     if (!result.ok) expect(result.code).toBe('already_exists');
 
     const list = await sites.listMySites(sessionId);
-    expect(list.some((s) => s.domain === 'mysite')).toBe(true);
+    expect(list.ok).toBe(true);
+    if (list.ok) expect(list.value.some((s) => s.domain === 'mysite')).toBe(true);
 
     const info = await sites.getSiteInfo(user, 'mysite');
     expect(info?.enabled).toBe(true);
@@ -130,14 +131,14 @@ describe('versions', () => {
   it('downloads a version zip', async () => {
     const sessionId = await makeSite('erin', 'mysite');
     const result = await sites.downloadVersion(sessionId, 'mysite', 1);
-    expect(result).not.toBeNull();
-    expect(result?.data.length).toBeGreaterThan(0);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value?.data.length).toBeGreaterThan(0);
   });
 
   it('returns null when downloading a missing version', async () => {
     const sessionId = await makeSite('erin', 'mysite');
     const result = await sites.downloadVersion(sessionId, 'mysite', 99);
-    expect(result).toBeNull();
+    expect(result.ok && result.value).toBeNull();
   });
 });
 
@@ -218,14 +219,15 @@ describe('custom domains', () => {
     expect(add.ok).toBe(true);
 
     const list = await sites.getCustomDomains(sessionId, 'mysite');
-    expect(list).toEqual([{ domain: 'example.com', verified: false }]);
+    expect(list.ok && list.value).toEqual([{ domain: 'example.com', verified: false }]);
 
     const all = await sites.getAllCustomDomains();
     expect(all.some((d) => d.customDomain === 'example.com')).toBe(true);
 
     const remove = await sites.removeCustomDomain(sessionId, 'mysite', 'example.com');
     expect(remove.ok).toBe(true);
-    expect(await sites.getCustomDomains(sessionId, 'mysite')).toEqual([]);
+    const after = await sites.getCustomDomains(sessionId, 'mysite');
+    expect(after.ok && after.value).toEqual([]);
   });
 
   it('rejects duplicate custom domains', async () => {
@@ -389,7 +391,7 @@ describe('github deploys', () => {
     expect(new TextDecoder().decode(served?.data)).toBe('<h1>from github</h1>');
 
     const repos = await sites.getSiteRepos(sessionId, 'ghsite');
-    expect(repos?.history[0]?.repo).toBe('owner/repo');
+    expect(repos.ok && repos.value?.history[0]?.repo).toBe('owner/repo');
   });
 
   it('returns not_found when the repo does not exist', async () => {
@@ -436,10 +438,12 @@ describe('deleteSite', () => {
     const user = await username(sessionId);
     sites.recordPageHit('mysite', '1.2.3.4');
 
-    await sites.deleteSite(sessionId, 'mysite');
+    const deleted = await sites.deleteSite(sessionId, 'mysite');
+    expect(deleted.ok).toBe(true);
 
     expect(await sites.findUserForDomain('mysite')).toBeNull();
-    expect((await sites.listMySites(sessionId)).some((s) => s.domain === 'mysite')).toBe(false);
+    const list = await sites.listMySites(sessionId);
+    expect(list.ok && list.value.some((s) => s.domain === 'mysite')).toBe(false);
     const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
     expect(totalHits).toBe(0);
     expect(user).toBeTruthy();
@@ -483,15 +487,16 @@ describe('getSiteMeta and getMySiteInfo', () => {
   it('returns the subdomain', async () => {
     const sessionId = await makeSite('tina', 'mysite');
     const meta = await sites.getSiteMeta(sessionId, 'mysite');
-    expect(meta?.subdomain).toBe('tina-mysite');
+    expect(meta.ok && meta.value?.subdomain).toBe('tina-mysite');
 
     const info = await sites.getMySiteInfo(sessionId, 'mysite');
-    expect(info?.siteId).toBe('tina-mysite');
+    expect(info.ok && info.value?.siteId).toBe('tina-mysite');
   });
 
   it('returns null for a missing site', async () => {
     const sessionId = await registerUser('tina');
-    expect(await sites.getSiteMeta(sessionId, 'missing')).toBeNull();
+    const meta = await sites.getSiteMeta(sessionId, 'missing');
+    expect(meta.ok && meta.value).toBeNull();
   });
 });
 

@@ -27,13 +27,12 @@ export async function getCustomDomains(req: ExpressReq, res: ExpressRes): Promis
     return;
   }
 
-  try {
-    const result = await sites.getCustomDomains(sessionId, p(req, 'domain') || '');
-    json(res, { customDomains: result });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to get custom domains';
-    json(res, { error: message }, message.includes('not found') ? 404 : 400);
+  const result = await sites.getCustomDomains(sessionId, p(req, 'domain') || '');
+  if (!result.ok) {
+    sendUsecaseError(res, result);
+    return;
   }
+  json(res, { customDomains: result.value });
 }
 
 export async function addCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
