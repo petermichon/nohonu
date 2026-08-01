@@ -5,7 +5,7 @@ import { readZip } from '../../shared/zip.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { requireSession } from '../auth/require-session.ts';
-import type { Result } from '../errors.ts';
+import type { Result } from '../../shared/errors.ts';
 import type { CustomDomain, PublicSiteSummary, RepoHistoryEntry, SiteSummary, VersionInfo, VersionSource } from './types.ts';
 
 // Custom domain registry cache: Map<customDomain, internalDomain>

@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson, p } from '../../shared/http.ts';
+import { json, parseJson, p } from '../../shared/express/http.ts';
 import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import { sendUsecaseError } from '../errors.ts';

@@ -1,5 +1,5 @@
 import { db } from '../../db.ts';
-import type { Result } from '../errors.ts';
+import type { Result } from '../../shared/errors.ts';
 
 export async function requireSession(sessionId: string | undefined): Promise<Result<string>> {
   if (!sessionId) return { ok: false, code: 'unauthorized', message: 'Session required' };

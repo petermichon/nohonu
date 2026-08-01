@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson } from '../../shared/http.ts';
+import { json, parseJson } from '../../shared/express/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import { sendUsecaseError } from '../errors.ts';

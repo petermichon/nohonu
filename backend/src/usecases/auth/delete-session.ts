@@ -1,5 +1,5 @@
 import { db } from '../../db.ts';
-import type { Result } from '../errors.ts';
+import type { Result } from '../../shared/errors.ts';
 
 export async function deleteSession(currentSessionId: string, sessionToDeleteId: string): Promise<Result<void>> {
   const currentSession = await db.session.findUnique({ where: { id: currentSessionId } });

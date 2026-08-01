@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json } from '../../shared/http.ts';
+import { json } from '../../shared/express/http.ts';
 import * as sites from '../../usecases/sites/index.ts';
 import { getPublicUser } from '../../usecases/auth/get-public-user.ts';
 import { userExists } from '../../usecases/auth/user-exists.ts';

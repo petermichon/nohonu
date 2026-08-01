@@ -1,6 +1,6 @@
 import { db } from '../../db.ts';
 import type { SessionInfo } from './types.ts';
-import type { Result } from '../errors.ts';
+import type { Result } from '../../shared/errors.ts';
 
 function toSessionInfo(session: {
   id: string;
