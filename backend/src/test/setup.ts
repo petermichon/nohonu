@@ -39,7 +39,7 @@ export const getProfilePictureFile = (await import('../usecases/auth/get-profile
   .getProfilePictureFile;
 export const listSessions = (await import('../usecases/auth/list-sessions.ts')).listSessions;
 export const deleteSession = (await import('../usecases/auth/delete-session.ts')).deleteSession;
-export const checkAuth = (await import('../usecases/auth/check-auth.ts')).checkAuth;
+export const checkAuth = (await import('../usecases/apikey/check-auth.ts')).checkAuth;
 
 export const sites = await import('../usecases/sites/index.ts');
 export const listStarredSites = (await import('../usecases/sites/list-starred-sites.ts')).listStarredSites;
