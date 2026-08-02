@@ -2,12 +2,12 @@ import * as fs from 'node:fs/promises';
 import * as dns from 'node:dns/promises';
 import { VALID_DOMAIN, MAX_ZIP_BYTES, domainDir, coverImagePath } from '../../shared/paths.ts';
 import { readZip } from '../../shared/zip.ts';
+import { db } from '../../db.ts';
 import * as storage from '../../core/sites/storage.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { requireSession } from '../auth/require-session.ts';
 import type { Result } from '../../shared/errors.ts';
 import type { CustomDomain, PublicSiteSummary, RepoHistoryEntry, SiteSummary, VersionInfo, VersionSource } from './types.ts';
-import { getUserProfilePicture } from './get-user-profile-picture.ts';
 
 // Custom domain registry cache: Map<customDomain, internalDomain>
 let customDomainCache: Map<string, string> | null = null;
@@ -65,10 +65,11 @@ export async function listMySites(sessionId: string): Promise<Result<SiteSummary
 }
 
 export async function listSites(user: string): Promise<SiteSummary[]> {
-  const [domains, accountProfilePicture] = await Promise.all([
+  const [domains, userRecord] = await Promise.all([
     storage.listDomains(user),
-    getUserProfilePicture(user),
+    db.user.findUnique({ where: { username: user }, select: { profilePicture: true } }),
   ]);
+  const accountProfilePicture = userRecord?.profilePicture ?? undefined;
   return Promise.all(
     domains.map(async (domain) => {
       const data = await storage.readSiteMetadata(user, domain);
@@ -96,10 +97,11 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
   const allSites: PublicSiteSummary[] = [];
 
   for (const user of users) {
-    const [domains, accountProfilePicture] = await Promise.all([
+    const [domains, userRecord] = await Promise.all([
       storage.listDomains(user),
-      getUserProfilePicture(user),
+      db.user.findUnique({ where: { username: user }, select: { profilePicture: true } }),
     ]);
+    const accountProfilePicture = userRecord?.profilePicture ?? undefined;
     for (const domain of domains) {
       const data = await storage.readSiteMetadata(user, domain);
       allSites.push({
