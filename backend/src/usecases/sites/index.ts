@@ -761,6 +761,10 @@ export async function saveAnalytics(user: string, domain: string): Promise<void>
   await analytics.saveAnalytics(user, domain);
 }
 
+export async function loadAnalytics(user: string, domain: string): Promise<void> {
+  await analytics.loadAnalytics(user, domain);
+}
+
 export function resetAnalytics(): void {
   analytics.resetAnalytics();
 }

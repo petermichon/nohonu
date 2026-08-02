@@ -348,11 +348,61 @@ describe('analytics', () => {
     expect(visitors).toEqual([{ ip: '1.2.3.4', count: 2, last: expect.any(Number) }]);
   });
 
+  it('reports uptime percentage in the site listing', async () => {
+    const sessionId = await makeSite('oscar', 'mysite');
+    sites.recordUptime('mysite', true);
+
+    const list = await sites.listMySites(sessionId);
+    expect(list.ok).toBe(true);
+    if (list.ok) expect(list.value[0]?.uptime).toBe(100);
+  });
+
+  it('caps the number of tracked visitors', async () => {
+    await makeSite('pat', 'mysite');
+
+    for (let i = 0; i < 501; i += 1) {
+      sites.recordPageHit('mysite', `ip-${i}`);
+    }
+
+    const visitors = sites.getSiteVisitors('mysite');
+    expect(visitors.length).toBeLessThanOrEqual(500);
+  });
+
+  it('groups uptime slots', async () => {
+    await makeSite('ray', 'mysite');
+    sites.recordUptime('mysite', true);
+
+    const grouped = sites.getSiteUptime('mysite', 60, 5);
+    expect(grouped[grouped.length - 1]?.up).toBe(true);
+    expect(grouped.length).toBeLessThanOrEqual(13);
+  });
+
   it('persists analytics to disk', async () => {
     const sessionId = await makeSite('olivia', 'mysite');
     const user = await username(sessionId);
     sites.recordPageHit('mysite', '1.2.3.4');
     await expect(sites.saveAnalytics(user, 'mysite')).resolves.toBeUndefined();
+  });
+
+  it('round-trips analytics through persistence', async () => {
+    const sessionId = await makeSite('quinn', 'mysite');
+    const user = await username(sessionId);
+    sites.recordPageHit('mysite', '1.2.3.4');
+    sites.recordUptime('mysite', true);
+
+    await sites.saveAnalytics(user, 'mysite');
+    sites.resetAnalytics();
+
+    await sites.loadAnalytics(user, 'mysite');
+
+    const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(totalHits).toBe(1);
+
+    const uptime = sites.getSiteUptime('mysite', 5);
+    expect(uptime[uptime.length - 1]?.up).toBe(true);
+
+    const visitors = sites.getSiteVisitors('mysite');
+    expect(visitors.some((v) => v.ip === '1.2.3.4')).toBe(true);
   });
 });
 
