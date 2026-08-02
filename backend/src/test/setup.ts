@@ -14,14 +14,10 @@ await fs.mkdir(SITES_TEST_DIR, { recursive: true });
 
 // Push schema to the test database before any app module reads env vars.
 const backendDir = path.resolve(import.meta.dirname ?? process.cwd(), '../..');
-execSync(`npx prisma db push --accept-data-loss --schema="${backendDir}/prisma/schema.prisma"`, {
+execSync(`npx prisma migrate deploy`, {
   cwd: backendDir,
   stdio: 'pipe',
-  env: {
-    ...process.env,
-    DATABASE_URL: `file:${TEST_DB}`,
-    PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
-  },
+  env: { ...process.env, DATABASE_URL: `file:${TEST_DB}` },
 });
 
 // App modules must be imported dynamically, after DATABASE_URL/SITES_DIR are set.
