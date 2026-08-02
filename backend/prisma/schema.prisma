@@ -51,8 +51,16 @@ model Site {
   customDomains CustomDomain[]
   repoHistories RepoHistory[]
   starredBy     StarredBy[]
+  analytics     Analytics?
 
   @@unique([userUsername, domain])
+}
+
+model Analytics {
+  id     String @id @default(uuid())
+  data   String
+  site   Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteId String @unique
 }
 
 model Version {

@@ -1,14 +1,9 @@
-import * as fs from 'node:fs/promises';
-import { domainDir } from '../../shared/paths.ts';
+import { db } from '../../db.ts';
 
 export const SLOT_MS = 60 * 1000;
 export const STATS_SLOTS = 86400;
 export const UPTIME_SLOTS = 86400;
 export const MAX_VISITORS_PER_DOMAIN = 500;
-
-function analyticsPath(user: string, domain: string): string {
-  return `${domainDir(user, domain)}/analytics.json`;
-}
 
 export const hits = new Map<string, Map<number, number>>();
 export const visitors = new Map<string, Map<string, { count: number; last: number }>>();
@@ -20,15 +15,23 @@ type AnalyticsSnapshot = {
   uptime: Record<number, boolean>;
 };
 
+async function findSiteId(user: string, domain: string): Promise<string | undefined> {
+  const site = await db.site.findUnique({
+    where: { userUsername_domain: { userUsername: user, domain } },
+    select: { id: true },
+  });
+  return site?.id;
+}
+
 export async function loadAnalytics(user: string, domain: string): Promise<void> {
-  let content: string;
+  const siteId = await findSiteId(user, domain);
+  if (!siteId) return;
+
+  const record = await db.analytics.findUnique({ where: { siteId } });
+  if (!record) return;
+
   try {
-    content = await fs.readFile(analyticsPath(user, domain), 'utf-8');
-  } catch {
-    return;
-  }
-  try {
-    const snapshot = JSON.parse(content) as AnalyticsSnapshot;
+    const snapshot = JSON.parse(record.data) as AnalyticsSnapshot;
     const now = Math.floor(Date.now() / SLOT_MS);
 
     const hitsMap = new Map<number, number>();
@@ -54,6 +57,9 @@ export async function loadAnalytics(user: string, domain: string): Promise<void>
 }
 
 export async function saveAnalytics(user: string, domain: string): Promise<void> {
+  const siteId = await findSiteId(user, domain);
+  if (!siteId) return;
+
   const snapshot: AnalyticsSnapshot = { hits: {}, visitors: {}, uptime: {} };
   const domainHits = hits.get(domain);
   if (domainHits) snapshot.hits = Object.fromEntries(domainHits);
@@ -62,9 +68,11 @@ export async function saveAnalytics(user: string, domain: string): Promise<void>
   const domainUptime = uptime.get(domain);
   if (domainUptime) snapshot.uptime = Object.fromEntries(domainUptime);
   try {
-    const dir = domainDir(user, domain);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(analyticsPath(user, domain), JSON.stringify(snapshot));
+    await db.analytics.upsert({
+      where: { siteId },
+      create: { siteId, data: JSON.stringify(snapshot) },
+      update: { data: JSON.stringify(snapshot) },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`Failed to save analytics snapshot for ${user}/${domain}: ${message}`);
