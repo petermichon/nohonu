@@ -116,7 +116,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
       {/* Card footer */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {site.account ? (
+          {site.accountProfilePicture ? (
             <img
               src={`${apiBase}/users/${site.account}/profile-picture`}
               alt={site.account}
@@ -135,7 +135,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
           ) : null}
           <div
             className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center shrink-0"
-            style={{ display: site.account ? 'none' : 'flex' }}
+            style={{ display: site.accountProfilePicture ? 'none' : 'flex' }}
           >
             <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
               {site.account ? site.account[0].toUpperCase() : 'G'}

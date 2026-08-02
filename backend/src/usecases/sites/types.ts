@@ -25,6 +25,7 @@ export interface SiteSummary {
   hits: number;
   uptime: number | undefined;
   account?: string;
+  accountProfilePicture?: string;
   displayName?: string;
   subdomain?: string;
   coverImage?: string;

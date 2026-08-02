@@ -7,6 +7,7 @@ import * as analytics from '../../core/analytics/metrics.ts';
 import { requireSession } from '../auth/require-session.ts';
 import type { Result } from '../../shared/errors.ts';
 import type { CustomDomain, PublicSiteSummary, RepoHistoryEntry, SiteSummary, VersionInfo, VersionSource } from './types.ts';
+import { getUserProfilePicture } from './get-user-profile-picture.ts';
 
 // Custom domain registry cache: Map<customDomain, internalDomain>
 let customDomainCache: Map<string, string> | null = null;
@@ -64,7 +65,10 @@ export async function listMySites(sessionId: string): Promise<Result<SiteSummary
 }
 
 export async function listSites(user: string): Promise<SiteSummary[]> {
-  const domains = await storage.listDomains(user);
+  const [domains, accountProfilePicture] = await Promise.all([
+    storage.listDomains(user),
+    getUserProfilePicture(user),
+  ]);
   return Promise.all(
     domains.map(async (domain) => {
       const data = await storage.readSiteMetadata(user, domain);
@@ -75,6 +79,7 @@ export async function listSites(user: string): Promise<SiteSummary[]> {
         hits: analytics.getTotalHits(domain),
         uptime: analytics.getUptimePct(domain),
         account: data?.account,
+        accountProfilePicture,
         displayName: data?.displayName,
         subdomain: data?.subdomain,
         coverImage: data?.coverImage,
@@ -91,7 +96,10 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
   const allSites: PublicSiteSummary[] = [];
 
   for (const user of users) {
-    const domains = await storage.listDomains(user);
+    const [domains, accountProfilePicture] = await Promise.all([
+      storage.listDomains(user),
+      getUserProfilePicture(user),
+    ]);
     for (const domain of domains) {
       const data = await storage.readSiteMetadata(user, domain);
       allSites.push({
@@ -102,6 +110,7 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
         hits: analytics.getTotalHits(domain),
         uptime: analytics.getUptimePct(domain),
         account: data?.account,
+        accountProfilePicture,
         displayName: data?.displayName,
         subdomain: data?.subdomain,
         coverImage: data?.coverImage,

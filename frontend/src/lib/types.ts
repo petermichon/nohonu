@@ -8,6 +8,7 @@ export interface Site {
   hits: number;
   uptime: number | null;
   account?: string;
+  accountProfilePicture?: string;
   customDomains?: { domain: string; verified: boolean }[];
   subdomain?: string;
   subdomainBase?: string;
