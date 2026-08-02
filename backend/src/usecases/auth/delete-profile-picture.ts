@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
-import { SITES_DIR, getProfilePicturePath } from '../../shared/paths.ts';
+import { getProfilePicturePath } from '../../shared/paths.ts';
+import { SITES_DIR } from '../../config.ts';
 import type { ProfileResult } from './types.ts';
 
 export async function deleteProfilePicture(sessionId: string): Promise<ProfileResult> {
