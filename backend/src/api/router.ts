@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import * as health from './endpoints/health.ts';
 import * as auth from './endpoints/auth.ts';
 import * as check from './endpoints/check.ts';
@@ -11,11 +12,21 @@ export const router = Router();
 
 const API_KEY = process.env['API_KEY'];
 
+function requireApiKey(req: Request, res: Response, next: NextFunction): void {
+  if (req.headers['x-api-key'] === API_KEY) return next();
+  res.status(401).json({ error: 'Unauthorized' });
+}
+
 if (API_KEY) {
-  router.use((req, res, next) => {
-    if (req.headers['x-api-key'] === API_KEY) return next();
-    res.status(401).json({ error: 'Unauthorized' });
-  });
+  // Protect only the management API; public endpoints and static file
+  // serving stay open.
+  router.use('/auth/me', requireApiKey);
+  router.use('/auth/logout', requireApiKey);
+  router.use('/auth/displayname', requireApiKey);
+  router.use('/auth/profile-picture', requireApiKey);
+  router.use('/auth/sessions', requireApiKey);
+  router.use('/sites', requireApiKey);
+  router.use('/custom-domains', requireApiKey);
 }
 
 // Public
