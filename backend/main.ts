@@ -4,8 +4,8 @@ import cors from 'cors';
 import { router } from './src/api/router.ts';
 import { scheduleUptimeChecks } from './src/scheduler.ts';
 import * as sites from './src/usecases/sites/index.ts';
-import { SITES_DIR } from './src/shared/paths.ts';
-import { listUsers, listDomains } from './src/core/sites/storage.ts';
+import { SITES_DIR } from './src/config.ts';
+import { listUsers, listDomains } from './src/core/sites/db.ts';
 
 await fs.mkdir(SITES_DIR, { recursive: true });
 

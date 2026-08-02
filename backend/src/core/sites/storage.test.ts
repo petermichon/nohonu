@@ -15,8 +15,8 @@ execSync(`npx prisma migrate deploy`, { cwd: backendDir, stdio: 'pipe', env: { .
 
 const storageModule = await import('./storage.ts');
 const extractFiles = storageModule.extractFiles;
-const writeSiteMetadata = storageModule.writeSiteMetadata;
 const DEFAULT_DATA = storageModule.DEFAULT_DATA;
+const { writeSiteMetadata } = await import('./db.ts');
 
 import { db } from '../../db.ts';
 
