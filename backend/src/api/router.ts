@@ -73,7 +73,7 @@ router.post('/sites/:domain/versions', versions.upload);
 router.post('/sites/:domain/versions/github', versions.fetchGithub);
 router.post('/sites/:domain/versions/:timestamp/activate', versions.activateVersion);
 router.post('/sites/:domain/custom-domains', customDomains.addCustomDomain);
-router.post('/sites/:domain/custom-domains/verify', customDomains.verifyCustomDomain);
+router.post('/sites/:domain/custom-domains/:subAction/verify', customDomains.verifyCustomDomain);
 router.post('/sites/:domain/cover', sites.uploadCover);
 router.delete('/sites/:domain', sites.deleteSite);
 router.delete('/sites/:domain/versions/:timestamp', versions.deleteVersion);
