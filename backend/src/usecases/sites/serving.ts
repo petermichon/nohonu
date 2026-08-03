@@ -4,6 +4,7 @@ import * as fsOps from '../../core/sites/fs.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { readZip } from '../../shared/zip.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
+import { getContentType } from '../../shared/mime.ts';
 import { getCustomDomainCache } from './custom-domains.ts';
 
 export function recordPageHit(domain: string, ip: string): void {
@@ -103,23 +104,4 @@ export async function resolveDomainAndServe(
   }
 
   return null;
-}
-
-function getContentType(ext: string): string {
-  const types: Record<string, string> = {
-    html: 'text/html',
-    css: 'text/css',
-    js: 'application/javascript',
-    json: 'application/json',
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    gif: 'image/gif',
-    svg: 'image/svg+xml',
-    ico: 'image/x-icon',
-    woff: 'font/woff',
-    woff2: 'font/woff2',
-    ttf: 'font/ttf',
-  };
-  return types[ext] ?? 'application/octet-stream';
 }
