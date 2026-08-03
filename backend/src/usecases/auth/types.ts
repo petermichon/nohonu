@@ -1,8 +1,6 @@
-export interface AuthUser {
-  username: string;
-  displayName: string;
-  profilePicture?: string;
-}
+import type { AuthUser } from '../../shared/auth-user.ts';
+
+export type { AuthUser };
 
 export interface SessionInfo {
   id: string;

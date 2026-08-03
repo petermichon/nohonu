@@ -1,6 +1,6 @@
 import { db } from '../../db.ts';
 import { verifyPassword } from '../../shared/password.ts';
-import { toAuthUser } from './to-auth-user.ts';
+import { toAuthUser } from '../../shared/auth-user.ts';
 import type { LoginResult } from './types.ts';
 
 export async function login(username: string, password: string, userAgent?: string): Promise<LoginResult> {

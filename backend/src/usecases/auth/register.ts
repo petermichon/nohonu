@@ -1,6 +1,6 @@
 import { db } from '../../db.ts';
 import { hashPassword } from '../../shared/password.ts';
-import { toAuthUser } from './to-auth-user.ts';
+import { toAuthUser } from '../../shared/auth-user.ts';
 import type { RegisterResult } from './types.ts';
 
 export async function register(password: string, username: string, userAgent?: string): Promise<RegisterResult> {

@@ -1,5 +1,5 @@
 import { db } from '../../db.ts';
-import { toAuthUser } from './to-auth-user.ts';
+import { toAuthUser } from '../../shared/auth-user.ts';
 import type { MeResult } from './types.ts';
 
 export async function me(sessionId: string): Promise<MeResult> {

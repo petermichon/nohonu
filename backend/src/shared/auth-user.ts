@@ -1,4 +1,8 @@
-import type { AuthUser } from './types.ts';
+export interface AuthUser {
+  username: string;
+  displayName: string;
+  profilePicture?: string;
+}
 
 export function toAuthUser(user: { username: string; displayName: string; profilePicture: string | null }): AuthUser {
   return {
