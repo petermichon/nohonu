@@ -1,5 +1,5 @@
 import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
-import { generateVerificationToken } from './custom-domain-dns.ts';
+import { generateVerificationToken } from '../../shared/custom-domain-dns.ts';
 
 
 export async function getVerificationToken(domain: string): Promise<{ token: string }> {

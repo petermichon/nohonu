@@ -1,6 +1,5 @@
 import * as dns from 'node:dns/promises';
 
-
 export async function generateVerificationToken(domain: string): Promise<string> {
   const data = new TextEncoder().encode(domain);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -28,4 +27,3 @@ export async function dnsVerifyCustomDomain(domain: string, customDomain: string
     return false;
   }
 }
-

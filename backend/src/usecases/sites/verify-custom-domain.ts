@@ -2,7 +2,7 @@ import * as sitesDb from '../../core/sites/db.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 import type { Result } from '../../shared/errors.ts';
 import { invalidateCustomDomainCache } from './custom-domains-cache.ts';
-import { dnsVerifyCustomDomain } from './custom-domain-dns.ts';
+import { dnsVerifyCustomDomain } from '../../shared/custom-domain-dns.ts';
 
 
 export async function verifyCustomDomain(

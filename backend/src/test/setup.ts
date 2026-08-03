@@ -47,7 +47,6 @@ export const sites = {
   ...(await import('../usecases/sites/check-subdomain.ts')),
   ...(await import('../usecases/sites/create-site-from-github.ts')),
   ...(await import('../usecases/sites/create-site.ts')),
-  ...(await import('../usecases/sites/custom-domain-dns.ts')),
   ...(await import('../usecases/sites/custom-domains-cache.ts')),
   ...(await import('../usecases/sites/delete-site-cover.ts')),
   ...(await import('../usecases/sites/delete-site.ts')),
