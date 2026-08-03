@@ -6,7 +6,7 @@ This folder contains the Docker Compose stack for production deployment.
 
 | File | Purpose |
 |---|---|
-| `docker-compose.yml` | Orchestrates Caddy (reverse proxy) and the Deno backend |
+| `docker-compose.yml` | Orchestrates Caddy (reverse proxy) and the Node.js backend |
 | `Dockerfile.caddy` | Builds Caddy with the OVH DNS plugin and the frontend |
 | `Caddyfile` | Reverse-proxy and HTTPS configuration |
 | `.env.example` | Environment variables template |
