@@ -16,7 +16,6 @@ import {
   resetTestState,
   updateDisplayName,
   uploadProfilePicture,
-  userExists,
 } from '../../test/setup.ts';
 
 beforeEach(async () => {
@@ -161,8 +160,6 @@ describe('profile picture', () => {
 describe('public user', () => {
   it('reports existence and public info without sensitive fields', async () => {
     await registerUser('grace');
-    expect(await userExists('grace')).toBe(true);
-    expect(await userExists('nobody')).toBe(false);
     expect(await getPublicUser('nobody')).toBeNull();
 
     const publicUser = await getPublicUser('grace');

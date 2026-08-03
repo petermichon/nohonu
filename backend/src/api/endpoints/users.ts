@@ -3,7 +3,6 @@ import { json } from '../../shared/express/http.ts';
 import { getSiteInfo } from '../../usecases/sites/get-site-info.ts';
 import { listSites } from '../../usecases/sites/list-sites.ts';
 import { getPublicUser } from '../../usecases/auth/get-public-user.ts';
-import { userExists } from '../../usecases/auth/user-exists.ts';
 import { getProfilePictureFile } from '../../usecases/auth/get-profile-picture-file.ts';
 import { listStarredSites } from '../../usecases/sites/list-starred-sites.ts';
 
@@ -29,7 +28,7 @@ export async function getUserByUsernameEndpoint(req: ExpressReq, res: ExpressRes
 export async function getPublicSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = (req.params as Record<string, string>)['username'] || '';
   const domain = (req.params as Record<string, string>)['domain'] || '';
-  if (!username || !(await userExists(username))) {
+  if (!username) {
     userNotFound(res);
     return;
   }
@@ -58,10 +57,6 @@ export async function getUserSites(req: ExpressReq, res: ExpressRes): Promise<vo
     userNotFound(res);
     return;
   }
-  if (!(await userExists(username))) {
-    userNotFound(res);
-    return;
-  }
 
   const siteList = await listSites(username);
   json(res, { sites: siteList });
@@ -70,10 +65,6 @@ export async function getUserSites(req: ExpressReq, res: ExpressRes): Promise<vo
 export async function getUserStars(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = (req.params as Record<string, string>)['username'];
   if (!username) {
-    userNotFound(res);
-    return;
-  }
-  if (!(await userExists(username))) {
     userNotFound(res);
     return;
   }

@@ -30,7 +30,6 @@ export const updateDisplayName = (await import('../usecases/auth/update-display-
 export const uploadProfilePicture = (await import('../usecases/auth/upload-profile-picture.ts')).uploadProfilePicture;
 export const deleteProfilePicture = (await import('../usecases/auth/delete-profile-picture.ts')).deleteProfilePicture;
 export const getPublicUser = (await import('../usecases/auth/get-public-user.ts')).getPublicUser;
-export const userExists = (await import('../usecases/auth/user-exists.ts')).userExists;
 export const getProfilePictureFile = (await import('../usecases/auth/get-profile-picture-file.ts'))
   .getProfilePictureFile;
 export const listSessions = (await import('../usecases/auth/list-sessions.ts')).listSessions;
