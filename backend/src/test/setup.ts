@@ -41,12 +41,12 @@ export const checkAuth = (await import('../usecases/apikey/check-auth.ts')).chec
 export const sites = {
   ...(await import('../usecases/sites/activate-version.ts')),
   ...(await import('../usecases/sites/add-custom-domain.ts')),
+  ...(await import('../usecases/sites/check-custom-domain.ts')),
   ...(await import('../usecases/sites/check-domain.ts')),
   ...(await import('../usecases/sites/check-site.ts')),
   ...(await import('../usecases/sites/check-subdomain.ts')),
   ...(await import('../usecases/sites/create-site-from-github.ts')),
   ...(await import('../usecases/sites/create-site.ts')),
-  ...(await import('../usecases/sites/custom-domains-cache.ts')),
   ...(await import('../usecases/sites/delete-site-cover.ts')),
   ...(await import('../usecases/sites/delete-site.ts')),
   ...(await import('../usecases/sites/delete-version.ts')),

@@ -1,7 +1,7 @@
 import * as sitesDb from '../../core/sites/db.ts';
 import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
-import { getCustomDomainCache } from './custom-domains-cache.ts';
+import { getCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
 
 
 export async function resolveDomainAndServe(

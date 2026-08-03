@@ -1,4 +1,4 @@
-import * as sitesDb from '../../core/sites/db.ts';
+import * as sitesDb from './db.ts';
 
 
 // Custom domain registry cache: Map<customDomain, internalDomain>

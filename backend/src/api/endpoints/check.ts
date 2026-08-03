@@ -1,7 +1,7 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { checkDomain as domainExists } from '../../usecases/sites/check-domain.ts';
 import { checkSubdomain as subdomainExists } from '../../usecases/sites/check-subdomain.ts';
-import { getCustomDomainCache } from '../../usecases/sites/custom-domains-cache.ts';
+import { checkCustomDomain as checkCustomDomainUsecase } from '../../usecases/sites/check-custom-domain.ts';
 
 export async function checkDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
   const rawDomain = (req.query.domain as string) || '';
@@ -18,12 +18,8 @@ export async function checkCustomDomain(req: ExpressReq, res: ExpressRes): Promi
     return;
   }
 
-  const cache = await getCustomDomainCache();
-  if (cache.get(domain)) {
-    res.status(200).send('OK');
-    return;
-  }
-  res.status(404).json({ error: 'Domain not found' });
+  const exists = await checkCustomDomainUsecase(domain);
+  res.status(exists ? 200 : 404).json(exists ? 'OK' : { error: 'Domain not found' });
 }
 
 export async function checkSubdomain(req: ExpressReq, res: ExpressRes): Promise<void> {
