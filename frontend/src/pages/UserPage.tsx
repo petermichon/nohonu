@@ -1,22 +1,17 @@
 import { useParams, Link, useLocation } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  User,
-  AlertCircle,
-  Layout,
-  Globe,
-  Check,
-  X,
-  Plus,
-  Settings,
-  Key,
-  Monitor,
-  LogOut,
-  Star,
-} from 'lucide-react';
+import { User, AlertCircle, Layout, Globe, Check, X, Plus, Settings, Key, Monitor, LogOut, Star } from 'lucide-react';
 import { ProfileSiteCard } from '../components/ProfileSiteCard.tsx';
 import { Tooltip } from '../components/Tooltip.tsx';
-import { useSites, useDomains, useUserSites, useSessions, useDeleteSession, useUser, useUserStars } from '../lib/api.ts';
+import {
+  useSites,
+  useDomains,
+  useUserSites,
+  useSessions,
+  useDeleteSession,
+  useUser,
+  useUserStars,
+} from '../lib/api.ts';
 import { useAccentColor } from '../lib/AccentColorProvider.tsx';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { useApi } from '../lib/api.ts';
@@ -329,10 +324,10 @@ export default function UserPage() {
               params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
                 transition-colors cursor-pointer rounded-full ${
-                activeTab === 'overview'
-                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
+                  activeTab === 'overview'
+                    ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
             >
               <User className="w-4 h-4" />
               Overview
@@ -342,10 +337,10 @@ export default function UserPage() {
               params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
                 transition-colors cursor-pointer rounded-full ${
-                activeTab === 'sites'
-                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
+                  activeTab === 'sites'
+                    ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
             >
               <Layout className="w-4 h-4" />
               Sites
@@ -358,10 +353,10 @@ export default function UserPage() {
               params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
                 transition-colors cursor-pointer rounded-full ${
-                activeTab === 'stars'
-                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
+                  activeTab === 'stars'
+                    ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
             >
               <Star className="w-4 h-4" />
               Stars
@@ -374,10 +369,10 @@ export default function UserPage() {
               params={{ username }}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
                 transition-colors cursor-pointer rounded-full ${
-                activeTab === 'domains'
-                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
+                  activeTab === 'domains'
+                    ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
             >
               <Globe className="w-4 h-4" />
               Domains
@@ -950,58 +945,58 @@ export default function UserPage() {
                   ) : sessions.length === 0 ? (
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">No active sessions</p>
                   ) : (
-                    [...sessions].sort(
-                      (a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()
-                    ).map((session) => (
-                      <div
-                        key={session.id}
-                        className="flex items-center justify-between w-full py-4 pr-4 overflow-hidden"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-                            <Monitor className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                    [...sessions]
+                      .sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime())
+                      .map((session) => (
+                        <div
+                          key={session.id}
+                          className="flex items-center justify-between w-full py-4 pr-4 overflow-hidden"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                              <Monitor className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-zinc-950 dark:text-zinc-100 truncate">
+                                {formatUserAgent(session.userAgent)}
+                              </p>
+                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                                Last active {new Date(session.lastActive).toLocaleString()}
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-zinc-950 dark:text-zinc-100 truncate">
-                              {formatUserAgent(session.userAgent)}
-                            </p>
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                              Last active {new Date(session.lastActive).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                        {session.id === sessionId ? (
-                          <button
-                            type="button"
-                            disabled
-                            className="p-2 rounded-lg shrink-0 cursor-default
-                              text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
-                          >
-                            <LogOut className="w-4 h-4" />
-                          </button>
-                        ) : (
-                          <Tooltip content="Revoke session">
+                          {session.id === sessionId ? (
                             <button
                               type="button"
-                              onClick={() => {
-                                deleteSession(session.id)
-                                  .then(() => {
-                                    showToast('Session revoked', true);
-                                  })
-                                  .catch(() => {
-                                    showToast('Failed to revoke session', false);
-                                  });
-                              }}
-                              className="p-2 rounded-lg shrink-0 cursor-pointer
-                                text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800
-                                hover:text-zinc-900 dark:hover:text-zinc-100"
+                              disabled
+                              className="p-2 rounded-lg shrink-0 cursor-default
+                              text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
                             >
                               <LogOut className="w-4 h-4" />
                             </button>
-                          </Tooltip>
-                        )}
-                      </div>
-                    ))
+                          ) : (
+                            <Tooltip content="Revoke session">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  deleteSession(session.id)
+                                    .then(() => {
+                                      showToast('Session revoked', true);
+                                    })
+                                    .catch(() => {
+                                      showToast('Failed to revoke session', false);
+                                    });
+                                }}
+                                className="p-2 rounded-lg shrink-0 cursor-pointer
+                                text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800
+                                hover:text-zinc-900 dark:hover:text-zinc-100"
+                              >
+                                <LogOut className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                          )}
+                        </div>
+                      ))
                   )}
                 </div>
               </div>

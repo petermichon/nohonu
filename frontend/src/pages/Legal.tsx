@@ -49,11 +49,7 @@ export default function Legal() {
 
       <div className="flex flex-col gap-4">
         {LEGAL_PAGES.map(({ to, label, description, Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            className="flex items-start gap-4 py-3 hover:brightness-90 w-fit"
-          >
+          <Link key={to} to={to} className="flex items-start gap-4 py-3 hover:brightness-90 w-fit">
             <div className="shrink-0 w-10 h-10 flex items-center justify-center">
               <Icon className="w-6 h-6 text-zinc-500 dark:text-zinc-400" />
             </div>
@@ -64,7 +60,6 @@ export default function Legal() {
           </Link>
         ))}
       </div>
-
     </div>
   );
 }

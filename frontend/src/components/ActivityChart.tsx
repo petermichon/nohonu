@@ -61,20 +61,32 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
 
   return (
     <div>
-      <ChartHeader title="Activity" range={range} onRangeChange={onRangeChange} onReload={onReload} reloading={reloading} badge={badge} />
+      <ChartHeader
+        title="Activity"
+        range={range}
+        onRangeChange={onRangeChange}
+        onReload={onReload}
+        reloading={reloading}
+        badge={badge}
+      />
       <div className="h-14">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barCategoryGap={2}>
             <XAxis dataKey="slot" hide />
             <Tooltip
-              content={({ active, payload }:
-                { active?: boolean; payload?: Array<{ payload: { count: number; time: string } }> }
-              ) =>
+              content={({
+                active,
+                payload,
+              }: {
+                active?: boolean;
+                payload?: Array<{ payload: { count: number; time: string } }>;
+              }) =>
                 active && payload?.length ? (
                   <div className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-md whitespace-nowrap">
                     <p className="flex items-center gap-1 text-xs font-semibold text-zinc-950 dark:text-zinc-100">
                       <Eye className="w-3 h-3 text-zinc-400 dark:text-zinc-500" />
-                      {payload[0].payload.count} <span className="font-normal text-zinc-400 dark:text-zinc-500">views</span>
+                      {payload[0].payload.count}{' '}
+                      <span className="font-normal text-zinc-400 dark:text-zinc-500">views</span>
                     </p>
                     <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{payload[0].payload.time}</p>
                   </div>

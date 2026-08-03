@@ -63,38 +63,52 @@ export function UptimeChart({ uptime, allUptime, range, onRangeChange, onReload,
     return '#a1a1aa';
   };
 
-  const badge = pct !== null ? (
-    <span
-      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-        pct >= 90
-          ? `${accentColorValues.bgLight} ${accentColorValues.text}`
-          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-      }`}
-    >
-      {pct}%
-    </span>
-  ) : undefined;
+  const badge =
+    pct !== null ? (
+      <span
+        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+          pct >= 90
+            ? `${accentColorValues.bgLight} ${accentColorValues.text}`
+            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+        }`}
+      >
+        {pct}%
+      </span>
+    ) : undefined;
 
   return (
     <div>
-      <ChartHeader title="Uptime" range={range} onRangeChange={onRangeChange} onReload={onReload} reloading={reloading} badge={badge} />
+      <ChartHeader
+        title="Uptime"
+        range={range}
+        onRangeChange={onRangeChange}
+        onReload={onReload}
+        reloading={reloading}
+        badge={badge}
+      />
       <div className="h-8">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barCategoryGap={2}>
             <XAxis dataKey="slot" hide />
             <Tooltip
-              content={({ active, payload }:
-                { active?: boolean; payload?: Array<{ payload: { up: boolean | null; time: string } }> }
-              ) =>
+              content={({
+                active,
+                payload,
+              }: {
+                active?: boolean;
+                payload?: Array<{ payload: { up: boolean | null; time: string } }>;
+              }) =>
                 active && payload?.length ? (
                   <div className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-md whitespace-nowrap">
-                    <p className={`text-xs font-semibold ${
-                      payload[0].payload.up === null
-                        ? 'text-zinc-400 dark:text-zinc-500'
-                        : payload[0].payload.up
-                          ? 'text-green-400 dark:text-green-300'
-                          : 'text-zinc-600 dark:text-zinc-400'
-                    }`}>
+                    <p
+                      className={`text-xs font-semibold ${
+                        payload[0].payload.up === null
+                          ? 'text-zinc-400 dark:text-zinc-500'
+                          : payload[0].payload.up
+                            ? 'text-green-400 dark:text-green-300'
+                            : 'text-zinc-600 dark:text-zinc-400'
+                      }`}
+                    >
                       {payload[0].payload.up === null ? 'No data' : payload[0].payload.up ? 'Up' : 'Down'}
                     </p>
                     <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{payload[0].payload.time}</p>

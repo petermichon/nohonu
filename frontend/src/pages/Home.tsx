@@ -181,12 +181,12 @@ function Home() {
                 to={sessionId ? '/deploy' : '/signup'}
                 className={`inline-flex items-center justify-center gap-2 px-6 h-[46px] rounded-full
                   text-sm font-medium ${
-                  accentColorValues.textColor === 'light'
-                    ? 'text-white'
-                    : accentColorValues.textColor === 'inverted'
-                      ? 'text-zinc-100 dark:text-zinc-950'
-                      : 'text-zinc-950'
-                } cursor-pointer whitespace-nowrap ${accentColorValues.bg}`}
+                    accentColorValues.textColor === 'light'
+                      ? 'text-white'
+                      : accentColorValues.textColor === 'inverted'
+                        ? 'text-zinc-100 dark:text-zinc-950'
+                        : 'text-zinc-950'
+                  } cursor-pointer whitespace-nowrap ${accentColorValues.bg}`}
               >
                 <CloudUpload className="w-4 h-4" />
                 Deploy Now

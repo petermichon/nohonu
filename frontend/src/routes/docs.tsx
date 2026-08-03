@@ -15,9 +15,7 @@ function DocsLayout() {
       <aside className="float-left w-44">
         <nav className="md:sticky md:top-16 space-y-1">
           {SECTIONS.map((s) => {
-            const isActive = s.exact
-              ? matchRoute({ to: s.to, fuzzy: false })
-              : matchRoute({ to: s.to, fuzzy: true });
+            const isActive = s.exact ? matchRoute({ to: s.to, fuzzy: false }) : matchRoute({ to: s.to, fuzzy: true });
             return (
               <Link
                 key={s.to}

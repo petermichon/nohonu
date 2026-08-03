@@ -39,7 +39,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     queryKey: ['check-domain', newDomain, username],
     queryFn: async () => {
       const res = await apiFetch(
-        `/check-domain?domain=${encodeURIComponent(newDomain)}&user=${encodeURIComponent(username ?? '')}`,
+        `/check-domain?domain=${encodeURIComponent(newDomain)}&user=${encodeURIComponent(username ?? '')}`
       );
       return { domain: newDomain, taken: res.ok };
     },
@@ -180,23 +180,23 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           <button
             type="button"
             onClick={() => setUploadMode('file')}
-             className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${
-               uploadMode === 'file'
-                 ? 'text-zinc-950 dark:text-zinc-100'
-                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-             }`}
-           >
-             <Upload className="w-4 h-4" />
-             File Upload
-           </button>
-           <button
-             type="button"
-             onClick={() => setUploadMode('github')}
-             className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${
-               uploadMode === 'github'
-                 ? 'text-zinc-950 dark:text-zinc-100'
-                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-             }`}
+            className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${
+              uploadMode === 'file'
+                ? 'text-zinc-950 dark:text-zinc-100'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <Upload className="w-4 h-4" />
+            File Upload
+          </button>
+          <button
+            type="button"
+            onClick={() => setUploadMode('github')}
+            className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${
+              uploadMode === 'github'
+                ? 'text-zinc-950 dark:text-zinc-100'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
           >
             <GitBranch className="w-4 h-4" />
             GitHub
@@ -361,10 +361,22 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={
             uploadMode === 'github'
-              ? fetchGithubMutation.isPending || !githubRepo || !newDomain || !newSubdomain
-                || domainChecking || domainResult?.taken || subdomainChecking || subdomainResult?.taken
-              : uploadMutation.isPending || !selectedFile || !newDomain || !newSubdomain
-                || domainChecking || domainResult?.taken || subdomainChecking || subdomainResult?.taken
+              ? fetchGithubMutation.isPending ||
+                !githubRepo ||
+                !newDomain ||
+                !newSubdomain ||
+                domainChecking ||
+                domainResult?.taken ||
+                subdomainChecking ||
+                subdomainResult?.taken
+              : uploadMutation.isPending ||
+                !selectedFile ||
+                !newDomain ||
+                !newSubdomain ||
+                domainChecking ||
+                domainResult?.taken ||
+                subdomainChecking ||
+                subdomainResult?.taken
           }
           className={`w-full py-3 ${
             accentColorValues.textColor === 'light'
@@ -374,9 +386,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                 : 'text-zinc-950'
           }
             text-sm font-medium rounded-full flex items-center justify-center gap-2
-              cursor-pointer disabled:cursor-auto ${
-            accentColorValues.bg
-          }           disabled:opacity-40`}
+              cursor-pointer disabled:cursor-auto ${accentColorValues.bg}           disabled:opacity-40`}
         >
           {uploadMutation.isPending || fetchGithubMutation.isPending ? (
             <>
