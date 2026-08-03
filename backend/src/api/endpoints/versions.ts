@@ -1,7 +1,13 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, p } from '../../shared/express/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
-import * as sites from '../../usecases/sites/index.ts';
+import { findUserForDomain } from '../../usecases/sites/find-user-for-domain.ts';
+import { uploadVersion } from '../../usecases/sites/upload-version.ts';
+import { uploadVersionFromGithub } from '../../usecases/sites/upload-version-from-github.ts';
+import { activateVersion as activateVersionUsecase } from '../../usecases/sites/activate-version.ts';
+import { deleteVersion as deleteVersionUsecase } from '../../usecases/sites/delete-version.ts';
+import { downloadVersion } from '../../usecases/sites/download-version.ts';
+import { listVersions } from '../../usecases/sites/list-versions.ts';
 import { sendUsecaseError } from '../errors.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
@@ -52,13 +58,13 @@ async function extractGithubParams(req: ExpressReq): Promise<GithubParams | unde
 
 export async function listSiteVersions(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
-  const user = await sites.findUserForDomain(domain);
+  const user = await findUserForDomain(domain);
   if (!user) {
     json(res, { domain, versions: [], current: null });
     return;
   }
 
-  const result = await sites.listVersions(user, domain);
+  const result = await listVersions(user, domain);
   if (!result) {
     json(res, { domain, versions: [], current: null });
     return;
@@ -73,7 +79,7 @@ export async function upload(req: ExpressReq, res: ExpressRes): Promise<void> {
     return;
   }
 
-  const result = await sites.uploadVersion(params.sessionId, params.domain, params.zipData);
+  const result = await uploadVersion(params.sessionId, params.domain, params.zipData);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -88,7 +94,7 @@ export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
 
-  const result = await sites.uploadVersionFromGithub(params.sessionId, params.domain, params.repo, params.ref);
+  const result = await uploadVersionFromGithub(params.sessionId, params.domain, params.repo, params.ref);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -110,7 +116,7 @@ export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Pro
     return;
   }
 
-  const result = await sites.downloadVersion(sessionId, domainFrom(req), idx);
+  const result = await downloadVersion(sessionId, domainFrom(req), idx);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -139,7 +145,7 @@ export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<v
     return;
   }
 
-  const result = await sites.deleteVersion(sessionId, domainFrom(req), idx);
+  const result = await deleteVersionUsecase(sessionId, domainFrom(req), idx);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -160,7 +166,7 @@ export async function activateVersion(req: ExpressReq, res: ExpressRes): Promise
     return;
   }
 
-  const result = await sites.activateVersion(sessionId, domainFrom(req), idx);
+  const result = await activateVersionUsecase(sessionId, domainFrom(req), idx);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;

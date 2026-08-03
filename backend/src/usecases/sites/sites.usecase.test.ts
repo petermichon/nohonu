@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as dns from 'node:dns/promises';
 import * as fs from 'node:fs/promises';
 import type { Mock } from 'vitest';
+
 import {
   listStarredSites,
   makeStoredZip,
@@ -646,3 +647,4 @@ describe('error paths', () => {
     expect(resolved).toEqual({ user, domain: 'mysite', filePath: '/index.html' });
   });
 });
+

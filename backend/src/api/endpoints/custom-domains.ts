@@ -1,7 +1,13 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, p } from '../../shared/express/http.ts';
 import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/paths.ts';
-import * as sites from '../../usecases/sites/index.ts';
+import { findUserForDomain } from '../../usecases/sites/find-user-for-domain.ts';
+import { addCustomDomain as addCustomDomainUsecase } from '../../usecases/sites/add-custom-domain.ts';
+import { getAllCustomDomains as getAllCustomDomainsUsecase } from '../../usecases/sites/get-all-custom-domains.ts';
+import { getCustomDomains as getCustomDomainsUsecase } from '../../usecases/sites/get-custom-domains.ts';
+import { getVerificationToken as getVerificationTokenUsecase } from '../../usecases/sites/get-verification-token.ts';
+import { removeCustomDomain } from '../../usecases/sites/remove-custom-domain.ts';
+import { verifyCustomDomain as verifyCustomDomainUsecase } from '../../usecases/sites/verify-custom-domain.ts';
 import { sendUsecaseError } from '../errors.ts';
 
 function requireCustomDomain(customDomain: string | undefined): string | undefined {
@@ -13,7 +19,7 @@ function requireCustomDomain(customDomain: string | undefined): string | undefin
 export async function getAllCustomDomains(req: ExpressReq, res: ExpressRes): Promise<void> {
   try {
     const account = req.get('X-Account') || undefined;
-    const allCustomDomains = await sites.getAllCustomDomains(account);
+    const allCustomDomains = await getAllCustomDomainsUsecase(account);
     json(res, { customDomains: allCustomDomains });
   } catch (err) {
     json(res, { error: err instanceof Error ? err.message : 'Failed to get custom domains' }, 500);
@@ -27,7 +33,7 @@ export async function getCustomDomains(req: ExpressReq, res: ExpressRes): Promis
     return;
   }
 
-  const result = await sites.getCustomDomains(sessionId, p(req, 'domain') || '');
+  const result = await getCustomDomainsUsecase(sessionId, p(req, 'domain') || '');
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -54,7 +60,7 @@ export async function addCustomDomain(req: ExpressReq, res: ExpressRes): Promise
     return;
   }
 
-  const result = await sites.addCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
+  const result = await addCustomDomainUsecase(sessionId, p(req, 'domain') || '', customDomain);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -75,7 +81,7 @@ export async function deleteCustomDomain(req: ExpressReq, res: ExpressRes): Prom
     return;
   }
 
-  const result = await sites.removeCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
+  const result = await removeCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -96,7 +102,7 @@ export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Prom
     return;
   }
 
-  const result = await sites.verifyCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
+  const result = await verifyCustomDomainUsecase(sessionId, p(req, 'domain') || '', customDomain);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -106,14 +112,14 @@ export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Prom
 
 export async function getVerificationToken(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = p(req, 'domain') || '';
-  const user = await sites.findUserForDomain(domain);
+  const user = await findUserForDomain(domain);
   if (!user) {
     json(res, { error: 'Site not found' }, 404);
     return;
   }
 
   try {
-    const result = await sites.getVerificationToken(domain);
+    const result = await getVerificationTokenUsecase(domain);
     json(res, result);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to get verification token';

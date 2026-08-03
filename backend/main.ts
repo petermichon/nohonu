@@ -3,7 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import { router } from './src/api/router.ts';
 import { scheduleUptimeChecks } from './src/scheduler.ts';
-import * as sites from './src/usecases/sites/index.ts';
+import { loadAnalytics } from './src/usecases/sites/load-analytics.ts';
+import { saveAnalytics } from './src/usecases/sites/save-analytics.ts';
 import { SITES_DIR } from './src/config.ts';
 import { listUsers, listDomains } from './src/core/sites/db.ts';
 
@@ -13,7 +14,7 @@ const users = await listUsers();
 for (const user of users) {
   const domains = await listDomains(user);
   for (const domain of domains) {
-    await sites.loadAnalytics(user, domain);
+    await loadAnalytics(user, domain);
   }
 }
 
@@ -37,7 +38,7 @@ process.on('SIGTERM', async () => {
   for (const user of siteUsers) {
     const domains = await listDomains(user);
     for (const domain of domains) {
-      await sites.saveAnalytics(user, domain);
+      await saveAnalytics(user, domain);
     }
   }
   process.exit(0);

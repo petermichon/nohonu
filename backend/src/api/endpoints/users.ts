@@ -1,6 +1,7 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../shared/express/http.ts';
-import * as sites from '../../usecases/sites/index.ts';
+import { getSiteInfo } from '../../usecases/sites/get-site-info.ts';
+import { listSites } from '../../usecases/sites/list-sites.ts';
 import { getPublicUser } from '../../usecases/auth/get-public-user.ts';
 import { userExists } from '../../usecases/auth/user-exists.ts';
 import { getProfilePictureFile } from '../../usecases/auth/get-profile-picture-file.ts';
@@ -33,7 +34,7 @@ export async function getPublicSiteInfo(req: ExpressReq, res: ExpressRes): Promi
     return;
   }
 
-  const info = await sites.getSiteInfo(username, domain);
+  const info = await getSiteInfo(username, domain);
   if (!info) {
     json(res, { error: 'Site not found' }, 404);
     return;
@@ -62,7 +63,7 @@ export async function getUserSites(req: ExpressReq, res: ExpressRes): Promise<vo
     return;
   }
 
-  const siteList = await sites.listSites(username);
+  const siteList = await listSites(username);
   json(res, { sites: siteList });
 }
 

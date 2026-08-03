@@ -1,12 +1,13 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import * as sites from '../../usecases/sites/index.ts';
-import { getCustomDomainCache } from '../../usecases/sites/index.ts';
+import { checkDomain as domainExists } from '../../usecases/sites/check-domain.ts';
+import { checkSubdomain as subdomainExists } from '../../usecases/sites/check-subdomain.ts';
+import { getCustomDomainCache } from '../../usecases/sites/custom-domains-cache.ts';
 
 export async function checkDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
   const rawDomain = (req.query.domain as string) || '';
   const user = (req.query.user as string) || '';
 
-  const exists = await sites.checkDomain(user, rawDomain);
+  const exists = await domainExists(user, rawDomain);
   res.status(exists ? 200 : 404).end();
 }
 
@@ -32,6 +33,6 @@ export async function checkSubdomain(req: ExpressReq, res: ExpressRes): Promise<
     return;
   }
 
-  const exists = await sites.checkSubdomain(subdomain);
+  const exists = await subdomainExists(subdomain);
   res.status(exists ? 200 : 404).end();
 }

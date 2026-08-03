@@ -1,22 +1,25 @@
 import { SLOT_MS } from './config.ts';
-import * as sites from './usecases/sites/index.ts';
+import { checkSite } from './usecases/sites/check-site.ts';
+import { listAllSites } from './usecases/sites/list-all-sites.ts';
+import { recordUptime } from './usecases/sites/record-uptime.ts';
+import { saveAnalytics } from './usecases/sites/save-analytics.ts';
 import { cleanupExpiredSessions } from './usecases/auth/cleanup-expired-sessions.ts';
 
 async function checkAndRecord(user: string, domain: string): Promise<void> {
-  const status = await sites.checkSite(user, domain);
-  sites.recordUptime(domain, status.enabled);
+  const status = await checkSite(user, domain);
+  recordUptime(domain, status.enabled);
 }
 
 async function runUptimeChecks(): Promise<void> {
-  const siteList = await sites.listAllSites();
+  const siteList = await listAllSites();
   const checks = siteList.map(({ user, domain }) => checkAndRecord(user, domain));
   await Promise.all(checks);
 }
 
 async function flushAnalytics(): Promise<void> {
-  const siteList = await sites.listAllSites();
+  const siteList = await listAllSites();
   for (const { user, domain } of siteList) {
-    await sites.saveAnalytics(user, domain);
+    await saveAnalytics(user, domain);
   }
 }
 
