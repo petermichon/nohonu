@@ -2,30 +2,37 @@
 
 A static site hosting platform. Upload zip archives, serve them on subdomains.
 
+<https://github.com/petermichon/nohonu>
+
 ## Project Structure
 
 ```txt
-nohonu-vibe/
-├── frontend/        # Frontend
-└── backend/         # Backend
+nohonu/
+├── frontend/   # Frontend (React)
+├── backend/    # Backend (Node.js + Express)
+└── deploy/     # Docker Compose + Caddy
 ```
 
 ## Technology Stack
 
 ### Frontend
 
-- **React** 19.2.6 - UI framework
-- **TypeScript** 6.0.2 - Type safety
-- **Vite** 8.0.12 - Build tool and dev server
-- **Tailwind CSS** 4.3.0 - Utility-first CSS framework
-- **React Router DOM** 7.15.1 - Client-side routing
-- **Lucide React** 1.16.0 - Icon library
-- **Fontsource** - Font packages (Cinzel, Exo, Inter, JetBrains Mono, Lato, Mona Sans, Montserrat, Noto Sans, Open Sans, Oswald, PT Sans, Raleway, Roboto, Rubik)
+- **React** 19 - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** 4 - Utility-first CSS framework
+- **TanStack Router** - Client-side routing
+- **TanStack Query** - Server state
+- **Recharts** - Charts
+- **Lucide React** - Icon library
+- **Fontsource** - Font packages
 
 ### Backend
 
-- **Deno** 2.x - JavaScript/TypeScript runtime and HTTP server
-- **Docker** - Containerization
+- **Node.js** - Runtime
+- **Express** 5 - HTTP server
+- **Prisma** + libSQL/SQLite - Database
+- **Vitest** - Test suite (usecase layer)
 
 ### Deployment
 
@@ -34,11 +41,11 @@ nohonu-vibe/
 
 ## Local Development
 
-**Requirements:** Deno 2.x, Node.js.
+**Requirements:** Node.js 20+, Deno 2.x (optional).
 
 ```bash
 # Terminal 1 — backend
-cd backend && deno task dev
+cd backend && npm install && npm run dev
 
 # Terminal 2 — frontend
 cd frontend && npm ci && npm run dev
@@ -46,6 +53,8 @@ cd frontend && npm ci && npm run dev
 
 Frontend: <http://localhost:5173>
 Backend: <http://localhost:8080>
+
+The backend `npm run dev` applies pending Prisma migrations before starting.
 
 ## Docker Deployment
 
