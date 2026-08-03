@@ -1,6 +1,6 @@
 import { db } from '../../db.ts';
+import { SLOT_MS } from '../../config.ts';
 
-export const SLOT_MS = 60 * 1000;
 export const STATS_SLOTS = 86400;
 export const UPTIME_SLOTS = 86400;
 export const MAX_VISITORS_PER_DOMAIN = 500;

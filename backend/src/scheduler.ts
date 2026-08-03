@@ -1,4 +1,4 @@
-import { SLOT_MS } from './core/analytics/metrics.ts';
+import { SLOT_MS } from './config.ts';
 import * as sites from './usecases/sites/index.ts';
 import { cleanupExpiredSessions } from './usecases/auth/cleanup-expired-sessions.ts';
 
