@@ -7,7 +7,7 @@ import { getCustomDomains as getCustomDomainsUsecase } from '../../usecases/site
 import { getVerificationToken as getVerificationTokenUsecase } from '../../usecases/sites/get-verification-token.ts';
 import { removeCustomDomain } from '../../usecases/sites/remove-custom-domain.ts';
 import { verifyCustomDomain as verifyCustomDomainUsecase } from '../../usecases/sites/verify-custom-domain.ts';
-import { sendUsecaseError } from '../errors.ts';
+import { sendUsecaseError } from '../../shared/express/errors.ts';
 
 function requireCustomDomain(customDomain: string | undefined): string | undefined {
   if (!customDomain) return;

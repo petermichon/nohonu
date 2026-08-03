@@ -7,7 +7,7 @@ import { activateVersion as activateVersionUsecase } from '../../usecases/sites/
 import { deleteVersion as deleteVersionUsecase } from '../../usecases/sites/delete-version.ts';
 import { downloadVersion } from '../../usecases/sites/download-version.ts';
 import { listVersions } from '../../usecases/sites/list-versions.ts';
-import { sendUsecaseError } from '../errors.ts';
+import { sendUsecaseError } from '../../shared/express/errors.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 function validateRepo(repo: unknown): repo is string {

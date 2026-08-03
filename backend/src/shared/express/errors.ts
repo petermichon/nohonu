@@ -1,6 +1,6 @@
 import type { Response as ExpressRes } from 'express';
-import { json } from '../shared/express/http.ts';
-import type { ErrorCode } from '../shared/errors.ts';
+import { json } from './http.ts';
+import type { ErrorCode } from '../errors.ts';
 
 export function toHttpStatus(code: ErrorCode): number {
   switch (code) {

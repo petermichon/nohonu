@@ -23,7 +23,7 @@ import { getSiteVisitors as getSiteVisitorsUsecase } from '../../usecases/sites/
 import { getSiteCover as getSiteCoverUsecase } from '../../usecases/sites/get-site-cover.ts';
 import { uploadSiteCover } from '../../usecases/sites/upload-site-cover.ts';
 import { deleteSiteCover } from '../../usecases/sites/delete-site-cover.ts';
-import { sendUsecaseError } from '../errors.ts';
+import { sendUsecaseError } from '../../shared/express/errors.ts';
 
 const GITHUB_REPO_REGEX = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 function validateRepo(repo: unknown): repo is string {

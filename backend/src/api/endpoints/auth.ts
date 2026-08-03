@@ -1,6 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, requireSessionId } from '../../shared/express/http.ts';
-import { sendUsecaseError } from '../errors.ts';
+import { sendUsecaseError } from '../../shared/express/errors.ts';
 import { checkAuth } from '../../usecases/apikey/check-auth.ts';
 import { login } from '../../usecases/auth/login.ts';
 import { register } from '../../usecases/auth/register.ts';
