@@ -1,14 +1,10 @@
 import { requireSession } from '../../core/auth/require-session.ts';
+import { listSites } from '../../core/sites/list-sites.ts';
 import type { Result } from '../../shared/errors.ts';
-import type { SiteSummary } from './types.ts';
-import { listSites } from './list-sites.ts';
 
 
-export async function listMySites(sessionId: string): Promise<Result<SiteSummary[]>> {
+export async function listMySites(sessionId: string): Promise<Result<Awaited<ReturnType<typeof listSites>>>> {
   const session = await requireSession(sessionId);
   if (!session.ok) return session;
-  const user = session.value;
-  return { ok: true, value: await listSites(user) };
+  return { ok: true, value: await listSites(session.value) };
 }
-
-
