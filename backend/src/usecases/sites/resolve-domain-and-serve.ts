@@ -1,4 +1,5 @@
 import * as sitesDb from '../../core/sites/db.ts';
+import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { getCustomDomainCache } from './custom-domains-cache.ts';
 
@@ -14,14 +15,10 @@ export async function resolveDomainAndServe(
   const cache = await getCustomDomainCache();
   const mappedDomain = cache.get(host);
   if (mappedDomain) {
-    // Need to find which user owns this domain
-    const users = await sitesDb.listUsers();
-    for (const user of users) {
-      const domains = await sitesDb.listDomains(user);
-      if (domains.includes(mappedDomain)) {
-        const filePath = path === '/' ? '/index.html' : path;
-        return { user, domain: mappedDomain, filePath };
-      }
+    const user = await findUserForDomain(mappedDomain);
+    if (user) {
+      const filePath = path === '/' ? '/index.html' : path;
+      return { user, domain: mappedDomain, filePath };
     }
   }
 
@@ -47,17 +44,14 @@ export async function resolveDomainAndServe(
     const parts = path.split('/').filter(Boolean);
     const potential = parts[0];
     if (potential && VALID_DOMAIN.test(potential)) {
-      const users = await sitesDb.listUsers();
-      for (const user of users) {
-        const domains = await sitesDb.listDomains(user);
-        if (domains.includes(potential)) {
-          const info = await sitesDb.readSiteMetadata(user, potential);
-          if (info && info.currentIndex !== null) {
-            const domain = potential;
-            const rest = parts.slice(1).join('/');
-            const filePath = rest !== '' ? '/' + rest : '/index.html';
-            return { user, domain, filePath };
-          }
+      const user = await findUserForDomain(potential);
+      if (user) {
+        const info = await sitesDb.readSiteMetadata(user, potential);
+        if (info && info.currentIndex !== null) {
+          const domain = potential;
+          const rest = parts.slice(1).join('/');
+          const filePath = rest !== '' ? '/' + rest : '/index.html';
+          return { user, domain, filePath };
         }
       }
     }
@@ -65,5 +59,3 @@ export async function resolveDomainAndServe(
 
   return null;
 }
-
-

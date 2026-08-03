@@ -1,7 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, p } from '../../shared/express/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
-import { findUserForDomain } from '../../usecases/sites/find-user-for-domain.ts';
 import { uploadVersion } from '../../usecases/sites/upload-version.ts';
 import { uploadVersionFromGithub } from '../../usecases/sites/upload-version-from-github.ts';
 import { activateVersion as activateVersionUsecase } from '../../usecases/sites/activate-version.ts';
@@ -58,13 +57,7 @@ async function extractGithubParams(req: ExpressReq): Promise<GithubParams | unde
 
 export async function listSiteVersions(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
-  const user = await findUserForDomain(domain);
-  if (!user) {
-    json(res, { domain, versions: [], current: null });
-    return;
-  }
-
-  const result = await listVersions(user, domain);
+  const result = await listVersions(domain);
   if (!result) {
     json(res, { domain, versions: [], current: null });
     return;

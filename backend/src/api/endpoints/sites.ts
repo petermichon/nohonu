@@ -1,7 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson } from '../../shared/express/http.ts';
 import { MAX_ZIP_BYTES } from '../../shared/paths.ts';
-import { findUserForDomain } from '../../usecases/sites/find-user-for-domain.ts';
 import { listAllSites } from '../../usecases/sites/list-all-sites.ts';
 import { listMySites } from '../../usecases/sites/list-my-sites.ts';
 import { downloadActiveVersion } from '../../usecases/sites/download-active-version.ts';
@@ -154,13 +153,7 @@ export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<voi
 
 export async function downloadSite(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
-  const user = await findUserForDomain(domain);
-  if (!user) {
-    json(res, { error: 'Site not found' }, 404);
-    return;
-  }
-
-  const result = await downloadActiveVersion(user, domain);
+  const result = await downloadActiveVersion(domain);
   if (!result) {
     json(res, { error: 'Site not found' }, 404);
     return;
@@ -173,13 +166,7 @@ export async function downloadSite(req: ExpressReq, res: ExpressRes): Promise<vo
 
 export async function getSiteIcon(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
-  const user = await findUserForDomain(domain);
-  if (!user) {
-    res.status(404).end();
-    return;
-  }
-
-  const result = await getSiteIconUsecase(user, domain);
+  const result = await getSiteIconUsecase(domain);
   if (!result) {
     res.status(404).end();
     return;
@@ -192,13 +179,7 @@ export async function getSiteIcon(req: ExpressReq, res: ExpressRes): Promise<voi
 
 export async function getSiteCover(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = domainFrom(req);
-  const user = await findUserForDomain(domain);
-  if (!user) {
-    res.status(404).end();
-    return;
-  }
-
-  const result = await getSiteCoverUsecase(user, domain);
+  const result = await getSiteCoverUsecase(domain);
   if (!result) {
     res.status(404).end();
     return;

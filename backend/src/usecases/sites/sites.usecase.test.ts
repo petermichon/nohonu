@@ -89,12 +89,11 @@ describe('createSite', () => {
 describe('versions', () => {
   it('uploads versions and lists them with current pointing at the latest', async () => {
     const sessionId = await makeSite('bob', 'mysite');
-    const user = await username(sessionId);
 
     const uploaded = await sites.uploadVersion(sessionId, 'mysite', zip({ 'index.html': '<h1>v2</h1>' }));
     expect(uploaded.ok).toBe(true);
 
-    const list = await sites.listVersions(user, 'mysite');
+    const list = await sites.listVersions('mysite');
     expect(list.versions.length).toBe(2);
     expect(list.current).toBe(2);
   });
@@ -108,23 +107,21 @@ describe('versions', () => {
 
   it('activates a specific version', async () => {
     const sessionId = await makeSite('carol', 'mysite');
-    const user = await username(sessionId);
     await sites.uploadVersion(sessionId, 'mysite', zip({ 'index.html': '<h1>v2</h1>' }));
 
     const result = await sites.activateVersion(sessionId, 'mysite', 1);
     expect(result.ok).toBe(true);
-    expect((await sites.listVersions(user, 'mysite')).current).toBe(1);
+    expect((await sites.listVersions('mysite')).current).toBe(1);
   });
 
   it('deletes a version and falls back to the highest remaining', async () => {
     const sessionId = await makeSite('dave', 'mysite');
-    const user = await username(sessionId);
     await sites.uploadVersion(sessionId, 'mysite', zip({ 'index.html': '<h1>v2</h1>' }));
 
     const result = await sites.deleteVersion(sessionId, 'mysite', 2);
     expect(result.ok).toBe(true);
 
-    const list = await sites.listVersions(user, 'mysite');
+    const list = await sites.listVersions('mysite');
     expect(list.versions.map((v) => v.index)).toEqual([1]);
     expect(list.current).toBe(1);
   });
@@ -266,17 +263,16 @@ describe('custom domains', () => {
 describe('cover image', () => {
   it('uploads, reads and deletes a cover', async () => {
     const sessionId = await makeSite('karl', 'mysite');
-    const user = await username(sessionId);
     const data = new Uint8Array([9, 8, 7]);
 
     const upload = await sites.uploadSiteCover(sessionId, 'mysite', data);
     expect(upload.ok).toBe(true);
-    const cover = await sites.getSiteCover(user, 'mysite');
+    const cover = await sites.getSiteCover('mysite');
     expect(Array.from(cover ?? [])).toEqual([9, 8, 7]);
 
     const del = await sites.deleteSiteCover(sessionId, 'mysite');
     expect(del.ok).toBe(true);
-    expect(await sites.getSiteCover(user, 'mysite')).toBeNull();
+    expect(await sites.getSiteCover('mysite')).toBeNull();
   });
 });
 
@@ -414,16 +410,13 @@ describe('check helpers', () => {
 
     expect(await sites.checkSite(user, 'mysite')).toEqual({ exists: true, enabled: true });
     expect(await sites.checkDomain(user, 'mysite')).toBe(true);
-    expect(await sites.findUserForDomain('mysite')).toBe(user);
-    expect(await sites.findUserForDomain('missing')).toBeNull();
     expect(await sites.checkSubdomain('no-such-subdomain')).toBe(false);
     expect(sessionId).toBeTruthy();
   });
 
   it('returns null for the icon when the site has no favicon', async () => {
     const sessionId = await makeSite('oscar', 'mysite');
-    const user = await username(sessionId);
-    expect(await sites.getSiteIcon(user, 'mysite')).toBeNull();
+    expect(await sites.getSiteIcon('mysite')).toBeNull();
   });
 });
 
@@ -492,7 +485,7 @@ describe('deleteSite', () => {
     const deleted = await sites.deleteSite(sessionId, 'mysite');
     expect(deleted.ok).toBe(true);
 
-    expect(await sites.findUserForDomain('mysite')).toBeNull();
+    expect(await sites.checkSite(user, 'mysite')).toEqual({ exists: false, enabled: false });
     const list = await sites.listMySites(sessionId);
     expect(list.ok && list.value.some((s) => s.domain === 'mysite')).toBe(false);
     const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
@@ -518,19 +511,17 @@ describe('listAllSites', () => {
 describe('downloadActiveVersion', () => {
   it('downloads the active version zip', async () => {
     const sessionId = await makeSite('sarah', 'mysite');
-    const user = await username(sessionId);
 
-    const result = await sites.downloadActiveVersion(user, 'mysite');
+    const result = await sites.downloadActiveVersion('mysite');
     expect(result?.filename).toBe('mysite.zip');
     expect(result?.data.length).toBeGreaterThan(0);
   });
 
   it('returns null for a disabled site', async () => {
     const sessionId = await makeSite('sarah', 'mysite');
-    const user = await username(sessionId);
     await sites.toggleSite(sessionId, 'mysite');
 
-    expect(await sites.downloadActiveVersion(user, 'mysite')).toBeNull();
+    expect(await sites.downloadActiveVersion('mysite')).toBeNull();
   });
 });
 
@@ -558,7 +549,7 @@ describe('getSiteIcon', () => {
     const created = await sites.createSite(sessionId, 'mysite', body);
     expect(created.ok).toBe(true);
 
-    const icon = await sites.getSiteIcon(await username(sessionId), 'mysite');
+    const icon = await sites.getSiteIcon('mysite');
     expect(icon?.contentType).toBe('image/x-icon');
     expect(new TextDecoder().decode(icon?.data)).toBe('ico');
   });
@@ -621,7 +612,7 @@ describe('error paths', () => {
     const user = await username(sessionId);
 
     expect(await sites.serveSiteFile(user, 'missing', '/index.html')).toBeNull();
-    expect(await sites.listVersions(user, 'missing')).toEqual({ versions: [], current: null });
+    expect(await sites.listVersions('missing')).toEqual({ versions: [], current: null });
     expect(sessionId).toBeTruthy();
   });
 

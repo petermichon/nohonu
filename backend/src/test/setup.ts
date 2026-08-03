@@ -54,7 +54,6 @@ export const sites = {
   ...(await import('../usecases/sites/delete-version.ts')),
   ...(await import('../usecases/sites/download-active-version.ts')),
   ...(await import('../usecases/sites/download-version.ts')),
-  ...(await import('../usecases/sites/find-user-for-domain.ts')),
   ...(await import('../usecases/sites/get-all-custom-domains.ts')),
   ...(await import('../usecases/sites/get-custom-domains.ts')),
   ...(await import('../usecases/sites/get-my-site-info.ts')),

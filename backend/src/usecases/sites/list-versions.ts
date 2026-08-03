@@ -1,10 +1,14 @@
 import * as fs from 'node:fs/promises';
 import * as sitesDb from '../../core/sites/db.ts';
+import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import * as paths from '../../core/sites/paths.ts';
 import type { VersionInfo, VersionSource } from './types.ts';
 
 
-export async function listVersions(user: string, domain: string): Promise<{ versions: VersionInfo[]; current: number | null }> {
+export async function listVersions(domain: string): Promise<{ versions: VersionInfo[]; current: number | null }> {
+  const user = await findUserForDomain(domain);
+  if (!user) return { versions: [], current: null };
+
   const data = await sitesDb.readSiteMetadata(user, domain);
   if (!data) return { versions: [], current: null };
 
@@ -28,5 +32,3 @@ export async function listVersions(user: string, domain: string): Promise<{ vers
   });
   return { versions, current: data.currentIndex };
 }
-
-

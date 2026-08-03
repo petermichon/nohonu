@@ -1,7 +1,7 @@
 import * as sitesDb from '../../core/sites/db.ts';
+import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 import type { Result } from '../../shared/errors.ts';
-import { findUserForDomain } from './find-user-for-domain.ts';
 
 
 export async function toggleStar(

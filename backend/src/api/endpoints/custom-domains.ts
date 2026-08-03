@@ -1,7 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, parseJson, p } from '../../shared/express/http.ts';
 import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../../shared/paths.ts';
-import { findUserForDomain } from '../../usecases/sites/find-user-for-domain.ts';
 import { addCustomDomain as addCustomDomainUsecase } from '../../usecases/sites/add-custom-domain.ts';
 import { getAllCustomDomains as getAllCustomDomainsUsecase } from '../../usecases/sites/get-all-custom-domains.ts';
 import { getCustomDomains as getCustomDomainsUsecase } from '../../usecases/sites/get-custom-domains.ts';
@@ -112,12 +111,6 @@ export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Prom
 
 export async function getVerificationToken(req: ExpressReq, res: ExpressRes): Promise<void> {
   const domain = p(req, 'domain') || '';
-  const user = await findUserForDomain(domain);
-  if (!user) {
-    json(res, { error: 'Site not found' }, 404);
-    return;
-  }
-
   try {
     const result = await getVerificationTokenUsecase(domain);
     json(res, result);

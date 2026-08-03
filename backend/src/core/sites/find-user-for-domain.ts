@@ -1,4 +1,4 @@
-import * as sitesDb from '../../core/sites/db.ts';
+import * as sitesDb from './db.ts';
 
 
 export async function findUserForDomain(domain: string): Promise<string | null> {
@@ -11,5 +11,3 @@ export async function findUserForDomain(domain: string): Promise<string | null> 
   }
   return null;
 }
-
-

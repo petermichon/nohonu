@@ -1,12 +1,15 @@
 import * as sitesDb from '../../core/sites/db.ts';
+import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import * as storage from '../../core/sites/storage.ts';
 import { readZip } from '../../shared/zip.ts';
 
 
 export async function getSiteIcon(
-  user: string,
   domain: string,
 ): Promise<{ data: Uint8Array; contentType: string } | null> {
+  const user = await findUserForDomain(domain);
+  if (!user) return null;
+
   const data = await sitesDb.readSiteMetadata(user, domain);
   if (!data || !data.enabled || data.currentIndex === null) return null;
 
@@ -28,5 +31,3 @@ export async function getSiteIcon(
 
   return null;
 }
-
-
