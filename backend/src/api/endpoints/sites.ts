@@ -232,7 +232,7 @@ export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<voi
 export function getSiteStats(req: ExpressReq, res: ExpressRes): void {
   const slots = Math.min(parseInt(req.query.slots as string) || 60, 10080);
   const group = Math.min(parseInt(req.query.group as string) || 1, 60);
-  const stats  = getSiteStatsUsecase(domainFrom(req), slots, group);
+  const stats = getSiteStatsUsecase(domainFrom(req), slots, group);
   json(res, { domain: domainFrom(req), stats });
 }
 
