@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useClickOutside } from '../lib/useClickOutside.ts';
+import { useClickOutside } from '../hooks/useClickOutside.ts';
 
 interface TooltipProps {
   content: string;

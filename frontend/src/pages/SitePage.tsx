@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
-import { ConfirmModal } from '../lib/ConfirmModal.tsx';
+import { ConfirmModal } from '../components/ConfirmModal.tsx';
 import { useApi, useSites } from '../lib/api.ts';
 import { useConnection } from '../lib/ConnectionProvider.tsx';
 import { calcUptimePct } from '../lib/utils.ts';
@@ -293,17 +293,17 @@ function SitePage() {
           </div>
         </div>
 
-          {/* Navigation tabs */}
-          <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 p-1">
+        {/* Navigation tabs */}
+        <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 p-1">
           <Link
             to="/u/$username/$sitename"
             params={{ username: actualUsername || '', sitename: actualDomain }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
               transition-colors cursor-pointer rounded-full ${
-              activeTab === 'overview'
-                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
+                activeTab === 'overview'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
           >
             <Layout className="w-4 h-4" />
             Overview
@@ -313,10 +313,10 @@ function SitePage() {
             params={{ username: actualUsername || '', sitename: actualDomain, section: 'analytics' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
               transition-colors cursor-pointer rounded-full ${
-              activeTab === 'analytics'
-                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
+                activeTab === 'analytics'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
           >
             <BarChart3 className="w-4 h-4" />
             Analytics
@@ -326,10 +326,10 @@ function SitePage() {
             params={{ username: actualUsername || '', sitename: actualDomain, section: 'domains' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
               transition-colors cursor-pointer rounded-full ${
-              activeTab === 'domains'
-                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
+                activeTab === 'domains'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
           >
             <Globe className="w-4 h-4" />
             Domains
@@ -339,10 +339,10 @@ function SitePage() {
             params={{ username: actualUsername || '', sitename: actualDomain, section: 'versions' }}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium
               transition-colors cursor-pointer rounded-full ${
-              activeTab === 'versions'
-                ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
+                activeTab === 'versions'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
           >
             <Layers className="w-4 h-4" />
             Versions

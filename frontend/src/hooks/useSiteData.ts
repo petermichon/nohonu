@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../lib/api.ts';
-import { usePollData } from '../lib/usePollData.ts';
+import { usePollData } from '../hooks/usePollData.ts';
 import { SLOT_MS } from '../lib/types.ts';
 import { getGroupMinutes, getSlotsForRange } from '../lib/utils.ts';
 import type { Site, Version, Slot, Visitor, UptimeSlot, TimeRange, UptimeRange } from '../lib/types.ts';

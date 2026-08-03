@@ -1,7 +1,7 @@
 import { Power, Trash2, Loader2, ArrowUp } from 'lucide-react';
 import { Modal } from './Modal.tsx';
 import { useState, useEffect, useRef } from 'react';
-import { useAccentColor, ACCENT_COLORS } from './AccentColorProvider.tsx';
+import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
 
 type Action = 'delete' | 'enable' | 'disable' | 'delete-version' | 'activate-version';
 

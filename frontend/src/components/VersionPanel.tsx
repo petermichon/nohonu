@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Upload, Loader2, GitBranch, History, ChevronDown } from 'lucide-react';
 import { useApi } from '../lib/api.ts';
-import { useClickOutside } from '../lib/useClickOutside.ts';
+import { useClickOutside } from '../hooks/useClickOutside.ts';
 import { VersionList } from './VersionList.tsx';
 import type { Version } from '../lib/types.ts';
 

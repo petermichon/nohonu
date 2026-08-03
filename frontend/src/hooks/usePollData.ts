@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { SLOT_MS } from './types.ts';
-import { getNextMinuteMs } from './utils.ts';
+import { SLOT_MS } from '../lib/types.ts';
+import { getNextMinuteMs } from '../lib/utils.ts';
 
 export function usePollData(
   fetchFn: () => void | Promise<void>,
