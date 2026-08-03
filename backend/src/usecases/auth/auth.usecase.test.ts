@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   checkAuth,
+  cleanupExpiredSessions,
   deleteProfilePicture,
   deleteSession,
   getProfilePictureFile,
@@ -105,6 +106,20 @@ describe('logoutAll', () => {
     await logoutAll('karl');
     expect((await me(first)).error).toBe('Invalid session');
     expect((await me(second.session ?? '')).error).toBe('Invalid session');
+  });
+});
+
+describe('cleanupExpiredSessions', () => {
+  it('removes sessions older than the cutoff', async () => {
+    const sessionId = await registerUser('cleanup');
+    await cleanupExpiredSessions(0);
+    expect((await me(sessionId)).error).toBe('Invalid session');
+  });
+
+  it('keeps fresh sessions when the cutoff is far in the past', async () => {
+    const sessionId = await registerUser('fresh');
+    await cleanupExpiredSessions(30 * 24 * 60 * 60 * 1000 * 2);
+    expect((await me(sessionId)).error).toBeUndefined();
   });
 });
 

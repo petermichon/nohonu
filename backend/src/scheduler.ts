@@ -1,5 +1,6 @@
 import { SLOT_MS } from './core/analytics/metrics.ts';
 import * as sites from './usecases/sites/index.ts';
+import { cleanupExpiredSessions } from './usecases/auth/cleanup-expired-sessions.ts';
 
 async function checkAndRecord(user: string, domain: string): Promise<void> {
   const status = await sites.checkSite(user, domain);
@@ -27,4 +28,7 @@ export function scheduleUptimeChecks(): void {
   }, msToNextMinute);
   const FLUSH_INTERVAL_MS = 5 * SLOT_MS;
   setInterval(flushAnalytics, FLUSH_INTERVAL_MS);
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  cleanupExpiredSessions();
+  setInterval(cleanupExpiredSessions, DAY_MS);
 }
