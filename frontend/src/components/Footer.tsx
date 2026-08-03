@@ -41,7 +41,7 @@ export function Footer() {
   const projectLinks: FooterLink[] = [{ label: 'Docs', href: '/docs' }];
 
   const communityLinks: FooterLink[] = [
-    { label: 'GitHub', href: 'https://github.com/nohonu', external: true, icon: GitHubIcon },
+    { label: 'GitHub', href: 'https://github.com/petermichon/nohonu', external: true, icon: GitHubIcon },
     {
       label: 'Open Collective',
       href: 'https://opencollective.com/nohonu',
