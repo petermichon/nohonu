@@ -1,10 +1,11 @@
-import { versionExists } from '../../core/sites/version-exists.ts';
+import * as fs from 'node:fs/promises';
 import { setCurrentVersion } from '../../core/sites/set-current-version.ts';
 import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
 import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
+import { versionPath } from '../../shared/paths.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import type { Result } from '../../shared/errors.ts';
 
@@ -16,7 +17,7 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   const user = auth.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  const exists = await versionExists(user, domain, index);
+  const exists = await fs.stat(versionPath(user, domain, index)).then(() => true).catch(() => false);
   if (!exists) {
     return { ok: false, code: 'not_found', message: 'Version not found' };
   }
