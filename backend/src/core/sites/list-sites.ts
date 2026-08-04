@@ -2,7 +2,7 @@ import { db } from '../../db.ts';
 import * as analytics from '../analytics/metrics.ts';
 import { listDomains } from './list-domains.ts';
 import { readSiteMetadata } from './read-site-metadata.ts';
-import type { SiteSummary } from './site-summary.ts';
+import type { SiteSummary } from '../../shared/site-summary.ts';
 
 export async function listSites(user: string): Promise<SiteSummary[]> {
   const [domains, userRecord] = await Promise.all([
