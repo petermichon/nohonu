@@ -1,14 +1,17 @@
 import * as fs from 'node:fs/promises';
 import * as sitesDb from '../../core/sites/db.ts';
 import * as paths from '../../core/sites/paths.ts';
-import { requireSession } from '../../core/auth/require-session.ts';
+import { db } from '../../db.ts';
+import { validateSession } from '../../shared/session-check.ts';
+import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import type { Result } from '../../shared/errors.ts';
 
 
 export async function uploadVersion(sessionId: string, domain: string, zipData: Uint8Array): Promise<Result<{ index: number }>> {
-  const session = await requireSession(sessionId);
-  if (!session.ok) return session;
-  const user = session.value;
+  const sessionRecord = await db.session.findUnique({ where: { id: sessionId } });
+  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  if (!auth.ok) return auth;
+  const user = auth.value;
 
   // Check if domain exists
   const existingData = await sitesDb.readSiteMetadata(user, domain);
