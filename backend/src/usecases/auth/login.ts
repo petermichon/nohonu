@@ -1,7 +1,7 @@
 import { db } from '../../db.ts';
 import { verifyPassword } from '../../shared/password.ts';
 import { toAuthUser } from '../../shared/auth-user.ts';
-import type { LoginResult } from './types.ts';
+import type { LoginResult } from '../../shared/login-result.ts';
 
 export async function login(username: string, password: string, userAgent?: string): Promise<LoginResult> {
   const user = await db.user.findUnique({ where: { username } });

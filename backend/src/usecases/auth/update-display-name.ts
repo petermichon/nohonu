@@ -1,5 +1,5 @@
 import { db } from '../../db.ts';
-import type { ProfileResult } from './types.ts';
+import type { ProfileResult } from '../../shared/profile-result.ts';
 
 export async function updateDisplayName(sessionId: string, displayName: string): Promise<ProfileResult> {
   const session = await db.session.findUnique({ where: { id: sessionId } });

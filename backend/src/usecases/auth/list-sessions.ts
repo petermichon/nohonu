@@ -1,5 +1,5 @@
 import { db } from '../../db.ts';
-import type { SessionInfo } from './types.ts';
+import type { SessionInfo } from '../../shared/session-info.ts';
 import type { Result } from '../../shared/errors.ts';
 
 function toSessionInfo(session: {

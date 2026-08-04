@@ -11,7 +11,9 @@ import { uploadProfilePicture as uploadProfilePictureUsecase } from '../../useca
 import { deleteProfilePicture as deleteProfilePictureUsecase } from '../../usecases/auth/delete-profile-picture.ts';
 import { listSessions } from '../../usecases/auth/list-sessions.ts';
 import { deleteSession as deleteSessionUsecase } from '../../usecases/auth/delete-session.ts';
-import type { LoginResult, MeResult, RegisterResult } from '../../usecases/auth/types.ts';
+import type { LoginResult } from '../../shared/login-result.ts';
+import type { MeResult } from '../../shared/me-result.ts';
+import type { RegisterResult } from '../../shared/register-result.ts';
 
 // === Params
 
