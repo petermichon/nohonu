@@ -1,5 +1,4 @@
 import * as sitesDb from '../../core/sites/db.ts';
-import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
@@ -16,7 +15,8 @@ export async function toggleStar(
   if (!auth.ok) return auth;
   const user = auth.value;
   // Find the user that owns this site
-  const siteOwner = await findUserForDomain(domain);
+  const site = await db.site.findFirst({ where: { domain }, select: { userUsername: true } });
+  const siteOwner = site?.userUsername ?? null;
   if (!siteOwner) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }

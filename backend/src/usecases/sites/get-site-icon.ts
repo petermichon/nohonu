@@ -1,5 +1,5 @@
+import { db } from '../../db.ts';
 import * as sitesDb from '../../core/sites/db.ts';
-import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import * as storage from '../../core/sites/storage.ts';
 import { readZip } from '../../shared/zip.ts';
 
@@ -7,7 +7,8 @@ import { readZip } from '../../shared/zip.ts';
 export async function getSiteIcon(
   domain: string,
 ): Promise<{ data: Uint8Array; contentType: string } | null> {
-  const user = await findUserForDomain(domain);
+  const site = await db.site.findFirst({ where: { domain }, select: { userUsername: true } });
+  const user = site?.userUsername ?? null;
   if (!user) return null;
 
   const data = await sitesDb.readSiteMetadata(user, domain);

@@ -1,5 +1,5 @@
+import { db } from '../../db.ts';
 import * as sitesDb from '../../core/sites/db.ts';
-import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { getCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
 
@@ -15,7 +15,8 @@ export async function resolveDomainAndServe(
   const cache = await getCustomDomainCache();
   const mappedDomain = cache.get(host);
   if (mappedDomain) {
-    const user = await findUserForDomain(mappedDomain);
+    const site = await db.site.findFirst({ where: { domain: mappedDomain }, select: { userUsername: true } });
+    const user = site?.userUsername ?? null;
     if (user) {
       const filePath = path === '/' ? '/index.html' : path;
       return { user, domain: mappedDomain, filePath };
@@ -44,7 +45,8 @@ export async function resolveDomainAndServe(
     const parts = path.split('/').filter(Boolean);
     const potential = parts[0];
     if (potential && VALID_DOMAIN.test(potential)) {
-      const user = await findUserForDomain(potential);
+      const site = await db.site.findFirst({ where: { domain: potential }, select: { userUsername: true } });
+      const user = site?.userUsername ?? null;
       if (user) {
         const info = await sitesDb.readSiteMetadata(user, potential);
         if (info && info.currentIndex !== null) {

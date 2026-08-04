@@ -1,11 +1,12 @@
 import * as fs from 'node:fs/promises';
+import { db } from '../../db.ts';
 import * as sitesDb from '../../core/sites/db.ts';
-import { findUserForDomain } from '../../core/sites/find-user-for-domain.ts';
 import { coverImagePath } from '../../shared/paths.ts';
 
 
 export async function getSiteCover(domain: string): Promise<Uint8Array | null> {
-  const user = await findUserForDomain(domain);
+  const site = await db.site.findFirst({ where: { domain }, select: { userUsername: true } });
+  const user = site?.userUsername ?? null;
   if (!user) return null;
 
   const data = await sitesDb.readSiteMetadata(user, domain);
