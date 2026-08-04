@@ -3,7 +3,7 @@ import { listUsers } from '../../core/sites/list-users.ts';
 import { listDomains } from '../../core/sites/list-domains.ts';
 import { db } from '../../db.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
-import type {PublicSiteSummary} from './types.ts';
+import type { PublicSiteSummary } from '../../shared/public-site-summary.ts';
 
 
 export async function listAllSites(username?: string): Promise<PublicSiteSummary[]> {

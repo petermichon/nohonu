@@ -3,7 +3,7 @@ import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import type { Result } from '../../shared/errors.ts';
-import type { RepoHistoryEntry } from './types.ts';
+import type { RepoHistoryEntry } from '../../shared/repo-history-entry.ts';
 
 
 export async function getSiteRepos(

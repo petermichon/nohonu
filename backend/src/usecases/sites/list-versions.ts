@@ -4,7 +4,8 @@ import { versionPath } from '../../shared/paths.ts';
 
 import * as fs from 'node:fs/promises';
 
-import type { VersionInfo, VersionSource } from './types.ts';
+import type { VersionInfo } from '../../shared/version-info.ts';
+import type { VersionSource } from '../../shared/paths.ts';
 
 
 export async function listVersions(domain: string): Promise<{ versions: VersionInfo[]; current: number | null }> {

@@ -3,7 +3,7 @@ import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import type { Result } from '../../shared/errors.ts';
-import type { CustomDomain } from './types.ts';
+import type { CustomDomain } from '../../shared/custom-domain.ts';
 
 
 export async function getCustomDomains(sessionId: string, domain: string): Promise<Result<CustomDomain[]>> {
