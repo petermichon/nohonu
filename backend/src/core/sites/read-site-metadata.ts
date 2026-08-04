@@ -1,6 +1,6 @@
 import { db } from '../../db.ts';
 import type { SiteData } from '../../shared/paths.ts';
-import { toSiteData } from '../../shared/site-data.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 
 export async function readSiteMetadata(user: string, domain: string): Promise<SiteData | undefined> {
