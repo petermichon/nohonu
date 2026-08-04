@@ -1,6 +1,6 @@
 import { versionsDir } from '../../core/sites/versions-dir.ts';
 import { versionPath } from '../../core/sites/version-path.ts';
-import { DEFAULT_DATA } from '../../core/sites/default-data.ts';
+import { DEFAULT_DATA } from '../../shared/site-data.ts';
 import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import * as fs from 'node:fs/promises';

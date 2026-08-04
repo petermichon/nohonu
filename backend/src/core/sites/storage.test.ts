@@ -14,7 +14,7 @@ const backendDir = path.resolve(import.meta.dirname ?? process.cwd(), '../../..'
 execSync(`npx prisma migrate deploy`, { cwd: backendDir, stdio: 'pipe', env: { ...process.env, DATABASE_URL: `file:${TEST_DB}` } });
 
 const { extractFiles } = await import('./extract-files.ts');
-const { DEFAULT_DATA } = await import('./default-data.ts');
+const { DEFAULT_DATA } = await import('../../shared/site-data.ts');
 const { writeSiteMetadata } = await import('./write-site-metadata.ts');
 
 import { db } from '../../db.ts';
