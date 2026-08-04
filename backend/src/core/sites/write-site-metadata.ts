@@ -1,9 +1,6 @@
 import { db } from '../../db.ts';
 import type { SiteData } from '../../shared/paths.ts';
-
-function siteWhere(user: string, domain: string): { userUsername_domain: { userUsername: string; domain: string } } {
-  return { userUsername_domain: { userUsername: user, domain } };
-}
+import { siteWhere } from '../../shared/site-where.ts';
 
 export async function writeSiteMetadata(user: string, domain: string, data: SiteData): Promise<void> {
   if (data.nextIndex < 1) {

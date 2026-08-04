@@ -1,5 +1,6 @@
 import { db } from '../../db.ts';
 import type { SiteData } from '../../shared/paths.ts';
+import { siteWhere } from '../../shared/site-where.ts';
 
 type SiteRecord = {
   id: string;
@@ -55,10 +56,6 @@ function toSiteData(record: SiteRecord): SiteData {
     starCount: record.starCount,
     starredBy: record.starredBy.map((s) => s.username),
   };
-}
-
-function siteWhere(user: string, domain: string): { userUsername_domain: { userUsername: string; domain: string } } {
-  return { userUsername_domain: { userUsername: user, domain } };
 }
 
 export async function readSiteMetadata(user: string, domain: string): Promise<SiteData | undefined> {
