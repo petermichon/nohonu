@@ -1,6 +1,6 @@
+import { readActiveVersion } from '../../core/sites/read-active-version.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { db } from '../../db.ts';
-import * as sitesDb from '../../core/sites/db.ts';
-import * as storage from '../../core/sites/storage.ts';
 import { readZip } from '../../shared/zip.ts';
 
 
@@ -11,10 +11,10 @@ export async function getSiteIcon(
   const user = site?.userUsername ?? null;
   if (!user) return null;
 
-  const data = await sitesDb.readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, domain);
   if (!data || !data.enabled || data.currentIndex === null) return null;
 
-  const zipData = await storage.readActiveVersion(user, domain);
+  const zipData = await readActiveVersion(user, domain);
   if (!zipData) return null;
 
   const files = await readZip(zipData);

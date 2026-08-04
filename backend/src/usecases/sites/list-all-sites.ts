@@ -1,21 +1,23 @@
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
+import { listUsers } from '../../core/sites/list-users.ts';
+import { listDomains } from '../../core/sites/list-domains.ts';
 import { db } from '../../db.ts';
-import * as sitesDb from '../../core/sites/db.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import type {PublicSiteSummary} from './types.ts';
 
 
 export async function listAllSites(username?: string): Promise<PublicSiteSummary[]> {
-  const users = await sitesDb.listUsers();
+  const users = await listUsers();
   const allSites: PublicSiteSummary[] = [];
 
   for (const user of users) {
     const [domains, userRecord] = await Promise.all([
-      sitesDb.listDomains(user),
+      listDomains(user),
       db.user.findUnique({ where: { username: user }, select: { profilePicture: true } }),
     ]);
     const accountProfilePicture = userRecord?.profilePicture ?? undefined;
     for (const domain of domains) {
-      const data = await sitesDb.readSiteMetadata(user, domain);
+      const data = await readSiteMetadata(user, domain);
       allSites.push({
         user,
         siteId: data?.siteId || domain,

@@ -1,7 +1,7 @@
+import { versionPath } from '../../core/sites/version-path.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
-import * as sitesDb from '../../core/sites/db.ts';
-import * as paths from '../../core/sites/paths.ts';
 import type { VersionInfo, VersionSource } from './types.ts';
 
 
@@ -10,7 +10,7 @@ export async function listVersions(domain: string): Promise<{ versions: VersionI
   const user = site?.userUsername ?? null;
   if (!user) return { versions: [], current: null };
 
-  const data = await sitesDb.readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, domain);
   if (!data) return { versions: [], current: null };
 
   const versions: VersionInfo[] = [];
@@ -18,7 +18,7 @@ export async function listVersions(domain: string): Promise<{ versions: VersionI
   for (const [key, entry] of Object.entries(data.versions)) {
     const index = parseInt(key, 10);
     try {
-      const stat = await fs.stat(paths.versionPath(user, domain, index));
+      const stat = await fs.stat(versionPath(user, domain, index));
       const source: VersionSource = entry.source.type === 'github'
         ? { type: 'github', repo: entry.source.repo, branch: entry.source.branch }
         : { type: 'upload' };

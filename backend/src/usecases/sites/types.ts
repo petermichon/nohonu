@@ -1,4 +1,4 @@
-import type { SiteSummary } from '../../core/sites/list-sites.ts';
+import type { SiteSummary } from '../../core/sites/site-summary.ts';
 
 export type { SiteSummary };
 

@@ -1,4 +1,6 @@
-import * as sitesDb from './db.ts';
+import { listDomains } from './list-domains.ts';
+import { listUsers } from './list-users.ts';
+import { readSiteMetadata } from './read-site-metadata.ts';
 
 
 // Custom domain registry cache: Map<customDomain, internalDomain>
@@ -7,12 +9,12 @@ let customDomainCache: Map<string, string> | null = null;
 async function buildCustomDomainCache(): Promise<void> {
   const cache = new Map<string, string>();
   // Need to iterate all users to build complete cache
-  const users = await sitesDb.listUsers();
+  const users = await listUsers();
 
   for (const user of users) {
-    const domains = await sitesDb.listDomains(user);
+    const domains = await listDomains(user);
     for (const domain of domains) {
-      const data = await sitesDb.readSiteMetadata(user, domain);
+      const data = await readSiteMetadata(user, domain);
       if (data?.customDomains) {
         for (const entry of data.customDomains) {
           if (entry.verified) {
@@ -36,4 +38,3 @@ export async function getCustomDomainCache(): Promise<Map<string, string>> {
   }
   return customDomainCache as Map<string, string>;
 }
-

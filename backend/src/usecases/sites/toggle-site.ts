@@ -1,5 +1,6 @@
-import * as sitesDb from '../../core/sites/db.ts';
-import * as storage from '../../core/sites/storage.ts';
+import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
+import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
@@ -11,15 +12,15 @@ export async function toggleSite(sessionId: string, domain: string): Promise<Res
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await sitesDb.readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, domain);
   if (!data || data.currentIndex === null) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   data.enabled = !data.enabled;
-  await sitesDb.writeSiteMetadata(user, domain, data);
+  await writeSiteMetadata(user, domain, data);
 
-  if (!data.enabled) await storage.deleteExtractedFiles(user, domain);
+  if (!data.enabled) await deleteExtractedFiles(user, domain);
 
   const result = { enabled: data.enabled };
   return { ok: true, value: result };

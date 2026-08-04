@@ -1,4 +1,5 @@
-import * as fsOps from '../../core/sites/fs.ts';
+import { versionExists } from '../../core/sites/version-exists.ts';
+import { readVersion } from '../../core/sites/read-version.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
@@ -16,8 +17,8 @@ export async function downloadVersion(
   const user = auth.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  if (!(await fsOps.versionExists(user, domain, index))) return { ok: true, value: null };
-  const data = await fsOps.readVersion(user, domain, index);
+  if (!(await versionExists(user, domain, index))) return { ok: true, value: null };
+  const data = await readVersion(user, domain, index);
   return { ok: true, value: { data, filename: `${domain}-${index}.zip` } };
 }
 

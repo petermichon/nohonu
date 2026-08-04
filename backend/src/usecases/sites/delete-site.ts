@@ -1,4 +1,4 @@
-import * as storage from '../../core/sites/storage.ts';
+import { deleteSiteFiles } from '../../core/sites/delete-site-files.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -11,7 +11,7 @@ export async function deleteSite(sessionId: string, domain: string): Promise<Res
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;
-  await storage.deleteSiteFiles(user, domain);
+  await deleteSiteFiles(user, domain);
   analytics.clearDomain(domain);
   return { ok: true, value: undefined };
 }

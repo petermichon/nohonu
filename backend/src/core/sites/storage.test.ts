@@ -13,10 +13,9 @@ import { execSync } from 'node:child_process';
 const backendDir = path.resolve(import.meta.dirname ?? process.cwd(), '../../..');
 execSync(`npx prisma migrate deploy`, { cwd: backendDir, stdio: 'pipe', env: { ...process.env, DATABASE_URL: `file:${TEST_DB}` } });
 
-const storageModule = await import('./storage.ts');
-const extractFiles = storageModule.extractFiles;
-const DEFAULT_DATA = storageModule.DEFAULT_DATA;
-const { writeSiteMetadata } = await import('./db.ts');
+const { extractFiles } = await import('./extract-files.ts');
+const { DEFAULT_DATA } = await import('./default-data.ts');
+const { writeSiteMetadata } = await import('./write-site-metadata.ts');
 
 import { db } from '../../db.ts';
 

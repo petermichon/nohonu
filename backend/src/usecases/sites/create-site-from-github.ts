@@ -1,7 +1,9 @@
+import { versionsDir } from '../../core/sites/versions-dir.ts';
+import { versionPath } from '../../core/sites/version-path.ts';
+import { DEFAULT_DATA } from '../../core/sites/default-data.ts';
+import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import * as fs from 'node:fs/promises';
-import * as sitesDb from '../../core/sites/db.ts';
-import * as storage from '../../core/sites/storage.ts';
-import * as paths from '../../core/sites/paths.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
@@ -22,7 +24,7 @@ export async function createSiteFromGithub(
   const user = auth.value;
 
   // Check if domain already exists
-  const existingData = await sitesDb.readSiteMetadata(user, domain);
+  const existingData = await readSiteMetadata(user, domain);
   if (existingData) {
     return { ok: false, code: 'already_exists', message: 'Domain already exists for this user' };
   }
@@ -55,7 +57,7 @@ export async function createSiteFromGithub(
   const siteId = `${user}-${domain}`;
 
   // Create initial site data
-  const data = { ...storage.DEFAULT_DATA };
+  const data = { ...DEFAULT_DATA };
   data.siteId = siteId;
   data.account = user;
   data.repoHistory = [{ repo, branch: ref, lastUsed: Date.now() }];
@@ -68,9 +70,9 @@ export async function createSiteFromGithub(
   data.displayName = domain;
 
   await fs.mkdir(domainDir(user, domain), { recursive: true });
-  await fs.mkdir(paths.versionsDir(user, domain), { recursive: true });
-  await fs.writeFile(paths.versionPath(user, domain, index), zipData);
-  await sitesDb.writeSiteMetadata(user, domain, data);
+  await fs.mkdir(versionsDir(user, domain), { recursive: true });
+  await fs.writeFile(versionPath(user, domain, index), zipData);
+  await writeSiteMetadata(user, domain, data);
 
   return { ok: true, value: { index, siteId, repo, branch: ref } };
 }

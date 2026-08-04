@@ -1,6 +1,8 @@
-import * as sitesDb from '../../core/sites/db.ts';
-import * as storage from '../../core/sites/storage.ts';
-import * as fsOps from '../../core/sites/fs.ts';
+import { versionExists } from '../../core/sites/version-exists.ts';
+import { setCurrentVersion } from '../../core/sites/set-current-version.ts';
+import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
+import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
@@ -14,21 +16,21 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   const user = auth.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  const exists = await fsOps.versionExists(user, domain, index);
+  const exists = await versionExists(user, domain, index);
   if (!exists) {
     return { ok: false, code: 'not_found', message: 'Version not found' };
   }
-  const activated = await storage.setCurrentVersion(user, domain, index);
+  const activated = await setCurrentVersion(user, domain, index);
   if (!activated) {
     return { ok: false, code: 'internal', message: 'Failed to activate version' };
   }
   // Update lastDeployedAt
-  const data = await sitesDb.readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, domain);
   if (data) {
     data.lastDeployedAt = Date.now();
-    await sitesDb.writeSiteMetadata(user, domain, data);
+    await writeSiteMetadata(user, domain, data);
   }
-  await storage.deleteExtractedFiles(user, domain);
+  await deleteExtractedFiles(user, domain);
   return { ok: true, value: undefined };
 }
 

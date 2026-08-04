@@ -6,7 +6,8 @@ import { scheduleUptimeChecks } from './src/scheduler.ts';
 import { loadAnalytics } from './src/usecases/sites/load-analytics.ts';
 import { saveAnalytics } from './src/usecases/sites/save-analytics.ts';
 import { SITES_DIR } from './src/config.ts';
-import { listUsers, listDomains } from './src/core/sites/db.ts';
+import { listUsers } from './src/core/sites/list-users.ts';
+import { listDomains } from './src/core/sites/list-domains.ts';
 
 await fs.mkdir(SITES_DIR, { recursive: true });
 
