@@ -1,8 +1,9 @@
-import { readExtractedFile } from '../../core/sites/read-extracted-file.ts';
+import * as fs from 'node:fs/promises';
 import { readActiveVersion } from '../../core/sites/read-active-version.ts';
 import { extractedSiteExists } from '../../core/sites/extracted-site-exists.ts';
 import { extractFiles } from '../../core/sites/extract-files.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
+import { extractedFilePath } from '../../shared/paths.ts';
 import { readZip } from '../../shared/zip.ts';
 import { getContentType } from '../../shared/mime.ts';
 
@@ -28,7 +29,14 @@ export async function serveSiteFile(
     }
   }
 
-  const fileHandle = await readExtractedFile(user, domain, filePath);
+  const fullPath = extractedFilePath(user, domain, filePath);
+  let fileHandle: fs.FileHandle | undefined;
+  try {
+    fileHandle = await fs.open(fullPath);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Failed to read extracted file ${fullPath}: ${message}`);
+  }
   if (!fileHandle) return null;
 
   const data = await fileHandle.readFile();
@@ -38,5 +46,3 @@ export async function serveSiteFile(
   const ext = parts.pop() ?? '';
   return { data, contentType: getContentType(ext) };
 }
-
-
