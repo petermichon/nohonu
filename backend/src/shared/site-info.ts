@@ -1,3 +1,13 @@
+export const SITE_INFO_SELECT = {
+  enabled: true,
+  subdomain: true,
+  siteId: true,
+  displayName: true,
+  account: true,
+  coverImage: true,
+  currentIndex: true,
+} as const;
+
 export interface SiteInfo {
   enabled: boolean;
   subdomain?: string;

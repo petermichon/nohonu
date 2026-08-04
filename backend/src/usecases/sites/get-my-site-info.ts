@@ -1,18 +1,8 @@
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteInfo } from '../../shared/site-info.ts';
+import { SITE_INFO_SELECT, toSiteInfo } from '../../shared/site-info.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import type { Result } from '../../shared/errors.ts';
-
-const SELECT = {
-  enabled: true,
-  subdomain: true,
-  siteId: true,
-  displayName: true,
-  account: true,
-  coverImage: true,
-  currentIndex: true,
-} as const;
 
 
 export async function getMySiteInfo(
@@ -24,7 +14,7 @@ export async function getMySiteInfo(
   if (!auth.ok) return auth;
   const site = await db.site.findUnique({
     where: { userUsername_domain: { userUsername: auth.value, domain } },
-    select: SELECT,
+    select: SITE_INFO_SELECT,
   });
   return { ok: true, value: toSiteInfo(site) };
 }
