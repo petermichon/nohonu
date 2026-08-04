@@ -1,8 +1,12 @@
-import * as fs from 'node:fs/promises';
-import { extractedDir } from './extracted-dir.ts';
-import { extractedFilePath } from './extracted-file-path.ts';
+import { extractedDir, extractedFilePath } from '../../shared/paths.ts';
 import { readSiteMetadata } from './read-site-metadata.ts';
 import { writeSiteMetadata } from './write-site-metadata.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
+
 
 export async function extractedSiteExists(user: string, domain: string): Promise<boolean> {
   const data = await readSiteMetadata(user, domain);

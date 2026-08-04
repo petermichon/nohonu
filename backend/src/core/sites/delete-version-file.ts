@@ -1,7 +1,11 @@
-import * as fs from 'node:fs/promises';
+import { versionPath } from '../../shared/paths.ts';
 import { readSiteMetadata } from './read-site-metadata.ts';
-import { versionPath } from './version-path.ts';
 import { writeSiteMetadata } from './write-site-metadata.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
 
 export async function deleteVersionFile(user: string, domain: string, index: number): Promise<boolean> {
   const data = await readSiteMetadata(user, domain);

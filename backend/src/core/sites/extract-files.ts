@@ -1,9 +1,14 @@
-import * as fs from 'node:fs/promises';
+import { extractedDir, extractedFilePath } from '../../shared/paths.ts';
 import { deleteExtractedFiles } from './delete-extracted-files.ts';
-import { extractedDir } from './extracted-dir.ts';
-import { extractedFilePath } from './extracted-file-path.ts';
 import { readSiteMetadata } from './read-site-metadata.ts';
 import { writeSiteMetadata } from './write-site-metadata.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
+
+
 
 export async function extractFiles(user: string, domain: string, files: Record<string, Uint8Array>): Promise<void> {
   try {

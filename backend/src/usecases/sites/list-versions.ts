@@ -1,7 +1,9 @@
-import { versionPath } from '../../core/sites/version-path.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
-import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
+import { versionPath } from '../../shared/paths.ts';
+
+import * as fs from 'node:fs/promises';
+
 import type { VersionInfo, VersionSource } from './types.ts';
 
 
