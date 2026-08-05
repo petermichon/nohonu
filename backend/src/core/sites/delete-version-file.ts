@@ -1,8 +1,8 @@
 import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
+import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
-import { upsertSite } from './upsert-site.ts';
 import { toVersionSourceData } from '../../shared/version-source-data.ts';
 
 import * as fs from 'node:fs/promises';
@@ -35,7 +35,7 @@ export async function deleteVersionFile(user: string, domain: string, index: num
       });
     data.currentIndex = versionIndices.length > 0 ? (versionIndices[0] as number) : null;
   }
-  const siteRowId = await upsertSite(user, domain, data);
+  const siteRowId = (await db.site.upsert(toSiteUpsert(user, domain, data)))?.id;
   if (siteRowId) {
     for (const [key, entry] of Object.entries(data.versions)) {
       const index = parseInt(key, 10);

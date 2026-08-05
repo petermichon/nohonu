@@ -1,10 +1,10 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
 import { setCurrentVersion } from '../../core/sites/set-current-version.ts';
-import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
+import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 
@@ -39,7 +39,7 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   const data = record ? toSiteData(record) : undefined;
   if (data) {
     data.lastDeployedAt = Date.now();
-    await upsertSite(user, domain, data);
+    await db.site.upsert(toSiteUpsert(user, domain, data));
   }
   await deleteExtractedFiles(user, domain);
   return { ok: true, value: undefined };

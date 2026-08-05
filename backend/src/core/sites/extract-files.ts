@@ -1,9 +1,9 @@
 import { db } from '../../db.ts';
 import { extractedDir, extractedFilePath } from '../../shared/paths.ts';
+import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { deleteExtractedFiles } from './delete-extracted-files.ts';
-import { upsertSite } from './upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -52,7 +52,7 @@ export async function extractFiles(user: string, domain: string, files: Record<s
   const siteData = record ? toSiteData(record) : undefined;
     if (siteData) {
       siteData.extracted = true;
-      await upsertSite(user, domain, siteData);
+      await db.site.upsert(toSiteUpsert(user, domain, siteData));
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

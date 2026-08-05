@@ -1,4 +1,8 @@
+import { db } from '../../db.ts';
+import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
+import { execSync } from 'node:child_process';
 import { describe, it, expect } from 'vitest';
+
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -9,15 +13,14 @@ process.env['SITES_DIR'] = TEMP_BASE;
 process.env['DATABASE_URL'] = `file:${TEST_DB}`;
 
 // Push schema to test database
-import { execSync } from 'node:child_process';
+
 const backendDir = path.resolve(import.meta.dirname ?? process.cwd(), '../../..');
 execSync(`npx prisma migrate deploy`, { cwd: backendDir, stdio: 'pipe', env: { ...process.env, DATABASE_URL: `file:${TEST_DB}` } });
 
 const { extractFiles } = await import('./extract-files.ts');
 const { DEFAULT_DATA } = await import('../../shared/site-data.ts');
-const { upsertSite } = await import('./upsert-site.ts');
 
-import { db } from '../../db.ts';
+
 
 async function readExtracted(user: string, domain: string, filePath: string): Promise<string | undefined> {
   const fullPath = `${TEMP_BASE}/${user}/${domain}/extracted/${filePath}`;
@@ -49,7 +52,7 @@ async function setupDomain(user: string, domain: string): Promise<void> {
   const domainDir = `${TEMP_BASE}/${user}/${domain}`;
   await fs.mkdir(domainDir, { recursive: true });
   await createUser(user);
-  await upsertSite(user, domain, DEFAULT_DATA);
+  await db.site.upsert(toSiteUpsert(user, domain, DEFAULT_DATA));
 }
 
 async function cleanupDomain(user: string, domain: string): Promise<void> {

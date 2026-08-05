@@ -1,8 +1,8 @@
 import { db } from '../../db.ts';
 import { extractedDir, extractedFilePath } from '../../shared/paths.ts';
+import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
-import { upsertSite } from './upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -23,12 +23,12 @@ export async function extractedSiteExists(user: string, domain: string): Promise
       return true;
     } catch {
       data.extracted = false;
-      await upsertSite(user, domain, data);
+      await db.site.upsert(toSiteUpsert(user, domain, data));
       return false;
     }
   } catch {
     data.extracted = false;
-    await upsertSite(user, domain, data);
+    await db.site.upsert(toSiteUpsert(user, domain, data));
     return false;
   }
 }

@@ -1,8 +1,8 @@
 import { db } from '../../db.ts';
 import { extractedDir } from '../../shared/paths.ts';
+import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
-import { upsertSite } from './upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -21,6 +21,6 @@ export async function deleteExtractedFiles(user: string, domain: string): Promis
   const data = record ? toSiteData(record) : undefined;
   if (data) {
     data.extracted = false;
-    await upsertSite(user, domain, data);
+    await db.site.upsert(toSiteUpsert(user, domain, data));
   }
 }
