@@ -325,6 +325,25 @@ describe('serving', () => {
     expect(await pathExists(`${sitesDir}/evil.txt`)).toBe(false);
     expect(await pathExists(`${sitesDir}/abs.txt`)).toBe(false);
   });
+
+  it('serves a request end to end and records the page hit', async () => {
+    const sessionId = await makeSite('hugo', 'mysite');
+    const user = await username(sessionId);
+    await sites.updateSiteMeta(sessionId, 'mysite', { subdomain: 'my-app' });
+
+    const before = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    const served = await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4');
+    expect(served).not.toBeNull();
+    expect(new TextDecoder().decode(served?.data)).toBe('<h1>hi</h1>');
+    const after = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(after).toBe(before + 1);
+    expect(user).toBeTruthy();
+  });
+
+  it('returns null when the request cannot be resolved', async () => {
+    await makeSite('ivan', 'mysite');
+    expect(await sites.serveRequest('unknown.example.com', '/', '1.2.3.4')).toBeNull();
+  });
 });
 
 describe('analytics', () => {
