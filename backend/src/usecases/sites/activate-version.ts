@@ -1,6 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
-import { setCurrentVersion } from '../../core/sites/set-current-version.ts';
 import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -30,17 +29,15 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   if (!exists) {
     return { ok: false, code: 'not_found', message: 'Version not found' };
   }
-  const activated = await setCurrentVersion(user, domain, index);
-  if (!activated) {
-    return { ok: false, code: 'internal', message: 'Failed to activate version' };
-  }
-  // Update lastDeployedAt
   const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
   const data = record ? toSiteData(record) : undefined;
-  if (data) {
-    data.lastDeployedAt = Date.now();
-    await db.site.upsert(toSiteUpsert(user, domain, data));
+  if (!data) {
+    return { ok: false, code: 'internal', message: 'Failed to activate version' };
   }
+  data.currentIndex = index;
+  data.enabled = true;
+  data.lastDeployedAt = Date.now();
+  await db.site.upsert(toSiteUpsert(user, domain, data));
   await deleteExtractedFiles(user, domain);
   return { ok: true, value: undefined };
 }
