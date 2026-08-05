@@ -1,8 +1,10 @@
 import * as fs from 'node:fs/promises';
+import { SLOT_MS } from '../../config.ts';
 import { customDomain } from '../../db/custom-domain.ts';
 import { site } from '../../db/site.ts';
 import { user } from '../../db/user.ts';
-import { recordHit } from '../../memory/record-hit.ts';
+import { hits } from '../../memory/hits.ts';
+import { visitors } from '../../memory/visitors.ts';
 import { getContentType } from '../../shared/mime.ts';
 import { extractedDir, extractedFilePath, fileExists, versionPath, VALID_DOMAIN } from '../../shared/paths.ts';
 import { SITE_INCLUDE } from '../../shared/site-include.ts';
@@ -11,6 +13,8 @@ import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { stripCommonRoot } from '../../shared/strip-common-root.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { readZip } from '../../shared/zip.ts';
+import { MAX_VISITORS_PER_DOMAIN } from '../../shared/max-visitors-per-domain.ts';
+import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 
 async function resolveDomainAndServe(
   host: string,
@@ -153,7 +157,39 @@ export async function serveRequest(
   if (!result) return null;
 
   if (result.contentType === 'text/html') {
-    recordHit(resolved.domain, ip);
+    const slot = Math.floor(Date.now() / SLOT_MS);
+    const domainHits = hits.get(resolved.domain) ?? new Map();
+    hits.set(resolved.domain, domainHits);
+    const prevHits = domainHits.get(slot) ?? 0;
+    domainHits.set(slot, prevHits + 1);
+    const cutoff = slot - STATS_SLOTS;
+    for (const k of domainHits.keys()) {
+      if (k < cutoff) {
+        domainHits.delete(k);
+      }
+    }
+
+    const domainVisitors = visitors.get(resolved.domain) ?? new Map();
+    visitors.set(resolved.domain, domainVisitors);
+    const existing = domainVisitors.get(ip);
+    const prevCount = existing?.count ?? 0;
+    domainVisitors.set(ip, {
+      count: prevCount + 1,
+      last: Date.now(),
+    });
+    if (domainVisitors.size > MAX_VISITORS_PER_DOMAIN) {
+      let oldestIp = '';
+      let oldestTime = Infinity;
+      for (const [entryIp, entryData] of domainVisitors.entries()) {
+        if (entryData.last < oldestTime) {
+          oldestTime = entryData.last;
+          oldestIp = entryIp;
+        }
+      }
+      if (oldestIp) {
+        domainVisitors.delete(oldestIp);
+      }
+    }
   }
   return result;
 }
