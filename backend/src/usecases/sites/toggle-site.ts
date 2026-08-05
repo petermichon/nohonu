@@ -3,8 +3,8 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { extractedDir } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site } from '../../db/site.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -22,7 +22,7 @@ export async function toggleSite(sessionId: string, domain: string): Promise<Res
   }
 
   data.enabled = !data.enabled;
-  const siteRowId = (await site.upsert(toSiteUpsert(user, domain, data)))?.id;
+  const siteRowId = await upsertSite(user, domain, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

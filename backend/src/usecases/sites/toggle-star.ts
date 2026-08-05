@@ -3,8 +3,8 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { starredBy as starredByTable } from '../../db/starred-by.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site as siteTable } from '../../db/site.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -50,7 +50,7 @@ export async function toggleStar(
     data.starCount = data.starredBy.length;
   }
 
-  const siteId = (await siteTable.upsert(toSiteUpsert(siteOwner, domain, data)))?.id;
+  const siteId = await upsertSite(siteOwner, domain, data);
   if (!siteId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

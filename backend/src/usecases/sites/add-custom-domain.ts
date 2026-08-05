@@ -3,8 +3,8 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { customDomain as customDomainTable } from '../../db/custom-domain.ts';
 import { session } from '../../db/session.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site } from '../../db/site.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -32,7 +32,7 @@ export async function addCustomDomain(sessionId: string, domain: string, customD
   }
 
   data.customDomains.push({ domain: customDomain, verified: false });
-  const siteId = (await site.upsert(toSiteUpsert(user, domain, data)))?.id;
+  const siteId = await upsertSite(user, domain, data);
   if (!siteId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

@@ -3,9 +3,9 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { versionsDir, versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -35,7 +35,7 @@ export async function uploadVersion(sessionId: string, domain: string, zipData: 
 
   await fs.mkdir(versionsDir(user, domain), { recursive: true });
   await fs.writeFile(versionPath(user, domain, index), zipData);
-  const siteRowId = (await site.upsert(toSiteUpsert(user, domain, data)))?.id;
+  const siteRowId = await upsertSite(user, domain, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

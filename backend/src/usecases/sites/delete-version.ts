@@ -3,9 +3,9 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { fileExists, versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -49,7 +49,7 @@ export async function deleteVersion(sessionId: string, domain: string, index: nu
       });
     data.currentIndex = versionIndices.length > 0 ? (versionIndices[0] as number) : null;
   }
-  const siteRowId = (await site.upsert(toSiteUpsert(user, domain, data)))?.id;
+  const siteRowId = await upsertSite(user, domain, data);
   if (siteRowId) {
     await syncVersions(siteRowId, data.versions);
   }

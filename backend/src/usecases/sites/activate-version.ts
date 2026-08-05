@@ -3,8 +3,8 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { extractedDir, fileExists, versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site } from '../../db/site.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -35,7 +35,7 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   data.currentIndex = index;
   data.enabled = true;
   data.lastDeployedAt = Date.now();
-  await site.upsert(toSiteUpsert(user, domain, data));
+  await upsertSite(user, domain, data);
   try {
     await fs.rm(extractedDir(user, domain), { recursive: true, force: true });
   } catch (error) {

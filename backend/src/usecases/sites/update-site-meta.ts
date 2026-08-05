@@ -3,8 +3,8 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site } from '../../db/site.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -34,7 +34,7 @@ export async function updateSiteMeta(
     data.displayName = updates.displayName || undefined;
   }
 
-  const siteRowId = (await site.upsert(toSiteUpsert(user, domain, data)))?.id;
+  const siteRowId = await upsertSite(user, domain, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

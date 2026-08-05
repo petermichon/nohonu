@@ -4,8 +4,8 @@ import { customDomain as customDomainTable } from '../../db/custom-domain.ts';
 import { session } from '../../db/session.ts';
 import { dnsVerifyCustomDomain } from '../../shared/custom-domain-dns.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { site } from '../../db/site.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -38,7 +38,7 @@ export async function verifyCustomDomain(
   const isVerified = await dnsVerifyCustomDomain(domain, customDomain);
   entry.verified = isVerified;
 
-  const siteId = (await site.upsert(toSiteUpsert(user, domain, data)))?.id;
+  const siteId = await upsertSite(user, domain, data);
   if (!siteId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
