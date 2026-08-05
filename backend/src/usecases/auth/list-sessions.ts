@@ -1,24 +1,7 @@
 import { db } from '../../db.ts';
 import type { SessionInfo } from '../../shared/session-info.ts';
+import { toSessionInfo } from '../../shared/to-session-info.ts';
 import type { Result } from '../../shared/errors.ts';
-
-function toSessionInfo(session: {
-  id: string;
-  username: string;
-  userAgent: string | null;
-  deviceInfo: string | null;
-  createdAt: number;
-  lastActive: number;
-}): SessionInfo {
-  return {
-    id: session.id,
-    username: session.username,
-    userAgent: session.userAgent ?? undefined,
-    deviceInfo: session.deviceInfo ?? undefined,
-    createdAt: session.createdAt,
-    lastActive: session.lastActive,
-  };
-}
 
 export async function listSessions(sessionId: string): Promise<Result<SessionInfo[]>> {
   const session = await db.session.findUnique({ where: { id: sessionId } });
