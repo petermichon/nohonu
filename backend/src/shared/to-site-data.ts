@@ -1,4 +1,4 @@
-import type { SiteData } from './node/paths.ts';
+import type { SiteData } from './paths.ts';
 
 export type SiteRecord = {
   id: string;

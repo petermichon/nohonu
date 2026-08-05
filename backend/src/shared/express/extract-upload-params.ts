@@ -1,6 +1,6 @@
 import type { Request as ExpressReq } from 'express';
 import type { UploadParams } from '../upload-params.ts';
-import { MAX_ZIP_BYTES } from '../node/paths.ts';
+import { MAX_ZIP_BYTES } from '../paths.ts';
 import { domainFrom } from './domain-from.ts';
 
 export function extractUploadParams(req: ExpressReq): UploadParams | undefined {

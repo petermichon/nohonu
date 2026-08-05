@@ -1,6 +1,6 @@
 import { user as userTable } from '../../db/user.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
-import { VALID_DOMAIN } from '../../shared/node/paths.ts';
+import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { site } from '../../db/site.ts';
 
 export async function checkSubdomain(subdomain: string): Promise<boolean> {

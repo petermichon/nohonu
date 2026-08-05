@@ -1,4 +1,4 @@
-import { VALID_DOMAIN } from '../../shared/node/paths.ts';
+import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 
 export async function checkDomain(user: string, rawDomain: string): Promise<boolean> {

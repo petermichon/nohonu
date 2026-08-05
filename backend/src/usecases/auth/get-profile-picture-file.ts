@@ -1,6 +1,6 @@
 import { SITES_DIR } from '../../config.ts';
 import { user as userTable } from '../../db/user.ts';
-import { getProfilePicturePath } from '../../shared/node/paths.ts';
+import { getProfilePicturePath } from '../../shared/paths.ts';
 
 import * as fs from 'node:fs/promises';
 

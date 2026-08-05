@@ -1,5 +1,4 @@
-import * as fs from 'node:fs/promises';
-import { SITES_DIR } from '../../config.ts';
+import { SITES_DIR } from '../config.ts';
 
 export const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 export const VALID_CUSTOM_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;
@@ -32,15 +31,6 @@ export type SiteData = {
   starCount?: number;
   starredBy?: string[];
 };
-
-export async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.stat(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 export const MAX_ZIP_BYTES = 52_428_800; // 50 MB
 

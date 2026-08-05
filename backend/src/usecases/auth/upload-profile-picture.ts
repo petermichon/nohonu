@@ -1,7 +1,7 @@
 import { SITES_DIR } from '../../config.ts';
 import { session as sessionTable } from '../../db/session.ts';
 import { user } from '../../db/user.ts';
-import { getProfilePicturePath } from '../../shared/node/paths.ts';
+import { getProfilePicturePath } from '../../shared/paths.ts';
 
 import * as fs from 'node:fs/promises';
 

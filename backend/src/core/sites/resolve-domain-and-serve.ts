@@ -1,7 +1,7 @@
 import { customDomain } from '../../db/custom-domain.ts';
 import { site } from '../../db/site.ts';
 import { user } from '../../db/user.ts';
-import { VALID_DOMAIN } from '../../shared/node/paths.ts';
+import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { requestFilePath } from '../../shared/request-file-path.ts';
 import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { siteWhere } from '../../shared/site-where.ts';

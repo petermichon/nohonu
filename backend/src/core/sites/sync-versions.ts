@@ -1,5 +1,5 @@
 import { version } from '../../db/version.ts';
-import type { VersionEntry } from '../../shared/node/paths.ts';
+import type { VersionEntry } from '../../shared/paths.ts';
 import { toVersionSourceData } from '../../shared/version-source-data.ts';
 
 export async function syncVersions(siteId: string, versions: Record<string, VersionEntry>): Promise<void> {

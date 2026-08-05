@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { VALID_DOMAIN } from '../node/paths.ts';
+import { VALID_DOMAIN } from '../paths.ts';
 
 export function json(res: ExpressRes, data: unknown, status = 200): void {
   res.status(status).json(data);

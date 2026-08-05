@@ -1,4 +1,4 @@
-import type { VersionSource } from './node/paths.ts';
+import type { VersionSource } from './paths.ts';
 
 export function toVersionSourceData(source: VersionSource): {
   type: string;

@@ -1,6 +1,7 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
-import { fileExists, versionPath } from '../../shared/node/paths.ts';
+import { versionPath } from '../../shared/paths.ts';
+import { fileExists } from '../../shared/node/file-exists.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
