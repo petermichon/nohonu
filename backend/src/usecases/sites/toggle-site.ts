@@ -1,6 +1,6 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
-import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { siteWhere } from '../../shared/site-where.ts';
@@ -21,7 +21,10 @@ export async function toggleSite(sessionId: string, domain: string): Promise<Res
   }
 
   data.enabled = !data.enabled;
-  await writeSiteMetadata(user, domain, data);
+  const siteRowId = await upsertSite(user, domain, data);
+  if (!siteRowId) {
+    return { ok: false, code: 'internal', message: 'Failed to save site' };
+  }
 
   if (!data.enabled) await deleteExtractedFiles(user, domain);
 

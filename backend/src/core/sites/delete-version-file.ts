@@ -2,7 +2,8 @@ import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
-import { writeSiteMetadata } from './write-site-metadata.ts';
+import { syncVersions } from './sync-versions.ts';
+import { upsertSite } from './upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -34,6 +35,9 @@ export async function deleteVersionFile(user: string, domain: string, index: num
       });
     data.currentIndex = versionIndices.length > 0 ? (versionIndices[0] as number) : null;
   }
-  await writeSiteMetadata(user, domain, data);
+  const siteRowId = await upsertSite(user, domain, data);
+  if (siteRowId) {
+    await syncVersions(siteRowId, data.versions);
+  }
   return true;
 }

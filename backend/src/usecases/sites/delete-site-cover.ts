@@ -1,5 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { coverImagePath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -32,7 +32,10 @@ export async function deleteSiteCover(sessionId: string, domain: string): Promis
   }
 
   data.coverImage = undefined;
-  await writeSiteMetadata(user, domain, data);
+  const siteRowId = await upsertSite(user, domain, data);
+  if (!siteRowId) {
+    return { ok: false, code: 'internal', message: 'Failed to save site' };
+  }
   return { ok: true, value: undefined };
 }
 

@@ -2,7 +2,7 @@ import { db } from '../../db.ts';
 import { extractedDir } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
-import { writeSiteMetadata } from './write-site-metadata.ts';
+import { upsertSite } from './upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -21,6 +21,6 @@ export async function deleteExtractedFiles(user: string, domain: string): Promis
   const data = record ? toSiteData(record) : undefined;
   if (data) {
     data.extracted = false;
-    await writeSiteMetadata(user, domain, data);
+    await upsertSite(user, domain, data);
   }
 }

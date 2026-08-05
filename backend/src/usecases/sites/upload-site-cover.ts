@@ -1,5 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { coverImagePath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -28,7 +28,10 @@ export async function uploadSiteCover(sessionId: string, domain: string, imageDa
   try {
     await fs.writeFile(coverImagePath(user, domain), imageData);
     data.coverImage = 'cover.jpg';
-    await writeSiteMetadata(user, domain, data);
+    const siteRowId = await upsertSite(user, domain, data);
+    if (!siteRowId) {
+      return { ok: false, code: 'internal', message: 'Failed to save site' };
+    }
     return { ok: true, value: undefined };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

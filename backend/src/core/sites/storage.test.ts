@@ -15,7 +15,7 @@ execSync(`npx prisma migrate deploy`, { cwd: backendDir, stdio: 'pipe', env: { .
 
 const { extractFiles } = await import('./extract-files.ts');
 const { DEFAULT_DATA } = await import('../../shared/site-data.ts');
-const { writeSiteMetadata } = await import('./write-site-metadata.ts');
+const { upsertSite } = await import('./upsert-site.ts');
 
 import { db } from '../../db.ts';
 
@@ -49,7 +49,7 @@ async function setupDomain(user: string, domain: string): Promise<void> {
   const domainDir = `${TEMP_BASE}/${user}/${domain}`;
   await fs.mkdir(domainDir, { recursive: true });
   await createUser(user);
-  await writeSiteMetadata(user, domain, DEFAULT_DATA);
+  await upsertSite(user, domain, DEFAULT_DATA);
 }
 
 async function cleanupDomain(user: string, domain: string): Promise<void> {

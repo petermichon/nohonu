@@ -2,7 +2,7 @@ import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
-import { writeSiteMetadata } from './write-site-metadata.ts';
+import { upsertSite } from './upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -26,6 +26,6 @@ export async function setCurrentVersion(user: string, domain: string, index: num
 
   data.currentIndex = index;
   data.enabled = true;
-  await writeSiteMetadata(user, domain, data);
+  await upsertSite(user, domain, data);
   return true;
 }

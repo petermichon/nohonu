@@ -3,7 +3,7 @@ import { extractedDir, extractedFilePath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { deleteExtractedFiles } from './delete-extracted-files.ts';
-import { writeSiteMetadata } from './write-site-metadata.ts';
+import { upsertSite } from './upsert-site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -52,7 +52,7 @@ export async function extractFiles(user: string, domain: string, files: Record<s
   const siteData = record ? toSiteData(record) : undefined;
     if (siteData) {
       siteData.extracted = true;
-      await writeSiteMetadata(user, domain, siteData);
+      await upsertSite(user, domain, siteData);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
