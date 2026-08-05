@@ -1,6 +1,6 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { clearDomain } from '../../core/analytics/clear-domain.ts';
 import { db } from '../../db.ts';
+import { hits, uptime, visitors } from '../../memory.ts';
 import { domainDir } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
 
@@ -24,6 +24,8 @@ export async function deleteSite(sessionId: string, domain: string): Promise<Res
     console.error(`Failed to delete site directory for ${user}/${domain}: ${message}`);
   }
   await db.site.deleteMany({ where: { AND: { userUsername: user, domain } } });
-  clearDomain(domain);
+  hits.delete(domain);
+  visitors.delete(domain);
+  uptime.delete(domain);
   return { ok: true, value: undefined };
 }

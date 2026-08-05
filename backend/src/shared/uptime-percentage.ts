@@ -1,7 +1,4 @@
-import { uptime } from './analytics-state.ts';
-
-export function getUptimePct(domain: string): number | undefined {
-  const d = uptime.get(domain);
+export function uptimePercentage(d: Map<number, boolean> | undefined): number | undefined {
   if (!d || d.size === 0) {
     return undefined;
   }

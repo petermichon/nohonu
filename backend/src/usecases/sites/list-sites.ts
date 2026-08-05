@@ -1,9 +1,10 @@
-import { getTotalHits } from '../../core/analytics/get-total-hits.ts';
-import { getUptimePct } from '../../core/analytics/get-uptime-pct.ts';
 import { db } from '../../db.ts';
+import { hits, uptime } from '../../memory.ts';
+import { totalHits } from '../../shared/hits-total.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { toSiteSummary } from '../../shared/to-site-summary.ts';
+import { uptimePercentage } from '../../shared/uptime-percentage.ts';
 
 export async function listSites(user: string): Promise<Awaited<ReturnType<typeof toSiteSummary>>[]> {
   const [domains, userRecord] = await Promise.all([
@@ -15,7 +16,7 @@ export async function listSites(user: string): Promise<Awaited<ReturnType<typeof
     domains.map(async (domain) => {
       const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
       const data = record ? toSiteData(record) : undefined;
-      return toSiteSummary(domain, data, user, accountProfilePicture, getTotalHits(domain), getUptimePct(domain));
+      return toSiteSummary(domain, data, user, accountProfilePicture, totalHits(hits.get(domain)), uptimePercentage(uptime.get(domain)));
     }),
   );
 }

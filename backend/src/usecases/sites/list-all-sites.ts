@@ -1,8 +1,9 @@
-import { getTotalHits } from '../../core/analytics/get-total-hits.ts';
-import { getUptimePct } from '../../core/analytics/get-uptime-pct.ts';
 import { db } from '../../db.ts';
+import { hits, uptime } from '../../memory.ts';
+import { totalHits } from '../../shared/hits-total.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
+import { uptimePercentage } from '../../shared/uptime-percentage.ts';
 
 import type { PublicSiteSummary } from '../../shared/public-site-summary.ts';
 
@@ -25,8 +26,8 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
         siteId: data?.siteId || domain,
         domain,
         enabled: data?.enabled ?? false,
-        hits: getTotalHits(domain),
-        uptime: getUptimePct(domain),
+        hits: totalHits(hits.get(domain)),
+        uptime: uptimePercentage(uptime.get(domain)),
         account: data?.account,
         accountProfilePicture,
         displayName: data?.displayName,

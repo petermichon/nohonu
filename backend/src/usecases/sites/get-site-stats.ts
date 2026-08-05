@@ -1,4 +1,7 @@
-import { getStats } from '../../core/analytics/get-stats.ts';
+import { SLOT_MS } from '../../config.ts';
+import { hits } from '../../memory.ts';
+import { buildStatsSeries } from '../../shared/stats-series.ts';
+import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 
 
 export function getSiteStats(domain: string, slots: number, groupMinutes = 1): { slot: number; count: number }[] {
@@ -8,5 +11,6 @@ export function getSiteStats(domain: string, slots: number, groupMinutes = 1): {
     typeof groupMinutes === 'number' && !isNaN(groupMinutes) && groupMinutes > 0,
     'groupMinutes must be a positive number',
   );
-  return getStats(domain, slots, groupMinutes);
+  const now = Math.floor(Date.now() / SLOT_MS);
+  return buildStatsSeries(hits.get(domain) ?? new Map<number, number>(), now, slots, groupMinutes);
 }
