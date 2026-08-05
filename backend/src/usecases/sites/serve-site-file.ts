@@ -1,5 +1,4 @@
 import * as fs from 'node:fs/promises';
-import { extractedSiteExists } from '../../core/sites/extracted-site-exists.ts';
 import { db } from '../../db.ts';
 import { getContentType } from '../../shared/mime.ts';
 import { extractedDir, extractedFilePath, versionPath } from '../../shared/paths.ts';
@@ -19,7 +18,13 @@ export async function serveSiteFile(
   const siteData = record ? toSiteData(record) : undefined;
   if (!siteData) return null;
 
-  if (!(await extractedSiteExists(user, domain))) {
+  const extractedReady = siteData.extracted
+    && await fs.stat(extractedDir(user, domain)).then(() => true).catch(() => false)
+    && await fs.stat(extractedFilePath(user, domain, 'index.html')).then(() => true).catch(() => false);
+  if (!extractedReady) {
+    if (siteData.extracted) {
+      await db.site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
+    }
     if (!siteData.enabled || siteData.currentIndex === null) return null;
 
     try {
