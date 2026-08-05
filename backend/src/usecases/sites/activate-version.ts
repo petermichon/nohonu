@@ -1,12 +1,21 @@
-import * as fs from 'node:fs/promises';
-import { setCurrentVersion } from '../../core/sites/set-current-version.ts';
-import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
-import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
-import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
-import { db } from '../../db.ts';
-import { validateSession } from '../../shared/session-check.ts';
-import { versionPath } from '../../shared/paths.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
+import { setCurrentVersion } from '../../core/sites/set-current-version.ts';
+import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { db } from '../../db.ts';
+import { versionPath } from '../../shared/paths.ts';
+import { validateSession } from '../../shared/session-check.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
+
+
+
+
 import type { Result } from '../../shared/errors.ts';
 
 
@@ -26,7 +35,8 @@ export async function activateVersion(sessionId: string, domain: string, index: 
     return { ok: false, code: 'internal', message: 'Failed to activate version' };
   }
   // Update lastDeployedAt
-  const data = await readSiteMetadata(user, domain);
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
   if (data) {
     data.lastDeployedAt = Date.now();
     await writeSiteMetadata(user, domain, data);

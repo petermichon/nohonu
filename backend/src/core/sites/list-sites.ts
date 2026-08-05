@@ -1,6 +1,8 @@
 import { db } from '../../db.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
+
 import * as analytics from '../analytics/metrics.ts';
-import { readSiteMetadata } from './read-site-metadata.ts';
 import type { SiteSummary } from '../../shared/site-summary.ts';
 
 export async function listSites(user: string): Promise<SiteSummary[]> {
@@ -11,7 +13,8 @@ export async function listSites(user: string): Promise<SiteSummary[]> {
   const accountProfilePicture = userRecord?.profilePicture ?? undefined;
   return Promise.all(
     domains.map(async (domain) => {
-      const data = await readSiteMetadata(user, domain);
+      const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
       return {
         siteId: data?.siteId || domain,
         domain,

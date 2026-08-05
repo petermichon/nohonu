@@ -1,10 +1,13 @@
+import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { invalidateCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
 import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
-import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
+
 import type { Result } from '../../shared/errors.ts';
-import { invalidateCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
+
 
 
 export async function removeCustomDomain(
@@ -16,7 +19,8 @@ export async function removeCustomDomain(
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await readSiteMetadata(user, domain);
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }

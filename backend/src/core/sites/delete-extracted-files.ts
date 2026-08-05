@@ -1,5 +1,7 @@
+import { db } from '../../db.ts';
 import { extractedDir } from '../../shared/paths.ts';
-import { readSiteMetadata } from './read-site-metadata.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 import { writeSiteMetadata } from './write-site-metadata.ts';
 
 import * as fs from 'node:fs/promises';
@@ -15,7 +17,8 @@ export async function deleteExtractedFiles(user: string, domain: string): Promis
     console.error(`Failed to delete extracted site for ${user}/${domain}: ${message}`);
   }
 
-  const data = await readSiteMetadata(user, domain);
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
   if (data) {
     data.extracted = false;
     await writeSiteMetadata(user, domain, data);

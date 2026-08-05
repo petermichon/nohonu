@@ -1,6 +1,8 @@
+import { db } from '../../db.ts';
 import { extractedDir, extractedFilePath } from '../../shared/paths.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 import { deleteExtractedFiles } from './delete-extracted-files.ts';
-import { readSiteMetadata } from './read-site-metadata.ts';
 import { writeSiteMetadata } from './write-site-metadata.ts';
 
 import * as fs from 'node:fs/promises';
@@ -46,7 +48,8 @@ export async function extractFiles(user: string, domain: string, files: Record<s
       await fs.writeFile(outPath, data);
     }
 
-    const siteData = await readSiteMetadata(user, domain);
+    const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const siteData = record ? toSiteData(record) : undefined;
     if (siteData) {
       siteData.extracted = true;
       await writeSiteMetadata(user, domain, siteData);

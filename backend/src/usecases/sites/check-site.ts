@@ -1,8 +1,10 @@
-import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
-
+import { db } from '../../db.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 
 export async function checkSite(user: string, domain: string): Promise<{ exists: boolean; enabled: boolean }> {
-  const data = await readSiteMetadata(user, domain);
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
   return {
     exists: !!data && data.currentIndex !== null,
     enabled: data?.enabled ?? false,

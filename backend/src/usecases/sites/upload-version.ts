@@ -1,9 +1,10 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
 import { db } from '../../db.ts';
 import { versionsDir, versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -19,7 +20,8 @@ export async function uploadVersion(sessionId: string, domain: string, zipData: 
   const user = auth.value;
 
   // Check if domain exists
-  const existingData = await readSiteMetadata(user, domain);
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const existingData = record ? toSiteData(record) : undefined;
   if (!existingData) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }

@@ -1,8 +1,8 @@
-import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
+import { getCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
 import { db } from '../../db.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
-import { getCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
-
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 
 export async function resolveDomainAndServe(
   host: string,
@@ -32,7 +32,8 @@ export async function resolveDomainAndServe(
     for (const user of users) {
       const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map((s) => s.domain);
       for (const domain of domains) {
-        const info = await readSiteMetadata(user, domain);
+        const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const info = record ? toSiteData(record) : undefined;
         if (info && info.subdomain === subdomain && info.currentIndex !== null) {
           const filePath = path === '/' ? '/index.html' : path;
           return { user, domain, filePath };
@@ -48,7 +49,8 @@ export async function resolveDomainAndServe(
       const site = await db.site.findFirst({ where: { domain: potential }, select: { userUsername: true } });
       const user = site?.userUsername ?? null;
       if (user) {
-        const info = await readSiteMetadata(user, potential);
+        const record = await db.site.findUnique({ where: siteWhere(user, potential), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const info = record ? toSiteData(record) : undefined;
         if (info && info.currentIndex !== null) {
           const domain = potential;
           const rest = parts.slice(1).join('/');

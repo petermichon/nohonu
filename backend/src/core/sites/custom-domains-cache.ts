@@ -1,6 +1,6 @@
 import { db } from '../../db.ts';
-import { readSiteMetadata } from './read-site-metadata.ts';
-
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 
 // Custom domain registry cache: Map<customDomain, internalDomain>
 let customDomainCache: Map<string, string> | null = null;
@@ -13,7 +13,8 @@ async function buildCustomDomainCache(): Promise<void> {
   for (const user of users) {
     const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map((s) => s.domain);
     for (const domain of domains) {
-      const data = await readSiteMetadata(user, domain);
+      const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
       if (data?.customDomains) {
         for (const entry of data.customDomains) {
           if (entry.verified) {

@@ -1,6 +1,7 @@
-import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -13,7 +14,8 @@ export async function listVersions(domain: string): Promise<{ versions: VersionI
   const user = site?.userUsername ?? null;
   if (!user) return { versions: [], current: null };
 
-  const data = await readSiteMetadata(user, domain);
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
   if (!data) return { versions: [], current: null };
 
   const versions: VersionInfo[] = [];

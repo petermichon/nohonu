@@ -1,5 +1,7 @@
+import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
-import { readSiteMetadata } from './read-site-metadata.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 import { writeSiteMetadata } from './write-site-metadata.ts';
 
 import * as fs from 'node:fs/promises';
@@ -8,7 +10,8 @@ import * as fs from 'node:fs/promises';
 
 
 export async function setCurrentVersion(user: string, domain: string, index: number): Promise<boolean> {
-  const data = await readSiteMetadata(user, domain);
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
   if (data === undefined) {
     console.error(`setCurrentVersion: site not found: ${user}/${domain}`);
     return false;

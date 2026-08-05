@@ -1,8 +1,10 @@
+import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
-import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
+
 import type { Result } from '../../shared/errors.ts';
 
 
@@ -22,7 +24,8 @@ export async function toggleStar(
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
-  const data = await readSiteMetadata(siteOwner, domain);
+  const record = await db.site.findUnique({ where: siteWhere(siteOwner, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const data = record ? toSiteData(record) : undefined;
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
