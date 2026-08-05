@@ -1,5 +1,6 @@
-import { readActiveVersion } from '../../core/sites/read-active-version.ts';
+import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
+import { versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 
@@ -12,7 +13,7 @@ export async function downloadActiveVersion(
   const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
   const meta = record ? toSiteData(record) : undefined;
   if (!meta || !meta.enabled || meta.currentIndex === null) return null;
-  const data = await readActiveVersion(user, domain);
+  const data = await fs.readFile(versionPath(user, domain, meta.currentIndex)).catch(() => undefined);
   if (!data) return null;
   return { data, filename: `${domain}.zip` };
 }

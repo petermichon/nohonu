@@ -1,9 +1,8 @@
 import { extractFiles } from '../../core/sites/extract-files.ts';
 import { extractedSiteExists } from '../../core/sites/extracted-site-exists.ts';
-import { readActiveVersion } from '../../core/sites/read-active-version.ts';
 import { db } from '../../db.ts';
 import { getContentType } from '../../shared/mime.ts';
-import { extractedFilePath } from '../../shared/paths.ts';
+import { extractedFilePath, versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { readZip } from '../../shared/zip.ts';
@@ -30,7 +29,7 @@ export async function serveSiteFile(
     if (!siteData.enabled || siteData.currentIndex === null) return null;
 
     try {
-      const zipData = await readActiveVersion(user, domain);
+      const zipData = await fs.readFile(versionPath(user, domain, siteData.currentIndex));
       if (!zipData) return null;
       const files = await readZip(zipData);
       await extractFiles(user, domain, files);

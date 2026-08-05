@@ -1,5 +1,6 @@
-import { readActiveVersion } from '../../core/sites/read-active-version.ts';
+import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
+import { versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { readZip } from '../../shared/zip.ts';
@@ -15,7 +16,7 @@ export async function getSiteIcon(
   const data = record ? toSiteData(record) : undefined;
   if (!data || !data.enabled || data.currentIndex === null) return null;
 
-  const zipData = await readActiveVersion(user, domain);
+  const zipData = await fs.readFile(versionPath(user, domain, data.currentIndex)).catch(() => undefined);
   if (!zipData) return null;
 
   const files = await readZip(zipData);
