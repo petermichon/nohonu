@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as analytics from '../../core/analytics/metrics.ts';
 import { db } from '../../db.ts';
-import { invalidateCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
+import { invalidateCustomDomainCache } from '../../core/sites/invalidate-custom-domain-cache.ts';
 import { SITES_DIR } from '../../config.ts';
 
 

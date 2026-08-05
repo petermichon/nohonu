@@ -1,4 +1,4 @@
-import { getCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
+import { getCustomDomainCache } from '../../core/sites/get-custom-domain-cache.ts';
 
 
 export async function checkCustomDomain(customDomain: string): Promise<boolean> {

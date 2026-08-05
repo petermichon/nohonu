@@ -1,5 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { invalidateCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
+import { invalidateCustomDomainCache } from '../../core/sites/invalidate-custom-domain-cache.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';

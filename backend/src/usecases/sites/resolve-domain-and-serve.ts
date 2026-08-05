@@ -1,4 +1,4 @@
-import { getCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
+import { getCustomDomainCache } from '../../core/sites/get-custom-domain-cache.ts';
 import { db } from '../../db.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
