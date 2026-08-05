@@ -1,5 +1,4 @@
 import * as fs from 'node:fs/promises';
-import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
 import { extractedSiteExists } from '../../core/sites/extracted-site-exists.ts';
 import { db } from '../../db.ts';
 import { getContentType } from '../../shared/mime.ts';
@@ -44,7 +43,13 @@ export async function serveSiteFile(
         await db.site.upsert(toSiteUpsert(user, domain, extractionData));
       }
     } catch {
-      await deleteExtractedFiles(user, domain);
+      try {
+        await fs.rm(extractedDir(user, domain), { recursive: true, force: true });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`Failed to delete extracted site for ${user}/${domain}: ${message}`);
+      }
+      await db.site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
       return null;
     }
   }

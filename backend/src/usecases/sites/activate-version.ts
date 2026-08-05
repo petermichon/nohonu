@@ -1,7 +1,6 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { deleteExtractedFiles } from '../../core/sites/delete-extracted-files.ts';
 import { db } from '../../db.ts';
-import { versionPath } from '../../shared/paths.ts';
+import { extractedDir, versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
@@ -38,7 +37,13 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   data.enabled = true;
   data.lastDeployedAt = Date.now();
   await db.site.upsert(toSiteUpsert(user, domain, data));
-  await deleteExtractedFiles(user, domain);
+  try {
+    await fs.rm(extractedDir(user, domain), { recursive: true, force: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Failed to delete extracted site for ${user}/${domain}: ${message}`);
+  }
+  await db.site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
   return { ok: true, value: undefined };
 }
 
