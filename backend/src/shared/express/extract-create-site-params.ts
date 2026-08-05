@@ -1,7 +1,7 @@
 import type { Request as ExpressReq } from 'express';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
-import { MAX_ZIP_BYTES } from '../../../shared/paths.ts';
-import type { CreateSiteParams } from '../../../shared/create-site-params.ts';
+import type { CreateSiteParams } from '../create-site-params.ts';
+import { MAX_ZIP_BYTES } from '../paths.ts';
+import { domainFrom } from './domain-from.ts';
 
 export function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | undefined {
   const sessionId = req.get('X-Session-Id') || '';

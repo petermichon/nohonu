@@ -1,8 +1,8 @@
 import type { Request as ExpressReq } from 'express';
-import { parseJson } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
-import { validateRepo } from '../../../shared/validate-repo.ts';
-import type { CreateGithubParams } from '../../../shared/create-github-params.ts';
+import type { CreateGithubParams } from '../create-github-params.ts';
+import { validateRepo } from '../validate-repo.ts';
+import { domainFrom } from './domain-from.ts';
+import { parseJson } from './http.ts';
 
 export async function extractCreateGithubParams(req: ExpressReq): Promise<CreateGithubParams | undefined> {
   const sessionId = req.get('X-Session-Id') || '';

@@ -2,7 +2,7 @@ import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { createSite } from '../../../usecases/sites/create-site.ts';
-import { extractCreateSiteParams } from './extract-create-site-params.ts';
+import { extractCreateSiteParams } from '../../../shared/express/extract-create-site-params.ts';
 
 export async function createSiteRaw(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = extractCreateSiteParams(req);

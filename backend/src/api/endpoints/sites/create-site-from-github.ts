@@ -2,7 +2,7 @@ import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { createSiteFromGithub as createSiteFromGithubUsecase } from '../../../usecases/sites/create-site-from-github.ts';
-import { extractCreateGithubParams } from './extract-create-github-params.ts';
+import { extractCreateGithubParams } from '../../../shared/express/extract-create-github-params.ts';
 
 export async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractCreateGithubParams(req);
