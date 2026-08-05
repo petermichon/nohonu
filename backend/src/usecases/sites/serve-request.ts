@@ -1,6 +1,6 @@
-import { recordHit } from './record-hit.ts';
-import { resolveDomainAndServe } from './resolve-domain-and-serve.ts';
-import { serveSiteFile } from './serve-site-file.ts';
+import { recordHit } from '../../core/sites/record-hit.ts';
+import { resolveDomainAndServe } from '../../core/sites/resolve-domain-and-serve.ts';
+import { serveSiteFile } from '../../core/sites/serve-site-file.ts';
 
 export async function serveRequest(
   host: string,
