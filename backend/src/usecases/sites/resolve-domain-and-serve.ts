@@ -1,5 +1,4 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
-import { listUsers } from '../../core/sites/list-users.ts';
 import { listDomains } from '../../core/sites/list-domains.ts';
 import { db } from '../../db.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
@@ -30,7 +29,7 @@ export async function resolveDomainAndServe(
   if (subdomainMatch && subdomainMatch[1] && !['www'].includes(subdomainMatch[1])) {
     const subdomain = subdomainMatch[1];
     // Find which site has this subdomain in its metadata
-    const users = await listUsers();
+    const users = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
     for (const user of users) {
       const domains = await listDomains(user);
       for (const domain of domains) {

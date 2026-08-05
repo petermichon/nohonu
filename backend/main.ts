@@ -6,12 +6,12 @@ import { scheduleUptimeChecks } from './src/scheduler.ts';
 import { loadAnalytics } from './src/usecases/sites/load-analytics.ts';
 import { saveAnalytics } from './src/usecases/sites/save-analytics.ts';
 import { SITES_DIR } from './src/config.ts';
-import { listUsers } from './src/core/sites/list-users.ts';
+import { db } from './src/db.ts';
 import { listDomains } from './src/core/sites/list-domains.ts';
 
 await fs.mkdir(SITES_DIR, { recursive: true });
 
-const users = await listUsers();
+const users = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
 for (const user of users) {
   const domains = await listDomains(user);
   for (const domain of domains) {
@@ -35,7 +35,7 @@ const server = app.listen(port, () => {
 
 process.on('SIGTERM', async () => {
   server.close();
-  const siteUsers = await listUsers();
+  const siteUsers = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
   for (const user of siteUsers) {
     const domains = await listDomains(user);
     for (const domain of domains) {

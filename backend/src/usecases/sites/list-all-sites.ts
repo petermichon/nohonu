@@ -1,5 +1,4 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
-import { listUsers } from '../../core/sites/list-users.ts';
 import { listDomains } from '../../core/sites/list-domains.ts';
 import { db } from '../../db.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
@@ -7,7 +6,7 @@ import type { PublicSiteSummary } from '../../shared/public-site-summary.ts';
 
 
 export async function listAllSites(username?: string): Promise<PublicSiteSummary[]> {
-  const users = await listUsers();
+  const users = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
   const allSites: PublicSiteSummary[] = [];
 
   for (const user of users) {
