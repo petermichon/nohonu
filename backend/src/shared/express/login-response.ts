@@ -1,5 +1,5 @@
 import type { Response as ExpressRes } from 'express';
-import type { LoginResult } from '../login-result.ts';
+import type { LoginResult } from '../auth/login-result.ts';
 import { json } from './http.ts';
 
 export function loginResponse(res: ExpressRes, result: LoginResult): void {

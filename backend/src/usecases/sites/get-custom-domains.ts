@@ -3,7 +3,7 @@ import { session } from '../../db/session.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 
 import type { Result } from '../../shared/errors.ts';
-import type { CustomDomain } from '../../shared/custom-domain.ts';
+import type { CustomDomain } from '../../shared/sites/custom-domain.ts';
 
 
 export async function getCustomDomains(sessionId: string, domain: string): Promise<Result<CustomDomain[]>> {

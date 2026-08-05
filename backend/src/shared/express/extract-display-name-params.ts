@@ -1,5 +1,5 @@
 import type { Request as ExpressReq } from 'express';
-import type { DisplayNameParams } from '../display-name-params.ts';
+import type { DisplayNameParams } from '../auth/display-name-params.ts';
 import { parseJson, requireSessionId } from './http.ts';
 
 export async function extractDisplayNameParams(req: ExpressReq): Promise<DisplayNameParams | undefined> {

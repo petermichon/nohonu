@@ -1,6 +1,6 @@
 import type { Request as ExpressReq } from 'express';
-import type { GithubParams } from '../github-params.ts';
-import { validateRepo } from '../validate-repo.ts';
+import type { GithubParams } from '../sites/github-params.ts';
+import { validateRepo } from '../sites/validate-repo.ts';
 import { domainFrom } from './domain-from.ts';
 import { parseJson } from './http.ts';
 

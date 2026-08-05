@@ -1,6 +1,6 @@
 import { uptime } from '../../memory/uptime.ts';
 import { SLOT_MS } from '../../config.ts';
-import { UPTIME_SLOTS } from '../../shared/uptime-slots.ts';
+import { UPTIME_SLOTS } from '../../shared/analytics/uptime-slots.ts';
 
 
 export function recordUptime(domain: string, up: boolean): void {

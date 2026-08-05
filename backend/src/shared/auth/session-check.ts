@@ -1,4 +1,4 @@
-import type { Result } from './errors.ts';
+import type { Result } from '../errors.ts';
 
 export function validateSession(
   session: { username: string; lastActive: number } | null,

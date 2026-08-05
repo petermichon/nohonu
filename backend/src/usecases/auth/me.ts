@@ -1,8 +1,8 @@
 import { session as sessionTable } from '../../db/session.ts';
 import { user as userTable } from '../../db/user.ts';
-import { toAuthUser } from '../../shared/auth-user.ts';
+import { toAuthUser } from '../../shared/auth/auth-user.ts';
 
-import type { MeResult } from '../../shared/me-result.ts';
+import type { MeResult } from '../../shared/auth/me-result.ts';
 
 export async function me(sessionId: string): Promise<MeResult> {
   const session = await sessionTable.findUnique({ where: { id: sessionId } });

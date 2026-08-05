@@ -1,5 +1,5 @@
 import type { Request as ExpressReq } from 'express';
-import type { UpdateMetaParams } from '../update-meta-params.ts';
+import type { UpdateMetaParams } from '../sites/update-meta-params.ts';
 import { domainFrom } from './domain-from.ts';
 import { parseJson } from './http.ts';
 

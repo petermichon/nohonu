@@ -1,9 +1,9 @@
 import { session as sessionTable } from '../../db/session.ts';
 import { user as userTable } from '../../db/user.ts';
-import { toAuthUser } from '../../shared/auth-user.ts';
-import { verifyPassword } from '../../shared/password.ts';
+import { toAuthUser } from '../../shared/auth/auth-user.ts';
+import { verifyPassword } from '../../shared/auth/password.ts';
 
-import type { LoginResult } from '../../shared/login-result.ts';
+import type { LoginResult } from '../../shared/auth/login-result.ts';
 
 export async function login(username: string, password: string, userAgent?: string): Promise<LoginResult> {
   const user = await userTable.findUnique({ where: { username } });

@@ -87,7 +87,7 @@ export const sites = {
 export const listStarredSites = (await import('../usecases/sites/list-starred-sites.ts')).listStarredSites;
 export const health = {
   ...(await import('../usecases/health/check-health.ts')),
-  ...(await import('../shared/evaluate-health.ts')),
+  ...(await import('../shared/health/evaluate-health.ts')),
 };
 
 export async function resetTestState(): Promise<void> {

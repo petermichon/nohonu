@@ -1,4 +1,4 @@
-import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from './paths.ts';
+import { VALID_CUSTOM_DOMAIN, MAX_CUSTOM_DOMAIN_LENGTH } from '../paths.ts';
 
 export function requireCustomDomain(customDomain: string | undefined): string | undefined {
   if (!customDomain) return;

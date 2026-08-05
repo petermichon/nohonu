@@ -1,5 +1,5 @@
 import type { Response as ExpressRes } from 'express';
-import type { RegisterResult } from '../register-result.ts';
+import type { RegisterResult } from '../auth/register-result.ts';
 import { json } from './http.ts';
 
 export function registerResponse(res: ExpressRes, result: RegisterResult): void {

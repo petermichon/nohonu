@@ -1,5 +1,5 @@
 import type { Request as ExpressReq } from 'express';
-import type { UploadCoverParams } from '../upload-cover-params.ts';
+import type { UploadCoverParams } from '../sites/upload-cover-params.ts';
 import { domainFrom } from './domain-from.ts';
 
 export function extractUploadCoverParams(req: ExpressReq): UploadCoverParams | undefined {

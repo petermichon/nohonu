@@ -2,11 +2,11 @@ import { hits } from '../../memory/hits.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { uptime } from '../../memory/uptime.ts';
 import { user as userTable } from '../../db/user.ts';
-import { totalHits } from '../../shared/hits-total.ts';
-import { uptimePercentage } from '../../shared/uptime-percentage.ts';
+import { totalHits } from '../../shared/analytics/hits-total.ts';
+import { uptimePercentage } from '../../shared/analytics/uptime-percentage.ts';
 import { site } from '../../db/site.ts';
 
-import type { PublicSiteSummary } from '../../shared/public-site-summary.ts';
+import type { PublicSiteSummary } from '../../shared/sites/public-site-summary.ts';
 
 
 export async function listAllSites(username?: string): Promise<PublicSiteSummary[]> {

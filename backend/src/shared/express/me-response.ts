@@ -1,5 +1,5 @@
 import type { Response as ExpressRes } from 'express';
-import type { MeResult } from '../me-result.ts';
+import type { MeResult } from '../auth/me-result.ts';
 import { json } from './http.ts';
 
 export function meResponse(res: ExpressRes, result: MeResult): void {

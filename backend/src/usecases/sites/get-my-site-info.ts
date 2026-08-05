@@ -1,6 +1,6 @@
 import { session } from '../../db/session.ts';
 import { site as siteTable } from '../../db/site.ts';
-import { SITE_INFO_SELECT, toSiteInfo } from '../../shared/site-info.ts';
+import { SITE_INFO_SELECT, toSiteInfo } from '../../shared/sites/site-info.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 
 import type { Result } from '../../shared/errors.ts';
