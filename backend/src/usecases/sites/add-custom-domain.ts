@@ -1,6 +1,7 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { invalidateCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
-import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { syncCustomDomains } from '../../core/sites/sync-custom-domains.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { siteWhere } from '../../shared/site-where.ts';
@@ -33,7 +34,11 @@ export async function addCustomDomain(sessionId: string, domain: string, customD
   }
 
   data.customDomains.push({ domain: customDomain, verified: false });
-  await writeSiteMetadata(user, domain, data);
+  const siteId = await upsertSite(user, domain, data);
+  if (!siteId) {
+    return { ok: false, code: 'internal', message: 'Failed to save site' };
+  }
+  await syncCustomDomains(siteId, data.customDomains ?? []);
   invalidateCustomDomainCache();
   return { ok: true, value: undefined };
 }
