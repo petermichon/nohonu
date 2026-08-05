@@ -1,4 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { siteWhere } from '../../shared/site-where.ts';
@@ -16,7 +17,7 @@ export async function getSiteRepos(
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const data = record ? toSiteData(record) : undefined;
   if (!data) return { ok: true, value: null };
   const history = data.repoHistory.map(({ repo, branch, lastUsed }) => ({ repo, branch, lastUsed }));

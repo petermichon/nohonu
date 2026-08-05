@@ -1,4 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { db } from '../../db.ts';
 import { hits, uptime } from '../../memory.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -23,7 +24,7 @@ export async function listMySites(sessionId: string): Promise<Result<Awaited<Ret
   const accountProfilePicture = userRecord?.profilePicture ?? undefined;
   const value = await Promise.all(
     domains.map(async (domain) => {
-      const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+      const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
       const data = record ? toSiteData(record) : undefined;
       return toSiteSummary(domain, data, user, accountProfilePicture, totalHits(hits.get(domain)), uptimePercentage(uptime.get(domain)));
     }),

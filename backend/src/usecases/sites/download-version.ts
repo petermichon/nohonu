@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { versionPath } from '../../shared/paths.ts';
+import { fileExists, versionPath } from '../../shared/paths.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import type { Result } from '../../shared/errors.ts';
 
@@ -17,7 +17,7 @@ export async function downloadVersion(
   const user = auth.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  if (!(await fs.stat(versionPath(user, domain, index)).then(() => true).catch(() => false))) return { ok: true, value: null };
+  if (!(await fileExists(versionPath(user, domain, index)))) return { ok: true, value: null };
   const data = await fs.readFile(versionPath(user, domain, index));
   return { ok: true, value: { data, filename: `${domain}-${index}.zip` } };
 }

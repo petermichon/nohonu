@@ -1,4 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { db } from '../../db.ts';
 import { coverImagePath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -19,7 +20,7 @@ export async function uploadSiteCover(sessionId: string, domain: string, imageDa
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const data = record ? toSiteData(record) : undefined;
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };

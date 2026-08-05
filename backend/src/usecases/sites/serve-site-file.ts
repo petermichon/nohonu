@@ -1,7 +1,8 @@
 import * as fs from 'node:fs/promises';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { db } from '../../db.ts';
 import { getContentType } from '../../shared/mime.ts';
-import { extractedDir, extractedFilePath, versionPath } from '../../shared/paths.ts';
+import { extractedDir, extractedFilePath, fileExists, versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
@@ -14,13 +15,13 @@ export async function serveSiteFile(
   domain: string,
   filePath: string,
 ): Promise<{ data: Uint8Array; contentType: string } | null> {
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const siteData = record ? toSiteData(record) : undefined;
   if (!siteData) return null;
 
   const extractedReady = siteData.extracted
-    && await fs.stat(extractedDir(user, domain)).then(() => true).catch(() => false)
-    && await fs.stat(extractedFilePath(user, domain, 'index.html')).then(() => true).catch(() => false);
+    && await fileExists(extractedDir(user, domain))
+    && await fileExists(extractedFilePath(user, domain, 'index.html'));
   if (!extractedReady) {
     if (siteData.extracted) {
       await db.site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
@@ -41,7 +42,7 @@ export async function serveSiteFile(
         await fs.mkdir(dir, { recursive: true });
         await fs.writeFile(outPath, data);
       }
-      const extractionRecord = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+      const extractionRecord = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
       const extractionData = extractionRecord ? toSiteData(extractionRecord) : undefined;
       if (extractionData) {
         extractionData.extracted = true;

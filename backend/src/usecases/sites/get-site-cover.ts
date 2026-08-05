@@ -1,4 +1,5 @@
 import { db } from '../../db.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { coverImagePath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
@@ -13,7 +14,7 @@ export async function getSiteCover(domain: string): Promise<Uint8Array | null> {
   const user = site?.userUsername ?? null;
   if (!user) return null;
 
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const data = record ? toSiteData(record) : undefined;
   if (!data || !data.coverImage) return null;
 

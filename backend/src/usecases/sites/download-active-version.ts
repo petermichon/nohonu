@@ -1,4 +1,5 @@
 import * as fs from 'node:fs/promises';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
@@ -10,7 +11,7 @@ export async function downloadActiveVersion(
   const site = await db.site.findFirst({ where: { domain }, select: { userUsername: true } });
   const user = site?.userUsername ?? null;
   if (!user) return null;
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const meta = record ? toSiteData(record) : undefined;
   if (!meta || !meta.enabled || meta.currentIndex === null) return null;
   const data = await fs.readFile(versionPath(user, domain, meta.currentIndex)).catch(() => undefined);

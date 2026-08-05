@@ -1,4 +1,5 @@
 import { db } from '../../db.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
@@ -32,7 +33,7 @@ export async function resolveDomainAndServe(
     for (const user of users) {
       const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map((s) => s.domain);
       for (const domain of domains) {
-        const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+        const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const info = record ? toSiteData(record) : undefined;
         if (info && info.subdomain === subdomain && info.currentIndex !== null) {
           const filePath = path === '/' ? '/index.html' : path;
@@ -49,7 +50,7 @@ export async function resolveDomainAndServe(
       const site = await db.site.findFirst({ where: { domain: potential }, select: { userUsername: true } });
       const user = site?.userUsername ?? null;
       if (user) {
-        const record = await db.site.findUnique({ where: siteWhere(user, potential), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+        const record = await db.site.findUnique({ where: siteWhere(user, potential), include: SITE_INCLUDE });
   const info = record ? toSiteData(record) : undefined;
         if (info && info.currentIndex !== null) {
           const domain = potential;

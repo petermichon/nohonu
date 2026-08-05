@@ -1,6 +1,7 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { db } from '../../db.ts';
-import { extractedDir, versionPath } from '../../shared/paths.ts';
+import { extractedDir, fileExists, versionPath } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
@@ -24,11 +25,11 @@ export async function activateVersion(sessionId: string, domain: string, index: 
   const user = auth.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  const exists = await fs.stat(versionPath(user, domain, index)).then(() => true).catch(() => false);
+  const exists = await fileExists(versionPath(user, domain, index));
   if (!exists) {
     return { ok: false, code: 'not_found', message: 'Version not found' };
   }
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: { versions: true, repoHistories: true, customDomains: true, starredBy: true } });
+  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const data = record ? toSiteData(record) : undefined;
   if (!data) {
     return { ok: false, code: 'internal', message: 'Failed to activate version' };
