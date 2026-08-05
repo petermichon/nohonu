@@ -1,6 +1,6 @@
 import { SLOT_MS } from '../../config.ts';
 import { hits } from './analytics-state.ts';
-import { STATS_SLOTS } from './stats-slots.ts';
+import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 
 function buildStatSlot(
   domainData: Map<number, number>,

@@ -1,7 +1,7 @@
 import { SLOT_MS } from '../../config.ts';
 import { hits, visitors } from './analytics-state.ts';
 import { MAX_VISITORS_PER_DOMAIN } from '../../shared/max-visitors-per-domain.ts';
-import { STATS_SLOTS } from './stats-slots.ts';
+import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 
 export function recordHit(domain: string, ip: string): void {
   const slot = Math.floor(Date.now() / SLOT_MS);
