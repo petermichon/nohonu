@@ -6,6 +6,7 @@ import { requestFilePath } from '../../shared/request-file-path.ts';
 import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { splitSitePath } from '../../shared/split-site-path.ts';
+import { subdomainOf } from '../../shared/subdomain-of.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 
 export async function resolveDomainAndServe(
@@ -28,9 +29,8 @@ export async function resolveDomainAndServe(
   }
 
   // Check for subdomain-based routing
-  const subdomainMatch = host.match(/^([^.]+)\./);
-  if (subdomainMatch && subdomainMatch[1] && !['www'].includes(subdomainMatch[1])) {
-    const subdomain = subdomainMatch[1];
+  const subdomain = subdomainOf(host);
+  if (subdomain) {
     // Find which site has this subdomain in its metadata
     const users = (await user.findMany({ select: { username: true } })).map((u) => u.username);
     for (const siteUser of users) {
