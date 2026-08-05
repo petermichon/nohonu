@@ -5,6 +5,11 @@ import * as auth from './endpoints/auth.ts';
 import { checkDomain } from './endpoints/check/check-domain.ts';
 import { checkCustomDomain } from './endpoints/check/check-custom-domain.ts';
 import { checkSubdomain } from './endpoints/check/check-subdomain.ts';
+import { getUserByUsernameEndpoint } from './endpoints/users/get-user-by-username.ts';
+import { getPublicSiteInfo } from './endpoints/users/get-public-site-info.ts';
+import { getUserSites } from './endpoints/users/get-user-sites.ts';
+import { getUserStars } from './endpoints/users/get-user-stars.ts';
+import { getProfilePicture } from './endpoints/users/get-profile-picture.ts';
 import { listSites } from './endpoints/sites/list-sites.ts';
 import { listExploreSites } from './endpoints/sites/list-explore-sites.ts';
 import { getSiteInfo } from './endpoints/sites/get-site-info.ts';
@@ -37,7 +42,6 @@ import { getVerificationToken } from './endpoints/custom-domains/get-verificatio
 import { addCustomDomain } from './endpoints/custom-domains/add-custom-domain.ts';
 import { verifyCustomDomain } from './endpoints/custom-domains/verify-custom-domain.ts';
 import { deleteCustomDomain } from './endpoints/custom-domains/delete-custom-domain.ts';
-import * as users from './endpoints/users.ts';
 import { API_KEY } from '../config.ts';
 
 export const router = Router();
@@ -68,11 +72,11 @@ router.get('/check-domain', checkDomain);
 router.get('/check-custom-domain', checkCustomDomain);
 router.get('/check-subdomain', checkSubdomain);
 router.get('/explore/sites', listExploreSites);
-router.get('/users/:username/sites', users.getUserSites);
-router.get('/users/:username/profile-picture', users.getProfilePicture);
-router.get('/users/:username/stars', users.getUserStars);
-router.get('/users/:username/:domain', users.getPublicSiteInfo);
-router.get('/users/:username', users.getUserByUsernameEndpoint);
+router.get('/users/:username/sites', getUserSites);
+router.get('/users/:username/profile-picture', getProfilePicture);
+router.get('/users/:username/stars', getUserStars);
+router.get('/users/:username/:domain', getPublicSiteInfo);
+router.get('/users/:username', getUserByUsernameEndpoint);
 
 // Auth
 router.get('/auth/me', auth.authMe);
