@@ -1,7 +1,8 @@
+import type { Prisma } from '../../generated/prisma/client.ts';
 import type { SiteData } from './paths.ts';
 import { siteWhere } from './site-where.ts';
 
-export function toSiteUpsert(user: string, domain: string, data: SiteData) {
+export function toSiteUpsert(user: string, domain: string, data: SiteData): Prisma.SiteUpsertArgs {
   return {
     where: siteWhere(user, domain),
     create: toSiteCreate(user, domain, data),
@@ -10,7 +11,7 @@ export function toSiteUpsert(user: string, domain: string, data: SiteData) {
   };
 }
 
-export function toSiteCreate(user: string, domain: string, data: SiteData) {
+export function toSiteCreate(user: string, domain: string, data: SiteData): Prisma.SiteUncheckedCreateInput {
   const siteId = data.siteId || `${user}-${domain}`;
   return {
     siteId,
@@ -29,7 +30,7 @@ export function toSiteCreate(user: string, domain: string, data: SiteData) {
   };
 }
 
-export function toSiteUpdate(user: string, domain: string, data: SiteData) {
+export function toSiteUpdate(user: string, domain: string, data: SiteData): Prisma.SiteUncheckedUpdateInput {
   return {
     nextIndex: data.nextIndex,
     currentIndex: data.currentIndex,
