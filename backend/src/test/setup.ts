@@ -86,7 +86,10 @@ export const sites = {
   ...(await import('../usecases/sites/verify-custom-domain.ts')),
 };
 export const listStarredSites = (await import('../usecases/sites/list-starred-sites.ts')).listStarredSites;
-export const health = await import('../usecases/health/index.ts');
+export const health = {
+  ...(await import('../usecases/health/check-health.ts')),
+  ...(await import('../usecases/health/evaluate-health.ts')),
+};
 
 export async function resetTestState(): Promise<void> {
   await sites.resetDatabase();
