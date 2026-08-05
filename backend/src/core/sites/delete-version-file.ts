@@ -2,8 +2,8 @@ import { db } from '../../db.ts';
 import { versionPath } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
-import { syncVersions } from './sync-versions.ts';
 import { upsertSite } from './upsert-site.ts';
+import { toVersionSourceData } from '../../shared/version-source-data.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -37,7 +37,18 @@ export async function deleteVersionFile(user: string, domain: string, index: num
   }
   const siteRowId = await upsertSite(user, domain, data);
   if (siteRowId) {
-    await syncVersions(siteRowId, data.versions);
+    for (const [key, entry] of Object.entries(data.versions)) {
+      const index = parseInt(key, 10);
+      const existingVersion = await db.version.findFirst({ where: { siteId: siteRowId, index } });
+      const sourceData = toVersionSourceData(entry.source);
+      if (existingVersion) {
+        await db.version.update({ where: { id: existingVersion.id }, data: { ...sourceData, createdAt: entry.createdAt } });
+      } else {
+        await db.version.create({ data: { index, createdAt: entry.createdAt, siteId: siteRowId, ...sourceData } });
+      }
+    }
+    const versionIndices = new Set(Object.keys(data.versions).map(Number));
+    await db.version.deleteMany({ where: { siteId: siteRowId, index: { notIn: Array.from(versionIndices) } } });
   }
   return true;
 }

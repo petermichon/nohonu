@@ -1,6 +1,6 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { syncVersions } from '../../core/sites/sync-versions.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
+import { toVersionSourceData } from '../../shared/version-source-data.ts';
 import { db } from '../../db.ts';
 import { versionsDir, versionPath, MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -75,7 +75,18 @@ export async function uploadVersionFromGithub(
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
-  await syncVersions(siteRowId, data.versions);
+  for (const [key, entry] of Object.entries(data.versions)) {
+    const index = parseInt(key, 10);
+    const existingVersion = await db.version.findFirst({ where: { siteId: siteRowId, index } });
+    const sourceData = toVersionSourceData(entry.source);
+    if (existingVersion) {
+      await db.version.update({ where: { id: existingVersion.id }, data: { ...sourceData, createdAt: entry.createdAt } });
+    } else {
+      await db.version.create({ data: { index, createdAt: entry.createdAt, siteId: siteRowId, ...sourceData } });
+    }
+  }
+  const versionIndices = new Set(Object.keys(data.versions).map(Number));
+  await db.version.deleteMany({ where: { siteId: siteRowId, index: { notIn: Array.from(versionIndices) } } });
   await db.repoHistory.deleteMany({ where: { siteId: siteRowId } });
   if (data.repoHistory.length > 0) {
     await db.repoHistory.createMany({
