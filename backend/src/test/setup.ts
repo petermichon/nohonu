@@ -75,6 +75,7 @@ export const sites = {
   ...(await import('../usecases/sites/reset-analytics.ts')),
   ...(await import('../usecases/sites/reset-database.ts')),
   ...(await import('../usecases/sites/save-analytics.ts')),
+  ...(await import('../usecases/sites/resolve-domain-and-serve.ts')),
   ...(await import('../usecases/sites/serve-request.ts')),
   ...(await import('../usecases/sites/toggle-site.ts')),
   ...(await import('../usecases/sites/toggle-star.ts')),
