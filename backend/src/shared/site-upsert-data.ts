@@ -1,4 +1,14 @@
 import type { SiteData } from './paths.ts';
+import { siteWhere } from './site-where.ts';
+
+export function toSiteUpsert(user: string, domain: string, data: SiteData) {
+  return {
+    where: siteWhere(user, domain),
+    create: toSiteCreate(user, domain, data),
+    update: toSiteUpdate(user, domain, data),
+    select: { id: true },
+  };
+}
 
 export function toSiteCreate(user: string, domain: string, data: SiteData) {
   const siteId = data.siteId || `${user}-${domain}`;
