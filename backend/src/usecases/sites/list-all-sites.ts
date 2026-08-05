@@ -1,5 +1,4 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
-import { listDomains } from '../../core/sites/list-domains.ts';
 import { db } from '../../db.ts';
 import * as analytics from '../../core/analytics/metrics.ts';
 import type { PublicSiteSummary } from '../../shared/public-site-summary.ts';
@@ -11,7 +10,7 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
 
   for (const user of users) {
     const [domains, userRecord] = await Promise.all([
-      listDomains(user),
+      db.site.findMany({ where: { userUsername: user }, select: { domain: true } }).then((sites) => sites.map((s) => s.domain)),
       db.user.findUnique({ where: { username: user }, select: { profilePicture: true } }),
     ]);
     const accountProfilePicture = userRecord?.profilePicture ?? undefined;

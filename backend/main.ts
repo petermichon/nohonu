@@ -7,13 +7,14 @@ import { loadAnalytics } from './src/usecases/sites/load-analytics.ts';
 import { saveAnalytics } from './src/usecases/sites/save-analytics.ts';
 import { SITES_DIR } from './src/config.ts';
 import { db } from './src/db.ts';
-import { listDomains } from './src/core/sites/list-domains.ts';
 
 await fs.mkdir(SITES_DIR, { recursive: true });
 
 const users = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
 for (const user of users) {
-  const domains = await listDomains(user);
+  const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
+    (s) => s.domain,
+  );
   for (const domain of domains) {
     await loadAnalytics(user, domain);
   }
@@ -37,7 +38,9 @@ process.on('SIGTERM', async () => {
   server.close();
   const siteUsers = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
   for (const user of siteUsers) {
-    const domains = await listDomains(user);
+    const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
+      (s) => s.domain,
+    );
     for (const domain of domains) {
       await saveAnalytics(user, domain);
     }

@@ -1,12 +1,11 @@
 import { db } from '../../db.ts';
 import * as analytics from '../analytics/metrics.ts';
-import { listDomains } from './list-domains.ts';
 import { readSiteMetadata } from './read-site-metadata.ts';
 import type { SiteSummary } from '../../shared/site-summary.ts';
 
 export async function listSites(user: string): Promise<SiteSummary[]> {
   const [domains, userRecord] = await Promise.all([
-    listDomains(user),
+    db.site.findMany({ where: { userUsername: user }, select: { domain: true } }).then((sites) => sites.map((s) => s.domain)),
     db.user.findUnique({ where: { username: user }, select: { profilePicture: true } }),
   ]);
   const accountProfilePicture = userRecord?.profilePicture ?? undefined;

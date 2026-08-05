@@ -1,4 +1,3 @@
-import { listDomains } from './list-domains.ts';
 import { db } from '../../db.ts';
 import { readSiteMetadata } from './read-site-metadata.ts';
 
@@ -12,7 +11,7 @@ async function buildCustomDomainCache(): Promise<void> {
   const users = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
 
   for (const user of users) {
-    const domains = await listDomains(user);
+    const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map((s) => s.domain);
     for (const domain of domains) {
       const data = await readSiteMetadata(user, domain);
       if (data?.customDomains) {
