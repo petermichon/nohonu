@@ -1,8 +1,7 @@
-import { db } from '../../db.ts';
-
+import { starredBy } from '../../db/starred-by.ts';
 
 export async function listStarredSites(username: string): Promise<{ user: string; domain: string; displayName?: string; coverImage?: string; starCount?: number }[]> {
-  const starred = await db.starredBy.findMany({
+  const starred = await starredBy.findMany({
     where: { username },
     include: { site: { select: { userUsername: true, domain: true, displayName: true, coverImage: true, starCount: true } } },
   });

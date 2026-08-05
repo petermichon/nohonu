@@ -1,8 +1,9 @@
-import { db } from '../../db.ts';
+import { user as userTable } from '../../db/user.ts';
 import { toAuthUser } from '../../shared/auth-user.ts';
+
 import type { AuthUser } from '../../shared/auth-user.ts';
 
 export async function getPublicUser(username: string): Promise<AuthUser | null> {
-  const user = await db.user.findUnique({ where: { username } });
+  const user = await userTable.findUnique({ where: { username } });
   return user ? toAuthUser(user) : null;
 }

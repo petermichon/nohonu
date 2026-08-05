@@ -1,8 +1,13 @@
-import * as fs from 'node:fs/promises';
-import { db } from '../../db.ts';
-import { validateSession } from '../../shared/session-check.ts';
-import { fileExists, versionPath } from '../../shared/paths.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { session } from '../../db/session.ts';
+import { fileExists, versionPath } from '../../shared/paths.ts';
+import { validateSession } from '../../shared/session-check.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
+
 import type { Result } from '../../shared/errors.ts';
 
 
@@ -11,7 +16,7 @@ export async function downloadVersion(
   domain: string,
   index: number,
 ): Promise<Result<{ data: Uint8Array; filename: string } | null>> {
-  const sessionRecord = await db.session.findUnique({ where: { id: sessionId } });
+  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;

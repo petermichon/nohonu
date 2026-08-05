@@ -1,14 +1,16 @@
-import { db } from '../../db.ts';
+import { session as sessionTable } from '../../db/session.ts';
+import { user } from '../../db/user.ts';
+
 import type { ProfileResult } from '../../shared/profile-result.ts';
 
 export async function updateDisplayName(sessionId: string, displayName: string): Promise<ProfileResult> {
-  const session = await db.session.findUnique({ where: { id: sessionId } });
+  const session = await sessionTable.findUnique({ where: { id: sessionId } });
   if (!session) {
     return { success: false, error: 'Invalid session' };
   }
 
   try {
-    await db.user.update({ where: { username: session.username }, data: { displayName } });
+    await user.update({ where: { username: session.username }, data: { displayName } });
     return { success: true };
   } catch (error) {
     return {

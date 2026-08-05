@@ -1,17 +1,19 @@
 import { SLOT_MS } from '../../config.ts';
-import { db } from '../../db.ts';
+import { analytics } from '../../db/analytics.ts';
+import { site as siteTable } from '../../db/site.ts';
 import { hits, uptime, visitors } from '../../memory.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 import { UPTIME_SLOTS } from '../../shared/uptime-slots.ts';
+
 import type { AnalyticsSnapshot } from '../../shared/analytics-snapshot.ts';
 
 
 export async function loadAnalytics(user: string, domain: string): Promise<void> {
-  const site = await db.site.findUnique({ where: siteWhere(user, domain), select: { id: true } });
+  const site = await siteTable.findUnique({ where: siteWhere(user, domain), select: { id: true } });
   if (!site) return;
 
-  const record = await db.analytics.findUnique({ where: { siteId: site.id } });
+  const record = await analytics.findUnique({ where: { siteId: site.id } });
   if (!record) return;
 
   try {

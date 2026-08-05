@@ -1,9 +1,12 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
-import { db } from '../../db.ts';
+import { repoHistory as repoHistoryTable } from '../../db/repo-history.ts';
+import { session } from '../../db/session.ts';
+import { site } from '../../db/site.ts';
+import { version } from '../../db/version.ts';
 import { versionsDir, versionPath, domainDir, MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { DEFAULT_DATA } from '../../shared/site-data.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
@@ -24,13 +27,13 @@ export async function createSiteFromGithub(
   ref: string,
   subdomain?: string,
 ): Promise<Result<{ index: number; siteId: string; repo: string; branch: string }>> {
-  const sessionRecord = await db.session.findUnique({ where: { id: sessionId } });
+  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;
 
   // Check if domain already exists
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
+  const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const existingData = record ? toSiteData(record) : undefined;
   if (existingData) {
     return { ok: false, code: 'already_exists', message: 'Domain already exists for this user' };
@@ -80,25 +83,25 @@ export async function createSiteFromGithub(
   await fs.mkdir(versionsDir(user, domain), { recursive: true });
   await fs.writeFile(versionPath(user, domain, index), zipData);
 
-  const siteRowId = (await db.site.upsert(toSiteUpsert(user, domain, data)))?.id;
+  const siteRowId = (await site.upsert(toSiteUpsert(user, domain, data)))?.id;
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
   for (const [key, entry] of Object.entries(data.versions)) {
     const index = parseInt(key, 10);
-    const existingVersion = await db.version.findFirst({ where: { siteId: siteRowId, index } });
+    const existingVersion = await version.findFirst({ where: { siteId: siteRowId, index } });
     const sourceData = toVersionSourceData(entry.source);
     if (existingVersion) {
-      await db.version.update({ where: { id: existingVersion.id }, data: { ...sourceData, createdAt: entry.createdAt } });
+      await version.update({ where: { id: existingVersion.id }, data: { ...sourceData, createdAt: entry.createdAt } });
     } else {
-      await db.version.create({ data: { index, createdAt: entry.createdAt, siteId: siteRowId, ...sourceData } });
+      await version.create({ data: { index, createdAt: entry.createdAt, siteId: siteRowId, ...sourceData } });
     }
   }
   const versionIndices = new Set(Object.keys(data.versions).map(Number));
-  await db.version.deleteMany({ where: { siteId: siteRowId, index: { notIn: Array.from(versionIndices) } } });
-  await db.repoHistory.deleteMany({ where: { siteId: siteRowId } });
+  await version.deleteMany({ where: { siteId: siteRowId, index: { notIn: Array.from(versionIndices) } } });
+  await repoHistoryTable.deleteMany({ where: { siteId: siteRowId } });
   if (data.repoHistory.length > 0) {
-    await db.repoHistory.createMany({
+    await repoHistoryTable.createMany({
       data: data.repoHistory.map((r) => ({ repo: r.repo, branch: r.branch, lastUsed: r.lastUsed, siteId: siteRowId })),
     });
   }

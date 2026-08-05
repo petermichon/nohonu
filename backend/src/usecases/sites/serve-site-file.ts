@@ -1,13 +1,23 @@
-import * as fs from 'node:fs/promises';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
-import { db } from '../../db.ts';
+import { site } from '../../db/site.ts';
 import { getContentType } from '../../shared/mime.ts';
 import { extractedDir, extractedFilePath, fileExists, versionPath } from '../../shared/paths.ts';
-import { siteWhere } from '../../shared/site-where.ts';
-import { toSiteData } from '../../shared/to-site-data.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
+import { siteWhere } from '../../shared/site-where.ts';
 import { stripCommonRoot } from '../../shared/strip-common-root.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 import { readZip } from '../../shared/zip.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
+
+
+
+
+
+
 
 
 export async function serveSiteFile(
@@ -15,7 +25,7 @@ export async function serveSiteFile(
   domain: string,
   filePath: string,
 ): Promise<{ data: Uint8Array; contentType: string } | null> {
-  const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
+  const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const siteData = record ? toSiteData(record) : undefined;
   if (!siteData) return null;
 
@@ -24,7 +34,7 @@ export async function serveSiteFile(
     && await fileExists(extractedFilePath(user, domain, 'index.html'));
   if (!extractedReady) {
     if (siteData.extracted) {
-      await db.site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
+      await site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
     }
     if (!siteData.enabled || siteData.currentIndex === null) return null;
 
@@ -42,11 +52,11 @@ export async function serveSiteFile(
         await fs.mkdir(dir, { recursive: true });
         await fs.writeFile(outPath, data);
       }
-      const extractionRecord = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
+      const extractionRecord = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
       const extractionData = extractionRecord ? toSiteData(extractionRecord) : undefined;
       if (extractionData) {
         extractionData.extracted = true;
-        await db.site.upsert(toSiteUpsert(user, domain, extractionData));
+        await site.upsert(toSiteUpsert(user, domain, extractionData));
       }
     } catch {
       try {
@@ -55,7 +65,7 @@ export async function serveSiteFile(
         const message = error instanceof Error ? error.message : String(error);
         console.error(`Failed to delete extracted site for ${user}/${domain}: ${message}`);
       }
-      await db.site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
+      await site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
       return null;
     }
   }

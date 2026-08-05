@@ -1,10 +1,14 @@
-import * as fs from 'node:fs/promises';
-import { db } from '../../db.ts';
-import { getProfilePicturePath } from '../../shared/paths.ts';
 import { SITES_DIR } from '../../config.ts';
+import { user as userTable } from '../../db/user.ts';
+import { getProfilePicturePath } from '../../shared/paths.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
 
 export async function getProfilePictureFile(username: string): Promise<Uint8Array | null> {
-  const user = await db.user.findUnique({ where: { username } });
+  const user = await userTable.findUnique({ where: { username } });
   if (!user || !user.profilePicture) return null;
 
   try {

@@ -1,21 +1,23 @@
-import { db } from '../../db.ts';
-import { hashPassword } from '../../shared/password.ts';
+import { session as sessionTable } from '../../db/session.ts';
+import { user as userTable } from '../../db/user.ts';
 import { toAuthUser } from '../../shared/auth-user.ts';
+import { hashPassword } from '../../shared/password.ts';
+
 import type { RegisterResult } from '../../shared/register-result.ts';
 
 export async function register(password: string, username: string, userAgent?: string): Promise<RegisterResult> {
   try {
-    const existing = await db.user.findUnique({ where: { username } });
+    const existing = await userTable.findUnique({ where: { username } });
     if (existing) {
       return { success: false, error: 'Username already exists' };
     }
 
     const passwordHash = await hashPassword(password);
-    const user = await db.user.create({
+    const user = await userTable.create({
       data: { username, passwordHash, displayName: username, createdAt: Date.now() },
     });
 
-    const session = await db.session.create({
+    const session = await sessionTable.create({
       data: {
         id: crypto.randomUUID(),
         username,

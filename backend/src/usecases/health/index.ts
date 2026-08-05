@@ -1,4 +1,4 @@
-import { db } from '../../db.ts';
+import { user } from '../../db/user.ts';
 
 const startedAt = Date.now();
 
@@ -11,7 +11,7 @@ export function evaluateHealth(storageStatus: StorageStatus): HealthStatus {
 
 async function probeStorage(): Promise<StorageStatus> {
   try {
-    await db.user.count();
+    await user.count();
     return 'ok';
   } catch {
     return 'error';

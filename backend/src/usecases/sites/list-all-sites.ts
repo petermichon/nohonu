@@ -1,7 +1,8 @@
-import { db } from '../../db.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
+import { site } from '../../db/site.ts';
+import { user as userTable } from '../../db/user.ts';
 import { hits, uptime } from '../../memory.ts';
 import { totalHits } from '../../shared/hits-total.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteData } from '../../shared/to-site-data.ts';
 import { uptimePercentage } from '../../shared/uptime-percentage.ts';
@@ -10,17 +11,17 @@ import type { PublicSiteSummary } from '../../shared/public-site-summary.ts';
 
 
 export async function listAllSites(username?: string): Promise<PublicSiteSummary[]> {
-  const users = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
+  const users = (await userTable.findMany({ select: { username: true } })).map((u) => u.username);
   const allSites: PublicSiteSummary[] = [];
 
   for (const user of users) {
     const [domains, userRecord] = await Promise.all([
-      db.site.findMany({ where: { userUsername: user }, select: { domain: true } }).then((sites) => sites.map((s) => s.domain)),
-      db.user.findUnique({ where: { username: user }, select: { profilePicture: true } }),
+      site.findMany({ where: { userUsername: user }, select: { domain: true } }).then((sites) => sites.map((s) => s.domain)),
+      userTable.findUnique({ where: { username: user }, select: { profilePicture: true } }),
     ]);
     const accountProfilePicture = userRecord?.profilePicture ?? undefined;
     for (const domain of domains) {
-      const record = await db.site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
+      const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
   const data = record ? toSiteData(record) : undefined;
       allSites.push({
         user,

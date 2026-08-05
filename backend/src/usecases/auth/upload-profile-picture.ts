@@ -1,7 +1,12 @@
-import * as fs from 'node:fs/promises';
-import { db } from '../../db.ts';
-import { getProfilePicturePath } from '../../shared/paths.ts';
 import { SITES_DIR } from '../../config.ts';
+import { session as sessionTable } from '../../db/session.ts';
+import { user } from '../../db/user.ts';
+import { getProfilePicturePath } from '../../shared/paths.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
 import type { ProfileResult } from '../../shared/profile-result.ts';
 
 export async function uploadProfilePicture(
@@ -9,7 +14,7 @@ export async function uploadProfilePicture(
   contentType: string,
   data: ArrayBuffer,
 ): Promise<ProfileResult> {
-  const session = await db.session.findUnique({ where: { id: sessionId } });
+  const session = await sessionTable.findUnique({ where: { id: sessionId } });
   if (!session) {
     return { success: false, error: 'Invalid session' };
   }
@@ -28,7 +33,7 @@ export async function uploadProfilePicture(
     const dir = profilePicturePath.substring(0, profilePicturePath.lastIndexOf('/'));
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(profilePicturePath, new Uint8Array(data));
-    await db.user.update({ where: { username }, data: { profilePicture: 'profile.jpg' } });
+    await user.update({ where: { username }, data: { profilePicture: 'profile.jpg' } });
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

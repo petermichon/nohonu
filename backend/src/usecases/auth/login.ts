@@ -1,10 +1,12 @@
-import { db } from '../../db.ts';
-import { verifyPassword } from '../../shared/password.ts';
+import { session as sessionTable } from '../../db/session.ts';
+import { user as userTable } from '../../db/user.ts';
 import { toAuthUser } from '../../shared/auth-user.ts';
+import { verifyPassword } from '../../shared/password.ts';
+
 import type { LoginResult } from '../../shared/login-result.ts';
 
 export async function login(username: string, password: string, userAgent?: string): Promise<LoginResult> {
-  const user = await db.user.findUnique({ where: { username } });
+  const user = await userTable.findUnique({ where: { username } });
   if (!user) {
     return { success: false, error: 'Invalid username or password' };
   }
@@ -14,7 +16,7 @@ export async function login(username: string, password: string, userAgent?: stri
     return { success: false, error: 'Invalid username or password' };
   }
 
-  const session = await db.session.create({
+  const session = await sessionTable.create({
     data: {
       id: crypto.randomUUID(),
       username,

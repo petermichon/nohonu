@@ -1,5 +1,5 @@
-import { db } from '../../db.ts';
+import { session } from '../../db/session.ts';
 
 export async function logout(sessionId: string): Promise<void> {
-  await db.session.deleteMany({ where: { id: sessionId } });
+  await session.deleteMany({ where: { id: sessionId } });
 }

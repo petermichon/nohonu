@@ -1,18 +1,20 @@
-import * as fs from 'node:fs/promises';
-import express from 'express';
-import cors from 'cors';
 import { router } from './src/api/router.ts';
+import { SITES_DIR } from './src/config.ts';
 import { scheduleUptimeChecks } from './src/scheduler.ts';
 import { loadAnalytics } from './src/usecases/sites/load-analytics.ts';
 import { saveAnalytics } from './src/usecases/sites/save-analytics.ts';
-import { SITES_DIR } from './src/config.ts';
-import { db } from './src/db.ts';
+import { site } from './src/db/site.ts';
+import { user as userTable } from './src/db/user.ts';
+
+import * as fs from 'node:fs/promises';
+import express from 'express';
+import cors from 'cors';
 
 await fs.mkdir(SITES_DIR, { recursive: true });
 
-const users = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
+const users = (await userTable.findMany({ select: { username: true } })).map((u) => u.username);
 for (const user of users) {
-  const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
+  const domains = (await site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
     (s) => s.domain,
   );
   for (const domain of domains) {
@@ -36,9 +38,9 @@ const server = app.listen(port, () => {
 
 process.on('SIGTERM', async () => {
   server.close();
-  const siteUsers = (await db.user.findMany({ select: { username: true } })).map((u) => u.username);
+  const siteUsers = (await userTable.findMany({ select: { username: true } })).map((u) => u.username);
   for (const user of siteUsers) {
-    const domains = (await db.site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
+    const domains = (await site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
       (s) => s.domain,
     );
     for (const domain of domains) {
