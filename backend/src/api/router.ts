@@ -1,7 +1,16 @@
 import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import * as health from './endpoints/health.ts';
-import * as auth from './endpoints/auth.ts';
+import { auth } from './endpoints/auth/auth.ts';
+import { authRegister } from './endpoints/auth/auth-register.ts';
+import { authLogin } from './endpoints/auth/auth-login.ts';
+import { authLogout } from './endpoints/auth/auth-logout.ts';
+import { authMe } from './endpoints/auth/auth-me.ts';
+import { authDisplayName } from './endpoints/auth/auth-display-name.ts';
+import { uploadProfilePicture } from './endpoints/auth/upload-profile-picture.ts';
+import { deleteProfilePicture } from './endpoints/auth/delete-profile-picture.ts';
+import { getSessions } from './endpoints/auth/get-sessions.ts';
+import { deleteSession } from './endpoints/auth/delete-session.ts';
 import { checkDomain } from './endpoints/check/check-domain.ts';
 import { checkCustomDomain } from './endpoints/check/check-custom-domain.ts';
 import { checkSubdomain } from './endpoints/check/check-subdomain.ts';
@@ -65,9 +74,9 @@ if (API_KEY) {
 
 // Public
 router.get('/health', health.health);
-router.get('/auth', auth.auth);
-router.post('/auth/register', auth.authRegister);
-router.post('/auth/login', auth.authLogin);
+router.get('/auth', auth);
+router.post('/auth/register', authRegister);
+router.post('/auth/login', authLogin);
 router.get('/check-domain', checkDomain);
 router.get('/check-custom-domain', checkCustomDomain);
 router.get('/check-subdomain', checkSubdomain);
@@ -79,13 +88,13 @@ router.get('/users/:username/:domain', getPublicSiteInfo);
 router.get('/users/:username', getUserByUsernameEndpoint);
 
 // Auth
-router.get('/auth/me', auth.authMe);
-router.post('/auth/logout', auth.authLogout);
-router.patch('/auth/displayname', auth.authDisplayName);
-router.post('/auth/profile-picture', auth.uploadProfilePicture);
-router.delete('/auth/profile-picture/delete', auth.deleteProfilePicture);
-router.get('/auth/sessions', auth.getSessions);
-router.delete('/auth/sessions/delete', auth.deleteSession);
+router.get('/auth/me', authMe);
+router.post('/auth/logout', authLogout);
+router.patch('/auth/displayname', authDisplayName);
+router.post('/auth/profile-picture', uploadProfilePicture);
+router.delete('/auth/profile-picture/delete', deleteProfilePicture);
+router.get('/auth/sessions', getSessions);
+router.delete('/auth/sessions/delete', deleteSession);
 
 // Sites
 router.get('/sites', listSites);
