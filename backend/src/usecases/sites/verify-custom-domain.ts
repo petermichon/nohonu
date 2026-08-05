@@ -1,7 +1,7 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { customDomain as customDomainTable } from '../../db/custom-domain.ts';
 import { session } from '../../db/session.ts';
-import { dnsVerifyCustomDomain } from '../../shared/dns-verify-custom-domain.ts';
+import { generateVerificationToken } from '../../shared/generate-verification-token.ts';
 import { resolveTxtRecords } from '../../shared/node/resolve-txt-records.ts';
 import { site } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
@@ -34,7 +34,9 @@ export async function verifyCustomDomain(
     return { ok: false, code: 'not_found', message: 'Custom domain not found' };
   }
 
-  const isVerified = await dnsVerifyCustomDomain(domain, customDomain, resolveTxtRecords);
+  const expectedToken = await generateVerificationToken(domain);
+  const records = await resolveTxtRecords(`_nohonu.${customDomain}`);
+  const isVerified = records.includes(expectedToken);
   entry.verified = isVerified;
 
   const siteId = await upsertSite(user, domain, data);
