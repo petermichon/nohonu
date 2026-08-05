@@ -1,5 +1,4 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { invalidateCustomDomainCache } from '../../core/sites/invalidate-custom-domain-cache.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
@@ -47,7 +46,6 @@ export async function removeCustomDomain(
       data: data.customDomains.map((c) => ({ domain: c.domain, verified: c.verified, siteId })),
     });
   }
-  invalidateCustomDomainCache();
   return { ok: true, value: undefined };
 }
 

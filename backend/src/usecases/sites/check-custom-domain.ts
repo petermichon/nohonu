@@ -1,7 +1,7 @@
-import { getCustomDomainCache } from '../../core/sites/get-custom-domain-cache.ts';
+import { db } from '../../db.ts';
 
 
 export async function checkCustomDomain(customDomain: string): Promise<boolean> {
-  const cache = await getCustomDomainCache();
-  return cache.has(customDomain);
+  const record = await db.customDomain.findFirst({ where: { domain: customDomain, verified: true }, select: { id: true } });
+  return record !== null;
 }

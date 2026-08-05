@@ -1,4 +1,3 @@
-import { getCustomDomainCache } from '../../core/sites/get-custom-domain-cache.ts';
 import { db } from '../../db.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
 import { siteWhere } from '../../shared/site-where.ts';
@@ -12,8 +11,9 @@ export async function resolveDomainAndServe(
   console.assert(typeof path === 'string', 'path must be a string');
 
   // Check custom domain registry first
-  const cache = await getCustomDomainCache();
-  const mappedDomain = cache.get(host);
+  const customDomainRecord = await db.customDomain.findFirst({ where: { domain: host, verified: true }, select: { siteId: true } });
+  const mappedSite = customDomainRecord ? await db.site.findUnique({ where: { id: customDomainRecord.siteId }, select: { domain: true } }) : null;
+  const mappedDomain = mappedSite?.domain;
   if (mappedDomain) {
     const site = await db.site.findFirst({ where: { domain: mappedDomain }, select: { userUsername: true } });
     const user = site?.userUsername ?? null;
