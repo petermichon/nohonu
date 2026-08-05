@@ -7,10 +7,9 @@ import * as customDomains from './endpoints/custom-domains.ts';
 import * as sites from './endpoints/sites.ts';
 import * as versions from './endpoints/versions.ts';
 import * as users from './endpoints/users.ts';
+import { API_KEY } from '../config.ts';
 
 export const router = Router();
-
-const API_KEY = process.env['API_KEY'];
 
 function requireApiKey(req: Request, res: Response, next: NextFunction): void {
   if (req.headers['x-api-key'] === API_KEY) return next();
