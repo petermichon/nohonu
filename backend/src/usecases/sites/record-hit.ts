@@ -2,6 +2,7 @@ import { SLOT_MS } from '../../config.ts';
 import { hits } from '../../memory/hits.ts';
 import { visitors } from '../../memory/visitors.ts';
 import { MAX_VISITORS_PER_DOMAIN } from '../../shared/max-visitors-per-domain.ts';
+import { oldestVisitorKey } from '../../shared/oldest-visitor-key.ts';
 import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 
 export function recordHit(domain: string, ip: string): void {
@@ -26,14 +27,7 @@ export function recordHit(domain: string, ip: string): void {
     last: Date.now(),
   });
   if (domainVisitors.size > MAX_VISITORS_PER_DOMAIN) {
-    let oldestIp = '';
-    let oldestTime = Infinity;
-    for (const [entryIp, entryData] of domainVisitors.entries()) {
-      if (entryData.last < oldestTime) {
-        oldestTime = entryData.last;
-        oldestIp = entryIp;
-      }
-    }
+    const oldestIp = oldestVisitorKey(domainVisitors);
     if (oldestIp) {
       domainVisitors.delete(oldestIp);
     }
