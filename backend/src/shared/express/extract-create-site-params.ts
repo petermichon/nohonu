@@ -1,5 +1,5 @@
 import type { Request as ExpressReq } from 'express';
-import type { CreateSiteParams } from '../sites/create-site-params.ts';
+import type { CreateSiteParams } from '../create-site-params.ts';
 import { MAX_ZIP_BYTES } from '../paths.ts';
 import { domainFrom } from './domain-from.ts';
 

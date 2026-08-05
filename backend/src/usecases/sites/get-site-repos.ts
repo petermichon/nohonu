@@ -3,7 +3,7 @@ import { session } from '../../db/session.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 
 import type { Result } from '../../shared/errors.ts';
-import type { RepoHistoryEntry } from '../../shared/sites/repo-history-entry.ts';
+import type { RepoHistoryEntry } from '../../shared/repo-history-entry.ts';
 
 
 export async function getSiteRepos(

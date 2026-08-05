@@ -1,7 +1,7 @@
 import { session as sessionTable } from '../../db/session.ts';
 import { user } from '../../db/user.ts';
 
-import type { ProfileResult } from '../../shared/auth/profile-result.ts';
+import type { ProfileResult } from '../../shared/profile-result.ts';
 
 export async function updateDisplayName(sessionId: string, displayName: string): Promise<ProfileResult> {
   const session = await sessionTable.findUnique({ where: { id: sessionId } });

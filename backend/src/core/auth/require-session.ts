@@ -1,5 +1,5 @@
 import { session } from '../../db/session.ts';
-import { validateSession } from '../../shared/auth/session-check.ts';
+import { validateSession } from '../../shared/session-check.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import type { Result } from '../../shared/errors.ts';
 

@@ -2,7 +2,7 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { repoHistory as repoHistoryTable } from '../../db/repo-history.ts';
 import { session } from '../../db/session.ts';
 import { versionsDir, versionPath, domainDir, MAX_ZIP_BYTES } from '../../shared/paths.ts';
-import { DEFAULT_DATA } from '../../shared/sites/site-data.ts';
+import { DEFAULT_DATA } from '../../shared/site-data.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';

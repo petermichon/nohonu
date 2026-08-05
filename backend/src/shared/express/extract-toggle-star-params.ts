@@ -1,5 +1,5 @@
 import type { Request as ExpressReq } from 'express';
-import type { ToggleStarParams } from '../sites/toggle-star-params.ts';
+import type { ToggleStarParams } from '../toggle-star-params.ts';
 import { domainFrom } from './domain-from.ts';
 import { parseJson } from './http.ts';
 

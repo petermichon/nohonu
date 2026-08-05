@@ -1,9 +1,9 @@
 import { session as sessionTable } from '../../db/session.ts';
 import { user as userTable } from '../../db/user.ts';
-import { toAuthUser } from '../../shared/auth/auth-user.ts';
-import { hashPassword } from '../../shared/auth/password.ts';
+import { toAuthUser } from '../../shared/auth-user.ts';
+import { hashPassword } from '../../shared/password.ts';
 
-import type { RegisterResult } from '../../shared/auth/register-result.ts';
+import type { RegisterResult } from '../../shared/register-result.ts';
 
 export async function register(password: string, username: string, userAgent?: string): Promise<RegisterResult> {
   try {

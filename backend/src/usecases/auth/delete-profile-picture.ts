@@ -5,7 +5,7 @@ import { getProfilePicturePath } from '../../shared/paths.ts';
 
 import * as fs from 'node:fs/promises';
 
-import type { ProfileResult } from '../../shared/auth/profile-result.ts';
+import type { ProfileResult } from '../../shared/profile-result.ts';
 
 export async function deleteProfilePicture(sessionId: string): Promise<ProfileResult> {
   const session = await sessionTable.findUnique({ where: { id: sessionId } });

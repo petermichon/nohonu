@@ -1,13 +1,13 @@
 import * as fs from 'node:fs/promises';
 import { site } from '../../db/site.ts';
-import { isSafeRelativePath } from '../../shared/sites/is-safe-relative-path.ts';
+import { isSafeRelativePath } from '../../shared/is-safe-relative-path.ts';
 import { getContentType } from '../../shared/mime.ts';
 import { extractedDir, extractedFilePath, fileExists, versionPath } from '../../shared/paths.ts';
-import { SITE_INCLUDE } from '../../shared/sites/site-include.ts';
-import { siteWhere } from '../../shared/sites/site-where.ts';
-import { toSiteUpsert } from '../../shared/sites/site-upsert-data.ts';
-import { stripCommonRoot } from '../../shared/sites/strip-common-root.ts';
-import { toSiteData } from '../../shared/sites/to-site-data.ts';
+import { SITE_INCLUDE } from '../../shared/site-include.ts';
+import { siteWhere } from '../../shared/site-where.ts';
+import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
+import { stripCommonRoot } from '../../shared/strip-common-root.ts';
+import { toSiteData } from '../../shared/to-site-data.ts';
 import { readZip } from '../../shared/zip.ts';
 
 export async function serveSiteFile(

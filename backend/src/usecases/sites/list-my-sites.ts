@@ -3,9 +3,9 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { uptime } from '../../memory/uptime.ts';
 import { session } from '../../db/session.ts';
 import { user as userTable } from '../../db/user.ts';
-import { totalHits } from '../../shared/analytics/hits-total.ts';
-import { toSiteSummary } from '../../shared/sites/to-site-summary.ts';
-import { uptimePercentage } from '../../shared/analytics/uptime-percentage.ts';
+import { totalHits } from '../../shared/hits-total.ts';
+import { toSiteSummary } from '../../shared/to-site-summary.ts';
+import { uptimePercentage } from '../../shared/uptime-percentage.ts';
 import { site } from '../../db/site.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 

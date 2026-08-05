@@ -1,9 +1,9 @@
 import { SLOT_MS } from '../../config.ts';
 import { hits } from '../../memory/hits.ts';
 import { visitors } from '../../memory/visitors.ts';
-import { MAX_VISITORS_PER_DOMAIN } from '../../shared/analytics/max-visitors-per-domain.ts';
-import { oldestVisitorKey } from '../../shared/analytics/oldest-visitor-key.ts';
-import { STATS_SLOTS } from '../../shared/analytics/stats-slots.ts';
+import { MAX_VISITORS_PER_DOMAIN } from '../../shared/max-visitors-per-domain.ts';
+import { oldestVisitorKey } from '../../shared/oldest-visitor-key.ts';
+import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 
 export function recordHit(domain: string, ip: string): void {
   const slot = Math.floor(Date.now() / SLOT_MS);

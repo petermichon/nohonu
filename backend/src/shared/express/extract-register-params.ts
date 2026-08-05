@@ -1,5 +1,5 @@
 import type { Request as ExpressReq } from 'express';
-import type { RegisterParams } from '../auth/register-params.ts';
+import type { RegisterParams } from '../register-params.ts';
 import { parseJson } from './http.ts';
 
 export async function extractRegisterParams(req: ExpressReq): Promise<RegisterParams | undefined> {

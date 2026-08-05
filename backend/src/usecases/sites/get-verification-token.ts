@@ -1,5 +1,5 @@
 import { site as siteTable } from '../../db/site.ts';
-import { generateVerificationToken } from '../../shared/sites/custom-domain-dns.ts';
+import { generateVerificationToken } from '../../shared/custom-domain-dns.ts';
 
 export async function getVerificationToken(domain: string): Promise<{ token: string }> {
   const site = await siteTable.findFirst({ where: { domain }, select: { userUsername: true } });

@@ -3,9 +3,9 @@ import { visitors } from '../../memory/visitors.ts';
 import { uptime } from '../../memory/uptime.ts';
 import { analytics } from '../../db/analytics.ts';
 import { site as siteTable } from '../../db/site.ts';
-import { siteWhere } from '../../shared/sites/site-where.ts';
+import { siteWhere } from '../../shared/site-where.ts';
 
-import type { AnalyticsSnapshot } from '../../shared/analytics/analytics-snapshot.ts';
+import type { AnalyticsSnapshot } from '../../shared/analytics-snapshot.ts';
 
 
 export async function saveAnalytics(user: string, domain: string): Promise<void> {

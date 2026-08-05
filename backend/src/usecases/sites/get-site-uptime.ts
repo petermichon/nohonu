@@ -1,7 +1,7 @@
 import { uptime } from '../../memory/uptime.ts';
 import { SLOT_MS } from '../../config.ts';
-import { assertStatsParams } from '../../shared/analytics/assert-stats-params.ts';
-import { buildUptimeSeries } from '../../shared/analytics/uptime-series.ts';
+import { assertStatsParams } from '../../shared/assert-stats-params.ts';
+import { buildUptimeSeries } from '../../shared/uptime-series.ts';
 
 
 export function getSiteUptime(domain: string, slots: number, groupMinutes = 1): { slot: number; up: boolean | undefined }[] {

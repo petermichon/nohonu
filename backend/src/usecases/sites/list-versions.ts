@@ -4,7 +4,7 @@ import { site as siteTable } from '../../db/site.ts';
 
 import * as fs from 'node:fs/promises';
 
-import type { VersionInfo } from '../../shared/sites/version-info.ts';
+import type { VersionInfo } from '../../shared/version-info.ts';
 import type { VersionSource } from '../../shared/paths.ts';
 
 

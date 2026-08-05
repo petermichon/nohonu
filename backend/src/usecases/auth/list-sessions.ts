@@ -1,7 +1,7 @@
 import { session as sessionTable } from '../../db/session.ts';
-import { toSessionInfo } from '../../shared/auth/to-session-info.ts';
+import { toSessionInfo } from '../../shared/to-session-info.ts';
 
-import type { SessionInfo } from '../../shared/auth/session-info.ts';
+import type { SessionInfo } from '../../shared/session-info.ts';
 
 import type { Result } from '../../shared/errors.ts';
 

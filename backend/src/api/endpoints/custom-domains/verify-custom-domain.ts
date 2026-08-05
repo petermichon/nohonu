@@ -1,7 +1,7 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json, p } from '../../../shared/express/http.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
-import { requireCustomDomain } from '../../../shared/sites/require-custom-domain.ts';
+import { requireCustomDomain } from '../../../shared/require-custom-domain.ts';
 import { verifyCustomDomain as verifyCustomDomainUsecase } from '../../../usecases/sites/verify-custom-domain.ts';
 
 export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Promise<void> {
