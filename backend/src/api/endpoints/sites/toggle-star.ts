@@ -1,18 +1,8 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { json } from '../../../shared/express/http.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
+import { extractToggleStarParams } from '../../../shared/express/extract-toggle-star-params.ts';
 import { toggleStar as toggleStarUsecase } from '../../../usecases/sites/toggle-star.ts';
-
-type ToggleStarParams = { sessionId: string; domain: string; starred: boolean };
-
-async function extractToggleStarParams(req: ExpressReq): Promise<ToggleStarParams | undefined> {
-  const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) return;
-
-  const body = await parseJson<{ starred?: boolean }>(req);
-  return { sessionId, domain: domainFrom(req), starred: body?.starred === true };
-}
 
 export async function toggleStar(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractToggleStarParams(req);
