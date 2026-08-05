@@ -278,10 +278,9 @@ describe('cover image', () => {
 
 describe('serving', () => {
   it('serves an extracted file from the active version', async () => {
-    const sessionId = await makeSite('lisa', 'mysite');
-    const user = await username(sessionId);
+    await makeSite('lisa', 'mysite');
 
-    const served = await sites.serveSiteFile(user, 'mysite', '/index.html');
+    const served = await sites.serveRequest('localhost', '/mysite/index.html', '1.2.3.4');
     expect(served).not.toBeNull();
     expect(new TextDecoder().decode(served?.data)).toBe('<h1>hi</h1>');
     expect(served?.contentType).toBe('text/html');
@@ -289,27 +288,24 @@ describe('serving', () => {
 
   it('returns null for a disabled site', async () => {
     const sessionId = await makeSite('lisa', 'mysite');
-    const user = await username(sessionId);
     await sites.toggleSite(sessionId, 'mysite');
 
-    expect(await sites.serveSiteFile(user, 'mysite', '/index.html')).toBeNull();
+    expect(await sites.serveRequest('localhost', '/mysite/index.html', '1.2.3.4')).toBeNull();
   });
 
-  it('resolves a subdomain host and a path-based request', async () => {
+  it('serves via a subdomain host and a path-based request', async () => {
     const sessionId = await makeSite('mike', 'mysite');
-    const user = await username(sessionId);
     await sites.updateSiteMeta(sessionId, 'mysite', { subdomain: 'my-app' });
 
-    const viaSubdomain = await sites.resolveDomainAndServe('my-app.localhost', '/');
-    expect(viaSubdomain).toEqual({ user, domain: 'mysite', filePath: '/index.html' });
+    const viaSubdomain = await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4');
+    expect(new TextDecoder().decode(viaSubdomain?.data)).toBe('<h1>hi</h1>');
 
-    const viaPath = await sites.resolveDomainAndServe('localhost', '/mysite/page');
-    expect(viaPath).toEqual({ user, domain: 'mysite', filePath: '/page' });
+    const viaPath = await sites.serveRequest('localhost', '/mysite/index.html', '1.2.3.4');
+    expect(new TextDecoder().decode(viaPath?.data)).toBe('<h1>hi</h1>');
   });
 
   it('does not let a malicious zip escape the site directory', async () => {
     const sessionId = await registerUser('traversal');
-    const user = await username(sessionId);
     const body = zip({
       'index.html': '<h1>ok</h1>',
       '../../evil.txt': 'pwned',
@@ -318,7 +314,7 @@ describe('serving', () => {
     const created = await sites.createSite(sessionId, 'mysite', body);
     expect(created.ok).toBe(true);
 
-    const served = await sites.serveSiteFile(user, 'mysite', '/index.html');
+    const served = await sites.serveRequest('localhost', '/mysite/index.html', '1.2.3.4');
     expect(new TextDecoder().decode(served?.data)).toBe('<h1>ok</h1>');
 
     const sitesDir = process.env['SITES_DIR'] ?? '';
@@ -442,7 +438,6 @@ describe('check helpers', () => {
 describe('github deploys', () => {
   it('creates a site from a github archive', async () => {
     const sessionId = await registerUser('paul');
-    const user = await username(sessionId);
     const body = zip({ 'repo-main/index.html': '<h1>from github</h1>' });
     fetchMock.mockResolvedValue(new Response(body, { status: 200 }));
 
@@ -450,7 +445,7 @@ describe('github deploys', () => {
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.value.repo).toBe('owner/repo');
 
-    const served = await sites.serveSiteFile(user, 'ghsite', '/index.html');
+    const served = await sites.serveRequest('localhost', '/ghsite/index.html', '1.2.3.4');
     expect(new TextDecoder().decode(served?.data)).toBe('<h1>from github</h1>');
 
     const repos = await sites.getSiteRepos(sessionId, 'ghsite');
@@ -628,9 +623,8 @@ describe('error paths', () => {
 
   it('returns empty results for a missing site', async () => {
     const sessionId = await registerUser('xavier');
-    const user = await username(sessionId);
 
-    expect(await sites.serveSiteFile(user, 'missing', '/index.html')).toBeNull();
+    expect(await sites.serveRequest('localhost', '/missing/index.html', '1.2.3.4')).toBeNull();
     expect(await sites.listVersions('missing')).toEqual({ versions: [], current: null });
     expect(sessionId).toBeTruthy();
   });
@@ -646,15 +640,14 @@ describe('error paths', () => {
 
   it('routes a verified custom domain to its site', async () => {
     const sessionId = await makeSite('zane', 'mysite');
-    const user = await username(sessionId);
     await sites.addCustomDomain(sessionId, 'mysite', 'example.com');
 
     const token = await verificationToken('mysite');
     (dns.resolveTxt as Mock).mockResolvedValue([[token]]);
     await sites.verifyCustomDomain(sessionId, 'mysite', 'example.com');
 
-    const resolved = await sites.resolveDomainAndServe('example.com', '/');
-    expect(resolved).toEqual({ user, domain: 'mysite', filePath: '/index.html' });
+    const served = await sites.serveRequest('example.com', '/index.html', '1.2.3.4');
+    expect(new TextDecoder().decode(served?.data)).toBe('<h1>hi</h1>');
   });
 });
 
