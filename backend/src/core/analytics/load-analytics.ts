@@ -3,7 +3,7 @@ import { db } from '../../db.ts';
 import { findSiteId } from './find-site-id.ts';
 import { hits, uptime, visitors } from './analytics-state.ts';
 import { STATS_SLOTS } from './stats-slots.ts';
-import { UPTIME_SLOTS } from './uptime-slots.ts';
+import { UPTIME_SLOTS } from '../../shared/uptime-slots.ts';
 import type { AnalyticsSnapshot } from '../../shared/analytics-snapshot.ts';
 
 export async function loadAnalytics(user: string, domain: string): Promise<void> {
