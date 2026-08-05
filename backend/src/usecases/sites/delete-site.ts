@@ -1,7 +1,9 @@
+import { hits } from '../../memory/hits.ts';
+import { visitors } from '../../memory/visitors.ts';
+import { uptime } from '../../memory/uptime.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { session } from '../../db/session.ts';
 import { site } from '../../db/site.ts';
-import { hits, uptime, visitors } from '../../memory.ts';
 import { domainDir } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
 

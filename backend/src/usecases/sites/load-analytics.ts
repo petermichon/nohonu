@@ -1,7 +1,9 @@
+import { hits } from '../../memory/hits.ts';
+import { visitors } from '../../memory/visitors.ts';
+import { uptime } from '../../memory/uptime.ts';
 import { SLOT_MS } from '../../config.ts';
 import { analytics } from '../../db/analytics.ts';
 import { site as siteTable } from '../../db/site.ts';
-import { hits, uptime, visitors } from '../../memory.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 import { UPTIME_SLOTS } from '../../shared/uptime-slots.ts';

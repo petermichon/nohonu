@@ -1,5 +1,5 @@
+import { hits } from '../../memory/hits.ts';
 import { SLOT_MS } from '../../config.ts';
-import { hits } from '../../memory.ts';
 import { assertStatsParams } from '../../shared/assert-stats-params.ts';
 import { buildStatsSeries } from '../../shared/stats-series.ts';
 import { STATS_SLOTS } from '../../shared/stats-slots.ts';

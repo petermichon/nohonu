@@ -1,5 +1,4 @@
-import { visitors } from '../../memory.ts';
-
+import { visitors } from '../../memory/visitors.ts';
 
 export function getSiteVisitors(domain: string): { ip: string; count: number; last: number }[] {
   const domainVisitors = visitors.get(domain);

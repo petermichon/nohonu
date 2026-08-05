@@ -1,6 +1,8 @@
+import { hits } from '../../memory/hits.ts';
+import { visitors } from '../../memory/visitors.ts';
+import { uptime } from '../../memory/uptime.ts';
 import { SITES_DIR } from '../../config.ts';
 import { user } from '../../db/user.ts';
-import { hits, uptime, visitors } from '../../memory.ts';
 
 import * as fs from 'node:fs/promises';
 

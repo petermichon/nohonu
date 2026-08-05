@@ -1,5 +1,5 @@
+import { uptime } from '../../memory/uptime.ts';
 import { SLOT_MS } from '../../config.ts';
-import { uptime } from '../../memory.ts';
 import { assertStatsParams } from '../../shared/assert-stats-params.ts';
 import { buildUptimeSeries } from '../../shared/uptime-series.ts';
 

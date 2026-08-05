@@ -1,5 +1,6 @@
+import { hits } from '../../memory/hits.ts';
+import { visitors } from '../../memory/visitors.ts';
 import { SLOT_MS } from '../../config.ts';
-import { hits, visitors } from '../../memory.ts';
 import { MAX_VISITORS_PER_DOMAIN } from '../../shared/max-visitors-per-domain.ts';
 import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 

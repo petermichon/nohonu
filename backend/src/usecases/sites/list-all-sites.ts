@@ -1,6 +1,7 @@
+import { hits } from '../../memory/hits.ts';
+import { uptime } from '../../memory/uptime.ts';
 import { site } from '../../db/site.ts';
 import { user as userTable } from '../../db/user.ts';
-import { hits, uptime } from '../../memory.ts';
 import { totalHits } from '../../shared/hits-total.ts';
 import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { siteWhere } from '../../shared/site-where.ts';

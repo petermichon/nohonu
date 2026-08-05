@@ -1,5 +1,6 @@
-import { hits, uptime, visitors } from '../../memory.ts';
-
+import { hits } from '../../memory/hits.ts';
+import { uptime } from '../../memory/uptime.ts';
+import { visitors } from '../../memory/visitors.ts';
 
 export function resetAnalytics(): void {
   hits.clear();
