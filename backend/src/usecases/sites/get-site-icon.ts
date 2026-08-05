@@ -1,4 +1,4 @@
-import { versionPath } from '../../shared/paths.ts';
+import { versionPath } from '../../shared/node/paths.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { readZip } from '../../shared/zip.ts';
 import { site as siteTable } from '../../db/site.ts';

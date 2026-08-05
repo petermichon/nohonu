@@ -3,7 +3,7 @@ import { visitors } from '../../memory/visitors.ts';
 import { uptime } from '../../memory/uptime.ts';
 import { session } from '../../db/session.ts';
 import { site } from '../../db/site.ts';
-import { domainDir } from '../../shared/paths.ts';
+import { domainDir } from '../../shared/node/paths.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 
 import * as fs from 'node:fs/promises';

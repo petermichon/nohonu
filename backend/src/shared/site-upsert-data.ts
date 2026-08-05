@@ -1,4 +1,4 @@
-import type { SiteData } from './paths.ts';
+import type { SiteData } from './node/paths.ts';
 import { siteWhere } from './site-where.ts';
 
 export function toSiteUpsert(user: string, domain: string, data: SiteData) {

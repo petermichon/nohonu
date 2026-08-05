@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import { site } from '../../db/site.ts';
 import { isSafeRelativePath } from '../../shared/is-safe-relative-path.ts';
 import { getContentType } from '../../shared/mime.ts';
-import { extractedDir, extractedFilePath, fileExists, versionPath } from '../../shared/paths.ts';
+import { extractedDir, extractedFilePath, fileExists, versionPath } from '../../shared/node/paths.ts';
 import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { siteWhere } from '../../shared/site-where.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';

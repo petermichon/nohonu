@@ -1,11 +1,11 @@
-import { versionPath } from '../../shared/paths.ts';
+import { versionPath } from '../../shared/node/paths.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { site as siteTable } from '../../db/site.ts';
 
 import * as fs from 'node:fs/promises';
 
 import type { VersionInfo } from '../../shared/version-info.ts';
-import type { VersionSource } from '../../shared/paths.ts';
+import type { VersionSource } from '../../shared/node/paths.ts';
 
 
 export async function listVersions(domain: string): Promise<{ versions: VersionInfo[]; current: number | null }> {

@@ -1,7 +1,7 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { customDomain as customDomainTable } from '../../db/custom-domain.ts';
 import { session } from '../../db/session.ts';
-import { dnsVerifyCustomDomain } from '../../shared/custom-domain-dns.ts';
+import { dnsVerifyCustomDomain } from '../../shared/node/custom-domain-dns.ts';
 import { site } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { requireSession } from '../../core/auth/require-session.ts';

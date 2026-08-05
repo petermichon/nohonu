@@ -1,4 +1,4 @@
-import { coverImagePath } from '../../shared/paths.ts';
+import { coverImagePath } from '../../shared/node/paths.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { site as siteTable } from '../../db/site.ts';
 

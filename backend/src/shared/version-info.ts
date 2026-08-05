@@ -1,4 +1,4 @@
-import type { VersionSource } from './paths.ts';
+import type { VersionSource } from './node/paths.ts';
 
 export interface VersionInfo {
   index: number;

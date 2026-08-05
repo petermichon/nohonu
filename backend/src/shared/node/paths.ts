@@ -1,5 +1,5 @@
 import * as fs from 'node:fs/promises';
-import { SITES_DIR } from '../config.ts';
+import { SITES_DIR } from '../../config.ts';
 
 export const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 export const VALID_CUSTOM_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;

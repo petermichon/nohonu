@@ -1,6 +1,6 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
-import { VALID_DOMAIN } from '../../shared/paths.ts';
+import { VALID_DOMAIN } from '../../shared/node/paths.ts';
 import { site } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { requireSession } from '../../core/auth/require-session.ts';

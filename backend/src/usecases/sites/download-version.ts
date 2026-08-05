@@ -1,5 +1,5 @@
 import { session } from '../../db/session.ts';
-import { fileExists, versionPath } from '../../shared/paths.ts';
+import { fileExists, versionPath } from '../../shared/node/paths.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 
 import * as fs from 'node:fs/promises';
