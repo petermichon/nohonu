@@ -61,7 +61,8 @@ export default function DocsApi() {
           rows={[
             { method: 'GET', path: '/sites', desc: 'List all sites for the authenticated user' },
             { method: 'GET', path: '/sites/:domain', desc: 'Get site info and status' },
-            { method: 'POST', path: '/sites/:domain', desc: 'Create a site (zip upload or GitHub repo)' },
+            { method: 'POST', path: '/sites/:domain', desc: 'Create a site from a zip upload' },
+            { method: 'POST', path: '/sites/:domain/github', desc: 'Create a site from a GitHub repo' },
             { method: 'DELETE', path: '/sites/:domain', desc: 'Delete a site' },
             { method: 'PATCH', path: '/sites/:domain/toggle', desc: 'Enable or disable a site' },
             { method: 'PATCH', path: '/sites/:domain/star', desc: 'Star or unstar a site' },

@@ -87,7 +87,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
       if (subdomain) {
         body.subdomain = subdomain;
       }
-      const res = await apiFetch(`/sites/${domain}`, {
+      const res = await apiFetch(`/sites/${domain}/github`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
