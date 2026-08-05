@@ -1,9 +1,7 @@
-import { site } from '../../db/site.ts';
 import { user as userTable } from '../../db/user.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { VALID_DOMAIN } from '../../shared/paths.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
-import { siteWhere } from '../../shared/site-where.ts';
-import { toSiteData } from '../../shared/to-site-data.ts';
+import { site } from '../../db/site.ts';
 
 export async function checkSubdomain(subdomain: string): Promise<boolean> {
   if (!subdomain || !VALID_DOMAIN.test(subdomain)) return false;
@@ -11,8 +9,7 @@ export async function checkSubdomain(subdomain: string): Promise<boolean> {
   for (const user of users) {
     const domains = (await site.findMany({ where: { userUsername: user }, select: { domain: true } })).map((s) => s.domain);
     for (const domain of domains) {
-      const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
-  const data = record ? toSiteData(record) : undefined;
+      const data = await readSiteMetadata(user, domain);
       if (data?.subdomain === subdomain) return true;
     }
   }

@@ -1,16 +1,14 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { repoHistory as repoHistoryTable } from '../../db/repo-history.ts';
 import { session } from '../../db/session.ts';
-import { site } from '../../db/site.ts';
 import { version } from '../../db/version.ts';
 import { versionsDir, versionPath, domainDir, MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { DEFAULT_DATA } from '../../shared/site-data.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
-import { siteWhere } from '../../shared/site-where.ts';
-import { toSiteData } from '../../shared/to-site-data.ts';
 import { toVersionSourceData } from '../../shared/version-source-data.ts';
+import { site } from '../../db/site.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -33,8 +31,7 @@ export async function createSiteFromGithub(
   const user = auth.value;
 
   // Check if domain already exists
-  const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
-  const existingData = record ? toSiteData(record) : undefined;
+  const existingData = await readSiteMetadata(user, domain);
   if (existingData) {
     return { ok: false, code: 'already_exists', message: 'Domain already exists for this user' };
   }

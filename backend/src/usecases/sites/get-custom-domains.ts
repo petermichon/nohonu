@@ -1,10 +1,7 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
-import { site } from '../../db/site.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
-import { siteWhere } from '../../shared/site-where.ts';
-import { toSiteData } from '../../shared/to-site-data.ts';
 
 import type { Result } from '../../shared/errors.ts';
 import type { CustomDomain } from '../../shared/custom-domain.ts';
@@ -15,8 +12,7 @@ export async function getCustomDomains(sessionId: string, domain: string): Promi
   const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
-  const data = record ? toSiteData(record) : undefined;
+  const data = await readSiteMetadata(user, domain);
   if (!data) return { ok: true, value: [] };
   const customDomains = data.customDomains ?? [];
   return { ok: true, value: customDomains.map(({ domain: d, verified }) => ({ domain: d, verified })) };

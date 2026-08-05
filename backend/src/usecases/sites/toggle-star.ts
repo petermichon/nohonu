@@ -1,12 +1,10 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
-import { site as siteTable } from '../../db/site.ts';
 import { starredBy as starredByTable } from '../../db/starred-by.ts';
 import { validateSession } from '../../shared/session-check.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
-import { siteWhere } from '../../shared/site-where.ts';
-import { toSiteData } from '../../shared/to-site-data.ts';
+import { site as siteTable } from '../../db/site.ts';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -27,8 +25,7 @@ export async function toggleStar(
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
-  const record = await siteTable.findUnique({ where: siteWhere(siteOwner, domain), include: SITE_INCLUDE });
-  const data = record ? toSiteData(record) : undefined;
+  const data = await readSiteMetadata(siteOwner, domain);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }

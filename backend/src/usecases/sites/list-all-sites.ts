@@ -1,12 +1,10 @@
 import { hits } from '../../memory/hits.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { uptime } from '../../memory/uptime.ts';
-import { site } from '../../db/site.ts';
 import { user as userTable } from '../../db/user.ts';
 import { totalHits } from '../../shared/hits-total.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
-import { siteWhere } from '../../shared/site-where.ts';
-import { toSiteData } from '../../shared/to-site-data.ts';
 import { uptimePercentage } from '../../shared/uptime-percentage.ts';
+import { site } from '../../db/site.ts';
 
 import type { PublicSiteSummary } from '../../shared/public-site-summary.ts';
 
@@ -22,8 +20,7 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
     ]);
     const accountProfilePicture = userRecord?.profilePicture ?? undefined;
     for (const domain of domains) {
-      const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
-  const data = record ? toSiteData(record) : undefined;
+      const data = await readSiteMetadata(user, domain);
       allSites.push({
         user,
         siteId: data?.siteId || domain,

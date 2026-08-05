@@ -1,8 +1,6 @@
-import { site } from '../../db/site.ts';
 import { user as userTable } from '../../db/user.ts';
-import { SITE_INCLUDE } from '../../shared/site-include.ts';
-import { siteWhere } from '../../shared/site-where.ts';
-import { toSiteData } from '../../shared/to-site-data.ts';
+import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
+import { site } from '../../db/site.ts';
 
 export async function getAllCustomDomains(
   account?: string,
@@ -13,8 +11,7 @@ export async function getAllCustomDomains(
   for (const user of users) {
     const domains = (await site.findMany({ where: { userUsername: user }, select: { domain: true } })).map((s) => s.domain);
     for (const domain of domains) {
-      const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
-  const data = record ? toSiteData(record) : undefined;
+      const data = await readSiteMetadata(user, domain);
       if (account && data?.account !== account) continue;
       if (data?.customDomains) {
         for (const entry of data.customDomains) {
