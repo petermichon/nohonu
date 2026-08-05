@@ -1,5 +1,5 @@
 import { user } from '../../db/user.ts';
-import type { StorageStatus } from './storage-status.ts';
+import type { StorageStatus } from '../../shared/storage-status.ts';
 
 export async function probeStorage(): Promise<StorageStatus> {
   try {
