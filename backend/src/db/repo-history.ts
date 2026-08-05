@@ -1,3 +1,3 @@
-import { db } from "../db.ts";
+import { db } from '../db.ts';
 
 export const repoHistory = db.repoHistory;
