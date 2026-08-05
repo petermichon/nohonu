@@ -1,7 +1,7 @@
 import { db } from '../../db.ts';
 import { findSiteId } from './find-site-id.ts';
 import { hits, uptime, visitors } from './analytics-state.ts';
-import type { AnalyticsSnapshot } from './analytics-snapshot.ts';
+import type { AnalyticsSnapshot } from '../../shared/analytics-snapshot.ts';
 
 export async function saveAnalytics(user: string, domain: string): Promise<void> {
   const siteId = await findSiteId(user, domain);
