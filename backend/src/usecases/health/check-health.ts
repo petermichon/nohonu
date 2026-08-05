@@ -1,4 +1,4 @@
-import { evaluateHealth } from './evaluate-health.ts';
+import { evaluateHealth } from '../../shared/evaluate-health.ts';
 import { probeStorage } from './probe-storage.ts';
 import { startedAt } from './started-at.ts';
 import type { HealthStatus } from '../../shared/health-status.ts';
