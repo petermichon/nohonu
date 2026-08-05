@@ -1,5 +1,4 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { syncStarredBy } from '../../core/sites/sync-starred-by.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -55,9 +54,14 @@ export async function toggleStar(
   if (!siteId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
-  await syncStarredBy(siteId, data.starredBy ?? []);
+  await db.starredBy.deleteMany({ where: { siteId } });
+  if (data.starredBy.length > 0) {
+    await db.starredBy.createMany({
+      data: data.starredBy.map((username) => ({ username, siteId })),
+    });
+  }
 
-  return { ok: true, value: { starred: data.starredBy.includes(user), starCount: data.starCount } };
+  return { ok: true, value: { starred: data.starredBy.includes(user), starCount: data.starredBy.length } };
 }
 
 

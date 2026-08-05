@@ -1,6 +1,5 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { invalidateCustomDomainCache } from '../../core/sites/custom-domains-cache.ts';
-import { syncCustomDomains } from '../../core/sites/sync-custom-domains.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -42,7 +41,12 @@ export async function removeCustomDomain(
   if (!siteId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
-  await syncCustomDomains(siteId, data.customDomains ?? []);
+  await db.customDomain.deleteMany({ where: { siteId } });
+  if (data.customDomains.length > 0) {
+    await db.customDomain.createMany({
+      data: data.customDomains.map((c) => ({ domain: c.domain, verified: c.verified, siteId })),
+    });
+  }
   invalidateCustomDomainCache();
   return { ok: true, value: undefined };
 }

@@ -1,5 +1,6 @@
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
-import { writeSiteMetadata } from '../../core/sites/write-site-metadata.ts';
+import { syncVersions } from '../../core/sites/sync-versions.ts';
+import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { db } from '../../db.ts';
 import { versionsDir, versionPath, domainDir } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
@@ -51,7 +52,18 @@ export async function createSite(
   await fs.mkdir(domainDir(user, domain), { recursive: true });
   await fs.mkdir(versionsDir(user, domain), { recursive: true });
   await fs.writeFile(versionPath(user, domain, index), zipData);
-  await writeSiteMetadata(user, domain, data);
+
+  const siteRowId = await upsertSite(user, domain, data);
+  if (!siteRowId) {
+    return { ok: false, code: 'internal', message: 'Failed to save site' };
+  }
+  await syncVersions(siteRowId, data.versions);
+  await db.repoHistory.deleteMany({ where: { siteId: siteRowId } });
+  if (data.repoHistory.length > 0) {
+    await db.repoHistory.createMany({
+      data: data.repoHistory.map((r) => ({ repo: r.repo, branch: r.branch, lastUsed: r.lastUsed, siteId: siteRowId })),
+    });
+  }
 
   return { ok: true, value: { index, siteId } };
 }
