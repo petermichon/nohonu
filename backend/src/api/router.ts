@@ -51,14 +51,10 @@ import { getVerificationToken } from './endpoints/custom-domains/get-verificatio
 import { addCustomDomain } from './endpoints/custom-domains/add-custom-domain.ts';
 import { verifyCustomDomain } from './endpoints/custom-domains/verify-custom-domain.ts';
 import { deleteCustomDomain } from './endpoints/custom-domains/delete-custom-domain.ts';
+import { requireApiKey } from './require-api-key.ts';
 import { API_KEY } from '../config.ts';
 
 export const router = Router();
-
-function requireApiKey(req: Request, res: Response, next: NextFunction): void {
-  if (req.headers['x-api-key'] === API_KEY) return next();
-  res.status(401).json({ error: 'Unauthorized' });
-}
 
 if (API_KEY) {
   // Protect only the management API; public endpoints and static file
