@@ -1,20 +1,8 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { json, parseJson } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { json } from '../../../shared/express/http.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
+import { extractUpdateMetaParams } from '../../../shared/express/extract-update-meta-params.ts';
 import { updateSiteMeta } from '../../../usecases/sites/update-site-meta.ts';
-
-type UpdateMetaParams = { sessionId: string; domain: string; meta: { subdomain?: string; displayName?: string } };
-
-async function extractUpdateMetaParams(req: ExpressReq): Promise<UpdateMetaParams | undefined> {
-  const sessionId = req.get('X-Session-Id') || '';
-  if (!sessionId) return;
-
-  const body = await parseJson<{ subdomain?: string; displayName?: string }>(req);
-  if (!body) return;
-
-  return { sessionId, domain: domainFrom(req), meta: body };
-}
 
 export async function updateMeta(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractUpdateMetaParams(req);
