@@ -1,9 +1,14 @@
-import * as fs from 'node:fs/promises';
-import * as analytics from '../../core/analytics/metrics.ts';
-import { db } from '../../db.ts';
-import { validateSession } from '../../shared/session-check.ts';
-import { domainDir } from '../../shared/paths.ts';
 import { SESSION_MAX_AGE_MS } from '../../config.ts';
+import { clearDomain } from '../../core/analytics/clear-domain.ts';
+import { db } from '../../db.ts';
+import { domainDir } from '../../shared/paths.ts';
+import { validateSession } from '../../shared/session-check.ts';
+
+import * as fs from 'node:fs/promises';
+
+
+
+
 import type { Result } from '../../shared/errors.ts';
 
 
@@ -19,6 +24,6 @@ export async function deleteSite(sessionId: string, domain: string): Promise<Res
     console.error(`Failed to delete site directory for ${user}/${domain}: ${message}`);
   }
   await db.site.deleteMany({ where: { AND: { userUsername: user, domain } } });
-  analytics.clearDomain(domain);
+  clearDomain(domain);
   return { ok: true, value: undefined };
 }

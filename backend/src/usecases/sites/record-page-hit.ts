@@ -1,8 +1,6 @@
-import * as analytics from '../../core/analytics/metrics.ts';
+import { recordHit } from '../../core/analytics/record-hit.ts';
 
 
 export function recordPageHit(domain: string, ip: string): void {
-  analytics.recordHit(domain, ip);
+  recordHit(domain, ip);
 }
-
-

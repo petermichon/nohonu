@@ -1,4 +1,4 @@
-import * as analytics from '../../core/analytics/metrics.ts';
+import { getUptime } from '../../core/analytics/get-uptime.ts';
 
 
 export function getSiteUptime(domain: string, slots: number, groupMinutes = 1): { slot: number; up: boolean | undefined }[] {
@@ -8,7 +8,5 @@ export function getSiteUptime(domain: string, slots: number, groupMinutes = 1): 
     typeof groupMinutes === 'number' && !isNaN(groupMinutes) && groupMinutes > 0,
     'groupMinutes must be a positive number',
   );
-  return analytics.getUptime(domain, slots, groupMinutes);
+  return getUptime(domain, slots, groupMinutes);
 }
-
-

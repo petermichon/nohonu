@@ -1,4 +1,4 @@
-import * as analytics from '../../core/analytics/metrics.ts';
+import { getStats } from '../../core/analytics/get-stats.ts';
 
 
 export function getSiteStats(domain: string, slots: number, groupMinutes = 1): { slot: number; count: number }[] {
@@ -8,7 +8,5 @@ export function getSiteStats(domain: string, slots: number, groupMinutes = 1): {
     typeof groupMinutes === 'number' && !isNaN(groupMinutes) && groupMinutes > 0,
     'groupMinutes must be a positive number',
   );
-  return analytics.getStats(domain, slots, groupMinutes);
+  return getStats(domain, slots, groupMinutes);
 }
-
-

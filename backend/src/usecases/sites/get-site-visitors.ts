@@ -1,8 +1,6 @@
-import * as analytics from '../../core/analytics/metrics.ts';
+import { getVisitors } from '../../core/analytics/get-visitors.ts';
 
 
 export function getSiteVisitors(domain: string): { ip: string; count: number; last: number }[] {
-  return analytics.getVisitors(domain);
+  return getVisitors(domain);
 }
-
-

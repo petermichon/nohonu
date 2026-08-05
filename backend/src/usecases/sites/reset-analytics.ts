@@ -1,8 +1,1 @@
-import * as analytics from '../../core/analytics/metrics.ts';
-
-
-export function resetAnalytics(): void {
-  analytics.resetAnalytics();
-}
-
-
+export { resetAnalytics } from '../../core/analytics/reset-analytics.ts';
