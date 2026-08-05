@@ -1,12 +1,11 @@
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { repoHistory as repoHistoryTable } from '../../db/repo-history.ts';
 import { session } from '../../db/session.ts';
 import { versionsDir, versionPath, MAX_ZIP_BYTES } from '../../shared/paths.ts';
-import { validateSession } from '../../shared/session-check.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
+import { requireSession } from '../../core/auth/require-session.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -22,8 +21,7 @@ export async function uploadVersionFromGithub(
   repo: string,
   ref: string,
 ): Promise<Result<{ index: number; repo: string; branch: string }>> {
-  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
-  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
 

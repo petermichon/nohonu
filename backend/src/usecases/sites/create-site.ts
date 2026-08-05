@@ -1,13 +1,12 @@
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { repoHistory } from '../../db/repo-history.ts';
 import { session } from '../../db/session.ts';
 import { versionsDir, versionPath, domainDir } from '../../shared/paths.ts';
-import { validateSession } from '../../shared/session-check.ts';
 import { DEFAULT_DATA } from '../../shared/site-data.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
+import { requireSession } from '../../core/auth/require-session.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -23,8 +22,7 @@ export async function createSite(
   zipData: Uint8Array,
   subdomain?: string,
 ): Promise<Result<{ index: number; siteId: string }>> {
-  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
-  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
 

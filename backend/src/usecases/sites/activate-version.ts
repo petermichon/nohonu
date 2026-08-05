@@ -1,10 +1,9 @@
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { extractedDir, fileExists, versionPath } from '../../shared/paths.ts';
-import { validateSession } from '../../shared/session-check.ts';
 import { site } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
+import { requireSession } from '../../core/auth/require-session.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -18,8 +17,7 @@ import type { Result } from '../../shared/errors.ts';
 
 
 export async function activateVersion(sessionId: string, domain: string, index: number): Promise<Result<void>> {
-  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
-  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
   console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');

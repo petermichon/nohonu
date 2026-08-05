@@ -1,11 +1,10 @@
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { versionsDir, versionPath } from '../../shared/paths.ts';
-import { validateSession } from '../../shared/session-check.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
+import { requireSession } from '../../core/auth/require-session.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -15,8 +14,7 @@ import type { Result } from '../../shared/errors.ts';
 
 
 export async function uploadVersion(sessionId: string, domain: string, zipData: Uint8Array): Promise<Result<{ index: number }>> {
-  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
-  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
 

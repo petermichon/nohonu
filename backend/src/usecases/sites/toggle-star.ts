@@ -1,10 +1,9 @@
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { session } from '../../db/session.ts';
 import { starredBy as starredByTable } from '../../db/starred-by.ts';
-import { validateSession } from '../../shared/session-check.ts';
 import { site as siteTable } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
+import { requireSession } from '../../core/auth/require-session.ts';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -14,8 +13,7 @@ export async function toggleStar(
   domain: string,
   starred: boolean,
 ): Promise<Result<{ starred: boolean; starCount: number }>> {
-  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
-  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
   // Find the user that owns this site

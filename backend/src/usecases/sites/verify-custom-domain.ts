@@ -1,11 +1,10 @@
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { customDomain as customDomainTable } from '../../db/custom-domain.ts';
 import { session } from '../../db/session.ts';
 import { dnsVerifyCustomDomain } from '../../shared/custom-domain-dns.ts';
-import { validateSession } from '../../shared/session-check.ts';
 import { site } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
+import { requireSession } from '../../core/auth/require-session.ts';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -17,8 +16,7 @@ export async function verifyCustomDomain(
   domain: string,
   customDomain: string,
 ): Promise<Result<{ verified: boolean }>> {
-  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
-  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
   const data = await readSiteMetadata(user, domain);

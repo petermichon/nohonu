@@ -1,11 +1,10 @@
 import { hits } from '../../memory/hits.ts';
 import { visitors } from '../../memory/visitors.ts';
 import { uptime } from '../../memory/uptime.ts';
-import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { session } from '../../db/session.ts';
 import { site } from '../../db/site.ts';
 import { domainDir } from '../../shared/paths.ts';
-import { validateSession } from '../../shared/session-check.ts';
+import { requireSession } from '../../core/auth/require-session.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -16,8 +15,7 @@ import type { Result } from '../../shared/errors.ts';
 
 
 export async function deleteSite(sessionId: string, domain: string): Promise<Result<void>> {
-  const sessionRecord = await session.findUnique({ where: { id: sessionId } });
-  const auth = validateSession(sessionRecord, Date.now(), SESSION_MAX_AGE_MS);
+  const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
   try {
