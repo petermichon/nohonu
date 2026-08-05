@@ -2,13 +2,12 @@ import { SESSION_MAX_AGE_MS } from '../../config.ts';
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { repoHistory } from '../../db/repo-history.ts';
 import { session } from '../../db/session.ts';
-import { version } from '../../db/version.ts';
 import { versionsDir, versionPath, domainDir } from '../../shared/paths.ts';
 import { validateSession } from '../../shared/session-check.ts';
 import { DEFAULT_DATA } from '../../shared/site-data.ts';
 import { toSiteUpsert } from '../../shared/site-upsert-data.ts';
-import { toVersionSourceData } from '../../shared/version-source-data.ts';
 import { site } from '../../db/site.ts';
+import { syncVersions } from '../../core/sites/sync-versions.ts';
 
 import * as fs from 'node:fs/promises';
 
@@ -58,18 +57,7 @@ export async function createSite(
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
-  for (const [key, entry] of Object.entries(data.versions)) {
-    const index = parseInt(key, 10);
-    const existingVersion = await version.findFirst({ where: { siteId: siteRowId, index } });
-    const sourceData = toVersionSourceData(entry.source);
-    if (existingVersion) {
-      await version.update({ where: { id: existingVersion.id }, data: { ...sourceData, createdAt: entry.createdAt } });
-    } else {
-      await version.create({ data: { index, createdAt: entry.createdAt, siteId: siteRowId, ...sourceData } });
-    }
-  }
-  const versionIndices = new Set(Object.keys(data.versions).map(Number));
-  await version.deleteMany({ where: { siteId: siteRowId, index: { notIn: Array.from(versionIndices) } } });
+  await syncVersions(siteRowId, data.versions);
   await repoHistory.deleteMany({ where: { siteId: siteRowId } });
   if (data.repoHistory.length > 0) {
     await repoHistory.createMany({
