@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useToast } from '../lib/ToastContext.tsx';
+import { useToast } from '../providers/ToastContext.tsx';
 import { Toast } from './Toast.tsx';
 
 export function GlobalToast() {

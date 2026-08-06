@@ -1,5 +1,5 @@
 import { BackButton } from '../components/BackButton.tsx';
-import { useLanguage } from '../lib/LanguageProvider.tsx';
+import { useLanguage } from '../providers/LanguageProvider.tsx';
 
 export default function MentionsLegales() {
   const { resolvedLanguage } = useLanguage();

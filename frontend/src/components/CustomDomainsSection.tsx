@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Check, X } from 'lucide-react';
-import { useApi } from '../lib/api.ts';
-import { useToast } from '../lib/ToastContext.tsx';
+import { useApi } from '../hooks/api.ts';
+import { useToast } from '../providers/ToastContext.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;

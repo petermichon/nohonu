@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout, User } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
-import { useApi } from '../lib/api.ts';
+import { useApi } from '../hooks/api.ts';
 import type { Site } from '../lib/types.ts';
 
 interface SiteProfileSectionProps {

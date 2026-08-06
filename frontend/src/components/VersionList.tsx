@@ -1,7 +1,7 @@
 import { CheckCircle2, Clock, Trash2, ArrowUp, Download, Loader2, GitBranch, FileUp } from 'lucide-react';
 import { relativeTime } from '../lib/utils.ts';
 import { Tooltip } from './Tooltip.tsx';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import type { Version } from '../lib/types.ts';
 
 interface VersionListProps {

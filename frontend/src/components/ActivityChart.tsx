@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Eye, Globe } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { relativeTime } from '../lib/utils.ts';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { ChartHeader, formatChartTime, ChartFooter } from './ChartHeader.tsx';
 import type { Slot, Visitor, TimeRange } from '../lib/types.ts';
 

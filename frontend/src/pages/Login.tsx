@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
-import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
-import { useTheme } from '../lib/ThemeProvider.tsx';
-import { useConnection } from '../lib/ConnectionProvider.tsx';
-import { useApi } from '../lib/api.ts';
+import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
+import { useTheme } from '../providers/ThemeProvider.tsx';
+import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useApi } from '../hooks/api.ts';
 
 function Login() {
   const { accentColor, getAccentColorValues } = useAccentColor();

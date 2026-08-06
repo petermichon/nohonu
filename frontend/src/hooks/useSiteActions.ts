@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { useApi } from '../lib/api.ts';
-import { useToast } from '../lib/ToastContext.tsx';
+import { useApi } from '../hooks/api.ts';
+import { useToast } from '../providers/ToastContext.tsx';
 import type { Site } from '../lib/types.ts';
 
 interface UseSiteActionsParams {

@@ -1,9 +1,9 @@
 import { Globe, Eye, Star, ExternalLink } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { useApi, useUser } from '../lib/api.ts';
-import { useConnection } from '../lib/ConnectionProvider.tsx';
-import { useToast } from '../lib/ToastContext.tsx';
+import { useApi, useUser } from '../hooks/api.ts';
+import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useToast } from '../providers/ToastContext.tsx';
 import { formatHits } from '../lib/utils.ts';
 import type { Site } from '../lib/types.ts';
 

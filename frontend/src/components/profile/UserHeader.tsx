@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings } from 'lucide-react';
-import { useAccentColor } from '../../lib/AccentColorProvider.tsx';
+import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 
 export type UserPageTab = 'overview' | 'sites' | 'domains' | 'settings' | 'stars';
 

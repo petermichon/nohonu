@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { ChartHeader, formatChartTime, ChartFooter } from './ChartHeader.tsx';
 import type { UptimeSlot, UptimeRange } from '../lib/types.ts';
 import { calcUptimePct } from '../lib/utils.ts';

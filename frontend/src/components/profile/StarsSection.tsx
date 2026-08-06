@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Star } from 'lucide-react';
-import { useConnection } from '../../lib/ConnectionProvider.tsx';
+import { useConnection } from '../../providers/ConnectionProvider.tsx';
 
 export interface Star {
   user: string;

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useConnection } from './ConnectionProvider.tsx';
-import type { Site } from './types.ts';
+import { useConnection } from '../providers/ConnectionProvider.tsx';
+import type { Site } from '../lib/types.ts';
 
 export function useApi() {
   const { apiBase, apiKey, sessionId, username } = useConnection();

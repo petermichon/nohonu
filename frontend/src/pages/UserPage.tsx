@@ -1,9 +1,9 @@
 import { useParams, useLocation } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
-import { useSites, useUserSites, useDomains, useUser, useUserStars, useApi } from '../lib/api.ts';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
-import { useConnection } from '../lib/ConnectionProvider.tsx';
-import { useToast } from '../lib/ToastContext.tsx';
+import { useSites, useUserSites, useDomains, useUser, useUserStars, useApi } from '../hooks/api.ts';
+import { useAccentColor } from '../providers/AccentColorProvider.tsx';
+import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useToast } from '../providers/ToastContext.tsx';
 import { UserHeader, type UserPageTab } from '../components/profile/UserHeader.tsx';
 import { RecentSitesSection } from '../components/profile/RecentSitesSection.tsx';
 import { StarsSection } from '../components/profile/StarsSection.tsx';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import type { Site } from '../lib/types.ts';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;

@@ -1,5 +1,5 @@
 import { CheckCircle, XCircle, X } from 'lucide-react';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
+import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 
 interface ToastProps {
   message: string;

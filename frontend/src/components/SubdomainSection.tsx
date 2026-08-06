@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../lib/api.ts';
-import { useToast } from '../lib/ToastContext.tsx';
+import { useApi } from '../hooks/api.ts';
+import { useToast } from '../providers/ToastContext.tsx';
 
 interface SubdomainSectionProps {
   subdomain: string | null;

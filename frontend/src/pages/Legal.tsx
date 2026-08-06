@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { FileText, Scale, Shield, Info } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
-import { useLanguage } from '../lib/LanguageProvider.tsx';
+import { useLanguage } from '../providers/LanguageProvider.tsx';
 
 const getLegalPages = (resolvedLanguage: 'en' | 'fr') => [
   {

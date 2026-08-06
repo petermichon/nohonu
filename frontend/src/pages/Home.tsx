@@ -1,9 +1,9 @@
 import { Link } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
-import { useAccentColor, ACCENT_COLORS } from '../lib/AccentColorProvider.tsx';
-import { useTheme } from '../lib/ThemeProvider.tsx';
-import { useConnection } from '../lib/ConnectionProvider.tsx';
-import { useExploreSites } from '../lib/api.ts';
+import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
+import { useTheme } from '../providers/ThemeProvider.tsx';
+import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useExploreSites } from '../hooks/api.ts';
 import { formatHits } from '../lib/utils.ts';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { Eye, AlertCircle, CloudUpload, Book } from 'lucide-react';

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Key, LogOut, Monitor, User } from 'lucide-react';
-import { useApi, useDeleteSession, useSessions } from '../../lib/api.ts';
-import { useConnection } from '../../lib/ConnectionProvider.tsx';
-import { useAccentColor } from '../../lib/AccentColorProvider.tsx';
-import { useToast } from '../../lib/ToastContext.tsx';
+import { useApi, useDeleteSession, useSessions } from '../../hooks/api.ts';
+import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
+import { useToast } from '../../providers/ToastContext.tsx';
 import { formatUserAgent } from '../../lib/userAgent.ts';
 import { Tooltip } from '../Tooltip.tsx';
 

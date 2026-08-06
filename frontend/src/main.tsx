@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
 import { router } from './router';
 import './index.css';
-import { applyFont, validFonts, waitForFont, type Font } from './lib/FontProvider';
+import { applyFont, validFonts, waitForFont, type Font } from './providers/FontProvider';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 
 const savedFont = localStorage.getItem('font');

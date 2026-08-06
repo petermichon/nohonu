@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { MoreVertical, Sun, Moon, Languages, ChevronLeft, Type, Scale, Info, Palette, Settings } from 'lucide-react';
-import { useTheme } from '../../lib/ThemeProvider.tsx';
-import { useLanguage } from '../../lib/LanguageProvider.tsx';
-import { useFont, getFontFamily, type Font } from '../../lib/FontProvider.tsx';
-import { useAccentColor, type AccentColor, ACCENT_COLORS } from '../../lib/AccentColorProvider.tsx';
+import { useTheme } from '../../providers/ThemeProvider.tsx';
+import { useLanguage } from '../../providers/LanguageProvider.tsx';
+import { useFont, getFontFamily, type Font } from '../../providers/FontProvider.tsx';
+import { useAccentColor, type AccentColor, ACCENT_COLORS } from '../../providers/AccentColorProvider.tsx';
 import { MenuSection } from './MenuSection.tsx';
 
 type MenuView = 'main' | 'theme' | 'language' | 'font' | 'accent';

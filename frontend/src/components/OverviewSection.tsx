@@ -1,7 +1,7 @@
 import { ExternalLink, Power, Eye, X, Image as ImageIcon } from 'lucide-react';
-import { useAccentColor } from '../lib/AccentColorProvider.tsx';
-import { useApi } from '../lib/api.ts';
-import { useToast } from '../lib/ToastContext.tsx';
+import { useAccentColor } from '../providers/AccentColorProvider.tsx';
+import { useApi } from '../hooks/api.ts';
+import { useToast } from '../providers/ToastContext.tsx';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Site } from '../lib/types.ts';

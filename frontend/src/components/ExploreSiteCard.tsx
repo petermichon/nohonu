@@ -1,6 +1,6 @@
 import { ArrowRight, Globe } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import { useApi } from '../lib/api.ts';
+import { useApi } from '../hooks/api.ts';
 import type { Site } from '../lib/types.ts';
 
 interface ExploreSiteCardProps {

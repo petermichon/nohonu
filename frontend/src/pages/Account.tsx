@@ -1,5 +1,5 @@
 import { Server } from 'lucide-react';
-import { useConnection } from '../lib/ConnectionProvider.tsx';
+import { useConnection } from '../providers/ConnectionProvider.tsx';
 import { useState, useEffect } from 'react';
 
 export default function Account() {

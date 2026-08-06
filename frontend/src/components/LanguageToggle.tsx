@@ -1,5 +1,5 @@
 import { Languages, Check } from 'lucide-react';
-import { useLanguage } from '../lib/LanguageProvider.tsx';
+import { useLanguage } from '../providers/LanguageProvider.tsx';
 import { useState } from 'react';
 
 export function LanguageToggle() {

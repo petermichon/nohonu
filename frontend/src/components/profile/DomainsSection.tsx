@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, Globe, Plus, X } from 'lucide-react';
-import { useApi } from '../../lib/api.ts';
-import { useAccentColor } from '../../lib/AccentColorProvider.tsx';
-import { useToast } from '../../lib/ToastContext.tsx';
+import { useApi } from '../../hooks/api.ts';
+import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
+import { useToast } from '../../providers/ToastContext.tsx';
 
 export interface Domain {
   customDomain: string;

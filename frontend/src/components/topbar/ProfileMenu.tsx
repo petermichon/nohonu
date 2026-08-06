@@ -1,8 +1,8 @@
 import { Fragment, useEffect, useRef, useState, type ComponentType } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings, LogOut, LogIn } from 'lucide-react';
-import { useLogout, useApi } from '../../lib/api.ts';
-import { useConnection } from '../../lib/ConnectionProvider.tsx';
+import { useLogout, useApi } from '../../hooks/api.ts';
+import { useConnection } from '../../providers/ConnectionProvider.tsx';
 
 interface ProfileOption {
   route: string;

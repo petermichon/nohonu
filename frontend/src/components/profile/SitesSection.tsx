@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Plus, Star, User } from 'lucide-react';
-import { useAccentColor } from '../../lib/AccentColorProvider.tsx';
+import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { formatRelativeTime } from '../../lib/utils.ts';
 import type { Site } from '../../lib/types.ts';
 
