@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { shouldReloadOnCorruption } from '../lib/utils.ts';
 
 interface Props {
   children: ReactNode;
@@ -21,8 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      // Reload page on React corruption (HMR issue)
-      if (this.state.error?.message?.includes('React') || this.state.error?.message?.includes('hook')) {
+      if (shouldReloadOnCorruption(this.state.error)) {
         window.location.reload();
         return null;
       }
