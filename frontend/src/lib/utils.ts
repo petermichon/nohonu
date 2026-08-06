@@ -20,6 +20,21 @@ export function relativeTime(ts: number): string {
   return `${Math.floor(diff / 86_400_000)}d ago`;
 }
 
+export function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) return 'Updated now';
+  if (minutes < 60) return `Updated ${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  if (hours < 24) return `Updated ${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (days < 7) return `Updated ${days} day${days > 1 ? 's' : ''} ago`;
+  return `Updated ${new Date(timestamp).toLocaleDateString()}`;
+}
+
 export function formatHits(hits: number): string {
   if (hits >= 1_000_000) return `${(hits / 1_000_000).toFixed(1)}M`;
   if (hits >= 1000) return `${(hits / 1000).toFixed(1)}k`;
