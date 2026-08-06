@@ -175,7 +175,7 @@ export function SettingsMenu() {
                   <span>Accent Color</span>
                 </button>
                 <div className="border-t border-zinc-200 dark:border-zinc-700 my-1" />
-                <Link to="/settings" onClick={closeMenu} className={MENU_LINK_CLASS}>
+                <Link to="/account" onClick={closeMenu} className={MENU_LINK_CLASS}>
                   <Settings className="w-4 h-4" />
                   <span>Settings</span>
                 </Link>
