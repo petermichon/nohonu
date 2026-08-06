@@ -1,5 +1,5 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { TopBar } from '../components/TopBar';
+import { TopBar } from '../components/topbar/TopBar.tsx';
 import { Footer } from '../components/Footer';
 import { ToastProvider } from '../lib/ToastContext';
 import { GlobalToast } from '../components/GlobalToast';
