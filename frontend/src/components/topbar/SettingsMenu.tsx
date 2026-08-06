@@ -3,7 +3,8 @@ import { Link } from '@tanstack/react-router';
 import { MoreVertical, Sun, Moon, Languages, ChevronLeft, Type, Scale, Info, Palette, Settings } from 'lucide-react';
 import { useTheme } from '../../providers/ThemeProvider.tsx';
 import { useLanguage } from '../../providers/LanguageProvider.tsx';
-import { useFont, getFontFamily, type Font } from '../../providers/FontProvider.tsx';
+import { useFont } from '../../providers/FontProvider.tsx';
+import { getFontFamily, type Font } from '../../lib/font.ts';
 import { useAccentColor, type AccentColor, ACCENT_COLORS } from '../../providers/AccentColorProvider.tsx';
 import { MenuSection } from './MenuSection.tsx';
 
