@@ -2,6 +2,7 @@ import { ArrowRight, Globe } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useApi } from '../hooks/api.ts';
 import type { Site } from '../lib/types.ts';
+import { siteUrl } from '../lib/utils.ts';
 
 interface ExploreSiteCardProps {
   site: Site;
@@ -12,17 +13,9 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
   const { hostWithPort, protocol, apiBase } = useApi();
   const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
 
-  const getSiteUrl = () => {
-    if (!site.enabled) return '';
-    const subdomainBase = site.subdomainBase || hostWithPort;
-    return site.subdomain
-      ? `${protocol}//${site.subdomain}.${subdomainBase}`
-      : `${protocol}//${site.domain}.${subdomainBase}`;
-  };
-
   const handlePreviewClick = () => {
     if (site.enabled) {
-      window.open(getSiteUrl(), '_blank');
+      window.open(siteUrl(site, protocol, hostWithPort), '_blank');
     }
   };
 
@@ -54,7 +47,7 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
           </div>
         )}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-end justify-between p-4">
-          <span className="text-zinc-950 dark:text-zinc-100 text-sm font-medium truncate">{getSiteUrl()}</span>
+          <span className="text-zinc-950 dark:text-zinc-100 text-sm font-medium truncate">{siteUrl(site, protocol, hostWithPort)}</span>
           <button
             onClick={handleTitleClick}
             className="px-4 h-8 rounded-full text-sm font-medium text-zinc-950 dark:text-zinc-100 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-950 cursor-pointer border border-zinc-200 dark:border-zinc-800 whitespace-nowrap flex items-center justify-center gap-2"

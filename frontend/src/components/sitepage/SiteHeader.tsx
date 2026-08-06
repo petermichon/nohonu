@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
 import type { Site } from '../../lib/types.ts';
+import { tabClass } from '../../lib/utils.ts';
 
 export type SitePageTab = 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
 
@@ -12,13 +13,6 @@ interface SiteHeaderProps {
 }
 
 export function SiteHeader({ site, username, activeTab, isPublicView }: SiteHeaderProps) {
-  const tabClass = (active: boolean) =>
-    `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
-      active
-        ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-    }`;
-
   return (
     <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
       <div className="flex items-center gap-4 mb-4">

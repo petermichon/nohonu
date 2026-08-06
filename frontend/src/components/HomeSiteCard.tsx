@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useApi, useUser } from '../hooks/api.ts';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
 import { useToast } from '../providers/ToastContext.tsx';
-import { formatHits } from '../lib/utils.ts';
+import { formatHits, siteUrl } from '../lib/utils.ts';
 import type { Site } from '../lib/types.ts';
 
 interface HomeSiteCardProps {
@@ -20,14 +20,6 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
-
-  const getSiteUrl = () => {
-    if (!site.enabled) return '';
-    const subdomainBase = site.subdomainBase || hostWithPort;
-    return site.subdomain
-      ? `${protocol}//${site.subdomain}.${subdomainBase}`
-      : `${protocol}//${site.domain}.${subdomainBase}`;
-  };
 
   const handleToggleStar = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,7 +73,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
           <div className="flex items-center gap-2">
             {site.enabled && (
               <a
-                href={getSiteUrl()}
+                href={siteUrl(site, protocol, hostWithPort)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => {

@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings } from 'lucide-react';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
+import { tabClass } from '../../lib/utils.ts';
 
 export type UserPageTab = 'overview' | 'sites' | 'domains' | 'settings' | 'stars';
 
@@ -35,13 +36,6 @@ export function UserHeader({
 }: UserHeaderProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-
-  const tabClass = (active: boolean) =>
-    `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
-      active
-        ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
-        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-    }`;
 
   const avatarClass = `w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center justify-center shrink-0`;
 

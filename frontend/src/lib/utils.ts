@@ -58,3 +58,23 @@ export function getAccentStyle(
 export function getNextMinuteMs(): number {
   return SLOT_MS - (Date.now() % SLOT_MS);
 }
+
+export function tabClass(active: boolean): string {
+  return `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
+    active
+      ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
+      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+  }`;
+}
+
+export function siteUrl(
+  site: { enabled: boolean; domain: string; subdomain?: string; subdomainBase?: string },
+  protocol: string,
+  hostWithPort: string
+): string {
+  if (!site.enabled) return '';
+  const subdomainBase = site.subdomainBase || hostWithPort;
+  return site.subdomain
+    ? `${protocol}//${site.subdomain}.${subdomainBase}`
+    : `${protocol}//${site.domain}.${subdomainBase}`;
+}
