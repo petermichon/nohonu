@@ -4,12 +4,7 @@ import { Check, Globe, Plus, X } from 'lucide-react';
 import { useApi } from '../../hooks/api.ts';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
-
-export interface Domain {
-  customDomain: string;
-  siteDomain: string;
-  verified: boolean;
-}
+import type { Domain } from '../../lib/types.ts';
 
 interface DomainsSectionProps {
   domains: Domain[];

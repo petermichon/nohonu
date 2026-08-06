@@ -1,14 +1,7 @@
 import { Link } from '@tanstack/react-router';
-import { Star } from 'lucide-react';
+import { Star as StarIcon } from 'lucide-react';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
-
-export interface Star {
-  user: string;
-  domain: string;
-  createdAt: string;
-  displayName?: string;
-  starCount?: number;
-}
+import type { Star } from '../../lib/types.ts';
 
 interface StarsSectionProps {
   stars: Star[];
@@ -24,7 +17,7 @@ export function StarsSection({ stars, username, onToggleStar }: StarsSectionProp
       <section className="max-w-7xl mx-auto px-6 py-8">
         <div className="text-center py-20">
           <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Star className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
+            <StarIcon className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
           </div>
           <h3 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No stars yet</h3>
           <p className="text-zinc-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
@@ -70,7 +63,7 @@ export function StarsSection({ stars, username, onToggleStar }: StarsSectionProp
                   }}
                   className="shrink-0 flex items-center gap-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full px-2 py-1 cursor-pointer transition-colors"
                 >
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <StarIcon className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 </button>
               )}
             </div>

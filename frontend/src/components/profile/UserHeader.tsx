@@ -2,8 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings } from 'lucide-react';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { tabClass } from '../../lib/utils.ts';
-
-export type UserPageTab = 'overview' | 'sites' | 'domains' | 'settings' | 'stars';
+import type { UserPageTab } from '../../lib/types.ts';
 
 interface UserHeaderProps {
   username: string;

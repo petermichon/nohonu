@@ -1,3 +1,5 @@
+import type { ComponentType, CSSProperties } from 'react';
+
 export const SLOT_MS = 60 * 1000;
 
 export interface Site {
@@ -45,3 +47,29 @@ export interface UptimeSlot {
 
 export type TimeRange = 1 | 30 | 60 | 1440;
 export type UptimeRange = 1 | 30 | 60 | 1440;
+
+export type UserPageTab = 'overview' | 'sites' | 'domains' | 'settings' | 'stars';
+export type SitePageTab = 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
+
+export interface Star {
+  user: string;
+  domain: string;
+  createdAt: string;
+  displayName?: string;
+  starCount?: number;
+}
+
+export interface Domain {
+  customDomain: string;
+  siteDomain: string;
+  verified: boolean;
+}
+
+export interface MenuOption {
+  value: string;
+  icon: ComponentType<{ className?: string }> | string | null;
+  label: string;
+  divider?: boolean;
+  className?: string;
+  style?: CSSProperties;
+}

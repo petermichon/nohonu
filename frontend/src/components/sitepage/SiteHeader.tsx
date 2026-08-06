@@ -3,8 +3,6 @@ import { Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
 import type { Site } from '../../lib/types.ts';
 import { tabClass } from '../../lib/utils.ts';
 
-export type SitePageTab = 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';
-
 interface SiteHeaderProps {
   site: Site | null;
   username: string;

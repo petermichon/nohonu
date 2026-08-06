@@ -1,14 +1,6 @@
-import { Fragment, type ComponentType, type ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { Check, ChevronLeft } from 'lucide-react';
-
-interface MenuOption {
-  value: string;
-  icon: ComponentType<{ className?: string }> | string | null;
-  label: string;
-  divider?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-}
+import type { MenuOption } from '../../lib/types.ts';
 
 interface MenuSectionProps {
   onBack: () => void;
