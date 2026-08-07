@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Check, X } from 'lucide-react';
-import { useApi } from '../hooks/api.ts';
+import { useAddCustomDomain, useApi, useDeleteCustomDomain, useSiteCustomDomains, useVerificationToken, useVerifyCustomDomain } from '../hooks/api.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 
@@ -13,123 +12,56 @@ interface CustomDomainsSectionProps {
 }
 
 export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomainsSectionProps) {
-  const { apiFetch, host } = useApi();
+  const { host } = useApi();
+  const { customDomains, loading: customDomainsLoading } = useSiteCustomDomains(domain);
+  const { verificationToken } = useVerificationToken(domain);
+  const { addCustomDomain } = useAddCustomDomain();
+  const { verifyCustomDomain } = useVerifyCustomDomain();
+  const { deleteCustomDomain } = useDeleteCustomDomain();
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
   const [newCustomDomain, setNewCustomDomain] = useState('');
   const [addingCustomDomain, setAddingCustomDomain] = useState(false);
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
   const [showDnsInstructions, setShowDnsInstructions] = useState(false);
 
-  // Custom domains query
-  const customDomainsQuery = useQuery({
-    queryKey: ['custom-domains', domain],
-    queryFn: async () => {
-      const res = await apiFetch(`/sites/${domain}/custom-domains`);
-      const data = await res.json();
-      return (data.customDomains as { domain: string; verified: boolean }[]) ?? [];
-    },
-    retry: false,
-  });
-
-  // Verification token query
-  const verificationTokenQuery = useQuery({
-    queryKey: ['verification-token', domain],
-    queryFn: async () => {
-      const res = await apiFetch(`/sites/${domain}/custom-domains/token`);
-      const data = await res.json();
-      return data.token as string;
-    },
-    retry: false,
-  });
-
-  const customDomains = customDomainsQuery.data ?? [];
-  const customDomainsLoading = customDomainsQuery.isLoading;
-  const verificationToken = verificationTokenQuery.data ?? null;
-
-  // Add custom domain mutation
-  const addDomainMutation = useMutation({
-    mutationFn: async (customDomain: string) => {
-      const res = await apiFetch(`/sites/${domain}/custom-domains`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customDomain }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Failed to add custom domain');
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['custom-domains', domain] });
+  const handleAddCustomDomain = async () => {
+    const value = newCustomDomain.trim();
+    if (!value) return;
+    setAddingCustomDomain(true);
+    try {
+      await addCustomDomain(domain, value);
       setNewCustomDomain('');
       showToast('Custom domain added', true);
-    },
-    onError: (err: Error) => {
-      showToast(err.message, false);
-    },
-  });
-
-  // Verify custom domain mutation
-  const verifyDomainMutation = useMutation({
-    mutationFn: async (customDomain: string) => {
-      const res = await apiFetch(`/sites/${domain}/custom-domains/${customDomain}/verify`, {
-        method: 'POST',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Verification failed');
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['custom-domains', domain] });
-      showToast('Custom domain verified', true);
-    },
-    onError: (err: Error) => {
-      showToast(err.message, false);
-    },
-  });
-
-  // Delete custom domain mutation
-  const deleteDomainMutation = useMutation({
-    mutationFn: async (customDomain: string) => {
-      const res = await apiFetch(`/sites/${domain}/custom-domains/${customDomain}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Failed to remove custom domain');
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['custom-domains', domain] });
-      showToast('Custom domain removed', true);
-    },
-    onError: (err: Error) => {
-      showToast(err.message, false);
-    },
-  });
-
-  const addCustomDomain = () => {
-    if (!newCustomDomain.trim()) return;
-    addDomainMutation.mutate(newCustomDomain.trim(), {
-      onSettled: () => setAddingCustomDomain(false),
-    });
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to add custom domain', false);
+    } finally {
+      setAddingCustomDomain(false);
+    }
   };
 
-  const verifyCustomDomain = (customDomain: string) => {
+  const handleVerifyCustomDomain = async (customDomain: string) => {
     setVerifyingDomain(customDomain);
-    verifyDomainMutation.mutate(customDomain, {
-      onSettled: () => setVerifyingDomain(null),
-    });
+    try {
+      await verifyCustomDomain(domain, customDomain);
+      showToast('Custom domain verified', true);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Verification failed', false);
+    } finally {
+      setVerifyingDomain(null);
+    }
   };
 
-  const deleteCustomDomain = (customDomain: string) => {
+  const handleDeleteCustomDomain = async (customDomain: string) => {
     setDeletingDomain(customDomain);
-    deleteDomainMutation.mutate(customDomain, {
-      onSettled: () => setDeletingDomain(null),
-    });
+    try {
+      await deleteCustomDomain(domain, customDomain);
+      showToast('Custom domain removed', true);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to remove custom domain', false);
+    } finally {
+      setDeletingDomain(null);
+    }
   };
 
   return (
@@ -151,7 +83,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
           />
           <button
             type="button"
-            onClick={addCustomDomain}
+            onClick={handleAddCustomDomain}
             disabled={addingCustomDomain || !newCustomDomain.trim() || isReadOnly}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
           >
@@ -227,7 +159,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
                   {!cd.verified && (
                     <button
                       type="button"
-                      onClick={() => verifyCustomDomain(cd.domain)}
+                      onClick={() => handleVerifyCustomDomain(cd.domain)}
                       disabled={verifyingDomain === cd.domain}
                       className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50"
                       title="Verify domain"
@@ -237,7 +169,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
                   )}
                   <button
                     type="button"
-                    onClick={() => deleteCustomDomain(cd.domain)}
+                    onClick={() => handleDeleteCustomDomain(cd.domain)}
                     disabled={deletingDomain === cd.domain}
                     className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
                     title="Remove domain"

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Layout, User } from 'lucide-react';
-import { useMutation } from '@tanstack/react-query';
-import { useApi } from '../hooks/api.ts';
+import { useUpdateSiteMeta } from '../hooks/api.ts';
 import type { Site } from '../lib/types.ts';
 
 interface SiteProfileSectionProps {
@@ -10,42 +9,25 @@ interface SiteProfileSectionProps {
 }
 
 export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProps) {
-  const { apiFetch } = useApi();
+  const { updateSiteMeta } = useUpdateSiteMeta();
   const [editingDisplayName, setEditingDisplayName] = useState(site?.displayName || '');
   const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved' | 'error'>('idle');
 
-  // Update site metadata mutation
-  const updateMetaMutation = useMutation({
-    mutationFn: async ({ domain, displayName }: { domain: string; displayName: string }) => {
-      const res = await apiFetch(`/sites/${domain}/meta`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to update display name');
-      }
-      return res.json();
-    },
-    onSuccess: (_data, variables) => {
-      setEditingDisplayName(variables.displayName);
-      setDisplayNameStatus('saved');
-      setTimeout(() => setDisplayNameStatus('idle'), 2000);
-    },
-    onError: () => {
-      setDisplayNameStatus('error');
-      setTimeout(() => setDisplayNameStatus('idle'), 2000);
-    },
-  });
-
-  const saveDisplayName = () => {
+  const saveDisplayName = async () => {
     if (!site || !editingDisplayName.trim()) {
       setDisplayNameStatus('error');
       setTimeout(() => setDisplayNameStatus('idle'), 2000);
       return;
     }
-    updateMetaMutation.mutate({ domain: site.domain, displayName: editingDisplayName.trim() });
+    try {
+      await updateSiteMeta(site.domain, editingDisplayName.trim());
+      setEditingDisplayName(editingDisplayName.trim());
+      setDisplayNameStatus('saved');
+      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+    } catch {
+      setDisplayNameStatus('error');
+      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+    }
   };
 
   if (siteLoading) {

@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, Globe, Plus, X } from 'lucide-react';
-import { useApi } from '../../hooks/api.ts';
+import { useDeleteCustomDomain, useVerifyCustomDomain } from '../../hooks/api.ts';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
 import type { Domain } from '../../lib/types.ts';
@@ -15,58 +14,34 @@ interface DomainsSectionProps {
 export function DomainsSection({ domains, isOwnProfile, domainsLoading }: DomainsSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const { apiFetch } = useApi();
+  const { verifyCustomDomain } = useVerifyCustomDomain();
+  const { deleteCustomDomain } = useDeleteCustomDomain();
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
 
-  const verifyDomainMutation = useMutation({
-    mutationFn: async ({ siteDomain, customDomain }: { siteDomain: string; customDomain: string }) => {
-      const res = await apiFetch(`/sites/${siteDomain}/custom-domains/${customDomain}/verify`, {
-        method: 'POST',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Verification failed');
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
-      showToast('Custom domain verified', true);
-    },
-    onError: (err: Error) => {
-      showToast(err.message, false);
-    },
-  });
-
-  const deleteDomainMutation = useMutation({
-    mutationFn: async ({ siteDomain, customDomain }: { siteDomain: string; customDomain: string }) => {
-      const res = await apiFetch(`/sites/${siteDomain}/custom-domains/${customDomain}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Failed to remove custom domain');
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
-      showToast('Custom domain removed', true);
-    },
-    onError: (err: Error) => {
-      showToast(err.message, false);
-    },
-  });
-
-  const verifyCustomDomain = (siteDomain: string, customDomain: string) => {
+  const handleVerifyCustomDomain = async (siteDomain: string, customDomain: string) => {
     setVerifyingDomain(customDomain);
-    verifyDomainMutation.mutate({ siteDomain, customDomain }, { onSettled: () => setVerifyingDomain(null) });
+    try {
+      await verifyCustomDomain(siteDomain, customDomain);
+      showToast('Custom domain verified', true);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Verification failed', false);
+    } finally {
+      setVerifyingDomain(null);
+    }
   };
 
-  const deleteCustomDomain = (siteDomain: string, customDomain: string) => {
+  const handleDeleteCustomDomain = async (siteDomain: string, customDomain: string) => {
     setDeletingDomain(customDomain);
-    deleteDomainMutation.mutate({ siteDomain, customDomain }, { onSettled: () => setDeletingDomain(null) });
+    try {
+      await deleteCustomDomain(siteDomain, customDomain);
+      showToast('Custom domain removed', true);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to remove custom domain', false);
+    } finally {
+      setDeletingDomain(null);
+    }
   };
 
   const addButtonClass = `inline-flex items-center gap-2 px-4 h-[40px] rounded-full text-sm font-medium ${
@@ -165,7 +140,7 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading }: Domain
                 {!cd.verified && (
                   <button
                     type="button"
-                    onClick={() => verifyCustomDomain(cd.siteDomain, cd.customDomain)}
+                    onClick={() => handleVerifyCustomDomain(cd.siteDomain, cd.customDomain)}
                     disabled={verifyingDomain === cd.customDomain}
                     className={verifyButtonClass}
                   >
@@ -175,7 +150,7 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading }: Domain
                 )}
                 <button
                   type="button"
-                  onClick={() => deleteCustomDomain(cd.siteDomain, cd.customDomain)}
+                  onClick={() => handleDeleteCustomDomain(cd.siteDomain, cd.customDomain)}
                   disabled={deletingDomain === cd.customDomain}
                   className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
                   title="Remove domain"

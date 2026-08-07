@@ -73,3 +73,11 @@ export interface MenuOption {
   className?: string;
   style?: CSSProperties;
 }
+
+export interface Session {
+  id: string;
+  username: string;
+  userAgent?: string;
+  createdAt: number;
+  lastActive: number;
+}

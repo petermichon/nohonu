@@ -1,9 +1,9 @@
 import { ExternalLink, Power, Eye, X, Image as ImageIcon } from 'lucide-react';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
-import { useApi } from '../hooks/api.ts';
+import { useApi, useDeleteCover, useUploadCover } from '../hooks/api.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { processImageTo4to3 } from '../lib/image.ts';
 import type { Site } from '../lib/types.ts';
 
 interface OverviewSectionProps {
@@ -31,9 +31,10 @@ export function OverviewSection({
 }: OverviewSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const { apiFetch, apiBase } = useApi();
+  const { apiBase } = useApi();
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
+  const { uploadCover } = useUploadCover(site?.domain ?? '');
+  const { deleteCover } = useDeleteCover(site?.domain ?? '');
   const [uploadingCover, setUploadingCover] = useState(false);
   const [deletingCover, setDeletingCover] = useState(false);
 
@@ -56,17 +57,8 @@ export function OverviewSection({
       // Process image to 4:3 aspect ratio
       const processedFile = await processImageTo4to3(file);
 
-      const res = await apiFetch(`/sites/${site.domain}/cover`, {
-        method: 'POST',
-        headers: { 'Content-Type': processedFile.type },
-        body: processedFile,
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to upload cover');
-      }
+      await uploadCover(processedFile);
       showToast('Cover image uploaded', true);
-      queryClient.invalidateQueries({ queryKey: ['site', site.domain] });
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to upload cover', false);
     } finally {
@@ -74,89 +66,13 @@ export function OverviewSection({
     }
   };
 
-  const processImageTo4to3 = async (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-
-        const targetRatio = 4 / 3;
-        const currentRatio = img.width / img.height;
-
-        let cropX: number, cropY: number, cropWidth: number, cropHeight: number;
-
-        if (currentRatio > targetRatio) {
-          // Image is wider than 4:3, crop sides
-          cropHeight = img.height;
-          cropWidth = Math.round(img.height * targetRatio);
-          cropX = Math.round((img.width - cropWidth) / 2);
-          cropY = 0;
-        } else if (currentRatio < targetRatio) {
-          // Image is taller than 4:3, crop from top
-          cropWidth = img.width;
-          cropHeight = Math.round(img.width / targetRatio);
-          cropX = 0;
-          cropY = 0;
-        } else {
-          // Already 4:3, no cropping needed
-          cropX = 0;
-          cropY = 0;
-          cropWidth = img.width;
-          cropHeight = img.height;
-        }
-
-        // Create canvas for cropping
-        const canvas = document.createElement('canvas');
-        canvas.width = cropWidth;
-        canvas.height = cropHeight;
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
-          return;
-        }
-
-        // Draw cropped image
-        ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-
-        // Convert to blob
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error('Failed to process image'));
-              return;
-            }
-            const processedFile = new File([blob], file.name, { type: 'image/jpeg' });
-            resolve(processedFile);
-          },
-          'image/jpeg',
-          0.85
-        );
-      };
-
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        reject(new Error('Failed to load image'));
-      };
-
-      img.src = url;
-    });
-  };
-
   const handleCoverDelete = async () => {
     if (!site) return;
 
     setDeletingCover(true);
     try {
-      const res = await apiFetch(`/sites/${site.domain}/cover`, { method: 'DELETE' });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to delete cover');
-      }
+      await deleteCover();
       showToast('Cover image removed', true);
-      queryClient.invalidateQueries({ queryKey: ['site', site.domain] });
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to delete cover', false);
     } finally {

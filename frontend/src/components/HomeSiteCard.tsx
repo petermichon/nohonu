@@ -1,7 +1,6 @@
 import { Globe, Eye, Star, ExternalLink } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { useApi, useUser } from '../hooks/api.ts';
+import { useApi, useUser, useToggleStar } from '../hooks/api.ts';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
 import { useToast } from '../providers/ToastContext.tsx';
 import { formatHits, siteUrl } from '../lib/utils.ts';
@@ -16,30 +15,16 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const router = useRouter();
   const { user: accountUser } = useUser(site.account);
   const { username: loggedInUsername } = useConnection();
-  const { apiFetch } = useApi();
+  const { toggleStar } = useToggleStar();
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
   const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
 
   const handleToggleStar = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!loggedInUsername) return;
 
-    const newStarredState = !site.isStarred;
-
     try {
-      const res = await apiFetch(`/sites/${site.domain}/star`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ starred: newStarredState }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        showToast(data.error || 'Failed to update star');
-        return;
-      }
-      // Invalidate explore sites query to refresh data
-      queryClient.invalidateQueries({ queryKey: ['explore-sites'] });
+      await toggleStar(site.domain, !site.isStarred);
     } catch {
       showToast('Failed to update star');
     }

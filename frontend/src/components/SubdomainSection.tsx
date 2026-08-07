@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../hooks/api.ts';
+import { useUpdateSiteConfig } from '../hooks/api.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 
 interface SubdomainSectionProps {
@@ -10,41 +9,24 @@ interface SubdomainSectionProps {
 }
 
 export function SubdomainSection({ subdomain, siteLoading, isReadOnly = false }: SubdomainSectionProps) {
-  const { apiFetch } = useApi();
+  const { updateSiteConfig } = useUpdateSiteConfig();
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
   const [editingSubdomain, setEditingSubdomain] = useState(subdomain || '');
   const [isSaving, setIsSaving] = useState(false);
 
-  const updateMutation = useMutation({
-    mutationFn: async (newSubdomain: string) => {
-      const res = await apiFetch(`/sites/meta`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subdomain: newSubdomain || null }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to update subdomain');
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['site-meta'] });
-      showToast('Subdomain updated', true);
-      setIsSaving(false);
-    },
-    onError: (err: Error) => {
-      showToast(err.message, false);
-      setIsSaving(false);
-    },
-  });
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingSubdomain === subdomain) {
       return;
     }
     setIsSaving(true);
-    updateMutation.mutate(editingSubdomain);
+    try {
+      await updateSiteConfig(editingSubdomain || null);
+      showToast('Subdomain updated', true);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to update subdomain', false);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

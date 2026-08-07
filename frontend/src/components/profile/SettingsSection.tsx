@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Key, LogOut, Monitor, User } from 'lucide-react';
-import { useApi, useDeleteSession, useSessions } from '../../hooks/api.ts';
+import { useDeleteProfilePicture, useDeleteSession, useSessions, useUpdateDisplayName, useUploadProfilePicture } from '../../hooks/api.ts';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
@@ -14,11 +14,13 @@ interface SettingsSectionProps {
 export function SettingsSection({ username }: SettingsSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const { apiFetch } = useApi();
   const { showToast } = useToast();
   const { displayName, setDisplayName, apiBase, sessionId, profilePicture } = useConnection();
   const { sessions, loading: sessionsLoading } = useSessions();
   const { deleteSession } = useDeleteSession();
+  const { updateDisplayName } = useUpdateDisplayName();
+  const { uploadProfilePicture } = useUploadProfilePicture();
+  const { deleteProfilePicture } = useDeleteProfilePicture();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -44,19 +46,10 @@ export function SettingsSection({ username }: SettingsSectionProps) {
 
     setUploadingProfilePicture(true);
     try {
-      const res = await apiFetch('/auth/profile-picture', {
-        method: 'POST',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        showToast(data.error || 'Failed to upload profile picture');
-        return;
-      }
+      await uploadProfilePicture(file);
       window.location.reload();
-    } catch {
-      showToast('Failed to upload profile picture');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to upload profile picture', false);
     } finally {
       setUploadingProfilePicture(false);
     }
@@ -64,17 +57,10 @@ export function SettingsSection({ username }: SettingsSectionProps) {
 
   const handleDeleteProfilePicture = async () => {
     try {
-      const res = await apiFetch('/auth/profile-picture/delete', {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        showToast(data.error || 'Failed to delete profile picture');
-        return;
-      }
+      await deleteProfilePicture();
       window.location.reload();
-    } catch {
-      showToast('Failed to delete profile picture');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to delete profile picture', false);
     }
   };
 
@@ -103,23 +89,12 @@ export function SettingsSection({ username }: SettingsSectionProps) {
       return;
     }
     try {
-      const res = await apiFetch('/auth/displayname', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName: editingDisplayName }),
-      });
-      if (res.ok) {
-        setDisplayName(editingDisplayName);
-        setDisplayNameStatus('saved');
-        setTimeout(() => setDisplayNameStatus('idle'), 2000);
-      } else {
-        const data = await res.json().catch(() => ({}));
-        showToast(data.error || 'Failed to update display name');
-        setDisplayNameStatus('error');
-        setTimeout(() => setDisplayNameStatus('idle'), 2000);
-      }
-    } catch {
-      showToast('Failed to update display name');
+      await updateDisplayName(editingDisplayName);
+      setDisplayName(editingDisplayName);
+      setDisplayNameStatus('saved');
+      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to update display name', false);
       setDisplayNameStatus('error');
       setTimeout(() => setDisplayNameStatus('idle'), 2000);
     }

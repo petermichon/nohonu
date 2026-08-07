@@ -63,6 +63,21 @@ export function shouldReloadOnCorruption(error?: Error): boolean {
   return Boolean(error?.message?.includes('React') || error?.message?.includes('hook'));
 }
 
+export function parseApiBase(apiBase: string): { host: string; hostWithPort: string; protocol: string } {
+  let host = '';
+  let hostWithPort = '';
+  let protocol = 'http:';
+  try {
+    ({ host, protocol } = new URL(apiBase));
+    hostWithPort = host;
+    // Strip port from host for subdomain URLs
+    host = host.split(':')[0];
+  } catch {
+    /* invalid URL */
+  }
+  return { host, hostWithPort, protocol };
+}
+
 export function tabClass(active: boolean): string {
   return `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer rounded-full ${
     active

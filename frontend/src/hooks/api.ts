@@ -1,21 +1,12 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
-import type { Site } from '../lib/types.ts';
+import { parseApiBase } from '../lib/utils.ts';
+import type { Site, Domain, Session } from '../lib/types.ts';
 
 export function useApi() {
   const { apiBase, apiKey, sessionId, username } = useConnection();
-  let host = '';
-  let hostWithPort = '';
-  let protocol = 'http:';
-  try {
-    ({ host, protocol } = new URL(apiBase));
-    hostWithPort = host;
-    // Strip port from host for subdomain URLs
-    host = host.split(':')[0];
-  } catch {
-    /* invalid URL */
-  }
+  const { host, hostWithPort, protocol } = parseApiBase(apiBase);
   const apiFetch = useCallback(
     (path: string, init?: RequestInit) => {
       const headers: HeadersInit = {
@@ -164,12 +155,6 @@ export function useUser(username: string | undefined) {
   };
 }
 
-interface CustomDomainEntry {
-  siteDomain: string;
-  customDomain: string;
-  verified: boolean;
-}
-
 export function useDomains() {
   const { apiFetch } = useApi();
   const queryClient = useQueryClient();
@@ -179,7 +164,7 @@ export function useDomains() {
     queryFn: async () => {
       const res = await apiFetch('/custom-domains');
       const data = await res.json();
-      return (data.customDomains ?? []) as CustomDomainEntry[];
+      return (data.customDomains ?? []) as Domain[];
     },
     retry: false,
   });
@@ -191,14 +176,6 @@ export function useDomains() {
     loading: query.isLoading,
     refreshDomains,
   };
-}
-
-interface Session {
-  id: string;
-  username: string;
-  userAgent?: string;
-  createdAt: number;
-  lastActive: number;
 }
 
 export function useSessions() {
@@ -263,4 +240,249 @@ export function useServers() {
     loading: false,
     error: false,
   };
+}
+
+export function useSiteCustomDomains(domain: string) {
+  const { apiFetch } = useApi();
+
+  const query = useQuery({
+    queryKey: ['custom-domains', domain],
+    queryFn: async () => {
+      const res = await apiFetch(`/sites/${domain}/custom-domains`);
+      const data = await res.json();
+      return (data.customDomains as Domain[]) ?? [];
+    },
+    retry: false,
+  });
+
+  return {
+    customDomains: query.data ?? [],
+    loading: query.isLoading,
+  };
+}
+
+export function useVerificationToken(domain: string) {
+  const { apiFetch } = useApi();
+
+  const query = useQuery({
+    queryKey: ['verification-token', domain],
+    queryFn: async () => {
+      const res = await apiFetch(`/sites/${domain}/custom-domains/token`);
+      const data = await res.json();
+      return data.token as string;
+    },
+    retry: false,
+  });
+
+  return {
+    verificationToken: query.data ?? null,
+  };
+}
+
+export function useToggleStar() {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const toggleStar = async (domain: string, isStarred: boolean) => {
+    const res = await apiFetch(`/sites/${domain}/star`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ starred: isStarred }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to update star');
+    }
+    queryClient.invalidateQueries({ queryKey: ['explore-sites'] });
+    queryClient.invalidateQueries({ queryKey: ['sites'] });
+    queryClient.invalidateQueries({ queryKey: ['user-sites'] });
+    queryClient.invalidateQueries({ queryKey: ['user-stars'] });
+  };
+
+  return { toggleStar };
+}
+
+export function useAddCustomDomain() {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const addCustomDomain = async (siteDomain: string, customDomain: string) => {
+    const res = await apiFetch(`/sites/${siteDomain}/custom-domains`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customDomain }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'Failed to add custom domain');
+    }
+    queryClient.invalidateQueries({ queryKey: ['custom-domains', siteDomain] });
+    queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
+  };
+
+  return { addCustomDomain };
+}
+
+export function useVerifyCustomDomain() {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const verifyCustomDomain = async (siteDomain: string, customDomain: string) => {
+    const res = await apiFetch(`/sites/${siteDomain}/custom-domains/${customDomain}/verify`, {
+      method: 'POST',
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'Verification failed');
+    }
+    queryClient.invalidateQueries({ queryKey: ['custom-domains', siteDomain] });
+    queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
+  };
+
+  return { verifyCustomDomain };
+}
+
+export function useDeleteCustomDomain() {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const deleteCustomDomain = async (siteDomain: string, customDomain: string) => {
+    const res = await apiFetch(`/sites/${siteDomain}/custom-domains/${customDomain}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'Failed to remove custom domain');
+    }
+    queryClient.invalidateQueries({ queryKey: ['custom-domains', siteDomain] });
+    queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
+  };
+
+  return { deleteCustomDomain };
+}
+
+export function useUpdateSiteMeta() {
+  const { apiFetch } = useApi();
+
+  const updateSiteMeta = async (domain: string, displayName: string) => {
+    const res = await apiFetch(`/sites/${domain}/meta`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to update site meta');
+    }
+  };
+
+  return { updateSiteMeta };
+}
+
+export function useUpdateSiteConfig() {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const updateSiteConfig = async (subdomain: string | null) => {
+    const res = await apiFetch(`/sites/meta`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subdomain }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to update subdomain');
+    }
+    queryClient.invalidateQueries({ queryKey: ['site-meta'] });
+  };
+
+  return { updateSiteConfig };
+}
+
+export function useUploadCover(domain: string) {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const uploadCover = async (file: File) => {
+    const res = await apiFetch(`/sites/${domain}/cover`, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type },
+      body: file,
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to upload cover');
+    }
+    queryClient.invalidateQueries({ queryKey: ['site', domain] });
+  };
+
+  return { uploadCover };
+}
+
+export function useDeleteCover(domain: string) {
+  const { apiFetch } = useApi();
+  const queryClient = useQueryClient();
+
+  const deleteCover = async () => {
+    const res = await apiFetch(`/sites/${domain}/cover`, { method: 'DELETE' });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to delete cover');
+    }
+    queryClient.invalidateQueries({ queryKey: ['site', domain] });
+  };
+
+  return { deleteCover };
+}
+
+export function useUpdateDisplayName() {
+  const { apiFetch } = useApi();
+
+  const updateDisplayName = async (displayName: string) => {
+    const res = await apiFetch('/auth/displayname', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to update display name');
+    }
+  };
+
+  return { updateDisplayName };
+}
+
+export function useUploadProfilePicture() {
+  const { apiFetch } = useApi();
+
+  const uploadProfilePicture = async (file: File) => {
+    const res = await apiFetch('/auth/profile-picture', {
+      method: 'POST',
+      headers: { 'Content-Type': file.type },
+      body: file,
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to upload profile picture');
+    }
+  };
+
+  return { uploadProfilePicture };
+}
+
+export function useDeleteProfilePicture() {
+  const { apiFetch } = useApi();
+
+  const deleteProfilePicture = async () => {
+    const res = await apiFetch('/auth/profile-picture/delete', {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to delete profile picture');
+    }
+  };
+
+  return { deleteProfilePicture };
 }

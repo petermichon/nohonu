@@ -1,6 +1,6 @@
 import { useParams, useLocation } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
-import { useSites, useUserSites, useDomains, useUser, useUserStars, useApi } from '../hooks/api.ts';
+import { useSites, useUserSites, useDomains, useUser, useUserStars, useToggleStar } from '../hooks/api.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
 import { useToast } from '../providers/ToastContext.tsx';
@@ -17,8 +17,7 @@ export default function UserPage() {
   const { username } = useParams({ from: '/u/$username' });
   const location = useLocation();
   const { displayName, username: loggedInUsername, profilePicture, apiBase } = useConnection();
-  const { apiFetch } = useApi();
-  const { refreshSites } = useSites();
+  const { toggleStar } = useToggleStar();
   const { showToast } = useToast();
 
   const isOwnProfile = !!loggedInUsername && username === loggedInUsername;
@@ -26,21 +25,11 @@ export default function UserPage() {
   const { sites: privateSites, loading: privateLoading, error: privateError } = useSites();
   const { domains, loading: domainsLoading } = useDomains();
   const { user: publicUser } = useUser(isOwnProfile ? undefined : username);
-  const { stars: userStars, loading: starsLoading, refreshStars } = useUserStars(username);
+  const { stars: userStars, loading: starsLoading } = useUserStars(username);
 
   const handleToggleStar = async (domain: string, isStarred: boolean) => {
     try {
-      const res = await apiFetch(`/sites/${domain}/star`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ starred: !isStarred }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        showToast(data.error || 'Failed to update star');
-        return;
-      }
-      await Promise.all([refreshSites(), refreshStars()]);
+      await toggleStar(domain, isStarred);
     } catch {
       showToast('Failed to update star');
     }
