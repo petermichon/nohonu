@@ -1,8 +1,18 @@
 import { createFileRoute, notFound, Link, useParams } from '@tanstack/react-router';
-import SitePage from '../pages/SitePage';
 import { AlertCircle } from 'lucide-react';
+import { ActivityChart } from '../components/ActivityChart.tsx';
+import { UptimeChart } from '../components/UptimeChart.tsx';
+import { VersionPanel } from '../components/VersionPanel.tsx';
+import { CustomDomainsSection } from '../components/CustomDomainsSection.tsx';
+import { DangerZoneSection } from '../components/DangerZoneSection.tsx';
+import { SubdomainSection } from '../components/SubdomainSection.tsx';
+import { SiteProfileSection } from '../components/SiteProfileSection.tsx';
+import { SECTIONS } from '../lib/sectionsConfig.ts';
+import { useSiteShellContext } from '../hooks/useSiteShellContext.ts';
 
 const VALID_SECTIONS = ['analytics', 'domains', 'versions', 'settings'];
+
+const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SectionNotFound() {
   const { username, sitename } = useParams({ from: '/u/$username/$sitename/$section' });
@@ -24,12 +34,97 @@ function SectionNotFound() {
   );
 }
 
+function SectionPage() {
+  const { section } = useParams({ from: '/u/$username/$sitename/$section' });
+  const ctx = useSiteShellContext();
+
+  if (section === 'analytics') {
+    return (
+      <section className="max-w-7xl mx-auto px-6 py-8">
+        <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">
+          {SECTION_MAP['activity'].label}
+        </h2>
+        <ActivityChart
+          stats={ctx.stats}
+          visitors={ctx.visitors}
+          onReload={() => ctx.loadStats()}
+          reloading={ctx.statsLoading}
+          range={ctx.globalRange}
+          onRangeChange={ctx.setGlobalRange}
+          now={ctx.now}
+        />
+        <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3 mt-8">
+          {SECTION_MAP['uptime'].label}
+        </h2>
+        <UptimeChart
+          uptime={ctx.uptimeData}
+          allUptime={ctx.uptimeAllData}
+          range={ctx.globalRange}
+          onRangeChange={ctx.setGlobalRange}
+          onReload={() => ctx.loadUptime()}
+          reloading={ctx.uptimeLoading}
+          now={ctx.now}
+        />
+      </section>
+    );
+  }
+
+  if (section === 'domains') {
+    return (
+      <section className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
+        <SubdomainSection subdomain={ctx.site?.subdomain || null} siteLoading={ctx.siteLoading} isReadOnly={ctx.isPublicView} />
+        <CustomDomainsSection domain={ctx.domain} isReadOnly={ctx.isPublicView} />
+      </section>
+    );
+  }
+
+  if (section === 'versions') {
+    return (
+      <section className="max-w-7xl mx-auto px-6 py-8">
+        <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">
+          {SECTION_MAP['versions'].label}
+        </h2>
+        <VersionPanel
+          domain={ctx.site?.domain ?? ''}
+          versions={ctx.versions}
+          versionsLoading={ctx.versionsLoading}
+          currentVersion={ctx.currentVersion}
+          activating={ctx.activating}
+          deletingVersion={ctx.deletingVersion}
+          onActivate={ctx.requestVersionActivate}
+          onDelete={ctx.requestVersionDelete}
+          onDownload={ctx.downloadVersion}
+          onUploaded={ctx.onUploaded}
+          onToast={ctx.onToast}
+          isReadOnly={ctx.isPublicView}
+        />
+      </section>
+    );
+  }
+
+  if (section === 'settings' && !ctx.isPublicView) {
+    return (
+      <section className="max-w-7xl mx-auto px-6 py-8">
+        <SiteProfileSection site={ctx.site} siteLoading={ctx.siteLoading} />
+        <div className="border-t border-zinc-200 dark:border-zinc-800 my-8" />
+        <DangerZoneSection
+          site={ctx.site}
+          actionLoading={ctx.actionLoading}
+          onRequestDelete={() => ctx.setConfirmAction('delete')}
+        />
+      </section>
+    );
+  }
+
+  return null;
+}
+
 export const Route = createFileRoute('/u/$username/$sitename/$section')({
   beforeLoad: ({ params }) => {
     if (!VALID_SECTIONS.includes(params.section)) {
       throw notFound();
     }
   },
-  component: SitePage,
+  component: SectionPage,
   notFoundComponent: SectionNotFound,
 });
