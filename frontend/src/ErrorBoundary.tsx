@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from 'react';
-import { shouldReloadOnCorruption } from '../lib/utils.ts';
+import { shouldReloadOnCorruption } from './lib/utils.ts';
 
 interface Props {
   children: ReactNode;
