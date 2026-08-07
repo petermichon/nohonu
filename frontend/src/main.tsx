@@ -1,10 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RouterProvider } from '@tanstack/react-router';
-import { router } from './router';
+import { App } from './App.tsx';
 import './index.css';
 import { applyFont, validFonts, waitForFont, type Font } from './lib/font.ts';
-import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 
 const savedFont = localStorage.getItem('font');
 const font = savedFont && validFonts.includes(savedFont as Font) ? (savedFont as Font) : 'outfit';
@@ -22,9 +20,7 @@ function initApp() {
   const root = createRoot(rootElement);
   root.render(
     <StrictMode>
-      <ErrorBoundary>
-        <RouterProvider router={router} />
-      </ErrorBoundary>
+      <App />
     </StrictMode>
   );
 
