@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
 import { useTheme } from '../providers/ThemeProvider.tsx';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
-import { useApi } from '../hooks/api.ts';
+import { useApi } from '../hooks/api/useApi.ts';
 
 function Signup() {
   const { accentColor, getAccentColorValues } = useAccentColor();

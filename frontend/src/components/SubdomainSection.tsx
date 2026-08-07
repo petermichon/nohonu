@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useUpdateSiteConfig } from '../hooks/api.ts';
+import { useUpdateSiteConfig } from '../hooks/api/useUpdateSiteConfig.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 
 interface SubdomainSectionProps {

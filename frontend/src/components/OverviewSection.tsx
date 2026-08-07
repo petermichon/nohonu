@@ -1,6 +1,8 @@
 import { ExternalLink, Power, Eye, X, Image as ImageIcon } from 'lucide-react';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
-import { useApi, useDeleteCover, useUploadCover } from '../hooks/api.ts';
+import { useApi } from '../hooks/api/useApi.ts';
+import { useDeleteCover } from '../hooks/api/useDeleteCover.ts';
+import { useUploadCover } from '../hooks/api/useUploadCover.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { useState } from 'react';
 import { processImageTo4to3 } from '../lib/image.ts';

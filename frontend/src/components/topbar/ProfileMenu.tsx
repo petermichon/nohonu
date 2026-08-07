@@ -1,7 +1,8 @@
 import { Fragment, useRef, useState, type ComponentType } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings, LogOut, LogIn } from 'lucide-react';
-import { useLogout, useApi } from '../../hooks/api.ts';
+import { useLogout } from '../../hooks/api/useLogout.ts';
+import { useApi } from '../../hooks/api/useApi.ts';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
 import { useClickOutside } from '../../hooks/useClickOutside.ts';
 

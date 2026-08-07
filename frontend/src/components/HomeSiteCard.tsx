@@ -1,6 +1,8 @@
 import { Globe, Eye, Star, ExternalLink } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
-import { useApi, useUser, useToggleStar } from '../hooks/api.ts';
+import { useApi } from '../hooks/api/useApi.ts';
+import { useUser } from '../hooks/api/useUser.ts';
+import { useToggleStar } from '../hooks/api/useToggleStar.ts';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
 import { useToast } from '../providers/ToastContext.tsx';
 import { formatHits, siteUrl } from '../lib/utils.ts';

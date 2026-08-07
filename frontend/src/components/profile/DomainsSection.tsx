@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Globe, Plus, X } from 'lucide-react';
-import { useDeleteCustomDomain, useVerifyCustomDomain } from '../../hooks/api.ts';
+import { useDeleteCustomDomain } from '../../hooks/api/useDeleteCustomDomain.ts';
+import { useVerifyCustomDomain } from '../../hooks/api/useVerifyCustomDomain.ts';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
 import type { Domain } from '../../lib/types.ts';

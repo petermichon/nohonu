@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
 import { useTheme } from '../providers/ThemeProvider.tsx';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
-import { useExploreSites } from '../hooks/api.ts';
+import { useExploreSites } from '../hooks/api/useExploreSites.ts';
 import { formatHits } from '../lib/utils.ts';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';
 import { Eye, AlertCircle, CloudUpload, Book } from 'lucide-react';

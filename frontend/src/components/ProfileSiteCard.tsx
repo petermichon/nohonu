@@ -1,7 +1,7 @@
 import { Globe } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
-import { useApi } from '../hooks/api.ts';
+import { useApi } from '../hooks/api/useApi.ts';
 import type { Site } from '../lib/types.ts';
 
 interface ProfileSiteCardProps {

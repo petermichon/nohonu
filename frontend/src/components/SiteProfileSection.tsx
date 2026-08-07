@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout, User } from 'lucide-react';
-import { useUpdateSiteMeta } from '../hooks/api.ts';
+import { useUpdateSiteMeta } from '../hooks/api/useUpdateSiteMeta.ts';
 import type { Site } from '../lib/types.ts';
 
 interface SiteProfileSectionProps {

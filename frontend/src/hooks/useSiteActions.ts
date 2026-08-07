@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { useApi } from '../hooks/api.ts';
+import { useApi } from '../hooks/api/useApi.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import type { Site } from '../lib/types.ts';
 

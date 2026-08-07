@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Key, LogOut, Monitor, User } from 'lucide-react';
-import { useDeleteProfilePicture, useDeleteSession, useSessions, useUpdateDisplayName, useUploadProfilePicture } from '../../hooks/api.ts';
+import { useDeleteProfilePicture } from '../../hooks/api/useDeleteProfilePicture.ts';
+import { useDeleteSession } from '../../hooks/api/useDeleteSession.ts';
+import { useSessions } from '../../hooks/api/useSessions.ts';
+import { useUpdateDisplayName } from '../../hooks/api/useUpdateDisplayName.ts';
+import { useUploadProfilePicture } from '../../hooks/api/useUploadProfilePicture.ts';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';

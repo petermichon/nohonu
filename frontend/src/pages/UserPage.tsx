@@ -1,6 +1,11 @@
 import { useParams, useLocation } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
-import { useSites, useUserSites, useDomains, useUser, useUserStars, useToggleStar } from '../hooks/api.ts';
+import { useSites } from '../hooks/api/useSites.ts';
+import { useUserSites } from '../hooks/api/useUserSites.ts';
+import { useDomains } from '../hooks/api/useDomains.ts';
+import { useUser } from '../hooks/api/useUser.ts';
+import { useUserStars } from '../hooks/api/useUserStars.ts';
+import { useToggleStar } from '../hooks/api/useToggleStar.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
 import { useToast } from '../providers/ToastContext.tsx';

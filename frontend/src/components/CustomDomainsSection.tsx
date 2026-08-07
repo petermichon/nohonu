@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Plus, Check, X } from 'lucide-react';
-import { useAddCustomDomain, useApi, useDeleteCustomDomain, useSiteCustomDomains, useVerificationToken, useVerifyCustomDomain } from '../hooks/api.ts';
+import { useAddCustomDomain } from '../hooks/api/useAddCustomDomain.ts';
+import { useApi } from '../hooks/api/useApi.ts';
+import { useDeleteCustomDomain } from '../hooks/api/useDeleteCustomDomain.ts';
+import { useSiteCustomDomains } from '../hooks/api/useSiteCustomDomains.ts';
+import { useVerificationToken } from '../hooks/api/useVerificationToken.ts';
+import { useVerifyCustomDomain } from '../hooks/api/useVerifyCustomDomain.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
 
