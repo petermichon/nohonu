@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe, Check, X } from 'lucide-react';
-import { useApiFetch } from '../hooks/api/useApiFetch.ts';
+import { useCheckDomain } from '../hooks/api/useCheckDomain.ts';
+import { useCheckSubdomain } from '../hooks/api/useCheckSubdomain.ts';
+import { useCreateSite } from '../hooks/api/useCreateSite.ts';
+import { useDeployGithub } from '../hooks/api/useDeployGithub.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { useConnection } from '../hooks/useConnection.ts';
 import { hostWithPort } from '../config.ts';
@@ -13,10 +15,11 @@ interface InlineDeployFormProps {
 }
 
 export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
-  const { apiFetch } = useApiFetch();
   const { username } = useConnection();
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
+  const { createSite, isPending: uploadPending } = useCreateSite();
+  const { deployGithub, isPending: githubPending } = useDeployGithub();
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
   const [newDomain, setNewDomain] = useState('');
   const [newSubdomain, setNewSubdomain] = useState('');
@@ -27,86 +30,8 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const [githubBranch, setGithubBranch] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: subdomainResult, isFetching: subdomainChecking } = useQuery({
-    queryKey: ['check-subdomain', newSubdomain],
-    queryFn: async () => {
-      const res = await apiFetch(`/check-subdomain?subdomain=${encodeURIComponent(newSubdomain)}`);
-      return { subdomain: newSubdomain, taken: res.ok };
-    },
-    enabled: !!newSubdomain,
-  });
-
-  const { data: domainResult, isFetching: domainChecking } = useQuery({
-    queryKey: ['check-domain', newDomain, username],
-    queryFn: async () => {
-      const res = await apiFetch(
-        `/check-domain?domain=${encodeURIComponent(newDomain)}&user=${encodeURIComponent(username ?? '')}`
-      );
-      return { domain: newDomain, taken: res.ok };
-    },
-    enabled: !!newDomain,
-  });
-
-  // Upload mutation
-  const uploadMutation = useMutation({
-    mutationFn: async ({ file, domain, subdomain }: { file: File; domain: string; subdomain: string }) => {
-      const query = subdomain ? `?subdomain=${encodeURIComponent(subdomain)}` : '';
-      const res = await apiFetch(`/sites/${domain}${query}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/zip' },
-        body: file,
-      });
-      const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Upload failed');
-      }
-    },
-    onSuccess: () => {
-      const domain = newDomain;
-      reset();
-      onDeploy(domain);
-    },
-    onError: (err: Error) => {
-      setUploadError(err.message);
-    },
-  });
-
-  // GitHub fetch mutation
-  const fetchGithubMutation = useMutation({
-    mutationFn: async ({
-      domain,
-      repo,
-      branch,
-      subdomain,
-    }: {
-      domain: string;
-      repo: string;
-      branch: string;
-      subdomain: string;
-    }) => {
-      const body: { repo: string; branch: string; subdomain?: string } = { repo, branch };
-      if (subdomain) {
-        body.subdomain = subdomain;
-      }
-      const res = await apiFetch(`/sites/${domain}/github`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Fetch failed');
-      }
-    },
-    onSuccess: () => {
-      const domain = newDomain;
-      reset();
-      onDeploy(domain);
-    },
-    onError: (err: Error) => {
-      setUploadError(err.message);
-    },
-  });
+  const { result: subdomainResult, checking: subdomainChecking } = useCheckSubdomain(newSubdomain);
+  const { result: domainResult, checking: domainChecking } = useCheckDomain(newDomain, username ?? '');
 
   const reset = () => {
     setUploadMode('file');
@@ -145,27 +70,41 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     if (file) handleFileSelect(file);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!selectedFile || !newDomain || !newSubdomain) {
       setUploadError(!newDomain ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Select a .zip file');
       return;
     }
     setUploadError(null);
-    uploadMutation.mutate({ file: selectedFile, domain: newDomain, subdomain: newSubdomain });
+    try {
+      await createSite({ file: selectedFile, domain: newDomain, subdomain: newSubdomain });
+      const domain = newDomain;
+      reset();
+      onDeploy(domain);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+    }
   };
 
-  const handleFetchGithub = () => {
+  const handleFetchGithub = async () => {
     if (!githubRepo.includes('/') || !newDomain || !newSubdomain) {
       setUploadError(!newDomain ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Repo format: owner/repo');
       return;
     }
     setUploadError(null);
-    fetchGithubMutation.mutate({
-      domain: newDomain,
-      repo: githubRepo,
-      branch: githubBranch || 'main',
-      subdomain: newSubdomain,
-    });
+    try {
+      await deployGithub({
+        domain: newDomain,
+        repo: githubRepo,
+        branch: githubBranch || 'main',
+        subdomain: newSubdomain,
+      });
+      const domain = newDomain;
+      reset();
+      onDeploy(domain);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Fetch failed');
+    }
   };
 
   return (
@@ -362,7 +301,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           onClick={() => (uploadMode === 'github' ? handleFetchGithub() : handleUpload())}
           disabled={
             uploadMode === 'github'
-              ? fetchGithubMutation.isPending ||
+              ? githubPending ||
                 !githubRepo ||
                 !newDomain ||
                 !newSubdomain ||
@@ -370,7 +309,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                 domainResult?.taken ||
                 subdomainChecking ||
                 subdomainResult?.taken
-              : uploadMutation.isPending ||
+              : uploadPending ||
                 !selectedFile ||
                 !newDomain ||
                 !newSubdomain ||
@@ -389,7 +328,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             text-sm font-medium rounded-full flex items-center justify-center gap-2
               cursor-pointer disabled:cursor-auto ${accentColorValues.bg}           disabled:opacity-40`}
         >
-          {uploadMutation.isPending || fetchGithubMutation.isPending ? (
+          {uploadPending || githubPending ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
               Deploying...

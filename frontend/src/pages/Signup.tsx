@@ -1,47 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useMutation } from '@tanstack/react-query';
 import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
 import { useTheme } from '../providers/ThemeProvider.tsx';
-import { useConnection } from '../hooks/useConnection.ts';
-import { useApiFetch } from '../hooks/api/useApiFetch.ts';
+import { useSignup } from '../hooks/api/useSignup.ts';
 
 function Signup() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
-  const { setSessionId, setUsername } = useConnection();
-  const { apiFetch } = useApiFetch();
+  const { signup, isPending, error } = useSignup();
   const navigate = useNavigate();
   const [username, setUsernameState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particleCount = 250;
-
-  // Signup mutation
-  const signupMutation = useMutation({
-    mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      const res = await apiFetch('/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Registration failed');
-      }
-      return res.json();
-    },
-    onSuccess: (data) => {
-      setSessionId(data.session);
-      setUsername(data.user.username);
-      navigate({ to: `/u/${data.user.username}` });
-    },
-    onError: (err: Error) => {
-      setError(err.message);
-    },
-  });
 
   const accentColorValues = getAccentColorValues();
   const inputBaseClass =
@@ -191,8 +163,12 @@ function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    signupMutation.mutate({ username, password });
+    try {
+      const data = await signup({ username, password });
+      navigate({ to: `/u/${data.user.username}` });
+    } catch {
+      // Error is rendered from the hook
+    }
   };
 
   return (
@@ -211,9 +187,9 @@ function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
+            {error?.message && (
               <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
-                {error}
+                {error.message}
               </div>
             )}
 
@@ -276,10 +252,10 @@ function Signup() {
 
             <button
               type="submit"
-              disabled={signupMutation.isPending}
-              className={`${buttonBaseClass} ${accentColorValues.bg} ${signupMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isPending}
+              className={`${buttonBaseClass} ${accentColorValues.bg} ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {signupMutation.isPending ? 'Creating account...' : 'Create account'}
+              {isPending ? 'Creating account...' : 'Create account'}
             </button>
           </form>
 
