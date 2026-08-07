@@ -1,8 +1,8 @@
 import { Globe } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
-import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import type { Site } from '../lib/types.ts';
+import { apiBase } from '../config.ts';
 
 interface ProfileSiteCardProps {
   site: Site;
@@ -10,7 +10,6 @@ interface ProfileSiteCardProps {
 
 export function ProfileSiteCard({ site }: ProfileSiteCardProps) {
   const { getAccentColorValues } = useAccentColor();
-  const { apiBase } = useApiConfig();
   const accentColorValues = getAccentColorValues();
   const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
 

@@ -1,8 +1,8 @@
 import { ArrowRight, Globe } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import type { Site } from '../lib/types.ts';
 import { siteUrl } from '../lib/utils.ts';
+import { hostWithPort, protocol, apiBase } from '../config.ts';
 
 interface ExploreSiteCardProps {
   site: Site;
@@ -10,7 +10,6 @@ interface ExploreSiteCardProps {
 
 export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
   const navigate = useNavigate();
-  const { hostWithPort, protocol, apiBase } = useApiConfig();
   const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
 
   const handlePreviewClick = () => {

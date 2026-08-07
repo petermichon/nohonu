@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Plus, Check, X } from 'lucide-react';
 import { useAddCustomDomain } from '../hooks/api/useAddCustomDomain.ts';
-import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import { useDeleteCustomDomain } from '../hooks/api/useDeleteCustomDomain.ts';
 import { useSiteCustomDomains } from '../hooks/api/useSiteCustomDomains.ts';
 import { useVerificationToken } from '../hooks/api/useVerificationToken.ts';
 import { useVerifyCustomDomain } from '../hooks/api/useVerifyCustomDomain.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { SECTIONS } from '../lib/sectionsConfig.ts';
+import { host } from '../config.ts';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
@@ -17,7 +17,6 @@ interface CustomDomainsSectionProps {
 }
 
 export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomainsSectionProps) {
-  const { host } = useApiConfig();
   const { customDomains, loading: customDomainsLoading } = useSiteCustomDomains(domain);
   const { verificationToken } = useVerificationToken(domain);
   const { addCustomDomain } = useAddCustomDomain();

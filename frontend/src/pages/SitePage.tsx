@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { ConfirmModal } from '../components/ConfirmModal.tsx';
-import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import { useSites } from '../hooks/api/useSites.ts';
 import { useConnection } from '../hooks/useConnection.ts';
 import { useToast } from '../providers/ToastContext.tsx';
@@ -20,6 +19,7 @@ import { SECTIONS } from '../lib/sectionsConfig.ts';
 import { useSiteData } from '../hooks/useSiteData.ts';
 import { useSiteActions } from '../hooks/useSiteActions.ts';
 import { SLOT_MS, type TimeRange } from '../lib/types.ts';
+import { host, hostWithPort, protocol } from '../config.ts';
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
@@ -38,7 +38,6 @@ function SitePage() {
   const actualSection = hasSection ? section : undefined;
 
   const actualDomain = actualSitename;
-  const { host, hostWithPort, protocol } = useApiConfig();
   const { refreshSites } = useSites();
   const { username: loggedInUsername } = useConnection();
   const { showToast } = useToast();
