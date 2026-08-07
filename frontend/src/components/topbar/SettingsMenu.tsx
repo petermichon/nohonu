@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { MoreVertical, Sun, Moon, Languages, ChevronLeft, Type, Scale, Info, Palette, Settings } from 'lucide-react';
 import { useTheme } from '../../providers/ThemeProvider.tsx';
@@ -7,6 +7,7 @@ import { useFont } from '../../providers/FontProvider.tsx';
 import { getFontFamily, type Font } from '../../lib/font.ts';
 import { useAccentColor, type AccentColor, ACCENT_COLORS } from '../../providers/AccentColorProvider.tsx';
 import { MenuSection } from './MenuSection.tsx';
+import { useClickOutside } from '../../hooks/useClickOutside.ts';
 
 type MenuView = 'main' | 'theme' | 'language' | 'font' | 'accent';
 
@@ -25,17 +26,14 @@ export function SettingsMenu() {
   const { accentColor, setAccentColor } = useAccentColor();
 
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-        setMenuView('main');
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(
+    menuRef,
+    () => {
+      setIsMenuOpen(false);
+      setMenuView('main');
+    },
+    isMenuOpen
+  );
 
   const browserTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 

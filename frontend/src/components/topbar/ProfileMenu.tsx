@@ -1,8 +1,9 @@
-import { Fragment, useEffect, useRef, useState, type ComponentType } from 'react';
+import { Fragment, useRef, useState, type ComponentType } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLogout, useApi } from '../../hooks/api.ts';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useClickOutside } from '../../hooks/useClickOutside.ts';
 
 interface ProfileOption {
   route: string;
@@ -23,16 +24,7 @@ export function ProfileMenu() {
   const userName = displayName || username || 'Connect';
 
   const profileRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(profileRef, () => setIsProfileOpen(false), isProfileOpen);
 
   const profileOptions: ProfileOption[] = username
     ? [

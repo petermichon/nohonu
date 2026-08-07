@@ -1,5 +1,6 @@
-import { useEffect, type ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useClickOutside } from '../hooks/useClickOutside.ts';
 
 interface ModalProps {
   isOpen: boolean;
@@ -10,14 +11,8 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    globalThis.addEventListener('keydown', handler);
-    return () => {
-      globalThis.removeEventListener('keydown', handler);
-    };
-  }, [isOpen, onClose]);
+  const contentRef = useRef<HTMLDivElement>(null);
+  useClickOutside(contentRef, onClose, isOpen);
 
   if (!isOpen) return null;
 
@@ -27,8 +22,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   const modalClasses = `${baseModalClasses} ${widthClass}`;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className={modalClasses} onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div ref={contentRef} className={modalClasses}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100">{title}</h2>
           <button

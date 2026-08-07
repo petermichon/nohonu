@@ -16,7 +16,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const accentColorValues = getAccentColorValues();
   const { apiFetch } = useApi();
   const { showToast } = useToast();
-  const { displayName, setDisplayName, apiBase, apiKey, sessionId, profilePicture } = useConnection();
+  const { displayName, setDisplayName, apiBase, sessionId, profilePicture } = useConnection();
   const { sessions, loading: sessionsLoading } = useSessions();
   const { deleteSession } = useDeleteSession();
 
@@ -103,13 +103,9 @@ export function SettingsSection({ username }: SettingsSectionProps) {
       return;
     }
     try {
-      const res = await fetch(`${apiBase}/auth/displayname`, {
+      const res = await apiFetch('/auth/displayname', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(apiKey ? { 'X-Api-Key': apiKey } : {}),
-          'X-Session-Id': sessionId,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ displayName: editingDisplayName }),
       });
       if (res.ok) {
