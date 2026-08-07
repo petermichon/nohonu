@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLogout } from '../../hooks/api/useLogout.ts';
 import { useApi } from '../../hooks/api/useApi.ts';
+import { useMe } from '../../hooks/api/useMe.ts';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
 import { useClickOutside } from '../../hooks/useClickOutside.ts';
 
@@ -17,11 +18,14 @@ const MENU_LINK_CLASS =
   'w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-zinc-50';
 
 export function ProfileMenu() {
-  const { displayName, username, disconnect, profilePicture } = useConnection();
+  const { username, disconnect } = useConnection();
   const { apiBase } = useApi();
   const { logout } = useLogout();
+  const { user } = useMe();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const displayName = user?.displayName ?? '';
+  const profilePicture = user?.profilePicture;
   const userName = displayName || username || 'Connect';
 
   const profileRef = useRef<HTMLDivElement>(null);
@@ -47,7 +51,7 @@ export function ProfileMenu() {
       >
         {hasProfilePicture ? (
           <img
-            src={`${apiBase}/users/${username}/profile-picture`}
+            src={`${apiBase}/users/${username}/profile-picture?v=${profilePicture ?? ''}`}
             alt={userName}
             className="w-8 h-8 rounded-full object-cover"
           />
@@ -64,7 +68,7 @@ export function ProfileMenu() {
               <div className="flex items-start gap-2 px-3 py-2 mb-1">
                 {hasProfilePicture ? (
                   <img
-                    src={`${apiBase}/users/${username}/profile-picture`}
+                    src={`${apiBase}/users/${username}/profile-picture?v=${profilePicture ?? ''}`}
                     alt={userName}
                     className="w-8 h-8 rounded-full object-cover shrink-0"
                   />

@@ -6,6 +6,7 @@ import { useDomains } from '../hooks/api/useDomains.ts';
 import { useUser } from '../hooks/api/useUser.ts';
 import { useUserStars } from '../hooks/api/useUserStars.ts';
 import { useToggleStar } from '../hooks/api/useToggleStar.ts';
+import { useMe } from '../hooks/api/useMe.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { useConnection } from '../providers/ConnectionProvider.tsx';
 import { useToast } from '../providers/ToastContext.tsx';
@@ -21,7 +22,8 @@ export default function UserPage() {
   const accentColorValues = getAccentColorValues();
   const { username } = useParams({ from: '/u/$username' });
   const location = useLocation();
-  const { displayName, username: loggedInUsername, profilePicture, apiBase } = useConnection();
+  const { username: loggedInUsername, apiBase } = useConnection();
+  const { user: me } = useMe();
   const { toggleStar } = useToggleStar();
   const { showToast } = useToast();
 
@@ -57,8 +59,8 @@ export default function UserPage() {
   ) as UserPageTab;
 
   const userSites = sites.filter((s) => s.account === username);
-  const headerDisplayName = isOwnProfile ? displayName || username : publicUser?.displayName || username;
-  const showProfilePicture = isOwnProfile ? !!profilePicture : !!publicUser?.profilePicture;
+  const headerDisplayName = isOwnProfile ? me?.displayName || username : publicUser?.displayName || username;
+  const showProfilePicture = isOwnProfile ? !!me?.profilePicture : !!publicUser?.profilePicture;
 
   if (!isOwnProfile && error === 'not-found') {
     return (

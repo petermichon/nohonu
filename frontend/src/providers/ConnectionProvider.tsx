@@ -1,20 +1,18 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
+
 interface Connection {
   apiBase: string;
   apiKey: string;
   sessionId: string;
   username: string;
-  displayName: string;
-  profilePicture?: string;
 }
 
 interface ConnectionContextType extends Connection {
   setApiKey: (key: string) => void;
   setSessionId: (sessionId: string) => void;
   setUsername: (username: string) => void;
-  setDisplayName: (displayName: string) => void;
   disconnect: () => void;
 }
 
@@ -23,8 +21,6 @@ const DEFAULT: Connection = {
   apiKey: '',
   sessionId: '',
   username: '',
-  displayName: '',
-  profilePicture: undefined,
 };
 
 function load(): Connection {
@@ -32,14 +28,11 @@ function load(): Connection {
     const apiKey = localStorage.getItem('apiKey');
     const sessionId = localStorage.getItem('sessionId');
     const username = localStorage.getItem('username');
-    const displayName = localStorage.getItem('displayName');
     return {
       apiBase: API_BASE,
       apiKey: apiKey ?? DEFAULT.apiKey,
       sessionId: sessionId ?? DEFAULT.sessionId,
       username: username ?? DEFAULT.username,
-      displayName: displayName || username || DEFAULT.displayName,
-      profilePicture: DEFAULT.profilePicture,
     };
   } catch {
     /* ignore */
@@ -51,34 +44,6 @@ const ConnectionContext = createContext<ConnectionContextType | undefined>(undef
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [connection, setConnectionState] = useState<Connection>(load);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (connection.sessionId && connection.apiBase) {
-        try {
-          const headers: HeadersInit = {
-            ...(connection.apiKey ? { 'X-Api-Key': connection.apiKey } : {}),
-            'X-Session-Id': connection.sessionId,
-          };
-          const res = await fetch(`${connection.apiBase}/auth/me`, { headers });
-          if (res.ok) {
-            const data = await res.json();
-            const displayName = data.user?.displayName || connection.username;
-            localStorage.setItem('displayName', displayName);
-            setConnectionState((prev) => ({
-              ...prev,
-              username: data.user?.username || '',
-              displayName,
-              profilePicture: data.user?.profilePicture,
-            }));
-          }
-        } catch {
-          // Silent fail - user data will remain empty
-        }
-      }
-    };
-    fetchUserData();
-  }, [connection.sessionId, connection.apiBase, connection.apiKey, connection.username]);
 
   const setApiKey = (key: string) => {
     localStorage.setItem('apiKey', key);
@@ -95,23 +60,15 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setConnectionState((prev) => ({ ...prev, username }));
   };
 
-  const setDisplayName = (displayName: string) => {
-    localStorage.setItem('displayName', displayName);
-    setConnectionState((prev) => ({ ...prev, displayName }));
-  };
-
   const disconnect = () => {
     localStorage.removeItem('apiKey');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('username');
-    localStorage.removeItem('displayName');
     setConnectionState((prev) => ({
       ...prev,
       apiKey: '',
       sessionId: '',
       username: '',
-      displayName: '',
-      profilePicture: undefined,
     }));
   };
 
@@ -122,7 +79,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         setApiKey,
         setSessionId,
         setUsername,
-        setDisplayName,
         disconnect,
       }}
     >

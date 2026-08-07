@@ -5,6 +5,7 @@ import { useDeleteSession } from '../../hooks/api/useDeleteSession.ts';
 import { useSessions } from '../../hooks/api/useSessions.ts';
 import { useUpdateDisplayName } from '../../hooks/api/useUpdateDisplayName.ts';
 import { useUploadProfilePicture } from '../../hooks/api/useUploadProfilePicture.ts';
+import { useMe } from '../../hooks/api/useMe.ts';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
@@ -19,7 +20,10 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const { showToast } = useToast();
-  const { displayName, setDisplayName, apiBase, sessionId, profilePicture } = useConnection();
+  const { apiBase, sessionId } = useConnection();
+  const { user } = useMe();
+  const displayName = user?.displayName ?? '';
+  const profilePicture = user?.profilePicture;
   const { sessions, loading: sessionsLoading } = useSessions();
   const { deleteSession } = useDeleteSession();
   const { updateDisplayName } = useUpdateDisplayName();
@@ -51,7 +55,6 @@ export function SettingsSection({ username }: SettingsSectionProps) {
     setUploadingProfilePicture(true);
     try {
       await uploadProfilePicture(file);
-      window.location.reload();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to upload profile picture', false);
     } finally {
@@ -62,7 +65,6 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const handleDeleteProfilePicture = async () => {
     try {
       await deleteProfilePicture();
-      window.location.reload();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to delete profile picture', false);
     }
@@ -94,7 +96,6 @@ export function SettingsSection({ username }: SettingsSectionProps) {
     }
     try {
       await updateDisplayName(editingDisplayName);
-      setDisplayName(editingDisplayName);
       setDisplayNameStatus('saved');
       setTimeout(() => setDisplayNameStatus('idle'), 2000);
     } catch (err) {
@@ -126,7 +127,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
               <div className="flex items-center gap-4">
                 {profilePicture ? (
                   <img
-                    src={`${apiBase}/users/${username}/profile-picture`}
+                    src={`${apiBase}/users/${username}/profile-picture?v=${profilePicture ?? ''}`}
                     alt={displayName || username}
                     className="w-16 h-16 rounded-full object-cover"
                   />

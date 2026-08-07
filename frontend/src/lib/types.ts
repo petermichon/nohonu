@@ -81,3 +81,9 @@ export interface Session {
   createdAt: number;
   lastActive: number;
 }
+
+export interface Me {
+  username: string;
+  displayName: string;
+  profilePicture?: string;
+}
