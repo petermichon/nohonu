@@ -1,4 +1,3 @@
-import type { Session } from '../../lib/types.ts';
 import { useConnection } from '../../providers/ConnectionProvider.tsx';
 import { parseApiBase } from '../../lib/utils.ts';
 import { useCallback } from 'react';
