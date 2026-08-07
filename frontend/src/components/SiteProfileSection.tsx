@@ -12,6 +12,7 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
   const { updateSiteMeta } = useUpdateSiteMeta();
   const [editingDisplayName, setEditingDisplayName] = useState(site?.displayName || '');
   const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+  const [isSaving, setIsSaving] = useState(false);
 
   const saveDisplayName = async () => {
     if (!site || !editingDisplayName.trim()) {
@@ -19,6 +20,7 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
       setTimeout(() => setDisplayNameStatus('idle'), 2000);
       return;
     }
+    setIsSaving(true);
     try {
       await updateSiteMeta(site.domain, editingDisplayName.trim());
       setEditingDisplayName(editingDisplayName.trim());
@@ -27,6 +29,8 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
     } catch {
       setDisplayNameStatus('error');
       setTimeout(() => setDisplayNameStatus('idle'), 2000);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -72,10 +76,10 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
               <button
                 type="button"
                 onClick={saveDisplayName}
-                disabled={updateMetaMutation.isPending}
+                disabled={isSaving}
                 className="px-4 py-2.5 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer disabled:opacity-50"
               >
-                {updateMetaMutation.isPending
+                {isSaving
                   ? 'Saving...'
                   : displayNameStatus === 'saved'
                     ? 'Saved'
