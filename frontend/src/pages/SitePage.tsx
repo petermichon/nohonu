@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import { ConfirmModal } from '../components/ConfirmModal.tsx';
 import { useApi } from '../hooks/api/useApi.ts';
 import { useSites } from '../hooks/api/useSites.ts';
-import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useConnection } from '../hooks/useConnection.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { calcUptimePct } from '../lib/utils.ts';
 import { UptimeChart } from '../components/UptimeChart.tsx';

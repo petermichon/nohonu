@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe, Check, X } from 'lucide-react';
 import { useApi } from '../hooks/api/useApi.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
-import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useConnection } from '../hooks/useConnection.ts';
 
 type UploadMode = 'file' | 'github';
 

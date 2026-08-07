@@ -1,4 +1,4 @@
-import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useConnection } from '../../hooks/useConnection.ts';
 import { parseApiBase } from '../../lib/utils.ts';
 import { useCallback } from 'react';
 

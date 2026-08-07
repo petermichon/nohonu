@@ -87,3 +87,17 @@ export interface Me {
   displayName: string;
   profilePicture?: string;
 }
+
+export interface Connection {
+  apiBase: string;
+  apiKey: string;
+  sessionId: string;
+  username: string;
+}
+
+export interface ConnectionContextType extends Connection {
+  setApiKey: (key: string) => void;
+  setSessionId: (sessionId: string) => void;
+  setUsername: (username: string) => void;
+  disconnect: () => void;
+}

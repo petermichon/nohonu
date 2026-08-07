@@ -3,7 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
 import { useTheme } from '../providers/ThemeProvider.tsx';
-import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useConnection } from '../hooks/useConnection.ts';
 import { useApi } from '../hooks/api/useApi.ts';
 
 function Login() {

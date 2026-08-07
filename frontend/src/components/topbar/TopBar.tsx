@@ -1,7 +1,7 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { Tooltip } from '../Tooltip.tsx';
 import { useTheme } from '../../providers/ThemeProvider.tsx';
-import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useConnection } from '../../hooks/useConnection.ts';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { NavButton } from './NavButton.tsx';
 import { SettingsMenu } from './SettingsMenu.tsx';

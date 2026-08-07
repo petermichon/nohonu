@@ -8,7 +8,7 @@ import { useUserStars } from '../hooks/api/useUserStars.ts';
 import { useToggleStar } from '../hooks/api/useToggleStar.ts';
 import { useMe } from '../hooks/api/useMe.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
-import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useConnection } from '../hooks/useConnection.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { UserHeader, type UserPageTab } from '../components/profile/UserHeader.tsx';
 import { RecentSitesSection } from '../components/profile/RecentSitesSection.tsx';

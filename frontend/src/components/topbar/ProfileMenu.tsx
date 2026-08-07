@@ -4,7 +4,7 @@ import { User, Layout, Star, Globe, Settings, LogOut, LogIn } from 'lucide-react
 import { useLogout } from '../../hooks/api/useLogout.ts';
 import { useApi } from '../../hooks/api/useApi.ts';
 import { useMe } from '../../hooks/api/useMe.ts';
-import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useConnection } from '../../hooks/useConnection.ts';
 import { useClickOutside } from '../../hooks/useClickOutside.ts';
 
 interface ProfileOption {

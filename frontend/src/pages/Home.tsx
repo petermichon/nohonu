@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
 import { useTheme } from '../providers/ThemeProvider.tsx';
-import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useConnection } from '../hooks/useConnection.ts';
 import { useExploreSites } from '../hooks/api/useExploreSites.ts';
 import { formatHits } from '../lib/utils.ts';
 import { HomeSiteCard } from '../components/HomeSiteCard.tsx';

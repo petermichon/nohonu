@@ -1,20 +1,8 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { ConnectionContext } from './ConnectionContext.ts';
+import type { Connection, ConnectionContextType } from '../lib/types.ts';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
-
-interface Connection {
-  apiBase: string;
-  apiKey: string;
-  sessionId: string;
-  username: string;
-}
-
-interface ConnectionContextType extends Connection {
-  setApiKey: (key: string) => void;
-  setSessionId: (sessionId: string) => void;
-  setUsername: (username: string) => void;
-  disconnect: () => void;
-}
 
 const DEFAULT: Connection = {
   apiBase: API_BASE,
@@ -39,8 +27,6 @@ function load(): Connection {
   }
   return DEFAULT;
 }
-
-const ConnectionContext = createContext<ConnectionContextType | undefined>(undefined);
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [connection, setConnectionState] = useState<Connection>(load);
@@ -72,23 +58,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  return (
-    <ConnectionContext.Provider
-      value={{
-        ...connection,
-        setApiKey,
-        setSessionId,
-        setUsername,
-        disconnect,
-      }}
-    >
-      {children}
-    </ConnectionContext.Provider>
-  );
-}
+  const value: ConnectionContextType = {
+    ...connection,
+    setApiKey,
+    setSessionId,
+    setUsername,
+    disconnect,
+  };
 
-export function useConnection() {
-  const ctx = useContext(ConnectionContext);
-  if (!ctx) throw new Error('useConnection must be used within a ConnectionProvider');
-  return ctx;
+  return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;
 }

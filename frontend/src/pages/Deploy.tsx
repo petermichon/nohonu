@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { InlineDeployForm } from '../components/InlineDeployForm.tsx';
 import { useSites } from '../hooks/api/useSites.ts';
-import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useConnection } from '../hooks/useConnection.ts';
 
 export default function Deploy() {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Star as StarIcon } from 'lucide-react';
-import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useConnection } from '../../hooks/useConnection.ts';
 import type { Star } from '../../lib/types.ts';
 
 interface StarsSectionProps {

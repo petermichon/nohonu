@@ -6,7 +6,7 @@ import { useSessions } from '../../hooks/api/useSessions.ts';
 import { useUpdateDisplayName } from '../../hooks/api/useUpdateDisplayName.ts';
 import { useUploadProfilePicture } from '../../hooks/api/useUploadProfilePicture.ts';
 import { useMe } from '../../hooks/api/useMe.ts';
-import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useConnection } from '../../hooks/useConnection.ts';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
 import { formatUserAgent } from '../../lib/userAgent.ts';

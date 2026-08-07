@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useConnection } from '../../providers/ConnectionProvider.tsx';
+import { useConnection } from '../../hooks/useConnection.ts';
 import { useApi } from './useApi.ts';
 import type { Me } from '../../lib/types.ts';
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Settings } from 'lucide-react';
-import { useConnection } from '../providers/ConnectionProvider.tsx';
+import { useConnection } from '../hooks/useConnection.ts';
 import { useClickOutside } from '../hooks/useClickOutside.ts';
 
 const keyStatusMsg: Record<'idle' | 'checking' | 'valid' | 'invalid' | 'open', string | null> = {
