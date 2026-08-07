@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Check, X } from 'lucide-react';
 import { useAddCustomDomain } from '../hooks/api/useAddCustomDomain.ts';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import { useDeleteCustomDomain } from '../hooks/api/useDeleteCustomDomain.ts';
 import { useSiteCustomDomains } from '../hooks/api/useSiteCustomDomains.ts';
 import { useVerificationToken } from '../hooks/api/useVerificationToken.ts';
@@ -17,7 +17,7 @@ interface CustomDomainsSectionProps {
 }
 
 export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomainsSectionProps) {
-  const { host } = useApi();
+  const { host } = useApiConfig();
   const { customDomains, loading: customDomainsLoading } = useSiteCustomDomains(domain);
   const { verificationToken } = useVerificationToken(domain);
   const { addCustomDomain } = useAddCustomDomain();

@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe, Check, X } from 'lucide-react';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiFetch } from '../hooks/api/useApiFetch.ts';
+import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { useConnection } from '../hooks/useConnection.ts';
 
@@ -12,7 +13,8 @@ interface InlineDeployFormProps {
 }
 
 export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
-  const { apiFetch, hostWithPort } = useApi();
+  const { apiFetch } = useApiFetch();
+  const { hostWithPort } = useApiConfig();
   const { username } = useConnection();
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();

@@ -1,10 +1,9 @@
-import { useConnection } from '../../hooks/useConnection.ts';
-import { parseApiBase } from '../../lib/utils.ts';
 import { useCallback } from 'react';
+import { useConnection } from '../useConnection.ts';
 
-export function useApi() {
+export function useApiFetch() {
   const { apiBase, apiKey, sessionId, username } = useConnection();
-  const { host, hostWithPort, protocol } = parseApiBase(apiBase);
+
   const apiFetch = useCallback(
     (path: string, init?: RequestInit) => {
       const headers: HeadersInit = {
@@ -16,5 +15,6 @@ export function useApi() {
     },
     [apiBase, apiKey, sessionId, username]
   );
-  return { apiBase, apiKey, sessionId, username, host, hostWithPort, protocol, apiFetch };
+
+  return { apiFetch };
 }

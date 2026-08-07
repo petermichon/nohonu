@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiFetch } from '../hooks/api/useApiFetch.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import type { Site } from '../lib/types.ts';
 
@@ -13,7 +13,7 @@ interface UseSiteActionsParams {
 }
 
 export function useSiteActions({ site, username, loadSite, loadVersions }: UseSiteActionsParams) {
-  const { apiFetch } = useApi();
+  const { apiFetch } = useApiFetch();
   const navigate = useNavigate();
   const { showToast } = useToast();
 

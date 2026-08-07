@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { ConfirmModal } from '../components/ConfirmModal.tsx';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import { useSites } from '../hooks/api/useSites.ts';
 import { useConnection } from '../hooks/useConnection.ts';
 import { useToast } from '../providers/ToastContext.tsx';
@@ -38,7 +38,7 @@ function SitePage() {
   const actualSection = hasSection ? section : undefined;
 
   const actualDomain = actualSitename;
-  const { host, hostWithPort, protocol } = useApi();
+  const { host, hostWithPort, protocol } = useApiConfig();
   const { refreshSites } = useSites();
   const { username: loggedInUsername } = useConnection();
   const { showToast } = useToast();

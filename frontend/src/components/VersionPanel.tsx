@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Upload, Loader2, GitBranch, History, ChevronDown } from 'lucide-react';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiFetch } from '../hooks/api/useApiFetch.ts';
 import { useClickOutside } from '../hooks/useClickOutside.ts';
 import { VersionList } from './VersionList.tsx';
 import type { Version } from '../lib/types.ts';
@@ -35,7 +35,7 @@ export function VersionPanel({
   onToast,
   isReadOnly = false,
 }: VersionPanelProps) {
-  const { apiFetch } = useApi();
+  const { apiFetch } = useApiFetch();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showGithubFetch, setShowGithubFetch] = useState(false);
   const [githubRepo, setGithubRepo] = useState('');

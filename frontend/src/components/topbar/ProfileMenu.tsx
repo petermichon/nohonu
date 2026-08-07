@@ -2,7 +2,7 @@ import { Fragment, useRef, useState, type ComponentType } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { User, Layout, Star, Globe, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLogout } from '../../hooks/api/useLogout.ts';
-import { useApi } from '../../hooks/api/useApi.ts';
+import { useApiConfig } from '../../hooks/api/useApiConfig.ts';
 import { useMe } from '../../hooks/api/useMe.ts';
 import { useConnection } from '../../hooks/useConnection.ts';
 import { useClickOutside } from '../../hooks/useClickOutside.ts';
@@ -19,7 +19,7 @@ const MENU_LINK_CLASS =
 
 export function ProfileMenu() {
   const { username, disconnect } = useConnection();
-  const { apiBase } = useApi();
+  const { apiBase } = useApiConfig();
   const { logout } = useLogout();
   const { user } = useMe();
   const navigate = useNavigate();

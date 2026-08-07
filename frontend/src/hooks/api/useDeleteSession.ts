@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useApi } from './useApi.ts';
+import { useApiFetch } from './useApiFetch.ts';
 
 export function useDeleteSession() {
-  const { apiFetch } = useApi();
+  const { apiFetch } = useApiFetch();
   const queryClient = useQueryClient();
 
   const deleteSession = async (sessionId: string) => {

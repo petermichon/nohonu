@@ -1,6 +1,6 @@
 import { ExternalLink, Power, Eye, X, Image as ImageIcon } from 'lucide-react';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import { useDeleteCover } from '../hooks/api/useDeleteCover.ts';
 import { useUploadCover } from '../hooks/api/useUploadCover.ts';
 import { useToast } from '../providers/ToastContext.tsx';
@@ -33,7 +33,7 @@ export function OverviewSection({
 }: OverviewSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const { apiBase } = useApi();
+  const { apiBase } = useApiConfig();
   const { showToast } = useToast();
   const { uploadCover } = useUploadCover(site?.domain ?? '');
   const { deleteCover } = useDeleteCover(site?.domain ?? '');

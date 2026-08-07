@@ -1,6 +1,6 @@
 import { Globe, Eye, Star, ExternalLink } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiConfig } from '../hooks/api/useApiConfig.ts';
 import { useUser } from '../hooks/api/useUser.ts';
 import { useToggleStar } from '../hooks/api/useToggleStar.ts';
 import { useConnection } from '../hooks/useConnection.ts';
@@ -13,7 +13,7 @@ interface HomeSiteCardProps {
 }
 
 export function HomeSiteCard({ site }: HomeSiteCardProps) {
-  const { hostWithPort, protocol, apiBase } = useApi();
+  const { hostWithPort, protocol, apiBase } = useApiConfig();
   const router = useRouter();
   const { user: accountUser } = useUser(site.account);
   const { username: loggedInUsername } = useConnection();

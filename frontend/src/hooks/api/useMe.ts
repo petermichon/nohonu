@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useConnection } from '../../hooks/useConnection.ts';
-import { useApi } from './useApi.ts';
+import { useApiFetch } from './useApiFetch.ts';
 import type { Me } from '../../lib/types.ts';
 
 export function useMe() {
   const { sessionId } = useConnection();
-  const { apiFetch } = useApi();
+  const { apiFetch } = useApiFetch();
 
   const query = useQuery({
     queryKey: ['me'],

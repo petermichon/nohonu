@@ -4,13 +4,13 @@ import { useMutation } from '@tanstack/react-query';
 import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
 import { useTheme } from '../providers/ThemeProvider.tsx';
 import { useConnection } from '../hooks/useConnection.ts';
-import { useApi } from '../hooks/api/useApi.ts';
+import { useApiFetch } from '../hooks/api/useApiFetch.ts';
 
 function Signup() {
   const { accentColor, getAccentColorValues } = useAccentColor();
   const { resolvedTheme } = useTheme();
   const { setSessionId, setUsername } = useConnection();
-  const { apiFetch } = useApi();
+  const { apiFetch } = useApiFetch();
   const navigate = useNavigate();
   const [username, setUsernameState] = useState('');
   const [password, setPassword] = useState('');

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Domain } from '../../lib/types.ts';
-import { useApi } from './useApi.ts';
+import { useApiFetch } from './useApiFetch.ts';
 
 export function useSiteCustomDomains(domain: string) {
-  const { apiFetch } = useApi();
+  const { apiFetch } = useApiFetch();
 
   const query = useQuery({
     queryKey: ['custom-domains', domain],

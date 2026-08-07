@@ -1,7 +1,7 @@
-import { useApi } from './useApi.ts';
+import { useApiFetch } from './useApiFetch.ts';
 
 export function useUpdateSiteMeta() {
-  const { apiFetch } = useApi();
+  const { apiFetch } = useApiFetch();
 
   const updateSiteMeta = async (domain: string, displayName: string) => {
     const res = await apiFetch(`/sites/${domain}/meta`, {
