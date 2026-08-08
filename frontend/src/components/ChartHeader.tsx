@@ -45,6 +45,7 @@ export function ChartHeader({
           type="button"
           onClick={onReload}
           disabled={reloading}
+          aria-label="Reload"
           className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-50"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${reloading ? 'animate-spin' : ''}`} />

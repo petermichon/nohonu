@@ -209,6 +209,7 @@ export function OverviewSection({
                     type="button"
                     onClick={handleCoverDelete}
                     disabled={deletingCover}
+                    aria-label="Delete cover image"
                     className="absolute top-3 right-3 p-2 bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 cursor-pointer"
                   >
                     <X className="w-4 h-4" />

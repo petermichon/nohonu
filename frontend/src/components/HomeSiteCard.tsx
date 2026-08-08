@@ -133,13 +133,15 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
           </div>
         </div>
         <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-          <div
+          <button
+            type="button"
+            aria-label={site.isStarred ? 'Unstar site' : 'Star site'}
             className={`flex items-center gap-1 ${loggedInUsername ? 'cursor-pointer hover:text-zinc-950 dark:hover:text-zinc-100' : ''}`}
             onClick={handleToggleStar}
           >
             <Star className={`w-4 h-4 ${site.isStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
             {site.starCount ?? 0}
-          </div>
+          </button>
           <div className="flex items-center gap-1">
             <Eye className="w-4 h-4" />
             {formatHits(site.hits)}

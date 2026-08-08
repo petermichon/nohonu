@@ -44,8 +44,10 @@ export function ProfileMenu() {
 
   return (
     <div className="relative" ref={profileRef}>
-      <div
+      <button
+        type="button"
         onClick={() => setIsProfileOpen(!isProfileOpen)}
+        aria-label="Open profile menu"
         className="w-8 h-8 rounded-full shrink-0 cursor-pointer select-none"
       >
         {hasProfilePicture ? (
@@ -59,7 +61,7 @@ export function ProfileMenu() {
             <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
           </div>
         )}
-      </div>
+      </button>
       {isProfileOpen && (
         <div className="absolute right-0 top-full mt-0.5 z-50 bg-zinc-50 dark:bg-zinc-950 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-2 w-[256px] max-h-[80vh] overflow-y-auto dropdown-animate">
           {username && (

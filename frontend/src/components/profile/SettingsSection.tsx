@@ -319,6 +319,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                       <Tooltip content="Revoke session">
                         <button
                           type="button"
+                          aria-label="Revoke session"
                           onClick={() => {
                             deleteSession(session.id)
                               .then(() => {

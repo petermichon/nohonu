@@ -167,6 +167,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
                       disabled={verifyingDomain === cd.domain}
                       className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50"
                       title="Verify domain"
+                      aria-label="Verify domain"
                     >
                       <Check className="w-3.5 h-3.5" />
                     </button>
@@ -177,6 +178,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
                     disabled={deletingDomain === cd.domain}
                     className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
                     title="Remove domain"
+                    aria-label="Remove domain"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>

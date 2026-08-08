@@ -22,7 +22,7 @@ export function Toast({ message, visible, onClose, success = true }: ToastProps)
         <XCircle className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
       )}
       <span className="text-sm font-medium">{message}</span>
-      <button type="button" onClick={onClose} className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-800">
+      <button type="button" onClick={onClose} aria-label="Dismiss notification" className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-800">
         <X className="w-4 h-4" />
       </button>
     </div>

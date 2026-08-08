@@ -80,6 +80,7 @@ export function SettingsPopover() {
         }}
         className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg cursor-pointer"
         title="Connection settings"
+        aria-label="Connection settings"
       >
         <Settings className="w-5 h-5" />
       </button>
