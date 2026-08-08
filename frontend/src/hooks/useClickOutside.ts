@@ -18,7 +18,7 @@ export function useClickOutside(
       if (e.key === 'Escape') onClickOutside();
     };
 
-    document.addEventListener('click', handleClick);
+    document.addEventListener('mousedown', handleClick);
     document.addEventListener('keydown', handleKey);
 
     return () => {
