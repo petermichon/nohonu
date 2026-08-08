@@ -17,7 +17,9 @@
 
 *.{$DOMAIN:localhost} {
 	reverse_proxy backend:8080
-	tls internal
+	tls {
+		dns ovh
+	}
 }
 
 https:// {
