@@ -36,6 +36,15 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
       {/* Preview area */}
       <div
         onClick={handlePreviewClick}
+        role="link"
+        tabIndex={0}
+        aria-label={site.enabled ? `Open ${site.domain}` : `${site.domain} is disabled`}
+        onKeyDown={(e) => {
+          if (site.enabled && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            handlePreviewClick();
+          }
+        }}
         className={`rounded-3xl overflow-hidden relative group cursor-pointer ${!site.enabled ? 'cursor-not-allowed' : ''}`}
       >
         {coverUrl ? (

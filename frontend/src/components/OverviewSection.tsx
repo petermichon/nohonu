@@ -198,12 +198,13 @@ export function OverviewSection({
             )}
             {coverUrl ? (
               <div className="relative group w-full max-w-xs">
-                <img
-                  src={coverUrl || undefined}
-                  alt="Site cover"
-                  className="w-full aspect-4/3 object-cover rounded-2xl cursor-pointer"
-                  onClick={() => !isReadOnly && document.getElementById('coverUpload')?.click()}
-                />
+                <label htmlFor="coverUpload" className="block cursor-pointer">
+                  <img
+                    src={coverUrl || undefined}
+                    alt="Site cover"
+                    className="w-full aspect-4/3 object-cover rounded-2xl"
+                  />
+                </label>
                 {!isReadOnly && (
                   <button
                     type="button"
@@ -217,15 +218,15 @@ export function OverviewSection({
                 )}
               </div>
             ) : (
-              <div
+              <label
+                htmlFor="coverUpload"
                 className="w-full max-w-xs aspect-4/3 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
-                onClick={() => !isReadOnly && document.getElementById('coverUpload')?.click()}
               >
                 <ImageIcon className="w-6 h-6 text-zinc-400 dark:text-zinc-500" />
                 <p className="text-xs text-zinc-400 dark:text-zinc-500">
                   {isReadOnly ? 'No cover image' : uploadingCover ? 'Uploading...' : 'Add a cover image'}
                 </p>
-              </div>
+              </label>
             )}
           </div>
         </div>

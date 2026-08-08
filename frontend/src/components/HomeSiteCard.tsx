@@ -43,6 +43,18 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
             });
           }
         }}
+        role="link"
+        tabIndex={0}
+        aria-label={site.account ? `Open ${site.displayName || site.domain}` : undefined}
+        onKeyDown={(e) => {
+          if (site.account && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            router.navigate({
+              to: '/u/$username/$sitename',
+              params: { username: site.account, sitename: site.domain },
+            });
+          }
+        }}
         className={`rounded-xl overflow-hidden relative group ${!site.enabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
       >
         {coverUrl ? (
