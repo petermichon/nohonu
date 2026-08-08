@@ -1,11 +1,31 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { Tooltip } from '../Tooltip.tsx';
-import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
+import { useTheme } from '../../providers/ThemeProvider.tsx';
 import { useConnection } from '../../hooks/useConnection.ts';
+import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { NavButton } from './NavButton.tsx';
 import { SettingsMenu } from './SettingsMenu.tsx';
 import { ProfileMenu } from './ProfileMenu.tsx';
-import { LogoMark } from '../LogoMark.tsx';
+
+function LogoDot({ className }: { className: string }) {
+  const { accentColor, getAccentColorValues } = useAccentColor();
+  const { theme } = useTheme();
+  const accentColorValues = getAccentColorValues();
+  const dotColor =
+    accentColor === 'default' && theme === 'light'
+      ? 'rgb(9, 9, 11)'
+      : accentColor === 'default' && theme === 'dark'
+        ? 'rgb(250, 250, 250)'
+        : `rgb(${accentColorValues.rgb})`;
+  return (
+    <div
+      className={`absolute rounded-full opacity-0 transition-transform duration-75 group-hover:opacity-100 ${
+        className
+      }`}
+      style={{ backgroundColor: dotColor }}
+    />
+  );
+}
 
 export function TopBar() {
   const { username } = useConnection();
@@ -26,7 +46,14 @@ export function TopBar() {
       <div className="h-full flex items-center justify-between gap-2 max-w-7xl mx-auto px-3 sm:px-6">
         <div className="flex items-center h-full">
           <Link to="/" className="flex items-center gap-2 relative group">
-            <LogoMark className="w-7 h-7" />
+            <LogoDot className="top-1 left-4 w-1 h-1 group-hover:-translate-y-3" />
+            <LogoDot className="top-0 left-6 w-1 h-1 group-hover:-translate-y-2" />
+            <LogoDot className="top-1 right-4 w-1 h-1 group-hover:-translate-y-3" />
+            <LogoDot className="top-2 left-2 w-0.75 h-0.75 group-hover:-translate-y-2" />
+            <LogoDot className="top-2 right-2 w-0.75 h-0.75 group-hover:translate-y-4" />
+            <LogoDot className="bottom-1 left-4 w-1 h-1 group-hover:translate-y-2" />
+            <LogoDot className="bottom-1 right-4 w-1 h-1 group-hover:translate-y-2" />
+            <LogoDot className="top-1.5 left-7 w-1 h-1 group-hover:translate-y-6" />
             <span
               className="font-bold text-xl text-zinc-950 dark:text-zinc-50 tracking-tight"
               style={{ fontFamily: "'Outfit Variable', sans-serif" }}
