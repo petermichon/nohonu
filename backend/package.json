@@ -6,7 +6,7 @@
   "scripts": {
     "db:dev": "prisma generate && prisma migrate dev",
     "db:deploy": "prisma generate && prisma migrate deploy",
-    "dev": "npm run db:dev && tsx watch main.ts",
+    "dev": "npm run db:dev && tsx --env-file=.env watch main.ts",
     "start": "npm run db:deploy && tsx main.ts",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
