@@ -34,8 +34,8 @@ export default function DocsApi() {
       </header>
 
       <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed mb-8">
-        All API requests require authentication via session cookie or server password. The base URL is the root of your Nohonu
-        instance.
+        All API requests require authentication via session cookie or server password. The base URL is the root of your
+        Nohonu instance.
       </p>
 
       <section className="py-8 space-y-4">
