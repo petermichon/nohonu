@@ -5,7 +5,7 @@ import { useConnection } from '../../hooks/useConnection.ts';
 import { NavButton } from './NavButton.tsx';
 import { SettingsMenu } from './SettingsMenu.tsx';
 import { ProfileMenu } from './ProfileMenu.tsx';
-import { Logo } from '../Logo.tsx';
+import { LogoMark } from '../LogoMark.tsx';
 
 export function TopBar() {
   const { username } = useConnection();
@@ -26,7 +26,7 @@ export function TopBar() {
       <div className="h-full flex items-center justify-between gap-2 max-w-7xl mx-auto px-3 sm:px-6">
         <div className="flex items-center h-full">
           <Link to="/" className="flex items-center gap-2 relative group">
-            <Logo className="w-7 h-7" />
+            <LogoMark className="w-7 h-7" />
             <span
               className="font-bold text-xl text-zinc-950 dark:text-zinc-50 tracking-tight"
               style={{ fontFamily: "'Outfit Variable', sans-serif" }}
