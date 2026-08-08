@@ -89,6 +89,9 @@ export function SettingsPopover() {
           <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
             Connection
           </p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2 truncate" title={apiBase}>
+            Backend: {apiBase}
+          </p>
           <div className="grid gap-3">
             <div>
               <label htmlFor="popoverApiKey" className="text-xs text-zinc-500 dark:text-zinc-400 mb-1 block">
