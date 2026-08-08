@@ -23,9 +23,7 @@ http://localhost:2020 {
 
 *.{$DOMAIN:localhost} {
 	reverse_proxy backend:8080
-	tls {
-		dns ovh
-	}
+	tls {$WILDCARD_TLS:internal}
 }
 
 https:// {
