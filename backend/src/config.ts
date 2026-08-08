@@ -4,4 +4,5 @@ export const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 export const SLOT_MS = 60 * 1000;
 export const API_KEY = process.env['API_KEY'];
 export const DATABASE_URL = process.env['DATABASE_URL'] ?? 'file:./data/nohonu.db';
+export const COMMIT_SHA = process.env['COMMIT_SHA'] ?? 'dev';
 export const STARTED_AT = Date.now();

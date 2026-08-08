@@ -28,6 +28,7 @@ services:
       SITES_DIR: /data
       DATABASE_URL: file:/data/nohonu.db
       API_KEY: ${API_KEY:-}
+      COMMIT_SHA: ${COMMIT_SHA:-dev}
     volumes:
       - data:/data
     restart: unless-stopped
