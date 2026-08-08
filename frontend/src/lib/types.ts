@@ -90,13 +90,13 @@ export interface Me {
 
 export interface Connection {
   apiBase: string;
-  apiKey: string;
+  serverPassword: string;
   sessionId: string;
   username: string;
 }
 
 export interface ConnectionContextType extends Connection {
-  setApiKey: (key: string) => void;
+  setServerPassword: (key: string) => void;
   setSessionId: (sessionId: string) => void;
   setUsername: (username: string) => void;
   disconnect: () => void;

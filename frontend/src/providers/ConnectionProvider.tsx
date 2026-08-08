@@ -6,19 +6,19 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
 
 const DEFAULT: Connection = {
   apiBase: API_BASE,
-  apiKey: '',
+  serverPassword: '',
   sessionId: '',
   username: '',
 };
 
 function load(): Connection {
   try {
-    const apiKey = localStorage.getItem('apiKey');
+    const serverPassword = localStorage.getItem('serverPassword');
     const sessionId = localStorage.getItem('sessionId');
     const username = localStorage.getItem('username');
     return {
       apiBase: API_BASE,
-      apiKey: apiKey ?? DEFAULT.apiKey,
+      serverPassword: serverPassword ?? DEFAULT.serverPassword,
       sessionId: sessionId ?? DEFAULT.sessionId,
       username: username ?? DEFAULT.username,
     };
@@ -31,9 +31,9 @@ function load(): Connection {
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [connection, setConnectionState] = useState<Connection>(load);
 
-  const setApiKey = (key: string) => {
-    localStorage.setItem('apiKey', key);
-    setConnectionState((prev) => ({ ...prev, apiKey: key }));
+  const setServerPassword = (key: string) => {
+    localStorage.setItem('serverPassword', key);
+    setConnectionState((prev) => ({ ...prev, serverPassword: key }));
   };
 
   const setSessionId = (sessionId: string) => {
@@ -47,12 +47,12 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   };
 
   const disconnect = () => {
-    localStorage.removeItem('apiKey');
+    localStorage.removeItem('serverPassword');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('username');
     setConnectionState((prev) => ({
       ...prev,
-      apiKey: '',
+      serverPassword: '',
       sessionId: '',
       username: '',
     }));
@@ -60,7 +60,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
 
   const value: ConnectionContextType = {
     ...connection,
-    setApiKey,
+    setServerPassword,
     setSessionId,
     setUsername,
     disconnect,

@@ -27,7 +27,7 @@ services:
       PORT: '8080'
       SITES_DIR: /data
       DATABASE_URL: file:/data/nohonu.db
-      API_KEY: ${API_KEY:-}
+      SERVER_PASSWORD: ${SERVER_PASSWORD:-}
       COMMIT_SHA: ${COMMIT_SHA:-dev}
     volumes:
       - data:/data

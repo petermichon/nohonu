@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nohonu logo — C4-2 dot behind</title>
+<style>
+  :root { --bg: #fafafa; --card: #fff; --ink: #18181b; }
+  body { margin: 0; font-family: "Outfit", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.sub { color: #71717a; margin: 0 0 28px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+  .card { background: var(--card); border: 1px solid #e4e4e7; border-radius: 14px; padding: 16px; }
+  .card h2 { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
+  .card p { font-size: 12px; color: #71717a; margin: 0 0 12px; }
+  .swatches { display: flex; gap: 10px; }
+  .swatch { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 6px; border-radius: 10px; }
+  .swatch.light { background: #ffffff; border: 1px solid #e4e4e7; }
+  .swatch.dark { background: #18181b; }
+  .swatch svg { display: block; }
+  .wordmark { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  .swatch.dark .wordmark { color: #fafafa; }
+  h2.fav { font-size: 15px; margin: 40px 0 8px; }
+  .favrow { display: flex; gap: 30px; align-items: flex-end; padding: 20px; background: #fff; border: 1px solid #e4e4e7; border-radius: 14px; flex-wrap: wrap; }
+  .favitem { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .favitem span { font-size: 11px; color: #71717a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Nohonu — C4-2, dot behind the "n"</h1>
+  <p class="sub">The indigo dot is drawn behind the white "n", so it peeks out from under it. Ink badge, indigo-500 dot.</p>
+
+  <div class="grid">
+    <!-- A: peek top-right -->
+    <div class="card">
+      <h2>A — Peek top-right</h2>
+      <p>Dot tucked behind the n's arch corner.</p>
+      <div class="swatches">
+        <div class="swatch light"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/>
+          <circle cx="33" cy="12" r="6" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+        <div class="swatch dark"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1"/>
+          <circle cx="33" cy="12" r="6" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+      </div>
+    </div>
+
+    <!-- B: halo behind n -->
+    <div class="card">
+      <h2>B — Halo</h2>
+      <p>Big dot behind the whole n; indigo shows around its silhouette.</p>
+      <div class="swatches">
+        <div class="swatch light"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/>
+          <circle cx="23" cy="24" r="15" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+        <div class="swatch dark"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1"/>
+          <circle cx="23" cy="24" r="15" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+      </div>
+    </div>
+
+    <!-- C: peek top-left -->
+    <div class="card">
+      <h2>C — Peek top-left</h2>
+      <p>Dot tucked behind the n's left bar top.</p>
+      <div class="swatches">
+        <div class="swatch light"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/>
+          <circle cx="16" cy="12" r="5.5" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+        <div class="swatch dark"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1"/>
+          <circle cx="16" cy="12" r="5.5" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+      </div>
+    </div>
+
+    <!-- D: peek right leg -->
+    <div class="card">
+      <h2>D — Peek right leg</h2>
+      <p>Dot behind the n's right side, mid-height.</p>
+      <div class="swatches">
+        <div class="swatch light"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/>
+          <circle cx="34" cy="21" r="5.5" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+        <div class="swatch dark"><svg width="44" height="44" viewBox="0 0 48 48">
+          <rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1"/>
+          <circle cx="34" cy="21" r="5.5" fill="#6366f1"/>
+          <rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/>
+          <path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg><div class="wordmark">nohonu</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="fav">Favicon test (actual 16px)</h2>
+  <div class="favrow">
+    <div class="favitem"><svg width="16" height="16" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/><circle cx="33" cy="12" r="6" fill="#6366f1"/><rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/><path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/></svg><span>A</span></div>
+    <div class="favitem"><svg width="16" height="16" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/><circle cx="23" cy="24" r="15" fill="#6366f1"/><rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/><path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/></svg><span>B</span></div>
+    <div class="favitem"><svg width="16" height="16" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/><circle cx="16" cy="12" r="5.5" fill="#6366f1"/><rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/><path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/></svg><span>C</span></div>
+    <div class="favitem"><svg width="16" height="16" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="12.5" fill="#18181b"/><circle cx="34" cy="21" r="5.5" fill="#6366f1"/><rect x="13" y="14" width="6" height="21" rx="3" fill="#ffffff"/><path d="M33 14 v8 a9 9 0 0 1 -9 9 h-5" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/></svg><span>D</span></div>
+  </div>
+</div>
+</body>
+</html>
