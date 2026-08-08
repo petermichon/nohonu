@@ -61,7 +61,7 @@ export function TopBar() {
               nohonu
             </span>
           </Link>
-          <Tooltip content="This site is in active development" position="bottom">
+          <Tooltip content="Nohonu is in active development" position="bottom">
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 leading-none mt-0.5 ml-1 cursor-default">
               Beta
             </span>
