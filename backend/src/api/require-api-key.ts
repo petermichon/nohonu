@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
-import { API_KEY } from '../config.ts';
+import { SERVER_PASSWORD } from '../config.ts';
 
 export function requireApiKey(req: Request, res: Response, next: NextFunction): void {
-  if (req.headers['x-api-key'] === API_KEY) return next();
+  if (req.headers['x-api-key'] === SERVER_PASSWORD) return next();
   res.status(401).json({ error: 'Unauthorized' });
 }

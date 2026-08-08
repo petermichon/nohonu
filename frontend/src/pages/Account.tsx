@@ -3,8 +3,8 @@ import { useConnection } from '../hooks/useConnection.ts';
 import { useState, useEffect } from 'react';
 
 export default function Account() {
-  const { apiBase, apiKey, setApiKey } = useConnection();
-  const [key, setKey] = useState(apiKey);
+  const { apiBase, serverPassword, setServerPassword } = useConnection();
+  const [key, setKey] = useState(serverPassword);
   const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'open'>('idle');
   const [isServerOpen, setIsServerOpen] = useState(false);
 
@@ -12,7 +12,7 @@ export default function Account() {
     const checkServerSecurity = async () => {
       try {
         const res = await fetch(`${apiBase}/auth`, {
-          headers: apiKey ? { 'X-Api-Key': apiKey } : {},
+          headers: serverPassword ? { 'X-Server-Password': serverPassword } : {},
         });
         const data = await res.json().catch(() => ({}));
         setIsServerOpen(!data.secured);
@@ -21,25 +21,25 @@ export default function Account() {
       }
     };
     checkServerSecurity();
-  }, [apiBase, apiKey]);
+  }, [apiBase, serverPassword]);
 
   const saveKey = async () => {
     setKeyStatus('checking');
     const base = apiBase.replace(/\/$/, '');
     try {
       const res = await fetch(`${base}/auth`, {
-        headers: key ? { 'X-Api-Key': key } : {},
+        headers: key ? { 'X-Server-Password': key } : {},
       });
       const data = await res.json().catch(() => ({}));
       if (!data.secured) {
         setIsServerOpen(true);
-        setApiKey(key);
+        setServerPassword(key);
         setKeyStatus('open');
         setTimeout(() => setKeyStatus('idle'), 1200);
       } else {
         setIsServerOpen(false);
         if (res.ok) {
-          setApiKey(key);
+          setServerPassword(key);
           setKeyStatus('valid');
           setTimeout(() => setKeyStatus('idle'), 800);
         } else {
@@ -55,7 +55,7 @@ export default function Account() {
     idle: null,
     checking: null,
     valid: null,
-    invalid: 'Invalid API key',
+    invalid: 'Invalid server password',
     open: null,
   };
 
@@ -77,14 +77,14 @@ export default function Account() {
             }}
           >
             <div>
-              <label htmlFor="apiKey" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                API Key
+              <label htmlFor="serverPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
+                Server password
               </label>
               <div className="flex gap-2">
                 <input
                   type="password"
-                  id="apiKey"
-                  name="apiKey"
+                  id="serverPassword"
+                  name="serverPassword"
                   autoComplete="off"
                   value={key}
                   onChange={(e) => {
@@ -111,10 +111,10 @@ export default function Account() {
                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">{keyStatusMsg[keyStatus]}</p>
               )}
               {isServerOpen && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no API key — open access</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no password — open access</p>
               )}
               {!isServerOpen && apiBase && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires an API key</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires a password</p>
               )}
             </div>
           </form>

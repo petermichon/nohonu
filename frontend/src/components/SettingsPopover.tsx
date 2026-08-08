@@ -7,14 +7,14 @@ const keyStatusMsg: Record<'idle' | 'checking' | 'valid' | 'invalid' | 'open', s
   idle: null,
   checking: null,
   valid: null,
-  invalid: 'Invalid API key',
+  invalid: 'Invalid server password',
   open: null,
 };
 
 export function SettingsPopover() {
-  const { apiBase, apiKey, setApiKey } = useConnection();
+  const { apiBase, serverPassword, setServerPassword } = useConnection();
   const [open, setOpen] = useState(false);
-  const [key, setKey] = useState(apiKey);
+  const [key, setKey] = useState(serverPassword);
   const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'open'>('idle');
   const [isServerOpen, setIsServerOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -24,7 +24,7 @@ export function SettingsPopover() {
     const checkServerSecurity = async () => {
       try {
         const res = await fetch(`${apiBase}/auth`, {
-          headers: apiKey ? { 'X-Api-Key': apiKey } : {},
+          headers: serverPassword ? { 'X-Server-Password': serverPassword } : {},
         });
         const data = await res.json().catch(() => ({}));
         setIsServerOpen(!data.secured);
@@ -33,19 +33,19 @@ export function SettingsPopover() {
       }
     };
     checkServerSecurity();
-  }, [apiBase, apiKey]);
+  }, [apiBase, serverPassword]);
 
   const saveKey = async () => {
     setKeyStatus('checking');
     const base = apiBase.replace(/\/$/, '');
     try {
       const res = await fetch(`${base}/auth`, {
-        headers: key ? { 'X-Api-Key': key } : {},
+        headers: key ? { 'X-Server-Password': key } : {},
       });
       const data = await res.json().catch(() => ({}));
       if (!data.secured) {
         setIsServerOpen(true);
-        setApiKey(key);
+        setServerPassword(key);
         setKeyStatus('open');
         setTimeout(() => {
           setKeyStatus('idle');
@@ -54,7 +54,7 @@ export function SettingsPopover() {
       } else {
         setIsServerOpen(false);
         if (res.ok) {
-          setApiKey(key);
+          setServerPassword(key);
           setKeyStatus('valid');
           setTimeout(() => {
             setKeyStatus('idle');
@@ -74,7 +74,7 @@ export function SettingsPopover() {
       <button
         type="button"
         onClick={() => {
-          setKey(apiKey);
+          setKey(serverPassword);
           setKeyStatus('idle');
           setOpen((o) => !o);
         }}
@@ -92,13 +92,13 @@ export function SettingsPopover() {
           <div className="grid gap-3">
             <div>
               <label htmlFor="popoverApiKey" className="text-xs text-zinc-500 dark:text-zinc-400 mb-1 block">
-                API Key
+                Server password
               </label>
               <div className="flex gap-2">
                 <input
                   type="password"
                   id="popoverApiKey"
-                  name="apiKey"
+                  name="serverPassword"
                   autoComplete="off"
                   value={key}
                   onChange={(e) => {
@@ -121,10 +121,10 @@ export function SettingsPopover() {
                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">{keyStatusMsg[keyStatus]}</p>
               )}
               {isServerOpen && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no API key — open access</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no password — open access</p>
               )}
               {!isServerOpen && apiBase && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires an API key</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires a password</p>
               )}
             </div>
           </div>

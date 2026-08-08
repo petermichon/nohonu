@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nohonu logo concepts</title>
+<style>
+  :root { --bg: #fafafa; --card: #fff; --ink: #18181b; }
+  body { margin: 0; font-family: "Outfit", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.sub { color: #71717a; margin: 0 0 28px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .card { background: var(--card); border: 1px solid #e4e4e7; border-radius: 14px; padding: 18px; }
+  .card h2 { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
+  .card p { font-size: 12px; color: #71717a; margin: 0 0 14px; }
+  .swatches { display: flex; gap: 10px; }
+  .swatch { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 8px; border-radius: 10px; }
+  .swatch.light { background: #ffffff; border: 1px solid #e4e4e7; }
+  .swatch.dark { background: #18181b; }
+  .swatch svg { display: block; }
+  .wordmark { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  .swatch.dark .wordmark { color: #fafafa; }
+  .light-tag, .dark-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #a1a1aa; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Nohonu — logo mark concepts</h1>
+  <p class="sub">Quick geometric marks. Each shown on light &amp; dark with the "nohonu" wordmark. Favicon test: squint at the 16px scale in the corner of your eye.</p>
+
+  <div class="grid">
+    <!-- A: Deploy dot -->
+    <div class="card">
+      <h2>A. Deploy dot</h2>
+      <p>One dot "launching" off a baseline with an up-arrow — content going live.</p>
+      <div class="swatches">
+        <div class="swatch light">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <line x1="6" y1="38" x2="42" y2="38" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="24" cy="18" r="8" fill="#18181b"/>
+            <path d="M24 26 v10 M19 32 l5 4 5-4" stroke="#18181b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+        <div class="swatch dark">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <line x1="6" y1="38" x2="42" y2="38" stroke="#fafafa" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="24" cy="18" r="8" fill="#fafafa"/>
+            <path d="M24 26 v10 M19 32 l5 4 5-4" stroke="#fafafa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: Sequence dots -->
+    <div class="card">
+      <h2>B. Deploy sequence</h2>
+      <p>Three dots ascending like a deploy pipeline; the top one is "live".</p>
+      <div class="swatches">
+        <div class="swatch light">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <circle cx="24" cy="32" r="5" fill="#d4d4d8"/>
+            <circle cx="24" cy="21" r="6" fill="#a1a1aa"/>
+            <circle cx="24" cy="9" r="7" fill="#18181b"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+        <div class="swatch dark">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <circle cx="24" cy="32" r="5" fill="#3f3f46"/>
+            <circle cx="24" cy="21" r="6" fill="#71717a"/>
+            <circle cx="24" cy="9" r="7" fill="#fafafa"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C: Geometric n + dot -->
+    <div class="card">
+      <h2>C. The "n"</h2>
+      <p>Geometric n built from bars, with a dot as the deploy accent.</p>
+      <div class="swatches">
+        <div class="swatch light">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <rect x="8" y="16" width="5" height="20" rx="2.5" fill="#18181b"/>
+            <path d="M35 16 v10 a8 8 0 0 1 -8 8 h-3" stroke="#18181b" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="37" cy="11" r="3.5" fill="#6366f1"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+        <div class="swatch dark">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <rect x="8" y="16" width="5" height="20" rx="2.5" fill="#fafafa"/>
+            <path d="M35 16 v10 a8 8 0 0 1 -8 8 h-3" stroke="#fafafa" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="37" cy="11" r="3.5" fill="#818cf8"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D: Stacked layers -->
+    <div class="card">
+      <h2>D. Stack</h2>
+      <p>Three stacked bars — hosting layers / a page / versions.</p>
+      <div class="swatches">
+        <div class="swatch light">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <rect x="10" y="6" width="28" height="10" rx="3" fill="#18181b"/>
+            <rect x="10" y="19" width="28" height="10" rx="3" fill="#a1a1aa"/>
+            <rect x="10" y="32" width="28" height="10" rx="3" fill="#d4d4d8"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+        <div class="swatch dark">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <rect x="10" y="6" width="28" height="10" rx="3" fill="#fafafa"/>
+            <rect x="10" y="19" width="28" height="10" rx="3" fill="#71717a"/>
+            <rect x="10" y="32" width="28" height="10" rx="3" fill="#3f3f46"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E: Orbit dot -->
+    <div class="card">
+      <h2>E. Orbit</h2>
+      <p>A dot in orbit — a site "around" the platform.</p>
+      <div class="swatches">
+        <div class="swatch light">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="16" fill="none" stroke="#d4d4d8" stroke-width="4"/>
+            <circle cx="24" cy="8" r="6" fill="#18181b"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+        <div class="swatch dark">
+          <svg width="40" height="40" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="16" fill="none" stroke="#3f3f46" stroke-width="4"/>
+            <circle cx="24" cy="8" r="6" fill="#fafafa"/>
+          </svg>
+          <div class="wordmark">nohonu</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

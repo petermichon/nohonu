@@ -55,12 +55,12 @@ import { requireApiKey } from './require-api-key.ts';
 
 export const router = Router();
 
-// Public — no API key
+// Public — no server password
 router.get('/health', health.health);
 router.get('/auth', auth);
 router.get('/check-custom-domain', checkCustomDomain);
 
-// The API key is a backend-wide password. Gate every other prefix.
+// The server password is a backend-wide password. Gate every other prefix.
 // Infrastructure gate — removed once real authentication lands.
 router.use('/auth', requireApiKey);
 router.use('/check-domain', requireApiKey);

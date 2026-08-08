@@ -23,15 +23,15 @@ beforeEach(async () => {
 });
 
 describe('checkAuth', () => {
-  it('accepts the configured API key', () => {
+  it('accepts the configured server password', () => {
     expect(checkAuth('test-api-key')).toEqual({ secured: true, valid: true });
   });
 
-  it('rejects a wrong API key', () => {
+  it('rejects a wrong server password', () => {
     expect(checkAuth('wrong-key')).toEqual({ secured: true, valid: false });
   });
 
-  it('rejects a missing API key', () => {
+  it('rejects a missing server password', () => {
     expect(checkAuth(null)).toEqual({ secured: true, valid: false });
   });
 });
