@@ -52,29 +52,28 @@ import { addCustomDomain } from './endpoints/custom-domains/add-custom-domain.ts
 import { verifyCustomDomain } from './endpoints/custom-domains/verify-custom-domain.ts';
 import { deleteCustomDomain } from './endpoints/custom-domains/delete-custom-domain.ts';
 import { requireApiKey } from './require-api-key.ts';
-import { API_KEY } from '../config.ts';
 
 export const router = Router();
 
-if (API_KEY) {
-  // Protect only the management API; public endpoints and static file
-  // serving stay open.
-  router.use('/auth/me', requireApiKey);
-  router.use('/auth/logout', requireApiKey);
-  router.use('/auth/displayname', requireApiKey);
-  router.use('/auth/profile-picture', requireApiKey);
-  router.use('/auth/sessions', requireApiKey);
-  router.use('/sites', requireApiKey);
-  router.use('/custom-domains', requireApiKey);
-}
-
-// Public
+// Public — no API key
 router.get('/health', health.health);
 router.get('/auth', auth);
+router.get('/check-custom-domain', checkCustomDomain);
+
+// The API key is a backend-wide password. Gate every other prefix.
+// Infrastructure gate — removed once real authentication lands.
+router.use('/auth', requireApiKey);
+router.use('/check-domain', requireApiKey);
+router.use('/check-subdomain', requireApiKey);
+router.use('/explore', requireApiKey);
+router.use('/users', requireApiKey);
+router.use('/sites', requireApiKey);
+router.use('/custom-domains', requireApiKey);
+
+// Auth
 router.post('/auth/register', authRegister);
 router.post('/auth/login', authLogin);
 router.get('/check-domain', checkDomain);
-router.get('/check-custom-domain', checkCustomDomain);
 router.get('/check-subdomain', checkSubdomain);
 router.get('/explore/sites', listExploreSites);
 router.get('/users/:username/sites', getUserSites);
