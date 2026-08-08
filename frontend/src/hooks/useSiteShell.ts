@@ -65,6 +65,7 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
   const isPublicView = !!username && username !== loggedInUsername;
 
   const data = useSiteData(sitename, username, isPublicView);
+  const { setStatsRange, setUptimeRange } = data;
   const actions = useSiteActions({
     site: data.site,
     username,
@@ -83,9 +84,9 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
   }, []);
 
   useEffect(() => {
-    data.setStatsRange(globalRange);
-    data.setUptimeRange(globalRange);
-  }, [globalRange, data.setStatsRange, data.setUptimeRange]);
+    setStatsRange(globalRange);
+    setUptimeRange(globalRange);
+  }, [globalRange, setStatsRange, setUptimeRange]);
 
   const subdomainBase = data.site?.subdomainBase || hostWithPort;
   const siteUrl = data.site?.subdomain

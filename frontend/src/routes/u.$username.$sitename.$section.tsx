@@ -72,7 +72,11 @@ function SectionPage() {
   if (section === 'domains') {
     return (
       <section className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
-        <SubdomainSection subdomain={ctx.site?.subdomain || null} siteLoading={ctx.siteLoading} isReadOnly={ctx.isPublicView} />
+        <SubdomainSection
+          subdomain={ctx.site?.subdomain || null}
+          siteLoading={ctx.siteLoading}
+          isReadOnly={ctx.isPublicView}
+        />
         <CustomDomainsSection domain={ctx.domain} isReadOnly={ctx.isPublicView} />
       </section>
     );
