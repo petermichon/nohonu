@@ -30,6 +30,7 @@ export function SiteShell() {
       <SiteHeader
         site={shell.site}
         username={shell.username}
+        sitename={shell.domain}
         activeTab={shell.activeTab}
         isPublicView={shell.isPublicView}
       />

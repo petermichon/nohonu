@@ -6,11 +6,12 @@ import { tabClass } from '../../lib/utils.ts';
 interface SiteHeaderProps {
   site: Site | null;
   username: string;
+  sitename: string;
   activeTab: SitePageTab;
   isPublicView: boolean;
 }
 
-export function SiteHeader({ site, username, activeTab, isPublicView }: SiteHeaderProps) {
+export function SiteHeader({ site, username, sitename, activeTab, isPublicView }: SiteHeaderProps) {
   return (
     <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
       <div className="flex items-center gap-4 mb-4">
@@ -36,7 +37,7 @@ export function SiteHeader({ site, username, activeTab, isPublicView }: SiteHead
       <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 p-1">
         <Link
           to="/u/$username/$sitename"
-          params={{ username, sitename: site?.domain || '' }}
+          params={{ username, sitename }}
           className={tabClass(activeTab === 'overview')}
         >
           <Layout className="w-4 h-4" />
@@ -44,7 +45,7 @@ export function SiteHeader({ site, username, activeTab, isPublicView }: SiteHead
         </Link>
         <Link
           to="/u/$username/$sitename/$section"
-          params={{ username, sitename: site?.domain || '', section: 'analytics' }}
+          params={{ username, sitename, section: 'analytics' }}
           className={tabClass(activeTab === 'analytics')}
         >
           <BarChart3 className="w-4 h-4" />
@@ -52,7 +53,7 @@ export function SiteHeader({ site, username, activeTab, isPublicView }: SiteHead
         </Link>
         <Link
           to="/u/$username/$sitename/$section"
-          params={{ username, sitename: site?.domain || '', section: 'domains' }}
+          params={{ username, sitename, section: 'domains' }}
           className={tabClass(activeTab === 'domains')}
         >
           <Globe className="w-4 h-4" />
@@ -60,7 +61,7 @@ export function SiteHeader({ site, username, activeTab, isPublicView }: SiteHead
         </Link>
         <Link
           to="/u/$username/$sitename/$section"
-          params={{ username, sitename: site?.domain || '', section: 'versions' }}
+          params={{ username, sitename, section: 'versions' }}
           className={tabClass(activeTab === 'versions')}
         >
           <Layers className="w-4 h-4" />
@@ -69,7 +70,7 @@ export function SiteHeader({ site, username, activeTab, isPublicView }: SiteHead
         {!isPublicView && (
           <Link
             to="/u/$username/$sitename/$section"
-            params={{ username, sitename: site?.domain || '', section: 'settings' }}
+            params={{ username, sitename, section: 'settings' }}
             className={tabClass(activeTab === 'settings')}
           >
             <Settings className="w-4 h-4" />
