@@ -139,7 +139,7 @@ export default function DocsApi() {
 
       <section className="py-8 space-y-4">
         <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-100">Health</h2>
-        <Endpoints rows={[{ method: 'GET', path: '/health', desc: 'Server health check' }]} />
+        <Endpoints rows={[{ method: 'GET', path: '/health', desc: 'Server health check (status, uptime, commit)' }]} />
       </section>
     </div>
   );
