@@ -4,6 +4,8 @@ import { App } from './App.tsx';
 import './index.css';
 import { applyFont, validFonts, waitForFont, type Font } from './lib/font.ts';
 
+console.log('hello world');
+
 const savedFont = localStorage.getItem('font');
 const font = savedFont && validFonts.includes(savedFont as Font) ? (savedFont as Font) : 'outfit';
 
