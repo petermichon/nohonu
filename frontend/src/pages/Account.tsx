@@ -15,7 +15,7 @@ export default function Account() {
           headers: serverPassword ? { 'X-Server-Password': serverPassword } : {},
         });
         const data = await res.json().catch(() => ({}));
-        setIsServerOpen(!data.secured);
+        setIsServerOpen(res.ok && !data.secured);
       } catch {
         // Ignore errors on initial load
       }
@@ -31,7 +31,7 @@ export default function Account() {
         headers: key ? { 'X-Server-Password': key } : {},
       });
       const data = await res.json().catch(() => ({}));
-      if (!data.secured) {
+      if (res.ok && !data.secured) {
         setIsServerOpen(true);
         setServerPassword(key);
         setKeyStatus('open');
