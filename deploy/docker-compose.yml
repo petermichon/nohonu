@@ -8,6 +8,7 @@ services:
       - '443:443'
     environment:
       DOMAIN: ${DOMAIN:-localhost}
+      SERVER_PASSWORD: ${SERVER_PASSWORD:-}
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
@@ -28,6 +29,7 @@ services:
       SITES_DIR: /data
       DATABASE_URL: file:/data/nohonu.db
       SERVER_PASSWORD: ${SERVER_PASSWORD:-}
+      SUBDOMAIN_BASE: ${SUBDOMAIN_BASE:-}
       COMMIT_SHA: ${COMMIT_SHA:-dev}
     volumes:
       - data:/data

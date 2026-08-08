@@ -51,24 +51,26 @@ import { getVerificationToken } from './endpoints/custom-domains/get-verificatio
 import { addCustomDomain } from './endpoints/custom-domains/add-custom-domain.ts';
 import { verifyCustomDomain } from './endpoints/custom-domains/verify-custom-domain.ts';
 import { deleteCustomDomain } from './endpoints/custom-domains/delete-custom-domain.ts';
-import { requireApiKey } from './require-api-key.ts';
+import { requireServerPassword } from './require-server-password.ts';
+import { SUBDOMAIN_BASE } from '../config.ts';
 
 export const router = Router();
 
-// Public — no server password
+// Server-wide password gate at the entry point. Only GET requests fetching a
+// hosted site on a subdomain are open (browser access); everything else
+// requires the server password. Infrastructure gate — removed once real
+// authentication lands.
+router.use((req: Request, res: Response, next: NextFunction) => {
+  const host = (req.get('Host') ?? '').replace(/:\d+$/, '').toLowerCase();
+  const base = SUBDOMAIN_BASE.replace(/^https?:\/\//, '').replace(/:\d+$/, '').toLowerCase();
+  const isSubdomainSite = req.method === 'GET' && host.length > base.length && host.endsWith(`.${base}`);
+  if (isSubdomainSite) return next();
+  requireServerPassword(req, res, next);
+});
+
 router.get('/health', health.health);
 router.get('/auth', auth);
 router.get('/check-custom-domain', checkCustomDomain);
-
-// The server password is a backend-wide password. Gate every other prefix.
-// Infrastructure gate — removed once real authentication lands.
-router.use('/auth', requireApiKey);
-router.use('/check-domain', requireApiKey);
-router.use('/check-subdomain', requireApiKey);
-router.use('/explore', requireApiKey);
-router.use('/users', requireApiKey);
-router.use('/sites', requireApiKey);
-router.use('/custom-domains', requireApiKey);
 
 // Auth
 router.post('/auth/register', authRegister);
