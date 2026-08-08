@@ -123,7 +123,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
           </h2>
           <div className="space-y-4 max-w-md">
             <div>
-              <label className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Profile Picture</label>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Profile Picture</p>
               <div className="flex items-center gap-4">
                 {profilePicture ? (
                   <img
