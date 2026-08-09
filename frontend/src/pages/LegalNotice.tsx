@@ -1,8 +1,8 @@
 import { BackButton } from '../components/BackButton.tsx';
-import { useLanguage } from '../providers/LanguageProvider.tsx';
+import { useTranslation } from 'react-i18next';
 
 export default function MentionsLegales() {
-  const { resolvedLanguage } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 px-6 pt-12">
@@ -12,7 +12,7 @@ export default function MentionsLegales() {
 
       <div>
         <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">
-          {resolvedLanguage === 'fr' ? 'Mentions légales' : 'Legal notice'}
+          {t('legal.mentions')}
         </h1>
         <p className="text-sm text-zinc-400 dark:text-zinc-500">
           Conformément aux articles L.111-1 et suivants du Code de la consommation

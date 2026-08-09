@@ -1,9 +1,9 @@
 import { Link } from '@tanstack/react-router';
 import { FileText, Scale, Shield, Info } from 'lucide-react';
 import { BackButton } from '../components/BackButton.tsx';
-import { useLanguage } from '../providers/LanguageProvider.tsx';
+import { useTranslation } from 'react-i18next';
 
-const getLegalPages = (resolvedLanguage: 'en' | 'fr') => [
+const getLegalPages = (mentionsLabel: string) => [
   {
     to: '/legal/privacy-policy',
     label: 'Privacy Policy',
@@ -24,15 +24,15 @@ const getLegalPages = (resolvedLanguage: 'en' | 'fr') => [
   },
   {
     to: '/legal/legal-notice',
-    label: resolvedLanguage === 'fr' ? 'Mentions légales' : 'Legal notice',
+    label: mentionsLabel,
     description: 'Legal identification and company information (French LCEN compliance).',
     Icon: Info,
   },
 ];
 
 export default function Legal() {
-  const { resolvedLanguage } = useLanguage();
-  const LEGAL_PAGES = getLegalPages(resolvedLanguage);
+  const { t } = useTranslation();
+  const LEGAL_PAGES = getLegalPages(t('legal.mentions'));
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 px-6 pt-12">
