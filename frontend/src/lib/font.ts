@@ -1,4 +1,4 @@
-export type Font = 'system-ui' | 'outfit' | 'mona-sans' | 'urbanist';
+export type Font = 'outfit' | 'mona-sans' | 'urbanist';
 
 const fontNames: Partial<Record<Font, string>> = {
   outfit: 'Outfit Variable',
@@ -7,7 +7,6 @@ const fontNames: Partial<Record<Font, string>> = {
 };
 
 const fontFamilies: Record<Font, string> = {
-  'system-ui': 'system-ui',
   outfit: "'Outfit Variable'",
   'mona-sans': "'Mona Sans Variable'",
   urbanist: "'Urbanist Variable'",
@@ -16,7 +15,7 @@ const fontFamilies: Record<Font, string> = {
 export const validFonts = Object.keys(fontFamilies) as Font[];
 
 export function getFontFamily(font: Font): string {
-  return fontFamilies[font] || fontFamilies['system-ui'];
+  return fontFamilies[font] || fontFamilies.outfit;
 }
 
 export function applyFont(font: Font): void {
