@@ -1,9 +1,7 @@
 import { Server } from 'lucide-react';
 import { useConnection } from '../hooks/useConnection.ts';
 import { useState, useEffect } from 'react';
-import { Input } from '../components/Input.tsx';
-import { Button } from '../components/Button.tsx';
-import { Field } from '../components/Field.tsx';
+import { SaveField } from '../components/SaveField.tsx';
 
 export default function Account() {
   const { apiBase, serverPassword, setServerPassword } = useConnection();
@@ -82,44 +80,40 @@ export default function Account() {
               e.preventDefault();
             }}
           >
-            <Field label="Server password" htmlFor="serverPassword">
-              <div className="flex gap-2">
-                <Input
-                  type="password"
-                  id="serverPassword"
-                  name="serverPassword"
-                  autoComplete="off"
-                  value={key}
-                  onChange={(e) => {
-                    setKey(e.target.value);
-                    setKeyStatus('idle');
-                  }}
-                  placeholder="Leave empty if not set"
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  onClick={saveKey}
-                  disabled={keyStatus === 'checking'}
-                  className=""
-                >
-                  {keyStatus === 'checking'
-                    ? 'Checking…'
-                    : keyStatus === 'valid' || keyStatus === 'open'
-                      ? 'Saved'
-                      : 'Save'}
-                </Button>
-              </div>
-              {keyStatusMsg[keyStatus] && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">{keyStatusMsg[keyStatus]}</p>
-              )}
-              {isServerOpen && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no password — open access</p>
-              )}
-              {!isServerOpen && apiBase && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires a password</p>
-              )}
-            </Field>
+            <SaveField
+              label="Server password"
+              htmlFor="serverPassword"
+              type="password"
+              value={key}
+              onChange={(value) => {
+                setKey(value);
+                setKeyStatus('idle');
+              }}
+              placeholder="Leave empty if not set"
+              autoComplete="off"
+              onSave={saveKey}
+              saveDisabled={keyStatus === 'checking'}
+              buttonContent={
+                keyStatus === 'checking'
+                  ? 'Checking…'
+                  : keyStatus === 'valid' || keyStatus === 'open'
+                    ? 'Saved'
+                    : 'Save'
+              }
+              hint={
+                <>
+                  {keyStatusMsg[keyStatus] && (
+                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">{keyStatusMsg[keyStatus]}</p>
+                  )}
+                  {isServerOpen && (
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no password — open access</p>
+                  )}
+                  {!isServerOpen && apiBase && (
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires a password</p>
+                  )}
+                </>
+              }
+            />
           </form>
         </div>
       </div>

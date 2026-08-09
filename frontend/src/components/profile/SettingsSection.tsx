@@ -36,9 +36,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordStatus, setPasswordStatus] = useState<'idle' | 'saved' | 'error'>('idle');
-  const [editingDisplayName, setEditingDisplayName] = useState('');
-  const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+  const [editingDisplayName, setEditingDisplayName] = useState<string | null>(null);
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
 
   const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,39 +72,33 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   };
 
   const savePassword = () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordStatus('error');
-      setTimeout(() => setPasswordStatus('idle'), 2000);
-      return;
-    }
     if (newPassword !== confirmPassword) {
-      setPasswordStatus('error');
-      setTimeout(() => setPasswordStatus('idle'), 2000);
+      showToast('New passwords do not match', false);
       return;
     }
-    setPasswordStatus('saved');
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    setTimeout(() => setPasswordStatus('idle'), 2000);
   };
+
+  const isPasswordComplete = Boolean(
+    currentPassword && newPassword && confirmPassword && newPassword === confirmPassword
+  );
 
   const saveDisplayName = async () => {
     if (!editingDisplayName.trim()) {
-      setDisplayNameStatus('error');
-      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+      showToast('Display name cannot be empty', false);
       return;
     }
     try {
       await updateDisplayName(editingDisplayName);
-      setDisplayNameStatus('saved');
-      setTimeout(() => setDisplayNameStatus('idle'), 2000);
+      setEditingDisplayName(null);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to update display name', false);
-      setDisplayNameStatus('error');
-      setTimeout(() => setDisplayNameStatus('idle'), 2000);
     }
   };
+
+  const isDisplayNameDirty = editingDisplayName !== null && editingDisplayName.trim() !== displayName;
 
   const avatarClass = `w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center justify-center`;
   return (
@@ -154,26 +146,15 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 </div>
               </div>
             </div>
-            <Field label="Display Name" htmlFor="displayName">
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  id="displayName"
-                  name="displayName"
-                  value={editingDisplayName || displayName || ''}
-                  onChange={(e) => setEditingDisplayName(e.target.value)}
-                  placeholder="Enter display name"
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  onClick={saveDisplayName}
-                  className=""
-                >
-                  {displayNameStatus === 'saved' ? 'Saved' : displayNameStatus === 'error' ? 'Error' : 'Save'}
-                </Button>
-              </div>
-            </Field>
+            <SaveField
+              label="Display Name"
+              htmlFor="displayName"
+              value={editingDisplayName ?? displayName ?? ''}
+              onChange={(value) => setEditingDisplayName(value)}
+              placeholder="Enter display name"
+              onSave={saveDisplayName}
+              saveDisabled={!isDisplayNameDirty}
+            />
             <div>
               <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Username</p>
               <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">@{username || 'Not set'}</p>
@@ -213,7 +194,6 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="••••••••"
-                
               />
             </Field>
             <Field label="New Password" htmlFor="newPassword">
@@ -225,34 +205,26 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                
               />
             </Field>
-            <Field label="Confirm New Password" htmlFor="confirmPassword">
-              <div className="flex gap-2">
-                <Input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="flex-1"
-                />
+            <SaveField
+              label="Confirm New Password"
+              htmlFor="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(value) => setConfirmPassword(value)}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              action={
                 <Button
                   type="submit"
                   className=""
+                  disabled={!isPasswordComplete}
                 >
-                  {passwordStatus === 'saved' ? 'Saved' : passwordStatus === 'error' ? 'Error' : 'Change'}
+                  Change
                 </Button>
-              </div>
-              {passwordStatus === 'error' && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                  Passwords do not match or fields are empty
-                </p>
-              )}
-            </Field>
+              }
+            />
           </form>
         </div>
 

@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Layout, User } from 'lucide-react';
 import { useUpdateSiteMeta } from '../hooks/api/useUpdateSiteMeta.ts';
 import type { Site } from '../lib/types.ts';
-import { Input } from './Input.tsx';
-import { Button } from './Button.tsx';
+import { SaveField } from './SaveField.tsx';
 import { Field } from './Field.tsx';
 
 interface SiteProfileSectionProps {
@@ -13,7 +12,7 @@ interface SiteProfileSectionProps {
 
 export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProps) {
   const { updateSiteMeta } = useUpdateSiteMeta();
-  const [editingDisplayName, setEditingDisplayName] = useState(site?.displayName || '');
+  const [editingDisplayName, setEditingDisplayName] = useState<string | null>(null);
   const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved' | 'error'>('idle');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -62,33 +61,24 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
           Profile
         </h2>
         <div className="space-y-4 max-w-md">
-          <Field label="Display Name" htmlFor="siteDisplayName">
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                id="siteDisplayName"
-                name="siteDisplayName"
-                value={editingDisplayName || site?.displayName || ''}
-                onChange={(e) => setEditingDisplayName(e.target.value)}
-                placeholder="Enter display name"
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                onClick={saveDisplayName}
-                disabled={isSaving}
-                className=""
-              >
-                {isSaving
-                  ? 'Saving...'
-                  : displayNameStatus === 'saved'
-                    ? 'Saved'
-                    : displayNameStatus === 'error'
-                      ? 'Error'
-                      : 'Save'}
-              </Button>
-            </div>
-          </Field>
+          <SaveField
+            label="Display Name"
+            htmlFor="siteDisplayName"
+            value={editingDisplayName ?? site?.displayName ?? ''}
+            onChange={(value) => setEditingDisplayName(value)}
+            placeholder="Enter display name"
+            onSave={saveDisplayName}
+            saveDisabled={isSaving}
+            buttonContent={
+              isSaving
+                ? 'Saving...'
+                : displayNameStatus === 'saved'
+                  ? 'Saved'
+                  : displayNameStatus === 'error'
+                    ? 'Error'
+                    : 'Save'
+            }
+          />
           <Field label="Owner" htmlFor="siteUsername">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
