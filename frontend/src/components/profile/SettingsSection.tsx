@@ -126,7 +126,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <label className="px-3 py-2 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer">
+                  <Button as="label">
                     {uploadingProfilePicture ? 'Uploading...' : 'Upload'}
                     <input
                       type="file"
@@ -135,7 +135,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                       className="hidden"
                       disabled={uploadingProfilePicture}
                     />
-                  </label>
+                  </Button>
                   {profilePicture && (
                     <button
                       onClick={handleDeleteProfilePicture}
@@ -183,7 +183,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 autoComplete="username"
                 value={username || ''}
                 readOnly
-                className="bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 cursor-not-allowed"
+                className="bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 cursor-default"
               />
             </Field>
             <Field label="Current Password" htmlFor="currentPassword">
