@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { shouldReloadOnCorruption } from './lib/utils.ts';
+import { Button } from './components/Button.tsx';
 
 interface Props {
   children: ReactNode;
@@ -32,12 +33,11 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="text-center p-8">
             <h1 className="text-2xl font-bold text-zinc-950 dark:text-zinc-100 mb-4">Something went wrong</h1>
             <p className="text-zinc-600 dark:text-zinc-400 mb-4">{this.state.error?.message}</p>
-            <button
+            <Button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg"
             >
               Reload page
-            </button>
+            </Button>
           </div>
         </div>
       );

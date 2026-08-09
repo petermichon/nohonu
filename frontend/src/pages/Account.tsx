@@ -2,6 +2,7 @@ import { Server } from 'lucide-react';
 import { useConnection } from '../hooks/useConnection.ts';
 import { useState, useEffect } from 'react';
 import { Input } from '../components/Input.tsx';
+import { Button } from '../components/Button.tsx';
 
 export default function Account() {
   const { apiBase, serverPassword, setServerPassword } = useConnection();
@@ -98,18 +99,18 @@ export default function Account() {
                   placeholder="Leave empty if not set"
                   className="flex-1"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={saveKey}
                   disabled={keyStatus === 'checking'}
-                  className="px-4 py-2 text-sm bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-700 dark:hover:bg-zinc-300 disabled:opacity-50 text-white dark:text-zinc-950 font-medium rounded-lg cursor-pointer disabled:cursor-auto"
+                  className=""
                 >
                   {keyStatus === 'checking'
                     ? 'Checking…'
                     : keyStatus === 'valid' || keyStatus === 'open'
                       ? 'Saved'
                       : 'Save'}
-                </button>
+                </Button>
               </div>
               {keyStatusMsg[keyStatus] && (
                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">{keyStatusMsg[keyStatus]}</p>
