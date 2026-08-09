@@ -44,7 +44,7 @@ export default function MentionsLegales() {
             <strong>Numéro de TVA intracommunautaire :</strong> [À compléter : FRXXXXXXXXXXX]
           </p>
           <p>
-            <strong>Email :</strong> contact@nohonu.com
+            <strong>Email :</strong> nohonu@proton.me
           </p>
         </section>
 
