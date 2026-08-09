@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import i18n from '../lib/i18n.ts';
 
 type Language = 'en' | 'fr' | 'auto';
 
@@ -26,6 +27,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const resolvedLanguage: 'en' | 'fr' = language === 'auto' ? getBrowserLanguage() : language;
 
   useEffect(() => {
+    i18n.changeLanguage(resolvedLanguage);
     localStorage.setItem('language', language);
     document.documentElement.lang = resolvedLanguage;
   }, [language, resolvedLanguage]);
