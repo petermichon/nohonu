@@ -3,6 +3,7 @@ import { Layout, User } from 'lucide-react';
 import { useUpdateSiteMeta } from '../hooks/api/useUpdateSiteMeta.ts';
 import type { Site } from '../lib/types.ts';
 import { Input } from './Input.tsx';
+import { Button } from './Button.tsx';
 
 interface SiteProfileSectionProps {
   site: Site | null;
@@ -74,11 +75,11 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
                 placeholder="Enter display name"
                 className="flex-1"
               />
-              <button
+              <Button
                 type="button"
                 onClick={saveDisplayName}
                 disabled={isSaving}
-                className="px-4 py-2.5 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer disabled:opacity-50"
+                className=""
               >
                 {isSaving
                   ? 'Saving...'
@@ -87,7 +88,7 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
                     : displayNameStatus === 'error'
                       ? 'Error'
                       : 'Save'}
-              </button>
+              </Button>
             </div>
           </div>
           <div>

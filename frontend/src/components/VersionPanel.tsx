@@ -6,6 +6,7 @@ import { useUploadVersion } from '../hooks/api/useUploadVersion.ts';
 import { useClickOutside } from '../hooks/useClickOutside.ts';
 import { VersionList } from './VersionList.tsx';
 import type { Version } from '../lib/types.ts';
+import { Button } from './Button.tsx';
 
 interface VersionPanelProps {
   domain: string;
@@ -205,11 +206,11 @@ export function VersionPanel({
               placeholder="branch (default: main)"
               className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
             />
-            <button
+            <Button
               type="button"
               onClick={handleFetchGithub}
               disabled={fetchingGithub || !githubRepo}
-              className="px-4 py-2 bg-zinc-900 dark:bg-zinc-700 hover:bg-zinc-800 dark:hover:bg-zinc-600 disabled:bg-zinc-300 dark:disabled:bg-zinc-800 disabled:hover:bg-zinc-300 dark:disabled:hover:bg-zinc-800 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-pointer disabled:cursor-auto"
+              className="flex items-center justify-center gap-2"
             >
               {fetchingGithub ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -217,7 +218,7 @@ export function VersionPanel({
                 <GitBranch className="w-4 h-4" />
               )}
               {fetchingGithub ? 'Fetching...' : 'Fetch & Add'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

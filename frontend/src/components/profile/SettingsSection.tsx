@@ -12,6 +12,7 @@ import { useToast } from '../../providers/ToastContext.tsx';
 import { formatUserAgent } from '../../lib/userAgent.ts';
 import { Tooltip } from '../Tooltip.tsx';
 import { Input } from '../Input.tsx';
+import { Button } from '../Button.tsx';
 
 interface SettingsSectionProps {
   username: string;
@@ -166,13 +167,13 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   placeholder="Enter display name"
                   className="flex-1"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={saveDisplayName}
-                  className="px-4 py-2.5 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer"
+                  className=""
                 >
                   {displayNameStatus === 'saved' ? 'Saved' : displayNameStatus === 'error' ? 'Error' : 'Save'}
-                </button>
+                </Button>
               </div>
             </div>
             <div>
@@ -253,12 +254,12 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   placeholder="••••••••"
                   className="flex-1"
                 />
-                <button
+                <Button
                   type="submit"
-                  className="px-4 py-2.5 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer"
+                  className=""
                 >
                   {passwordStatus === 'saved' ? 'Saved' : passwordStatus === 'error' ? 'Error' : 'Change'}
-                </button>
+                </Button>
               </div>
               {passwordStatus === 'error' && (
                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">

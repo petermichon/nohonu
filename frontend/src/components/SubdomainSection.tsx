@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useUpdateSiteConfig } from '../hooks/api/useUpdateSiteConfig.ts';
 import { useToast } from '../providers/ToastContext.tsx';
 import { Input } from './Input.tsx';
+import { Button } from './Button.tsx';
 
 interface SubdomainSectionProps {
   subdomain: string | null;
@@ -50,14 +51,14 @@ export function SubdomainSection({ subdomain, siteLoading, isReadOnly = false }:
               placeholder="subdomain"
               className="flex-1"
             />
-            <button
+            <Button
               type="button"
               onClick={handleSave}
               disabled={isSaving || editingSubdomain === subdomain}
-              className="px-4 py-2.5 text-sm bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-700 dark:hover:bg-zinc-700 text-white dark:text-zinc-100 font-medium rounded-lg cursor-pointer disabled:cursor-auto disabled:opacity-40"
+              className=""
             >
               {isSaving ? 'Saving...' : 'Save'}
-            </button>
+            </Button>
           </>
         )}
       </div>
