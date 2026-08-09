@@ -45,10 +45,10 @@ export default function CopyrightPolicy() {
           <p className="mt-3">
             Send your notice to{' '}
             <a
-              href="mailto:dmca@nohonu.com"
+              href="mailto:nohonu@proton.me"
               className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              dmca@nohonu.com
+              nohonu@proton.me
             </a>
             .
           </p>
@@ -85,10 +85,10 @@ export default function CopyrightPolicy() {
           <p className="mt-3">
             Send counter-notices to{' '}
             <a
-              href="mailto:dmca@nohonu.com"
+              href="mailto:nohonu@proton.me"
               className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              dmca@nohonu.com
+              nohonu@proton.me
             </a>
             . Upon receiving a valid counter-notice, we may restore the removed content within 10–14 business days
             unless the original complainant files a court action.
@@ -108,10 +108,10 @@ export default function CopyrightPolicy() {
           <p>
             For copyright-related inquiries, contact our designated agent at{' '}
             <a
-              href="mailto:dmca@nohonu.com"
+              href="mailto:nohonu@proton.me"
               className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              dmca@nohonu.com
+              nohonu@proton.me
             </a>
             .
           </p>

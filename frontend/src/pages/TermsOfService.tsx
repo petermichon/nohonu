@@ -139,10 +139,10 @@ export default function TermsOfService() {
           <p>
             If you have any questions about these Terms, please contact us at{' '}
             <a
-              href="mailto:legal@nohonu.com"
+              href="mailto:nohonu@proton.me"
               className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              legal@nohonu.com
+              nohonu@proton.me
             </a>
             .
           </p>

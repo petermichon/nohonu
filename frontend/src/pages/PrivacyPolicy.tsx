@@ -97,10 +97,10 @@ export default function PrivacyPolicy() {
           <p className="mt-3">
             To exercise any of these rights, please contact us at{' '}
             <a
-              href="mailto:privacy@nohonu.com"
+              href="mailto:nohonu@proton.me"
               className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              privacy@nohonu.com
+              nohonu@proton.me
             </a>
             .
           </p>
@@ -136,10 +136,10 @@ export default function PrivacyPolicy() {
           <p>
             If you have any questions about this Privacy Policy, please contact us at{' '}
             <a
-              href="mailto:privacy@nohonu.com"
+              href="mailto:nohonu@proton.me"
               className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              privacy@nohonu.com
+              nohonu@proton.me
             </a>
             .
           </p>
