@@ -4,6 +4,7 @@ import { useUpdateSiteMeta } from '../hooks/api/useUpdateSiteMeta.ts';
 import type { Site } from '../lib/types.ts';
 import { Input } from './Input.tsx';
 import { Button } from './Button.tsx';
+import { Field } from './Field.tsx';
 
 interface SiteProfileSectionProps {
   site: Site | null;
@@ -61,10 +62,7 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
           Profile
         </h2>
         <div className="space-y-4 max-w-md">
-          <div>
-            <label htmlFor="siteDisplayName" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-              Display Name
-            </label>
+          <Field label="Display Name" htmlFor="siteDisplayName">
             <div className="flex gap-2">
               <Input
                 type="text"
@@ -90,22 +88,16 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
                       : 'Save'}
               </Button>
             </div>
-          </div>
-          <div>
-            <label htmlFor="siteUsername" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-              Owner
-            </label>
+          </Field>
+          <Field label="Owner" htmlFor="siteUsername">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
               <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">@{site?.account || 'Not set'}</p>
             </div>
-          </div>
-          <div>
-            <label htmlFor="siteId" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-              Site ID
-            </label>
+          </Field>
+          <Field label="Site ID" htmlFor="siteId">
             <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">{site?.siteId || 'Not set'}</p>
-          </div>
+          </Field>
         </div>
       </div>
     </div>
