@@ -47,12 +47,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   };
 
   const disconnect = () => {
-    localStorage.removeItem('serverPassword');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('username');
     setConnectionState((prev) => ({
       ...prev,
-      serverPassword: '',
       sessionId: '',
       username: '',
     }));
