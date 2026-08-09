@@ -7,6 +7,7 @@ import { useDeployGithub } from '../hooks/api/useDeployGithub.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { useConnection } from '../hooks/useConnection.ts';
 import { hostWithPort } from '../config.ts';
+import { Input } from './Input.tsx';
 
 type UploadMode = 'file' | 'github';
 
@@ -146,23 +147,23 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         {/* File upload or GitHub inputs */}
         {uploadMode === 'github' ? (
           <div className="space-y-3">
-            <input
+            <Input
               type="text"
               id="githubRepo"
               name="githubRepo"
               value={githubRepo}
               onChange={(e) => setGithubRepo(e.target.value)}
               placeholder="owner/repo"
-              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+              
             />
-            <input
+            <Input
               type="text"
               id="githubBranch"
               name="githubBranch"
               value={githubBranch}
               onChange={(e) => setGithubBranch(e.target.value)}
               placeholder="branch (default: main)"
-              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+              
             />
           </div>
         ) : (
@@ -230,7 +231,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <input
+            <Input
               type="text"
               id="domain"
               name="domain"
@@ -260,7 +261,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
         {/* Subdomain input */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <input
+            <Input
               type="text"
               id="subdomain"
               name="subdomain"
@@ -270,7 +271,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                 setNewSubdomain(val);
               }}
               placeholder="subdomain"
-              className="w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+              
             />
           </div>
           <span className="text-zinc-400 dark:text-zinc-500 text-sm shrink-0">.{hostWithPort}</span>

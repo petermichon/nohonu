@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useUpdateSiteConfig } from '../hooks/api/useUpdateSiteConfig.ts';
 import { useToast } from '../providers/ToastContext.tsx';
+import { Input } from './Input.tsx';
 
 interface SubdomainSectionProps {
   subdomain: string | null;
@@ -41,13 +42,13 @@ export function SubdomainSection({ subdomain, siteLoading, isReadOnly = false }:
           </div>
         ) : (
           <>
-            <input
+            <Input
               type="text"
               name="subdomain"
               value={editingSubdomain}
               onChange={(e) => setEditingSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
               placeholder="subdomain"
-              className="flex-1 px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+              className="flex-1"
             />
             <button
               type="button"

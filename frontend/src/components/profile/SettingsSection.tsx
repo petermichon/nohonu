@@ -11,6 +11,7 @@ import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
 import { formatUserAgent } from '../../lib/userAgent.ts';
 import { Tooltip } from '../Tooltip.tsx';
+import { Input } from '../Input.tsx';
 
 interface SettingsSectionProps {
   username: string;
@@ -105,14 +106,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
     }
   };
 
-  const inputClass =
-    'w-full px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600';
   const avatarClass = `w-16 h-16 rounded-full ${accentColorValues.bgLight} flex items-center justify-center`;
-  const usernameInputClass = [
-    inputClass,
-    'bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 cursor-not-allowed',
-  ].join(' ');
-
   return (
     <section className="max-w-7xl mx-auto px-6 py-8">
       <div className="space-y-8">
@@ -163,14 +157,14 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 Display Name
               </label>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="text"
                   id="displayName"
                   name="displayName"
                   value={editingDisplayName || displayName || ''}
                   onChange={(e) => setEditingDisplayName(e.target.value)}
                   placeholder="Enter display name"
-                  className={`${inputClass} flex-1`}
+                  className="flex-1"
                 />
                 <button
                   type="button"
@@ -204,21 +198,21 @@ export function SettingsSection({ username }: SettingsSectionProps) {
               <label htmlFor="username" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
                 Username
               </label>
-              <input
+              <Input
                 type="text"
                 id="username"
                 name="username"
                 autoComplete="username"
                 value={username || ''}
                 readOnly
-                className={usernameInputClass}
+                className="bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 cursor-not-allowed"
               />
             </div>
             <div>
               <label htmlFor="currentPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
                 Current Password
               </label>
-              <input
+              <Input
                 type="password"
                 id="currentPassword"
                 name="currentPassword"
@@ -226,14 +220,14 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="••••••••"
-                className={inputClass}
+                
               />
             </div>
             <div>
               <label htmlFor="newPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
                 New Password
               </label>
-              <input
+              <Input
                 type="password"
                 id="newPassword"
                 name="newPassword"
@@ -241,7 +235,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className={inputClass}
+                
               />
             </div>
             <div>
@@ -249,7 +243,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 Confirm New Password
               </label>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
@@ -257,7 +251,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`${inputClass} flex-1`}
+                  className="flex-1"
                 />
                 <button
                   type="submit"
