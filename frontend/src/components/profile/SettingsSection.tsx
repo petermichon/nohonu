@@ -13,6 +13,7 @@ import { formatUserAgent } from '../../lib/userAgent.ts';
 import { Tooltip } from '../Tooltip.tsx';
 import { Input } from '../Input.tsx';
 import { Button } from '../Button.tsx';
+import { Field } from '../Field.tsx';
 
 interface SettingsSectionProps {
   username: string;
@@ -153,10 +154,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 </div>
               </div>
             </div>
-            <div>
-              <label htmlFor="displayName" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                Display Name
-              </label>
+            <Field label="Display Name" htmlFor="displayName">
               <div className="flex gap-2">
                 <Input
                   type="text"
@@ -175,7 +173,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   {displayNameStatus === 'saved' ? 'Saved' : displayNameStatus === 'error' ? 'Error' : 'Save'}
                 </Button>
               </div>
-            </div>
+            </Field>
             <div>
               <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">Username</p>
               <p className="text-sm text-zinc-950 dark:text-zinc-100 font-mono">@{username || 'Not set'}</p>
@@ -195,10 +193,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
               savePassword();
             }}
           >
-            <div>
-              <label htmlFor="username" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                Username
-              </label>
+            <Field label="Username" htmlFor="username">
               <Input
                 type="text"
                 id="username"
@@ -208,11 +203,8 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 readOnly
                 className="bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 cursor-not-allowed"
               />
-            </div>
-            <div>
-              <label htmlFor="currentPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                Current Password
-              </label>
+            </Field>
+            <Field label="Current Password" htmlFor="currentPassword">
               <Input
                 type="password"
                 id="currentPassword"
@@ -223,11 +215,8 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 placeholder="••••••••"
                 
               />
-            </div>
-            <div>
-              <label htmlFor="newPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                New Password
-              </label>
+            </Field>
+            <Field label="New Password" htmlFor="newPassword">
               <Input
                 type="password"
                 id="newPassword"
@@ -238,11 +227,8 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                 placeholder="••••••••"
                 
               />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                Confirm New Password
-              </label>
+            </Field>
+            <Field label="Confirm New Password" htmlFor="confirmPassword">
               <div className="flex gap-2">
                 <Input
                   type="password"
@@ -266,7 +252,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   Passwords do not match or fields are empty
                 </p>
               )}
-            </div>
+            </Field>
           </form>
         </div>
 

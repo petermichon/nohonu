@@ -3,6 +3,7 @@ import { useConnection } from '../hooks/useConnection.ts';
 import { useState, useEffect } from 'react';
 import { Input } from '../components/Input.tsx';
 import { Button } from '../components/Button.tsx';
+import { Field } from '../components/Field.tsx';
 
 export default function Account() {
   const { apiBase, serverPassword, setServerPassword } = useConnection();
@@ -81,10 +82,7 @@ export default function Account() {
               e.preventDefault();
             }}
           >
-            <div>
-              <label htmlFor="serverPassword" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-                Server password
-              </label>
+            <Field label="Server password" htmlFor="serverPassword">
               <div className="flex gap-2">
                 <Input
                   type="password"
@@ -121,7 +119,7 @@ export default function Account() {
               {!isServerOpen && apiBase && (
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires a password</p>
               )}
-            </div>
+            </Field>
           </form>
         </div>
       </div>
