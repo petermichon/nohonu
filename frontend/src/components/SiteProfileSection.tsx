@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Layout, User } from 'lucide-react';
 import { useUpdateSiteMeta } from '../hooks/api/useUpdateSiteMeta.ts';
 import type { Site } from '../lib/types.ts';
+import { Input } from './Input.tsx';
 
 interface SiteProfileSectionProps {
   site: Site | null;
@@ -64,14 +65,14 @@ export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProp
               Display Name
             </label>
             <div className="flex gap-2">
-              <input
+              <Input
                 type="text"
                 id="siteDisplayName"
                 name="siteDisplayName"
                 value={editingDisplayName || site?.displayName || ''}
                 onChange={(e) => setEditingDisplayName(e.target.value)}
                 placeholder="Enter display name"
-                className="flex-1 px-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+                className="flex-1"
               />
               <button
                 type="button"
