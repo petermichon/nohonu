@@ -58,7 +58,6 @@ export function SettingsMenu() {
     () =>
       (
         [
-          { value: 'system-ui', label: 'System UI' },
           { value: 'outfit', label: 'Outfit' },
           { value: 'mona-sans', label: 'Mona Sans' },
           { value: 'urbanist', label: 'Urbanist' },
