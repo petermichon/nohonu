@@ -1,6 +1,7 @@
 import { Server } from 'lucide-react';
 import { useConnection } from '../hooks/useConnection.ts';
 import { useState, useEffect } from 'react';
+import { Input } from '../components/Input.tsx';
 
 export default function Account() {
   const { apiBase, serverPassword, setServerPassword } = useConnection();
@@ -84,7 +85,7 @@ export default function Account() {
                 Server password
               </label>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="password"
                   id="serverPassword"
                   name="serverPassword"
@@ -95,7 +96,7 @@ export default function Account() {
                     setKeyStatus('idle');
                   }}
                   placeholder="Leave empty if not set"
-                  className="flex-1 px-3 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+                  className="flex-1"
                 />
                 <button
                   type="button"

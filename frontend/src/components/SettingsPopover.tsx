@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import { useConnection } from '../hooks/useConnection.ts';
 import { useClickOutside } from '../hooks/useClickOutside.ts';
+import { Input } from './Input.tsx';
 
 const keyStatusMsg: Record<'idle' | 'checking' | 'valid' | 'invalid' | 'open', string | null> = {
   idle: null,
@@ -98,7 +99,7 @@ export function SettingsPopover() {
                 Server password
               </label>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="password"
                   id="popoverApiKey"
                   name="serverPassword"
@@ -109,7 +110,7 @@ export function SettingsPopover() {
                     setKeyStatus('idle');
                   }}
                   placeholder="Leave empty if not set"
-                  className="flex-1 px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-stone-400"
+                  className="flex-1"
                 />
                 <button
                   type="button"
