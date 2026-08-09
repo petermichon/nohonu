@@ -23,51 +23,48 @@ export default function MentionsLegales() {
         <section id="editeur">
           <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">Éditeur du site</h2>
           <p className="mb-2">
-            <strong>Nohonu</strong>
+            <strong>Nohonu</strong> — service d'hébergement de sites web statiques.
           </p>
           <p className="mb-2">
-            <strong>Forme juridique :</strong> [À compléter : SAS, SARL, SASU, etc.]
+            Le site est édité par un particulier à titre non professionnel (article 6-III de la loi LCEN).
           </p>
           <p className="mb-2">
-            <strong>Capital social :</strong> [À compléter : montant en euros]
-          </p>
-          <p className="mb-2">
-            <strong>SIRET :</strong> [À compléter : numéro SIRET]
-          </p>
-          <p className="mb-2">
-            <strong>SIREN :</strong> [À compléter : numéro SIREN]
-          </p>
-          <p className="mb-2">
-            <strong>Siège social :</strong> [À compléter : adresse complète]
-          </p>
-          <p className="mb-2">
-            <strong>Numéro de TVA intracommunautaire :</strong> [À compléter : FRXXXXXXXXXXX]
+            Conformément à la loi, l'identité de l'éditeur n'est pas rendue publique et peut être communiquée sur
+            demande aux autorités compétentes.
           </p>
           <p>
-            <strong>Email :</strong> nohonu@proton.me
+            <strong>Contact :</strong> nohonu@proton.me
           </p>
         </section>
 
         <section id="directeur">
           <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">Directeur de la publication</h2>
           <p>
-            <strong>Nom :</strong> [À compléter : nom du directeur de la publication]
+            <strong>Directeur de la publication :</strong> Nohonu (nohonu@proton.me)
           </p>
         </section>
 
         <section id="hebergement">
           <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">Hébergement</h2>
           <p className="mb-2">
-            <strong>Prestataire :</strong> [À compléter : nom de l'hébergeur, ex: OVH, AWS, Scaleway, etc.]
+            <strong>Prestataire :</strong> OVH SAS
           </p>
           <p className="mb-2">
-            <strong>Adresse :</strong> [À compléter : adresse de l'hébergeur]
+            <strong>Adresse :</strong> 2 rue Kellermann, 59100 Roubaix, France
           </p>
           <p className="mb-2">
-            <strong>Téléphone :</strong> [À compléter : numéro de téléphone de l'hébergeur]
+            <strong>Téléphone :</strong> +33 9 72 10 10 07
           </p>
           <p>
-            <strong>Site web :</strong> [À compléter : URL de l'hébergeur]
+            <strong>Site web :</strong>{' '}
+            <a
+              href="https://www.ovh.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-950 dark:text-zinc-100 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              https://www.ovh.com
+            </a>
           </p>
         </section>
       </div>
