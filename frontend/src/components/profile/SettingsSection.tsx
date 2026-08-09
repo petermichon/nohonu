@@ -14,6 +14,7 @@ import { Tooltip } from '../Tooltip.tsx';
 import { Input } from '../Input.tsx';
 import { Button } from '../Button.tsx';
 import { Field } from '../Field.tsx';
+import { SaveField } from '../SaveField.tsx';
 
 interface SettingsSectionProps {
   username: string;
