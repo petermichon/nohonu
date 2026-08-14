@@ -64,6 +64,34 @@ describe('SettingsSection', () => {
     expect(changeButton).toBeDisabled();
   });
 
+  it('changes the password and clears the fields on success', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SettingsSection username="peter" />);
+
+    await user.type(screen.getByLabelText('Current Password'), 'old-pass');
+    await user.type(screen.getByLabelText('New Password'), 'new-pass');
+    await user.type(screen.getByLabelText('Confirm New Password'), 'new-pass');
+    await user.click(screen.getByRole('button', { name: 'Change' }));
+
+    expect(await screen.findByText('Password changed')).toBeInTheDocument();
+    expect(screen.getByLabelText('Current Password')).toHaveValue('');
+    expect(screen.getByLabelText('New Password')).toHaveValue('');
+    expect(screen.getByLabelText('Confirm New Password')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Change' })).toBeDisabled();
+  });
+
+  it('shows an error toast when the current password is wrong', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SettingsSection username="peter" />);
+
+    await user.type(screen.getByLabelText('Current Password'), 'wrong-current');
+    await user.type(screen.getByLabelText('New Password'), 'new-pass');
+    await user.type(screen.getByLabelText('Confirm New Password'), 'new-pass');
+    await user.click(screen.getByRole('button', { name: 'Change' }));
+
+    expect(await screen.findByText('Current password is incorrect')).toBeInTheDocument();
+  });
+
   it('lists active sessions with a revoke action', async () => {
     const user = userEvent.setup();
     renderWithProviders(<SettingsSection username="peter" />);

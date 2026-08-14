@@ -27,6 +27,7 @@ export const logout = (await import('../usecases/auth/logout.ts')).logout;
 export const logoutAll = (await import('../usecases/auth/logout-all.ts')).logoutAll;
 export const me = (await import('../usecases/auth/me.ts')).me;
 export const updateDisplayName = (await import('../usecases/auth/update-display-name.ts')).updateDisplayName;
+export const changePassword = (await import('../usecases/auth/change-password.ts')).changePassword;
 export const uploadProfilePicture = (await import('../usecases/auth/upload-profile-picture.ts')).uploadProfilePicture;
 export const deleteProfilePicture = (await import('../usecases/auth/delete-profile-picture.ts')).deleteProfilePicture;
 export const getPublicUser = (await import('../usecases/auth/get-public-user.ts')).getPublicUser;

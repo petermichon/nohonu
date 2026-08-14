@@ -34,6 +34,13 @@ export const handlers = [
   http.patch('*/auth/displayname', () => {
     return HttpResponse.json({ success: true });
   }),
+  http.patch('*/auth/password', async ({ request }) => {
+    const body = (await request.json()) as { currentPassword?: string };
+    if (body.currentPassword === 'wrong-current') {
+      return HttpResponse.json({ error: 'Current password is incorrect' }, { status: 401 });
+    }
+    return HttpResponse.json({ success: true });
+  }),
   http.get('*/check-subdomain', ({ request }) => {
     const url = new URL(request.url);
     const subdomain = url.searchParams.get('subdomain');
