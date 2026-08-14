@@ -55,12 +55,12 @@ describe('useSites', () => {
     expect(result.current.error).toBe('connection');
   });
 
-  it('does not report an error for other HTTP statuses', async () => {
+  it('reports a connection error on other HTTP failures', async () => {
     mockFetch({ message: 'boom' }, 500);
     const { result } = renderHookWithProviders(() => useSites());
 
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBe(false);
+    await waitFor(() => expect(result.current.error).not.toBe(false));
+    expect(result.current.error).toBe('connection');
     expect(result.current.sites).toEqual([]);
   });
 

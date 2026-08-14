@@ -13,6 +13,9 @@ export function useSites() {
       if (res.status === 401) {
         throw new Error('unauthorized');
       }
+      if (!res.ok) {
+        throw new Error('request failed');
+      }
       const data = await res.json();
       return (data.sites ?? []) as Site[];
     },
