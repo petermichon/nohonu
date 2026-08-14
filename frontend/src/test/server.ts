@@ -15,6 +15,80 @@ export const handlers = [
   http.get('*/sites', () => {
     return HttpResponse.json({ sites: [] });
   }),
+  http.get('*/auth/sessions', () => {
+    return HttpResponse.json({
+      sessions: [
+        {
+          id: 'sess-other',
+          username: 'peter',
+          userAgent: 'Mozilla/5.0 (X11; Linux x86_64) Chrome/128.0',
+          createdAt: 1720000000000,
+          lastActive: 1720000000000,
+        },
+      ],
+    });
+  }),
+  http.delete('*/auth/sessions/delete', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.patch('*/auth/displayname', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.get('*/check-subdomain', ({ request }) => {
+    const url = new URL(request.url);
+    const subdomain = url.searchParams.get('subdomain');
+    if (subdomain === 'taken') {
+      return HttpResponse.json({ subdomain, taken: true });
+    }
+    return new HttpResponse(null, { status: 404 });
+  }),
+  http.get('*/check-domain', ({ request }) => {
+    const url = new URL(request.url);
+    const domain = url.searchParams.get('domain');
+    if (domain === 'taken') {
+      return HttpResponse.json({ domain, taken: true });
+    }
+    return new HttpResponse(null, { status: 404 });
+  }),
+  http.get('*/sites/meta', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.patch('*/sites/meta', async ({ request }) => {
+    await request.json();
+    return HttpResponse.json({ success: true });
+  }),
+  http.post('*/sites/:domain', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.post('*/sites/:domain/github', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.get('*/sites/:domain/custom-domains', () => {
+    return HttpResponse.json({
+      customDomains: [
+        { domain: 'example.com', verified: true },
+        { domain: 'pending.com', verified: false },
+      ],
+    });
+  }),
+  http.get('*/sites/:domain/custom-domains/token', () => {
+    return HttpResponse.json({ token: 'tok-abc' });
+  }),
+  http.post('*/sites/:domain/custom-domains', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.post('*/sites/:domain/custom-domains/:customDomain/verify', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.delete('*/sites/:domain/custom-domains/:customDomain', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.get('*/auth', ({ request }) => {
+    if (request.headers.get('X-Server-Password') === 'wrong') {
+      return new HttpResponse(null, { status: 401 });
+    }
+    return HttpResponse.json({ secured: true });
+  }),
 ];
 
 export const server = setupServer(...handlers);
