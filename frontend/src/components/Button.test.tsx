@@ -30,6 +30,18 @@ describe('Button', () => {
     expect(link).toHaveAttribute('href', '/somewhere');
   });
 
+  it('renders as a label when as="label"', () => {
+    render(
+      <Button as="label">
+        Upload
+        <input type="file" className="hidden" />
+      </Button>
+    );
+    const label = screen.getByText('Upload').closest('label');
+    expect(label).toHaveClass(/bg-zinc-900/);
+    expect(label).toContainElement(screen.getByLabelText('Upload') as HTMLElement);
+  });
+
   it('forwards extra button props', () => {
     render(
       <Button type="submit" aria-label="Submit form">
