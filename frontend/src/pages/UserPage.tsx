@@ -158,7 +158,12 @@ export default function UserPage() {
         )}
 
         {activeTab === 'domains' && !domainsLoading && (
-          <DomainsSection domains={domains} isOwnProfile={isOwnProfile} domainsLoading={domainsLoading} />
+          <DomainsSection
+            domains={domains}
+            isOwnProfile={isOwnProfile}
+            domainsLoading={domainsLoading}
+            sites={userSites}
+          />
         )}
 
         {activeTab === 'settings' && isOwnProfile && <SettingsSection username={username} />}

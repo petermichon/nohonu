@@ -23,7 +23,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div ref={contentRef} className={modalClasses}>
+      <div ref={contentRef} role="dialog" aria-modal="true" className={modalClasses}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-medium text-zinc-950 dark:text-zinc-100">{title}</h2>
           <button

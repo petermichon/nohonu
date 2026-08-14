@@ -2,24 +2,39 @@ import { useState } from 'react';
 import { Check, Globe, Plus, X } from 'lucide-react';
 import { useDeleteCustomDomain } from '../../hooks/api/useDeleteCustomDomain.ts';
 import { useVerifyCustomDomain } from '../../hooks/api/useVerifyCustomDomain.ts';
+import { useAddCustomDomain } from '../../hooks/api/useAddCustomDomain.ts';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
-import type { Domain } from '../../lib/types.ts';
+import type { Domain, Site } from '../../lib/types.ts';
+import { AddDomainModal } from '../AddDomainModal.tsx';
 
 interface DomainsSectionProps {
   domains: Domain[];
   isOwnProfile: boolean;
   domainsLoading: boolean;
+  sites: Site[];
 }
 
-export function DomainsSection({ domains, isOwnProfile, domainsLoading }: DomainsSectionProps) {
+export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }: DomainsSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const { verifyCustomDomain } = useVerifyCustomDomain();
   const { deleteCustomDomain } = useDeleteCustomDomain();
+  const { addCustomDomain } = useAddCustomDomain();
   const { showToast } = useToast();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
+
+  const handleAddCustomDomain = async (siteDomain: string, customDomain: string) => {
+    try {
+      await addCustomDomain(siteDomain, customDomain);
+      showToast('Custom domain added', true);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to add custom domain', false);
+      throw err;
+    }
+  };
 
   const handleVerifyCustomDomain = async (siteDomain: string, customDomain: string) => {
     setVerifyingDomain(customDomain);
@@ -70,12 +85,7 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading }: Domain
           {domains.length} {domains.length === 1 ? 'domain' : 'domains'} configured
         </p>
         {isOwnProfile && (
-          <button
-            onClick={() => {
-              /* TODO: Open add domain modal/input */
-            }}
-            className={addButtonClass}
-          >
+          <button onClick={() => setIsAddModalOpen(true)} className={addButtonClass}>
             <Plus className="w-4 h-4" />
             Add domain
           </button>
@@ -97,12 +107,7 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading }: Domain
             Connect a custom domain to your site to use your own brand.
           </p>
           {isOwnProfile && (
-            <button
-              onClick={() => {
-                /* TODO: Open add domain modal/input */
-              }}
-              className={addButtonClass}
-            >
+            <button onClick={() => setIsAddModalOpen(true)} className={addButtonClass}>
               <Plus className="w-4 h-4" />
               Add your first domain
             </button>
@@ -163,6 +168,15 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading }: Domain
             </div>
           ))}
         </div>
+      )}
+
+      {isOwnProfile && (
+        <AddDomainModal
+          isOpen={isAddModalOpen}
+          sites={sites}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddCustomDomain}
+        />
       )}
     </section>
   );
