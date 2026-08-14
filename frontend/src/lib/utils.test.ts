@@ -11,6 +11,7 @@ import {
   shouldReloadOnCorruption,
   getSlotsForRange,
   getGroupMinutes,
+  tabClass,
 } from './utils.ts';
 
 describe('relativeTime', () => {
@@ -308,5 +309,26 @@ describe('shouldReloadOnCorruption', () => {
 
   it('returns false for empty message', () => {
     expect(shouldReloadOnCorruption(new Error())).toBe(false);
+  });
+});
+
+describe('tabClass', () => {
+  it('returns active classes when active', () => {
+    const classes = tabClass(true);
+    expect(classes).toContain('text-zinc-950');
+    expect(classes).toContain('bg-zinc-100');
+  });
+
+  it('returns inactive classes when not active', () => {
+    const classes = tabClass(false);
+    expect(classes).toContain('text-zinc-500');
+    expect(classes).toContain('hover:text-zinc-700');
+  });
+
+  it('includes shared base classes in both states', () => {
+    expect(tabClass(true)).toContain('rounded-full');
+    expect(tabClass(false)).toContain('rounded-full');
+    expect(tabClass(true)).toContain('flex');
+    expect(tabClass(false)).toContain('flex');
   });
 });
