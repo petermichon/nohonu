@@ -89,6 +89,7 @@ export function VersionList({
                 <button
                   type="button"
                   onClick={() => onDownload(v.index)}
+                  aria-label="Download version"
                   className="p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
@@ -99,6 +100,7 @@ export function VersionList({
                   type="button"
                   onClick={() => onDelete(v.index)}
                   disabled={isDeleting || isCurrent || isReadOnly}
+                  aria-label="Delete version"
                   className={`p-1.5 text-zinc-700 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg disabled:opacity-30 cursor-pointer disabled:cursor-auto disabled:hover:bg-transparent dark:disabled:hover:bg-transparent disabled:hover:text-zinc-700 dark:disabled:hover:text-zinc-300 ${!isCurrent ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
                 >
                   {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}

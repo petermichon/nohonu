@@ -57,10 +57,11 @@ export const handlers = [
     }
     return new HttpResponse(null, { status: 404 });
   }),
-  http.get('*/sites/meta', () => {
+  http.patch('*/sites/meta', async ({ request }) => {
+    await request.json();
     return HttpResponse.json({ success: true });
   }),
-  http.patch('*/sites/meta', async ({ request }) => {
+  http.patch('*/sites/:domain/meta', async ({ request }) => {
     await request.json();
     return HttpResponse.json({ success: true });
   }),
@@ -68,6 +69,17 @@ export const handlers = [
     return HttpResponse.json({ success: true });
   }),
   http.post('*/sites/:domain/github', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.get('*/sites/:domain/repos', () => {
+    return HttpResponse.json({
+      repos: [{ repo: 'peter/my-site', branch: 'main', lastUsed: 1720000000000 }],
+    });
+  }),
+  http.post('*/sites/:domain/versions', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.post('*/sites/:domain/versions/github', () => {
     return HttpResponse.json({ success: true });
   }),
   http.get('*/sites/:domain/custom-domains', () => {
