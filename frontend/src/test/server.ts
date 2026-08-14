@@ -76,6 +76,12 @@ export const handlers = [
       repos: [{ repo: 'peter/my-site', branch: 'main', lastUsed: 1720000000000 }],
     });
   }),
+  http.patch('*/sites/:domain/star', () => {
+    return HttpResponse.json({ success: true });
+  }),
+  http.get('*/users/:username', () => {
+    return HttpResponse.json({ user: { username: 'peter', displayName: 'Peter' } });
+  }),
   http.post('*/sites/:domain/versions', () => {
     return HttpResponse.json({ success: true });
   }),
