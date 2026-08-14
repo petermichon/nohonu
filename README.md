@@ -44,10 +44,8 @@ nohonu/
 **Requirements:** Node.js 20+, Deno 2.x (optional).
 
 ```bash
-# Install dependencies once
-npm --prefix backend install
-npm --prefix frontend install
-npm install   # root — for concurrently
+# Install dependencies (root + backend + frontend)
+npm run install:all
 
 # Run both backend and frontend together
 npm run dev
