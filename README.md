@@ -44,17 +44,28 @@ nohonu/
 **Requirements:** Node.js 20+, Deno 2.x (optional).
 
 ```bash
-# Terminal 1 — backend
-cd backend && npm install && npm run dev
+# Install dependencies once
+npm --prefix backend install
+npm --prefix frontend install
+npm install   # root — for concurrently
 
-# Terminal 2 — frontend
-cd frontend && npm ci && npm run dev
+# Run both backend and frontend together
+npm run dev
+```
+
+This uses [concurrently](https://github.com/open-cli-tools/concurrently) to run both dev servers in one terminal, with prefixed output and `--kill-others` so they stop together.
+
+You can also run them separately:
+
+```bash
+npm run dev:backend
+npm run dev:frontend
 ```
 
 Frontend: <http://localhost:5173>
 Backend: <http://localhost:8080>
 
-The backend `npm run dev` applies pending Prisma migrations before starting.
+The backend `npm run dev` applies pending Prisma migrations before starting. Note: `prisma migrate dev` may prompt for a migration name when the schema changes — with `concurrently`, stdin isn't forwarded by default, so restart the backend in its own terminal if that happens.
 
 ## Docker Deployment
 
