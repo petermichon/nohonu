@@ -4,6 +4,7 @@ import { useDeleteProfilePicture } from '../../hooks/api/useDeleteProfilePicture
 import { useDeleteSession } from '../../hooks/api/useDeleteSession.ts';
 import { useSessions } from '../../hooks/api/useSessions.ts';
 import { useUpdateDisplayName } from '../../hooks/api/useUpdateDisplayName.ts';
+import { useUpdatePassword } from '../../hooks/api/useUpdatePassword.ts';
 import { useUploadProfilePicture } from '../../hooks/api/useUploadProfilePicture.ts';
 import { useMe } from '../../hooks/api/useMe.ts';
 import { useConnection } from '../../hooks/useConnection.ts';
@@ -31,6 +32,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const { sessions, loading: sessionsLoading } = useSessions();
   const { deleteSession } = useDeleteSession();
   const { updateDisplayName } = useUpdateDisplayName();
+  const { updatePassword } = useUpdatePassword();
   const { uploadProfilePicture } = useUploadProfilePicture();
   const { deleteProfilePicture } = useDeleteProfilePicture();
 
@@ -39,6 +41,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [editingDisplayName, setEditingDisplayName] = useState<string | null>(null);
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
 
   const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -72,18 +75,31 @@ export function SettingsSection({ username }: SettingsSectionProps) {
     }
   };
 
-  const savePassword = () => {
+  const savePassword = async () => {
     if (newPassword !== confirmPassword) {
       showToast('New passwords do not match', false);
       return;
     }
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    setSavingPassword(true);
+    try {
+      await updatePassword(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      showToast('Password changed', true);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to change password', false);
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   const isPasswordComplete = Boolean(
-    currentPassword && newPassword && confirmPassword && newPassword === confirmPassword
+    currentPassword &&
+      newPassword &&
+      confirmPassword &&
+      newPassword === confirmPassword &&
+      !savingPassword
   );
 
   const saveDisplayName = async () => {
@@ -222,7 +238,7 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   className=""
                   disabled={!isPasswordComplete}
                 >
-                  Change
+                  {savingPassword ? 'Saving...' : 'Change'}
                 </Button>
               }
             />

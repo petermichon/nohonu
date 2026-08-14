@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   checkAuth,
+  changePassword,
   cleanupExpiredSessions,
   deleteProfilePicture,
   deleteSession,
@@ -133,6 +134,39 @@ describe('updateDisplayName', () => {
   it('fails for an invalid session', async () => {
     const result = await updateDisplayName('bad-session', 'X');
     expect(result.success).toBe(false);
+  });
+});
+
+describe('changePassword', () => {
+  it('changes the password and allows login with the new one', async () => {
+    const registerResult = await register('password123', 'peter');
+    const sessionId = registerResult.session ?? '';
+
+    const result = await changePassword(sessionId, 'password123', 'new-password');
+    expect(result.success).toBe(true);
+
+    expect((await login('peter', 'password123')).success).toBe(false);
+    expect((await login('peter', 'new-password')).success).toBe(true);
+  });
+
+  it('rejects a wrong current password', async () => {
+    const sessionId = await registerUser('quinn');
+    const result = await changePassword(sessionId, 'wrong-current', 'new-password');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Current password is incorrect');
+  });
+
+  it('rejects an invalid session', async () => {
+    const result = await changePassword('bad-session', 'password123', 'new-password');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Invalid session');
+  });
+
+  it('rejects a new password identical to the current one', async () => {
+    const sessionId = await registerUser('rachel');
+    const result = await changePassword(sessionId, 'password123', 'password123');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('New password must be different');
   });
 });
 

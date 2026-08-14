@@ -104,6 +104,7 @@ static file serving stay open without either header.
 | GET    | `/auth/me`                     | Current user           |
 | POST   | `/auth/logout`                 | Invalidate the session |
 | PATCH  | `/auth/displayname`            | `{ "displayName" }`    |
+| PATCH  | `/auth/password`               | `{ "currentPassword", "newPassword" }` (min 8 chars) |
 | POST   | `/auth/profile-picture`        | Raw image body         |
 | DELETE | `/auth/profile-picture/delete` | Remove profile picture |
 | GET    | `/auth/sessions`               | List active sessions   |
