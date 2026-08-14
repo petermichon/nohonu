@@ -103,6 +103,9 @@ export const handlers = [
       ],
     });
   }),
+  http.get('*/custom-domains', () => {
+    return HttpResponse.json({ customDomains: [] });
+  }),
   http.get('*/sites/:domain/custom-domains/token', () => {
     return HttpResponse.json({ token: 'tok-abc' });
   }),
