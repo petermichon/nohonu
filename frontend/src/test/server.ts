@@ -9,6 +9,13 @@ export const handlers = [
     }
     return HttpResponse.json({ session: 'sess-abc', user: { username: body.username ?? 'peter' } });
   }),
+  http.post('*/auth/register', async ({ request }) => {
+    const body = (await request.json()) as { username?: string };
+    return HttpResponse.json({ session: 'sess-abc', user: { username: body.username ?? 'alice' } });
+  }),
+  http.post('*/auth/logout', () => {
+    return HttpResponse.json({ success: true });
+  }),
   http.get('*/auth/me', () => {
     return HttpResponse.json({ user: { username: 'peter', displayName: 'Peter' } });
   }),
