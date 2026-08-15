@@ -10,6 +10,7 @@ import { apiBase } from '../config.ts';
 
 interface OverviewSectionProps {
   site: Site | null;
+  username: string;
   siteLoading: boolean;
   actionLoading: boolean;
   onToggle: () => void;
@@ -22,6 +23,7 @@ interface OverviewSectionProps {
 
 export function OverviewSection({
   site,
+  username,
   siteLoading,
   actionLoading,
   onToggle,
@@ -34,8 +36,8 @@ export function OverviewSection({
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const { showToast } = useToast();
-  const { uploadCover } = useUploadCover(site?.domain ?? '');
-  const { deleteCover } = useDeleteCover(site?.domain ?? '');
+  const { uploadCover } = useUploadCover(username, site?.siteId ?? '');
+  const { deleteCover } = useDeleteCover(username, site?.siteId ?? '');
   const [uploadingCover, setUploadingCover] = useState(false);
   const [deletingCover, setDeletingCover] = useState(false);
 
@@ -81,7 +83,7 @@ export function OverviewSection({
     }
   };
 
-  const coverUrl = site?.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
+  const coverUrl = site?.coverImage ? `${apiBase}/users/${site.account}/sites/${site.siteId}/cover` : null;
   return siteLoading ? (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -106,7 +108,7 @@ export function OverviewSection({
     </div>
   ) : site ? (
     (() => {
-      const initial = site.domain[0].toUpperCase();
+      const initial = site.siteId[0].toUpperCase();
       const baseIconClasses =
         'shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-base font-semibold select-none overflow-hidden';
       const enabledIconClasses = 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
@@ -121,7 +123,7 @@ export function OverviewSection({
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 truncate">{site.domain}</h1>
+                  <h1 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 truncate">{site.siteId}</h1>
                   <span
                     className={`shrink-0 flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                       !site.enabled
@@ -149,7 +151,7 @@ export function OverviewSection({
                   >
                     {site.subdomain
                       ? `${site.subdomain}.${site.subdomainBase || host}`
-                      : `${site.domain}.${site.subdomainBase || host}`}
+                      : `${site.siteId}.${site.subdomainBase || host}`}
                     {site.enabled && <ExternalLink className="w-3 h-3" />}
                   </a>
                   {totalHits > 0 && (

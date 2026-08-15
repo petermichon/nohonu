@@ -1,17 +1,17 @@
 import { Link } from '@tanstack/react-router';
 import { Layout, BarChart3, Globe, Layers, Settings } from 'lucide-react';
-import type { Site } from '../../lib/types.ts';
+import type { Site, SitePageTab } from '../../lib/types.ts';
 import { tabClass } from '../../lib/utils.ts';
 
 interface SiteHeaderProps {
   site: Site | null;
   username: string;
-  sitename: string;
+  siteId: string;
   activeTab: SitePageTab;
   isPublicView: boolean;
 }
 
-export function SiteHeader({ site, username, sitename, activeTab, isPublicView }: SiteHeaderProps) {
+export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: SiteHeaderProps) {
   return (
     <header className="max-w-7xl mx-auto px-6 pt-12 pb-8">
       <div className="flex items-center gap-4 mb-4">
@@ -19,7 +19,7 @@ export function SiteHeader({ site, username, sitename, activeTab, isPublicView }
           <Layout className="w-8 h-8 text-zinc-600 dark:text-zinc-400" />
         </div>
         <div>
-          <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.domain}</h1>
+          <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.siteId}</h1>
           {username ? (
             <Link
               to="/u/$username"
@@ -36,32 +36,32 @@ export function SiteHeader({ site, username, sitename, activeTab, isPublicView }
 
       <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 p-1">
         <Link
-          to="/u/$username/$sitename"
-          params={{ username, sitename }}
+          to="/u/$username/$siteId"
+          params={{ username, siteId }}
           className={tabClass(activeTab === 'overview')}
         >
           <Layout className="w-4 h-4" />
           Overview
         </Link>
         <Link
-          to="/u/$username/$sitename/$section"
-          params={{ username, sitename, section: 'analytics' }}
+          to="/u/$username/$siteId/$section"
+          params={{ username, siteId, section: 'analytics' }}
           className={tabClass(activeTab === 'analytics')}
         >
           <BarChart3 className="w-4 h-4" />
           Analytics
         </Link>
         <Link
-          to="/u/$username/$sitename/$section"
-          params={{ username, sitename, section: 'domains' }}
+          to="/u/$username/$siteId/$section"
+          params={{ username, siteId, section: 'domains' }}
           className={tabClass(activeTab === 'domains')}
         >
           <Globe className="w-4 h-4" />
           Domains
         </Link>
         <Link
-          to="/u/$username/$sitename/$section"
-          params={{ username, sitename, section: 'versions' }}
+          to="/u/$username/$siteId/$section"
+          params={{ username, siteId, section: 'versions' }}
           className={tabClass(activeTab === 'versions')}
         >
           <Layers className="w-4 h-4" />
@@ -69,8 +69,8 @@ export function SiteHeader({ site, username, sitename, activeTab, isPublicView }
         </Link>
         {!isPublicView && (
           <Link
-            to="/u/$username/$sitename/$section"
-            params={{ username, sitename, section: 'settings' }}
+            to="/u/$username/$siteId/$section"
+            params={{ username, siteId, section: 'settings' }}
             className={tabClass(activeTab === 'settings')}
           >
             <Settings className="w-4 h-4" />

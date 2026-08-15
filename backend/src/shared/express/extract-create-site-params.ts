@@ -1,7 +1,7 @@
 import type { Request as ExpressReq } from 'express';
 import type { CreateSiteParams } from '../create-site-params.ts';
 import { MAX_ZIP_BYTES } from '../paths.ts';
-import { domainFrom } from './domain-from.ts';
+import { siteIdFrom } from './domain-from.ts';
 
 export function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | undefined {
   const sessionId = req.get('X-Session-Id') || '';
@@ -12,5 +12,5 @@ export function extractCreateSiteParams(req: ExpressReq): CreateSiteParams | und
   if (buffer.length > MAX_ZIP_BYTES) return;
 
   const subdomain = typeof req.query.subdomain === 'string' ? req.query.subdomain : undefined;
-  return { sessionId, domain: domainFrom(req), zipData: new Uint8Array(buffer), subdomain };
+  return { sessionId, siteId: siteIdFrom(req), zipData: new Uint8Array(buffer), subdomain };
 }

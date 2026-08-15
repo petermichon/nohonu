@@ -5,21 +5,20 @@ import { getSiteInfo } from '../../../usecases/sites/get-site-info.ts';
 
 export async function getPublicSiteInfo(req: ExpressReq, res: ExpressRes): Promise<void> {
   const username = (req.params as Record<string, string>)['username'] || '';
-  const domain = (req.params as Record<string, string>)['domain'] || '';
+  const siteId = (req.params as Record<string, string>)['siteId'] || '';
   if (!username) {
     userNotFound(res);
     return;
   }
 
-  const info = await getSiteInfo(username, domain);
+  const info = await getSiteInfo(username, siteId);
   if (!info) {
     json(res, { error: 'Site not found' }, 404);
     return;
   }
 
   json(res, {
-    domain,
-    siteId: info.siteId,
+    siteId,
     enabled: info.enabled,
     subdomain: info.subdomain,
     subdomainBase: req.headers.host || 'localhost:8080',

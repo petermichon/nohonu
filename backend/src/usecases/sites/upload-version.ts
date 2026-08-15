@@ -13,13 +13,13 @@ import * as fs from 'node:fs/promises';
 import type { Result } from '../../shared/errors.ts';
 
 
-export async function uploadVersion(sessionId: string, domain: string, zipData: Uint8Array): Promise<Result<{ index: number }>> {
+export async function uploadVersion(sessionId: string, siteId: string, zipData: Uint8Array): Promise<Result<{ index: number }>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
 
-  // Check if domain exists
-  const existingData = await readSiteMetadata(user, domain);
+  // Check if siteId exists
+  const existingData = await readSiteMetadata(user, siteId);
   if (!existingData) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
@@ -31,9 +31,9 @@ export async function uploadVersion(sessionId: string, domain: string, zipData: 
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
 
-  await fs.mkdir(versionsDir(user, domain), { recursive: true });
-  await fs.writeFile(versionPath(user, domain, index), zipData);
-  const siteRowId = await upsertSite(user, domain, data);
+  await fs.mkdir(versionsDir(user, siteId), { recursive: true });
+  await fs.writeFile(versionPath(user, siteId, index), zipData);
+  const siteRowId = await upsertSite(user, siteId, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

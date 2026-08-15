@@ -1,6 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { siteIdFrom } from '../../../shared/express/domain-from.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { deleteSiteCover } from '../../../usecases/sites/delete-site-cover.ts';
 
@@ -11,7 +11,7 @@ export async function deleteCover(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
 
-  const result = await deleteSiteCover(sessionId, domainFrom(req));
+  const result = await deleteSiteCover(sessionId, siteIdFrom(req));
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;

@@ -18,14 +18,14 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
   const { username: loggedInUsername } = useConnection();
   const { toggleStar } = useToggleStar();
   const { showToast } = useToast();
-  const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
+  const coverUrl = site.coverImage ? `${apiBase}/users/${site.account}/sites/${site.siteId}/cover` : null;
 
   const handleToggleStar = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!loggedInUsername) return;
 
     try {
-      await toggleStar(site.domain, !site.isStarred);
+      await toggleStar(site.account ?? '', site.siteId, !site.isStarred);
     } catch {
       showToast('Failed to update star');
     }
@@ -38,27 +38,27 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
         onClick={() => {
           if (site.account) {
             router.navigate({
-              to: '/u/$username/$sitename',
-              params: { username: site.account, sitename: site.domain },
+              to: '/u/$username/$siteId',
+              params: { username: site.account, siteId: site.siteId },
             });
           }
         }}
         role="link"
         tabIndex={0}
-        aria-label={site.account ? `Open ${site.displayName || site.domain}` : undefined}
+        aria-label={site.account ? `Open ${site.displayName || site.siteId}` : undefined}
         onKeyDown={(e) => {
           if (site.account && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
             router.navigate({
-              to: '/u/$username/$sitename',
-              params: { username: site.account, sitename: site.domain },
+              to: '/u/$username/$siteId',
+              params: { username: site.account, siteId: site.siteId },
             });
           }
         }}
         className={`rounded-xl overflow-hidden relative group ${!site.enabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
       >
         {coverUrl ? (
-          <img src={coverUrl} alt={site.domain} className="w-full aspect-4/3 object-cover" />
+          <img src={coverUrl} alt={site.siteId} className="w-full aspect-4/3 object-cover" />
         ) : (
           <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
             <Globe className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />
@@ -66,7 +66,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
         )}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-end justify-between p-4">
           <span className="text-zinc-950 dark:text-zinc-100 text-sm font-medium truncate">
-            {site.displayName || site.domain}
+            {site.displayName || site.siteId}
           </span>
           <div className="flex items-center gap-2">
             {site.enabled && (

@@ -32,7 +32,6 @@ model Session {
 model Site {
   id          String  @id @default(uuid())
   siteId      String
-  domain      String
   userUsername String
   nextIndex   Int     @default(1)
   currentIndex Int?
@@ -53,7 +52,7 @@ model Site {
   starredBy     StarredBy[]
   analytics     Analytics?
 
-  @@unique([userUsername, domain])
+  @@unique([userUsername, siteId])
 }
 
 model Analytics {

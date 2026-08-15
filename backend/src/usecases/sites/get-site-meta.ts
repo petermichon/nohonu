@@ -5,11 +5,11 @@ import { requireSession } from '../../core/auth/require-session.ts';
 import type { Result } from '../../shared/errors.ts';
 
 
-export async function getSiteMeta(sessionId: string, domain: string): Promise<Result<{ subdomain?: string } | null>> {
+export async function getSiteMeta(sessionId: string, siteId: string): Promise<Result<{ subdomain?: string } | null>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) {
     return { ok: true, value: null };
   }

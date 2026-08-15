@@ -1,1 +1,1 @@
-export const MAX_VISITORS_PER_DOMAIN = 500;
+export const MAX_VISITORS_PER_SITE = 500;

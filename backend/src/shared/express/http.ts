@@ -1,5 +1,5 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
-import { VALID_DOMAIN } from '../paths.ts';
+import { VALID_SITE_ID } from '../paths.ts';
 
 export function json(res: ExpressRes, data: unknown, status = 200): void {
   res.status(status).json(data);
@@ -14,7 +14,7 @@ export function p(req: ExpressReq, name: string): string {
 }
 
 export function validateDomain(domain: unknown): domain is string {
-  return typeof domain === 'string' && VALID_DOMAIN.test(domain);
+  return typeof domain === 'string' && VALID_SITE_ID.test(domain);
 }
 
 function headerValue(val: string | string[] | undefined): string | undefined {

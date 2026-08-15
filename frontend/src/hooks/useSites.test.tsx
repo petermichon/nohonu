@@ -10,7 +10,7 @@ afterEach(() => {
 
 const SITE: Site = {
   siteId: '1',
-  domain: 'example.com',
+
   enabled: true,
   hits: 0,
   uptime: null,

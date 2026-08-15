@@ -1,1 +1,1 @@
-export type GithubParams = { sessionId: string; domain: string; repo: string; ref: string };
+export type GithubParams = { sessionId: string; siteId: string; repo: string; ref: string };

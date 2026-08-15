@@ -58,38 +58,33 @@ export const handlers = [
   }),
   http.get('*/check-domain', ({ request }) => {
     const url = new URL(request.url);
-    const domain = url.searchParams.get('domain');
-    if (domain === 'taken') {
-      return HttpResponse.json({ domain, taken: true });
+    const siteId = url.searchParams.get('siteId');
+    if (siteId === 'taken') {
+      return HttpResponse.json({ siteId, taken: true });
     }
     return new HttpResponse(null, { status: 404 });
   }),
-  http.patch('*/sites/meta', async ({ request }) => {
+  http.patch('*/users/:username/sites/:siteId/meta', async ({ request }) => {
     await request.json();
     return HttpResponse.json({ success: true });
   }),
-  http.patch('*/sites/:domain/meta', async ({ request }) => {
-    await request.json();
+  http.post('*/users/:username/sites/:siteId', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.post('*/sites/:domain', () => {
+  http.post('*/users/:username/sites/:siteId/github', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.post('*/sites/:domain/github', () => {
-    return HttpResponse.json({ success: true });
-  }),
-  http.get('*/sites/:domain/repos', () => {
+  http.get('*/users/:username/sites/:siteId/repos', () => {
     return HttpResponse.json({
-      repos: [{ repo: 'peter/my-site', branch: 'main', lastUsed: 1720000000000 }],
+      history: [{ repo: 'peter/my-site', branch: 'main', lastUsed: 1720000000000 }],
     });
   }),
-  http.patch('*/sites/:domain/star', () => {
+  http.patch('*/users/:username/sites/:siteId/star', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.get('*/sites/:domain', () => {
+  http.get('*/users/:username/sites/:siteId', () => {
     return HttpResponse.json({
-      siteId: 'site-1',
-      domain: 'my-site',
+      siteId: 'my-site',
       displayName: 'My Site',
       enabled: true,
       hits: 100,
@@ -97,16 +92,16 @@ export const handlers = [
       account: 'peter',
     });
   }),
-  http.get('*/sites/:domain/stats', () => {
+  http.get('*/users/:username/sites/:siteId/stats', () => {
     return HttpResponse.json({ slots: [] });
   }),
-  http.get('*/sites/:domain/visitors', () => {
+  http.get('*/users/:username/sites/:siteId/visitors', () => {
     return HttpResponse.json({ visitors: [] });
   }),
-  http.get('*/sites/:domain/uptime', () => {
+  http.get('*/users/:username/sites/:siteId/uptime', () => {
     return HttpResponse.json({ slots: [] });
   }),
-  http.get('*/sites/:domain/versions', () => {
+  http.get('*/users/:username/sites/:siteId/versions', () => {
     return HttpResponse.json({
       versions: [
         { index: 1, size: 2048, source: { type: 'upload' }, createdAt: 1720000000000 },
@@ -117,17 +112,6 @@ export const handlers = [
   http.get('*/users/:username', () => {
     return HttpResponse.json({ user: { username: 'peter', displayName: 'Peter' } });
   }),
-  http.get('*/users/:username/:domain', () => {
-    return HttpResponse.json({
-      siteId: 'site-1',
-      domain: 'my-site',
-      displayName: 'My Site',
-      enabled: true,
-      hits: 100,
-      uptime: 99.5,
-      account: 'peter',
-    });
-  }),
   http.get('*/users/:username/sites', () => {
     return HttpResponse.json({ sites: [] });
   }),
@@ -137,13 +121,13 @@ export const handlers = [
   http.get('*/explore/sites', () => {
     return HttpResponse.json({ sites: [] });
   }),
-  http.post('*/sites/:domain/versions', () => {
+  http.post('*/users/:username/sites/:siteId/versions', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.post('*/sites/:domain/versions/github', () => {
+  http.post('*/users/:username/sites/:siteId/versions/github', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.get('*/sites/:domain/custom-domains', () => {
+  http.get('*/users/:username/sites/:siteId/custom-domains', () => {
     return HttpResponse.json({
       customDomains: [
         { domain: 'example.com', verified: true },
@@ -154,16 +138,16 @@ export const handlers = [
   http.get('*/custom-domains', () => {
     return HttpResponse.json({ customDomains: [] });
   }),
-  http.get('*/sites/:domain/custom-domains/token', () => {
+  http.get('*/users/:username/sites/:siteId/custom-domains/token', () => {
     return HttpResponse.json({ token: 'tok-abc' });
   }),
-  http.post('*/sites/:domain/custom-domains', () => {
+  http.post('*/users/:username/sites/:siteId/custom-domains', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.post('*/sites/:domain/custom-domains/:customDomain/verify', () => {
+  http.post('*/users/:username/sites/:siteId/custom-domains/:customDomain/verify', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.delete('*/sites/:domain/custom-domains/:customDomain', () => {
+  http.delete('*/users/:username/sites/:siteId/custom-domains/:customDomain', () => {
     return HttpResponse.json({ success: true });
   }),
   http.get('*/auth', ({ request }) => {

@@ -25,7 +25,7 @@ describe('Site page', () => {
     const { server } = await import('../test/server.ts');
     const { http, HttpResponse } = await import('msw');
     server.use(
-      http.get('*/users/peter/my-site', () => {
+      http.get('*/users/peter/sites/my-site', () => {
         return new HttpResponse(null, { status: 404 });
       })
     );

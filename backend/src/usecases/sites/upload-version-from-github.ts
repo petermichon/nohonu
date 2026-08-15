@@ -17,7 +17,7 @@ import type { Result } from '../../shared/errors.ts';
 
 export async function uploadVersionFromGithub(
   sessionId: string,
-  domain: string,
+  siteId: string,
   repo: string,
   ref: string,
 ): Promise<Result<{ index: number; repo: string; branch: string }>> {
@@ -25,8 +25,8 @@ export async function uploadVersionFromGithub(
   if (!auth.ok) return auth;
   const user = auth.value;
 
-  // Check if domain exists
-  const existingData = await readSiteMetadata(user, domain);
+  // Check if siteId exists
+  const existingData = await readSiteMetadata(user, siteId);
   if (!existingData) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
@@ -67,9 +67,9 @@ export async function uploadVersionFromGithub(
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
 
-  await fs.mkdir(versionsDir(user, domain), { recursive: true });
-  await fs.writeFile(versionPath(user, domain, index), zipData);
-  const siteRowId = await upsertSite(user, domain, data);
+  await fs.mkdir(versionsDir(user, siteId), { recursive: true });
+  await fs.writeFile(versionPath(user, siteId, index), zipData);
+  const siteRowId = await upsertSite(user, siteId, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

@@ -1,35 +1,37 @@
 import { SLOT_MS } from '../../config.ts';
 import { hits } from '../../memory/hits.ts';
 import { visitors } from '../../memory/visitors.ts';
-import { MAX_VISITORS_PER_DOMAIN } from '../../shared/max-visitors-per-domain.ts';
+import { MAX_VISITORS_PER_SITE } from '../../shared/max-visitors-per-domain.ts';
 import { oldestVisitorKey } from '../../shared/oldest-visitor-key.ts';
+import { siteKey } from '../../shared/site-key.ts';
 import { STATS_SLOTS } from '../../shared/stats-slots.ts';
 
-export function recordHit(domain: string, ip: string): void {
+export function recordHit(user: string, siteId: string, ip: string): void {
+  const key = siteKey(user, siteId);
   const slot = Math.floor(Date.now() / SLOT_MS);
-  const domainHits = hits.get(domain) ?? new Map();
-  hits.set(domain, domainHits);
-  const prevHits = domainHits.get(slot) ?? 0;
-  domainHits.set(slot, prevHits + 1);
+  const siteHits = hits.get(key) ?? new Map();
+  hits.set(key, siteHits);
+  const prevHits = siteHits.get(slot) ?? 0;
+  siteHits.set(slot, prevHits + 1);
   const cutoff = slot - STATS_SLOTS;
-  for (const k of domainHits.keys()) {
+  for (const k of siteHits.keys()) {
     if (k < cutoff) {
-      domainHits.delete(k);
+      siteHits.delete(k);
     }
   }
 
-  const domainVisitors = visitors.get(domain) ?? new Map();
-  visitors.set(domain, domainVisitors);
-  const existing = domainVisitors.get(ip);
+  const siteVisitors = visitors.get(key) ?? new Map();
+  visitors.set(key, siteVisitors);
+  const existing = siteVisitors.get(ip);
   const prevCount = existing?.count ?? 0;
-  domainVisitors.set(ip, {
+  siteVisitors.set(ip, {
     count: prevCount + 1,
     last: Date.now(),
   });
-  if (domainVisitors.size > MAX_VISITORS_PER_DOMAIN) {
-    const oldestIp = oldestVisitorKey(domainVisitors);
+  if (siteVisitors.size > MAX_VISITORS_PER_SITE) {
+    const oldestIp = oldestVisitorKey(siteVisitors);
     if (oldestIp) {
-      domainVisitors.delete(oldestIp);
+      siteVisitors.delete(oldestIp);
     }
   }
 }

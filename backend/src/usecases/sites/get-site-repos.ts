@@ -8,12 +8,12 @@ import type { RepoHistoryEntry } from '../../shared/repo-history-entry.ts';
 
 export async function getSiteRepos(
   sessionId: string,
-  domain: string,
+  siteId: string,
 ): Promise<Result<{ history: RepoHistoryEntry[] } | null>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) return { ok: true, value: null };
   const history = data.repoHistory.map(({ repo, branch, lastUsed }) => ({ repo, branch, lastUsed }));
   return { ok: true, value: { history } };

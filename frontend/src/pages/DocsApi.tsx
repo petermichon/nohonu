@@ -60,18 +60,18 @@ export default function DocsApi() {
         <Endpoints
           rows={[
             { method: 'GET', path: '/sites', desc: 'List all sites for the authenticated user' },
-            { method: 'GET', path: '/sites/:domain', desc: 'Get site info and status' },
-            { method: 'POST', path: '/sites/:domain', desc: 'Create a site from a zip upload' },
-            { method: 'POST', path: '/sites/:domain/github', desc: 'Create a site from a GitHub repo' },
-            { method: 'DELETE', path: '/sites/:domain', desc: 'Delete a site' },
-            { method: 'PATCH', path: '/sites/:domain/toggle', desc: 'Enable or disable a site' },
-            { method: 'PATCH', path: '/sites/:domain/star', desc: 'Star or unstar a site' },
-            { method: 'PATCH', path: '/sites/:domain/meta', desc: 'Update site metadata' },
-            { method: 'GET', path: '/sites/:domain/download', desc: 'Download the active version as zip' },
-            { method: 'GET', path: '/sites/:domain/icon', desc: 'Get site icon' },
-            { method: 'GET', path: '/sites/:domain/cover', desc: 'Get site cover image' },
-            { method: 'POST', path: '/sites/:domain/cover', desc: 'Upload a cover image' },
-            { method: 'DELETE', path: '/sites/:domain/cover', desc: 'Remove cover image' },
+            { method: 'GET', path: '/users/:username/sites/:siteId', desc: 'Get site info and status' },
+            { method: 'POST', path: '/users/:username/sites/:siteId', desc: 'Create a site from a zip upload' },
+            { method: 'POST', path: '/users/:username/sites/:siteId/github', desc: 'Create a site from a GitHub repo' },
+            { method: 'DELETE', path: '/users/:username/sites/:siteId', desc: 'Delete a site' },
+            { method: 'PATCH', path: '/users/:username/sites/:siteId/toggle', desc: 'Enable or disable a site' },
+            { method: 'PATCH', path: '/users/:username/sites/:siteId/star', desc: 'Star or unstar a site' },
+            { method: 'PATCH', path: '/users/:username/sites/:siteId/meta', desc: 'Update site metadata' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/download', desc: 'Download the active version as zip' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/icon', desc: 'Get site icon' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/cover', desc: 'Get site cover image' },
+            { method: 'POST', path: '/users/:username/sites/:siteId/cover', desc: 'Upload a cover image' },
+            { method: 'DELETE', path: '/users/:username/sites/:siteId/cover', desc: 'Remove cover image' },
           ]}
         />
       </section>
@@ -80,9 +80,9 @@ export default function DocsApi() {
         <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-100">Analytics</h2>
         <Endpoints
           rows={[
-            { method: 'GET', path: '/sites/:domain/stats', desc: 'Request counts and bandwidth' },
-            { method: 'GET', path: '/sites/:domain/visitors', desc: 'Unique visitor data' },
-            { method: 'GET', path: '/sites/:domain/uptime', desc: 'Uptime monitoring data' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/stats', desc: 'Request counts and bandwidth' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/visitors', desc: 'Unique visitor data' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/uptime', desc: 'Uptime monitoring data' },
           ]}
         />
       </section>
@@ -91,16 +91,16 @@ export default function DocsApi() {
         <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-100">Versions</h2>
         <Endpoints
           rows={[
-            { method: 'GET', path: '/sites/:domain/versions', desc: 'List all versions' },
-            { method: 'POST', path: '/sites/:domain/versions', desc: 'Upload a new version' },
-            { method: 'POST', path: '/sites/:domain/versions/:ts/activate', desc: 'Activate a specific version' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/versions', desc: 'List all versions' },
+            { method: 'POST', path: '/users/:username/sites/:siteId/versions', desc: 'Upload a new version' },
+            { method: 'POST', path: '/users/:username/sites/:siteId/versions/:ts/activate', desc: 'Activate a specific version' },
             {
               method: 'POST',
-              path: '/sites/:domain/versions/:ts/github',
+              path: '/users/:username/sites/:siteId/versions/:ts/github',
               desc: 'Fetch from GitHub and create version',
             },
-            { method: 'GET', path: '/sites/:domain/versions/download', desc: 'Download a specific version as zip' },
-            { method: 'DELETE', path: '/sites/:domain/versions/:ts', desc: 'Delete a version' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/versions/download', desc: 'Download a specific version as zip' },
+            { method: 'DELETE', path: '/users/:username/sites/:siteId/versions/:ts', desc: 'Delete a version' },
           ]}
         />
       </section>
@@ -110,10 +110,10 @@ export default function DocsApi() {
         <Endpoints
           rows={[
             { method: 'GET', path: '/custom-domains', desc: 'List all custom domains across sites' },
-            { method: 'GET', path: '/sites/:domain/custom-domains', desc: 'List domains for a site' },
-            { method: 'POST', path: '/sites/:domain/custom-domains', desc: 'Add a custom domain' },
-            { method: 'POST', path: '/sites/:domain/custom-domains/:domain/verify', desc: 'Verify DNS ownership' },
-            { method: 'DELETE', path: '/sites/:domain/custom-domains/:domain', desc: 'Remove a custom domain' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/custom-domains', desc: 'List domains for a site' },
+            { method: 'POST', path: '/users/:username/sites/:siteId/custom-domains', desc: 'Add a custom domain' },
+            { method: 'POST', path: '/users/:username/sites/:siteId/custom-domains/:domain/verify', desc: 'Verify DNS ownership' },
+            { method: 'DELETE', path: '/users/:username/sites/:siteId/custom-domains/:domain', desc: 'Remove a custom domain' },
             { method: 'GET', path: '/check-domain', desc: 'Check if a subdomain is available' },
             { method: 'GET', path: '/check-custom-domain', desc: 'Check if a custom domain is available' },
           ]}

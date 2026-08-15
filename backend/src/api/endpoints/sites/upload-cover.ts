@@ -11,7 +11,7 @@ export async function uploadCover(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
 
-  const result = await uploadSiteCover(params.sessionId, params.domain, params.data);
+  const result = await uploadSiteCover(params.sessionId, params.siteId, params.data);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;

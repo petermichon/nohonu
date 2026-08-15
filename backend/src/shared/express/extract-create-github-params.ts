@@ -1,7 +1,7 @@
 import type { Request as ExpressReq } from 'express';
 import type { CreateGithubParams } from '../create-github-params.ts';
 import { validateRepo } from '../validate-repo.ts';
-import { domainFrom } from './domain-from.ts';
+import { siteIdFrom } from './domain-from.ts';
 import { parseJson } from './http.ts';
 
 export async function extractCreateGithubParams(req: ExpressReq): Promise<CreateGithubParams | undefined> {
@@ -14,7 +14,7 @@ export async function extractCreateGithubParams(req: ExpressReq): Promise<Create
   const subdomain = typeof body.subdomain === 'string' ? body.subdomain : undefined;
   return {
     sessionId,
-    domain: domainFrom(req),
+    siteId: siteIdFrom(req),
     repo: body.repo,
     ref: typeof body.branch === 'string' && body.branch.length > 0 ? body.branch : 'main',
     subdomain,

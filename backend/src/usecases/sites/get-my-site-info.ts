@@ -8,12 +8,12 @@ import type { Result } from '../../shared/errors.ts';
 
 export async function getMySiteInfo(
   sessionId: string,
-  domain: string,
+  siteId: string,
 ): Promise<Result<Awaited<ReturnType<typeof toSiteInfo>>>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const site = await siteTable.findUnique({
-    where: { userUsername_domain: { userUsername: auth.value, domain } },
+    where: { userUsername_siteId: { userUsername: auth.value, siteId } },
     select: SITE_INFO_SELECT,
   });
   return { ok: true, value: toSiteInfo(site) };

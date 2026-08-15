@@ -1,12 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { useApiFetch } from './useApiFetch.ts';
 
-export function useUploadVersion(domain: string) {
+export function useUploadVersion(username: string, siteId: string) {
   const { apiFetch } = useApiFetch();
 
   const mutation = useMutation({
     mutationFn: async ({ file }: { file: File }) => {
-      const res = await apiFetch(`/sites/${domain}/versions`, {
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/versions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/zip' },
         body: file,

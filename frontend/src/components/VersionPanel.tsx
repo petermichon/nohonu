@@ -9,7 +9,8 @@ import type { Version } from '../lib/types.ts';
 import { Button } from './Button.tsx';
 
 interface VersionPanelProps {
-  domain: string;
+  username: string;
+  siteId: string;
   versions: Version[];
   versionsLoading: boolean;
   currentVersion: number | null;
@@ -24,7 +25,8 @@ interface VersionPanelProps {
 }
 
 export function VersionPanel({
-  domain,
+  username,
+  siteId,
   versions,
   versionsLoading,
   currentVersion,
@@ -37,9 +39,9 @@ export function VersionPanel({
   onToast,
   isReadOnly = false,
 }: VersionPanelProps) {
-  const { history: repoHistory, refetch: refetchRepoHistory } = useRepoHistory(domain);
-  const { uploadVersion, isPending: uploadingVersion } = useUploadVersion(domain);
-  const { fetchGithub, isPending: fetchingGithub } = useFetchVersionGithub(domain);
+  const { history: repoHistory, refetch: refetchRepoHistory } = useRepoHistory(username, siteId);
+  const { uploadVersion, isPending: uploadingVersion } = useUploadVersion(username, siteId);
+  const { fetchGithub, isPending: fetchingGithub } = useFetchVersionGithub(username, siteId);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showGithubFetch, setShowGithubFetch] = useState(false);
   const [githubRepo, setGithubRepo] = useState('');

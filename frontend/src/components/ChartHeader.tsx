@@ -1,4 +1,5 @@
 import { RefreshCw } from 'lucide-react';
+import type { TimeRange } from '../lib/types.ts';
 
 const RANGES = [1, 30, 60, 1440] as const;
 const RANGE_LABELS: Record<number, string> = { 1: '1 min', 30: '30 min', 60: '1 hour', 1440: '1 day' };
@@ -12,8 +13,8 @@ export function ChartHeader({
   badge,
 }: {
   title: string;
-  range: number;
-  onRangeChange: (r: number) => void;
+  range: TimeRange;
+  onRangeChange: (r: TimeRange) => void;
   onReload: () => void;
   reloading: boolean;
   badge?: React.ReactNode;

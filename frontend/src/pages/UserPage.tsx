@@ -10,7 +10,8 @@ import { useMe } from '../hooks/api/useMe.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { useConnection } from '../hooks/useConnection.ts';
 import { useToast } from '../providers/ToastContext.tsx';
-import { UserHeader, type UserPageTab } from '../components/profile/UserHeader.tsx';
+import type { UserPageTab } from '../lib/types.ts';
+import { UserHeader } from '../components/profile/UserHeader.tsx';
 import { RecentSitesSection } from '../components/profile/RecentSitesSection.tsx';
 import { StarsSection } from '../components/profile/StarsSection.tsx';
 import { SitesSection } from '../components/profile/SitesSection.tsx';
@@ -34,9 +35,9 @@ export default function UserPage() {
   const { user: publicUser } = useUser(isOwnProfile ? undefined : username);
   const { stars: userStars, loading: starsLoading } = useUserStars(username);
 
-  const handleToggleStar = async (domain: string, isStarred: boolean) => {
+  const handleToggleStar = async (siteId: string, isStarred: boolean) => {
     try {
-      await toggleStar(domain, isStarred);
+      await toggleStar(username, siteId, isStarred);
     } catch {
       showToast('Failed to update star');
     }
@@ -159,6 +160,7 @@ export default function UserPage() {
 
         {activeTab === 'domains' && !domainsLoading && (
           <DomainsSection
+            username={username}
             domains={domains}
             isOwnProfile={isOwnProfile}
             domainsLoading={domainsLoading}

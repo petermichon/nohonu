@@ -11,10 +11,10 @@ export async function toggleStar(req: ExpressReq, res: ExpressRes): Promise<void
     return;
   }
 
-  const result = await toggleStarUsecase(params.sessionId, params.domain, params.starred);
+  const result = await toggleStarUsecase(params.sessionId, params.siteOwnerUsername, params.siteId, params.starred);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { domain: params.domain, starred: result.value.starred, starCount: result.value.starCount });
+  json(res, { siteId: params.siteId, starred: result.value.starred, starCount: result.value.starCount });
 }

@@ -23,10 +23,10 @@ export async function addCustomDomain(req: ExpressReq, res: ExpressRes): Promise
     return;
   }
 
-  const result = await addCustomDomainUsecase(sessionId, p(req, 'domain') || '', customDomain);
+  const result = await addCustomDomainUsecase(sessionId, p(req, 'siteId') || '', customDomain);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { domain: p(req, 'domain') || '', customDomain, verified: false });
+  json(res, { siteId: p(req, 'siteId') || '', customDomain, verified: false });
 }

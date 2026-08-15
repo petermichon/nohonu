@@ -10,11 +10,11 @@ export async function serveRequest(
   const resolved = await resolveDomainAndServe(host, path);
   if (!resolved) return null;
 
-  const result = await serveSiteFile(resolved.user, resolved.domain, resolved.filePath);
+  const result = await serveSiteFile(resolved.user, resolved.siteId, resolved.filePath);
   if (!result) return null;
 
   if (result.contentType === 'text/html') {
-    recordHit(resolved.domain, ip);
+    recordHit(resolved.user, resolved.siteId, ip);
   }
   return result;
 }

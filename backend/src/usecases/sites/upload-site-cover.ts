@@ -13,19 +13,19 @@ import * as fs from 'node:fs/promises';
 import type { Result } from '../../shared/errors.ts';
 
 
-export async function uploadSiteCover(sessionId: string, domain: string, imageData: Uint8Array): Promise<Result<void>> {
+export async function uploadSiteCover(sessionId: string, siteId: string, imageData: Uint8Array): Promise<Result<void>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   try {
-    await fs.writeFile(coverImagePath(user, domain), imageData);
+    await fs.writeFile(coverImagePath(user, siteId), imageData);
     data.coverImage = 'cover.jpg';
-    const siteRowId = await upsertSite(user, domain, data);
+    const siteRowId = await upsertSite(user, siteId, data);
     if (!siteRowId) {
       return { ok: false, code: 'internal', message: 'Failed to save site' };
     }

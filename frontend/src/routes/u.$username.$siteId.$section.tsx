@@ -15,7 +15,7 @@ const VALID_SECTIONS = ['analytics', 'domains', 'versions', 'settings'];
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SectionNotFound() {
-  const { username, sitename } = useParams({ from: '/u/$username/$sitename/$section' });
+  const { username, siteId } = useParams({ from: '/u/$username/$siteId/$section' });
 
   return (
     <div className="text-center py-24">
@@ -24,8 +24,8 @@ function SectionNotFound() {
       </div>
       <p className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Section not found</p>
       <Link
-        to="/u/$username/$sitename"
-        params={{ username, sitename }}
+        to="/u/$username/$siteId"
+        params={{ username, siteId }}
         className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 mt-2 inline-block"
       >
         Back to overview
@@ -35,7 +35,7 @@ function SectionNotFound() {
 }
 
 function SectionPage() {
-  const { section } = useParams({ from: '/u/$username/$sitename/$section' });
+  const { section } = useParams({ from: '/u/$username/$siteId/$section' });
   const ctx = useSiteShellContext();
 
   if (section === 'analytics') {
@@ -73,11 +73,13 @@ function SectionPage() {
     return (
       <section className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
         <SubdomainSection
+          username={ctx.username}
+          siteId={ctx.siteId}
           subdomain={ctx.site?.subdomain || null}
           siteLoading={ctx.siteLoading}
           isReadOnly={ctx.isPublicView}
         />
-        <CustomDomainsSection domain={ctx.domain} isReadOnly={ctx.isPublicView} />
+        <CustomDomainsSection username={ctx.username} siteId={ctx.siteId} isReadOnly={ctx.isPublicView} />
       </section>
     );
   }
@@ -89,7 +91,8 @@ function SectionPage() {
           {SECTION_MAP['versions'].label}
         </h2>
         <VersionPanel
-          domain={ctx.site?.domain ?? ''}
+          username={ctx.username}
+          siteId={ctx.siteId}
           versions={ctx.versions}
           versionsLoading={ctx.versionsLoading}
           currentVersion={ctx.currentVersion}
@@ -109,7 +112,7 @@ function SectionPage() {
   if (section === 'settings' && !ctx.isPublicView) {
     return (
       <section className="max-w-7xl mx-auto px-6 py-8">
-        <SiteProfileSection site={ctx.site} siteLoading={ctx.siteLoading} />
+        <SiteProfileSection username={ctx.username} site={ctx.site} siteLoading={ctx.siteLoading} />
         <div className="border-t border-zinc-200 dark:border-zinc-800 my-8" />
         <DangerZoneSection
           site={ctx.site}
@@ -123,7 +126,7 @@ function SectionPage() {
   return null;
 }
 
-export const Route = createFileRoute('/u/$username/$sitename/$section')({
+export const Route = createFileRoute('/u/$username/$siteId/$section')({
   beforeLoad: ({ params }) => {
     if (!VALID_SECTIONS.includes(params.section)) {
       throw notFound();

@@ -17,10 +17,10 @@ export async function deleteCustomDomain(req: ExpressReq, res: ExpressRes): Prom
     return;
   }
 
-  const result = await removeCustomDomain(sessionId, p(req, 'domain') || '', customDomain);
+  const result = await removeCustomDomain(sessionId, p(req, 'siteId') || '', customDomain);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { domain: p(req, 'domain') || '', customDomain });
+  json(res, { siteId: p(req, 'siteId') || '', customDomain });
 }

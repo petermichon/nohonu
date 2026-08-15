@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApiFetch } from './useApiFetch.ts';
 
-export function useCheckDomain(domain: string, username: string) {
+export function useCheckSiteId(siteId: string, username: string) {
   const { apiFetch } = useApiFetch();
 
   const query = useQuery({
-    queryKey: ['check-domain', domain, username],
+    queryKey: ['check-site-id', siteId, username],
     queryFn: async () => {
       const res = await apiFetch(
-        `/check-domain?domain=${encodeURIComponent(domain)}&user=${encodeURIComponent(username)}`
+        `/check-domain?siteId=${encodeURIComponent(siteId)}&user=${encodeURIComponent(username)}`
       );
-      return { domain, taken: res.ok };
+      return { siteId, taken: res.ok };
     },
-    enabled: !!domain,
+    enabled: !!siteId,
   });
 
   return {

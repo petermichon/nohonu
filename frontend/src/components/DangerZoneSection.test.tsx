@@ -6,8 +6,8 @@ import { DangerZoneSection } from './DangerZoneSection.tsx';
 import type { Site } from '../lib/types.ts';
 
 const site: Site = {
-  siteId: 'site-1',
-  domain: 'my-site',
+  siteId: 'my-site',
+
   enabled: false,
   hits: 0,
   uptime: null,

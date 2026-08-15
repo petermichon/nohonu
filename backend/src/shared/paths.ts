@@ -1,6 +1,6 @@
 import { SITES_DIR } from '../config.ts';
 
-export const VALID_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+export const VALID_SITE_ID = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 export const VALID_CUSTOM_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;
 export const MAX_CUSTOM_DOMAIN_LENGTH = 253;
 
@@ -34,31 +34,31 @@ export type SiteData = {
 
 export const MAX_ZIP_BYTES = 52_428_800; // 50 MB
 
-// Path helpers for user-based structure: /data/{user}/{domain}/
-// Note: domain is used for directory structure, siteId is the stable identifier
-export function domainDir(user: string, domain: string): string {
-  return `${SITES_DIR}/${user}/${domain}`;
+// Path helpers for user-based structure: /data/{user}/{siteId}/
+// Note: siteId is the stable identifier and directory name; domain is not identity
+export function siteDir(user: string, siteId: string): string {
+  return `${SITES_DIR}/${user}/${siteId}`;
 }
 
-export function coverImagePath(user: string, domain: string): string {
-  return `${domainDir(user, domain)}/cover.jpg`;
+export function coverImagePath(user: string, siteId: string): string {
+  return `${siteDir(user, siteId)}/cover.jpg`;
 }
 
-export function versionsDir(user: string, domain: string): string {
-  return `${domainDir(user, domain)}/versions`;
+export function versionsDir(user: string, siteId: string): string {
+  return `${siteDir(user, siteId)}/versions`;
 }
 
-export function versionPath(user: string, domain: string, index: number): string {
-  return `${versionsDir(user, domain)}/${index}.zip`;
+export function versionPath(user: string, siteId: string, index: number): string {
+  return `${versionsDir(user, siteId)}/${index}.zip`;
 }
 
-export function extractedDir(user: string, domain: string): string {
-  return `${domainDir(user, domain)}/extracted`;
+export function extractedDir(user: string, siteId: string): string {
+  return `${siteDir(user, siteId)}/extracted`;
 }
 
-export function extractedFilePath(user: string, domain: string, filePath: string): string {
+export function extractedFilePath(user: string, siteId: string, filePath: string): string {
   const cleanPath = filePath.replace(/^\/+/, '');
-  const dir = extractedDir(user, domain);
+  const dir = extractedDir(user, siteId);
   return `${dir}/${cleanPath}`.replace(/\/+/g, '/');
 }
 

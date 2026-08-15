@@ -13,55 +13,55 @@ import { readZip } from '../../shared/zip.ts';
 
 export async function serveSiteFile(
   user: string,
-  domain: string,
+  siteId: string,
   filePath: string,
 ): Promise<{ data: Uint8Array; contentType: string } | null> {
-  const record = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
+  const record = await site.findUnique({ where: siteWhere(user, siteId), include: SITE_INCLUDE });
   const siteData = record ? toSiteData(record) : undefined;
   if (!siteData) return null;
 
   const extractedReady = siteData.extracted
-    && await fileExists(extractedDir(user, domain))
-    && await fileExists(extractedFilePath(user, domain, 'index.html'));
+    && await fileExists(extractedDir(user, siteId))
+    && await fileExists(extractedFilePath(user, siteId, 'index.html'));
   if (!extractedReady) {
     if (siteData.extracted) {
-      await site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
+      await site.updateMany({ where: { AND: { userUsername: user, siteId } }, data: { extracted: false } });
     }
     if (!siteData.enabled || siteData.currentIndex === null) return null;
 
     try {
-      const zipData = await fs.readFile(versionPath(user, domain, siteData.currentIndex));
+      const zipData = await fs.readFile(versionPath(user, siteId, siteData.currentIndex));
       if (!zipData) return null;
       const files = await readZip(zipData);
       const stripped = stripCommonRoot(files);
       if (stripped === null) return null;
-      await fs.mkdir(extractedDir(user, domain), { recursive: true });
+      await fs.mkdir(extractedDir(user, siteId), { recursive: true });
       for (const [relativePath, data] of Object.entries(stripped)) {
         if (!isSafeRelativePath(relativePath)) continue;
-        const outPath = extractedFilePath(user, domain, relativePath);
+        const outPath = extractedFilePath(user, siteId, relativePath);
         const dir = outPath.substring(0, outPath.lastIndexOf('/'));
         await fs.mkdir(dir, { recursive: true });
         await fs.writeFile(outPath, data);
       }
-      const extractionRecord = await site.findUnique({ where: siteWhere(user, domain), include: SITE_INCLUDE });
+      const extractionRecord = await site.findUnique({ where: siteWhere(user, siteId), include: SITE_INCLUDE });
       const extractionData = extractionRecord ? toSiteData(extractionRecord) : undefined;
       if (extractionData) {
         extractionData.extracted = true;
-        await site.upsert(toSiteUpsert(user, domain, extractionData));
+        await site.upsert(toSiteUpsert(user, siteId, extractionData));
       }
     } catch {
       try {
-        await fs.rm(extractedDir(user, domain), { recursive: true, force: true });
+        await fs.rm(extractedDir(user, siteId), { recursive: true, force: true });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error(`Failed to delete extracted site for ${user}/${domain}: ${message}`);
+        console.error(`Failed to delete extracted site for ${user}/${siteId}: ${message}`);
       }
-      await site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
+      await site.updateMany({ where: { AND: { userUsername: user, siteId } }, data: { extracted: false } });
       return null;
     }
   }
 
-  const fullPath = extractedFilePath(user, domain, filePath);
+  const fullPath = extractedFilePath(user, siteId, filePath);
   let fileHandle: fs.FileHandle | undefined;
   try {
     fileHandle = await fs.open(fullPath);

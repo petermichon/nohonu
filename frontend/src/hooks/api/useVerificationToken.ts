@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApiFetch } from './useApiFetch.ts';
 
-export function useVerificationToken(domain: string) {
+export function useVerificationToken(username: string, siteId: string) {
   const { apiFetch } = useApiFetch();
 
   const query = useQuery({
-    queryKey: ['verification-token', domain],
+    queryKey: ['verification-token', siteId],
     queryFn: async () => {
-      const res = await apiFetch(`/sites/${domain}/custom-domains/token`);
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/custom-domains/token`);
       const data = await res.json();
       return data.token as string;
     },

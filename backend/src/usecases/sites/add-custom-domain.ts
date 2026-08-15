@@ -9,11 +9,11 @@ import type { Result } from '../../shared/errors.ts';
 
 
 
-export async function addCustomDomain(sessionId: string, domain: string, customDomain: string): Promise<Result<void>> {
+export async function addCustomDomain(sessionId: string, siteId: string, customDomain: string): Promise<Result<void>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
@@ -30,14 +30,13 @@ export async function addCustomDomain(sessionId: string, domain: string, customD
   }
 
   data.customDomains.push({ domain: customDomain, verified: false });
-  const siteId = await upsertSite(user, domain, data);
-  if (!siteId) {
+  const siteRowId = await upsertSite(user, siteId, data);
+  if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
-  await customDomainTable.deleteMany({ where: { siteId } });
+  await customDomainTable.deleteMany({ where: { siteId: siteRowId } });
   await customDomainTable.createMany({
-    data: data.customDomains.map((c) => ({ domain: c.domain, verified: c.verified, siteId })),
+    data: data.customDomains.map((c) => ({ domain: c.domain, verified: c.verified, siteId: siteRowId })),
   });
   return { ok: true, value: undefined };
 }
-

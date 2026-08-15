@@ -87,7 +87,7 @@ export function tabClass(active: boolean): string {
 }
 
 export function siteUrl(
-  site: { enabled: boolean; domain: string; subdomain?: string; subdomainBase?: string },
+  site: { enabled: boolean; siteId: string; subdomain?: string; subdomainBase?: string },
   protocol: string,
   hostWithPort: string
 ): string {
@@ -95,5 +95,5 @@ export function siteUrl(
   const subdomainBase = site.subdomainBase || hostWithPort;
   return site.subdomain
     ? `${protocol}//${site.subdomain}.${subdomainBase}`
-    : `${protocol}//${site.domain}.${subdomainBase}`;
+    : `${protocol}//${site.siteId}.${subdomainBase}`;
 }

@@ -11,10 +11,10 @@ export async function upload(req: ExpressReq, res: ExpressRes): Promise<void> {
     return;
   }
 
-  const result = await uploadVersion(params.sessionId, params.domain, params.zipData);
+  const result = await uploadVersion(params.sessionId, params.siteId, params.zipData);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { success: true, domain: params.domain, index: result.value.index });
+  json(res, { success: true, siteId: params.siteId, index: result.value.index });
 }

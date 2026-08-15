@@ -10,7 +10,7 @@ interface ExploreSiteCardProps {
 
 export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
   const navigate = useNavigate();
-  const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
+  const coverUrl = site.coverImage ? `${apiBase}/users/${site.account}/sites/${site.siteId}/cover` : null;
 
   const handlePreviewClick = () => {
     if (site.enabled) {
@@ -20,7 +20,7 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
 
   const handleTitleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const targetPath = site.account ? `/u/${site.account}/${site.domain}` : `/sites/${site.domain}`;
+    const targetPath = site.account ? `/u/${site.account}/sites/${site.siteId}` : `/sites/${site.siteId}`;
     navigate({ to: targetPath });
   };
 
@@ -38,7 +38,7 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
         onClick={handlePreviewClick}
         role="link"
         tabIndex={0}
-        aria-label={site.enabled ? `Open ${site.domain}` : `${site.domain} is disabled`}
+        aria-label={site.enabled ? `Open ${site.siteId}` : `${site.siteId} is disabled`}
         onKeyDown={(e) => {
           if (site.enabled && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
@@ -48,7 +48,7 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
         className={`rounded-3xl overflow-hidden relative group cursor-pointer ${!site.enabled ? 'cursor-not-allowed' : ''}`}
       >
         {coverUrl ? (
-          <img src={coverUrl} alt={site.domain} className="w-full aspect-4/3 object-cover" />
+          <img src={coverUrl} alt={site.siteId} className="w-full aspect-4/3 object-cover" />
         ) : (
           <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
             <Globe className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />
@@ -81,7 +81,7 @@ export function ExploreSiteCard({ site }: ExploreSiteCardProps) {
               onClick={handleTitleClick}
               className="font-semibold text-zinc-950 dark:text-zinc-100 mb-0.5 truncate cursor-pointer"
             >
-              {site.domain}
+              {site.siteId}
             </h3>
             <p
               onClick={handleAuthorClick}

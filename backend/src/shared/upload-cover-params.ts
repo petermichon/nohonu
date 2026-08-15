@@ -1,1 +1,1 @@
-export type UploadCoverParams = { sessionId: string; domain: string; data: Uint8Array };
+export type UploadCoverParams = { sessionId: string; siteId: string; data: Uint8Array };

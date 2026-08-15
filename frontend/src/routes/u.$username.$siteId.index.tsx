@@ -5,6 +5,7 @@ import { useSiteShellContext } from '../hooks/useSiteShellContext.ts';
 function Overview() {
   const {
     site,
+    username,
     siteLoading,
     actionLoading,
     setConfirmAction,
@@ -19,6 +20,7 @@ function Overview() {
     <section className="max-w-7xl mx-auto px-6 py-8">
       <OverviewSection
         site={site}
+        username={username}
         siteLoading={siteLoading}
         actionLoading={actionLoading}
         onToggle={() => setConfirmAction(site?.enabled ? 'disable' : 'enable')}
@@ -32,6 +34,6 @@ function Overview() {
   );
 }
 
-export const Route = createFileRoute('/u/$username/$sitename/')({
+export const Route = createFileRoute('/u/$username/$siteId/')({
   component: Overview,
 });

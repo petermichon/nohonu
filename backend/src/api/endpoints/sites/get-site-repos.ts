@@ -1,6 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { siteIdFrom } from '../../../shared/express/domain-from.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { getSiteRepos as getSiteReposUsecase } from '../../../usecases/sites/get-site-repos.ts';
 
@@ -11,7 +11,7 @@ export async function getSiteRepos(req: ExpressReq, res: ExpressRes): Promise<vo
     return;
   }
 
-  const result = await getSiteReposUsecase(sessionId, domainFrom(req));
+  const result = await getSiteReposUsecase(sessionId, siteIdFrom(req));
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -21,5 +21,5 @@ export async function getSiteRepos(req: ExpressReq, res: ExpressRes): Promise<vo
     json(res, { error: 'Site not found' }, 404);
     return;
   }
-  json(res, { domain: domainFrom(req), history: value.history });
+  json(res, { siteId: siteIdFrom(req), history: value.history });
 }

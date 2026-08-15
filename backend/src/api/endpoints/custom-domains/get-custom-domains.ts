@@ -10,7 +10,7 @@ export async function getCustomDomains(req: ExpressReq, res: ExpressRes): Promis
     return;
   }
 
-  const result = await getCustomDomainsUsecase(sessionId, p(req, 'domain') || '');
+  const result = await getCustomDomainsUsecase(sessionId, p(req, 'siteId') || '');
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;

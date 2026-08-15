@@ -5,12 +5,14 @@ import { Input } from './Input.tsx';
 import { Button } from './Button.tsx';
 
 interface SubdomainSectionProps {
+  username: string;
+  siteId: string;
   subdomain: string | null;
   siteLoading: boolean;
   isReadOnly?: boolean;
 }
 
-export function SubdomainSection({ subdomain, siteLoading, isReadOnly = false }: SubdomainSectionProps) {
+export function SubdomainSection({ username, siteId, subdomain, siteLoading, isReadOnly = false }: SubdomainSectionProps) {
   const { updateSiteConfig } = useUpdateSiteConfig();
   const { showToast } = useToast();
   const [editingSubdomain, setEditingSubdomain] = useState(subdomain || '');
@@ -22,7 +24,7 @@ export function SubdomainSection({ subdomain, siteLoading, isReadOnly = false }:
     }
     setIsSaving(true);
     try {
-      await updateSiteConfig(editingSubdomain || null);
+      await updateSiteConfig(username, siteId, editingSubdomain || null);
       showToast('Subdomain updated', true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to update subdomain', false);

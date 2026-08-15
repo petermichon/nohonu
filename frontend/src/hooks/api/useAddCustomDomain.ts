@@ -5,8 +5,8 @@ export function useAddCustomDomain() {
   const { apiFetch } = useApiFetch();
   const queryClient = useQueryClient();
 
-  const addCustomDomain = async (siteDomain: string, customDomain: string) => {
-    const res = await apiFetch(`/sites/${siteDomain}/custom-domains`, {
+  const addCustomDomain = async (username: string, siteId: string, customDomain: string) => {
+    const res = await apiFetch(`/users/${username}/sites/${siteId}/custom-domains`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ customDomain }),
@@ -15,7 +15,7 @@ export function useAddCustomDomain() {
       const data = await res.json();
       throw new Error(data.message || 'Failed to add custom domain');
     }
-    queryClient.invalidateQueries({ queryKey: ['custom-domains', siteDomain] });
+    queryClient.invalidateQueries({ queryKey: ['custom-domains', siteId] });
     queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
   };
 

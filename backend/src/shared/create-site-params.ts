@@ -1,1 +1,1 @@
-export type CreateSiteParams = { sessionId: string; domain: string; zipData: Uint8Array; subdomain?: string };
+export type CreateSiteParams = { sessionId: string; siteId: string; zipData: Uint8Array; subdomain?: string };

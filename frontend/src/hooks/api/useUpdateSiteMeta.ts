@@ -3,8 +3,8 @@ import { useApiFetch } from './useApiFetch.ts';
 export function useUpdateSiteMeta() {
   const { apiFetch } = useApiFetch();
 
-  const updateSiteMeta = async (domain: string, displayName: string) => {
-    const res = await apiFetch(`/sites/${domain}/meta`, {
+  const updateSiteMeta = async (username: string, siteId: string, displayName: string) => {
+    const res = await apiFetch(`/users/${username}/sites/${siteId}/meta`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ displayName }),

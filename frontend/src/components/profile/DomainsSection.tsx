@@ -5,17 +5,18 @@ import { useVerifyCustomDomain } from '../../hooks/api/useVerifyCustomDomain.ts'
 import { useAddCustomDomain } from '../../hooks/api/useAddCustomDomain.ts';
 import { useAccentColor } from '../../providers/AccentColorProvider.tsx';
 import { useToast } from '../../providers/ToastContext.tsx';
-import type { Domain, Site } from '../../lib/types.ts';
+import type { ProfileDomain, Site } from '../../lib/types.ts';
 import { AddDomainModal } from '../AddDomainModal.tsx';
 
 interface DomainsSectionProps {
-  domains: Domain[];
+  username: string;
+  domains: ProfileDomain[];
   isOwnProfile: boolean;
   domainsLoading: boolean;
   sites: Site[];
 }
 
-export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }: DomainsSectionProps) {
+export function DomainsSection({ username, domains, isOwnProfile, domainsLoading, sites }: DomainsSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const { verifyCustomDomain } = useVerifyCustomDomain();
@@ -26,9 +27,9 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }:
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
 
-  const handleAddCustomDomain = async (siteDomain: string, customDomain: string) => {
+  const handleAddCustomDomain = async (siteId: string, customDomain: string) => {
     try {
-      await addCustomDomain(siteDomain, customDomain);
+      await addCustomDomain(username, siteId, customDomain);
       showToast('Custom domain added', true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to add custom domain', false);
@@ -36,10 +37,10 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }:
     }
   };
 
-  const handleVerifyCustomDomain = async (siteDomain: string, customDomain: string) => {
+  const handleVerifyCustomDomain = async (siteId: string, customDomain: string) => {
     setVerifyingDomain(customDomain);
     try {
-      await verifyCustomDomain(siteDomain, customDomain);
+      await verifyCustomDomain(username, siteId, customDomain);
       showToast('Custom domain verified', true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Verification failed', false);
@@ -48,10 +49,10 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }:
     }
   };
 
-  const handleDeleteCustomDomain = async (siteDomain: string, customDomain: string) => {
+  const handleDeleteCustomDomain = async (siteId: string, customDomain: string) => {
     setDeletingDomain(customDomain);
     try {
-      await deleteCustomDomain(siteDomain, customDomain);
+      await deleteCustomDomain(username, siteId, customDomain);
       showToast('Custom domain removed', true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to remove custom domain', false);
@@ -129,7 +130,7 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }:
                     <h3 className="font-medium text-zinc-950 dark:text-zinc-100 mb-0.5 truncate text-sm">
                       {cd.customDomain}
                     </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{cd.siteDomain}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{cd.siteId}</p>
                   </div>
                 </div>
                 <span
@@ -146,7 +147,7 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }:
                 {!cd.verified && (
                   <button
                     type="button"
-                    onClick={() => handleVerifyCustomDomain(cd.siteDomain, cd.customDomain)}
+                    onClick={() => handleVerifyCustomDomain(cd.siteId, cd.customDomain)}
                     disabled={verifyingDomain === cd.customDomain}
                     className={verifyButtonClass}
                   >
@@ -156,7 +157,7 @@ export function DomainsSection({ domains, isOwnProfile, domainsLoading, sites }:
                 )}
                 <button
                   type="button"
-                  onClick={() => handleDeleteCustomDomain(cd.siteDomain, cd.customDomain)}
+                  onClick={() => handleDeleteCustomDomain(cd.siteId, cd.customDomain)}
                   disabled={deletingDomain === cd.customDomain}
                   className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
                   title="Remove domain"

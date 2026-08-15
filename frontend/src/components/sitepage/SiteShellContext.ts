@@ -1,4 +1,4 @@
 import { createContext } from 'react';
-import type { SiteShellContext } from '../../hooks/useSiteShell.ts';
+import type { SiteShellContext as SiteShellContextValue } from '../../hooks/useSiteShell.ts';
 
-export const SiteShellContext = createContext<SiteShellContext | undefined>(undefined);
+export const SiteShellContext = createContext<SiteShellContextValue | undefined>(undefined);

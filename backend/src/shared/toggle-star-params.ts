@@ -1,1 +1,1 @@
-export type ToggleStarParams = { sessionId: string; domain: string; starred: boolean };
+export type ToggleStarParams = { sessionId: string; siteOwnerUsername: string; siteId: string; starred: boolean };
