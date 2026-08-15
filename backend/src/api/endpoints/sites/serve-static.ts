@@ -3,7 +3,7 @@ import { serveRequest } from '../../../usecases/sites/serve-request.ts';
 
 export async function serveStatic(req: ExpressReq, res: ExpressRes): Promise<void> {
   const host = req.get('Host') ?? '';
-  const result = await serveRequest(host, req.path, req.ip || 'unknown');
+  const result = await serveRequest(host, req.path, req.ip || 'unknown', req.get('Sec-Fetch-Mode') || undefined);
   if (!result) {
     res.status(404).end();
     return;

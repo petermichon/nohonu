@@ -328,12 +328,22 @@ describe('serving', () => {
     await sites.updateSiteMeta(sessionId, 'mysite', { subdomain: 'my-app' });
 
     const before = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
-    const served = await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4');
+    const served = await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4', 'navigate');
     expect(served).not.toBeNull();
     expect(new TextDecoder().decode(served?.data)).toBe('<h1>hi</h1>');
     const after = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
     expect(after).toBe(before + 1);
     expect(user).toBeTruthy();
+  });
+
+  it('does not record a hit for non-navigate HTML requests', async () => {
+    const sessionId = await makeSite('hugo', 'mysite');
+    await sites.updateSiteMeta(sessionId, 'mysite', { subdomain: 'my-app' });
+
+    const before = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4', 'no-cors');
+    const after = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(after).toBe(before);
   });
 
   it('returns null when the request cannot be resolved', async () => {
