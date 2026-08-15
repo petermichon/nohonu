@@ -1,6 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { siteIdFrom } from '../../../shared/express/domain-from.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { getMySiteInfo } from '../../../usecases/sites/get-my-site-info.ts';
 
@@ -10,7 +10,7 @@ export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<voi
     json(res, { error: 'Session required' }, 401);
     return;
   }
-  const result = await getMySiteInfo(sessionId, domainFrom(req));
+  const result = await getMySiteInfo(sessionId, siteIdFrom(req));
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -22,7 +22,6 @@ export async function getSiteInfo(req: ExpressReq, res: ExpressRes): Promise<voi
   }
 
   json(res, {
-    domain: domainFrom(req),
     siteId: info.siteId,
     enabled: info.enabled,
     subdomain: info.subdomain,

@@ -6,26 +6,28 @@ import { SaveField } from './SaveField.tsx';
 import { Field } from './Field.tsx';
 
 interface SiteProfileSectionProps {
+  username: string;
   site: Site | null;
   siteLoading: boolean;
 }
 
-export function SiteProfileSection({ site, siteLoading }: SiteProfileSectionProps) {
+export function SiteProfileSection({ username, site, siteLoading }: SiteProfileSectionProps) {
   const { updateSiteMeta } = useUpdateSiteMeta();
   const [editingDisplayName, setEditingDisplayName] = useState<string | null>(null);
   const [displayNameStatus, setDisplayNameStatus] = useState<'idle' | 'saved' | 'error'>('idle');
   const [isSaving, setIsSaving] = useState(false);
 
   const saveDisplayName = async () => {
-    if (!site || !editingDisplayName.trim()) {
+    if (!site || !editingDisplayName?.trim()) {
       setDisplayNameStatus('error');
       setTimeout(() => setDisplayNameStatus('idle'), 2000);
       return;
     }
     setIsSaving(true);
     try {
-      await updateSiteMeta(site.domain, editingDisplayName.trim());
-      setEditingDisplayName(editingDisplayName.trim());
+      const name = editingDisplayName.trim();
+      await updateSiteMeta(username, site.siteId, name);
+      setEditingDisplayName(name);
       setDisplayNameStatus('saved');
       setTimeout(() => setDisplayNameStatus('idle'), 2000);
     } catch {

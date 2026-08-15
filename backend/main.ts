@@ -14,11 +14,11 @@ await fs.mkdir(SITES_DIR, { recursive: true });
 
 const users = (await userTable.findMany({ select: { username: true } })).map((u) => u.username);
 for (const user of users) {
-  const domains = (await site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
-    (s) => s.domain,
+  const domains = (await site.findMany({ where: { userUsername: user }, select: { siteId: true } })).map(
+    (s) => s.siteId,
   );
-  for (const domain of domains) {
-    await loadAnalytics(user, domain);
+  for (const siteId of domains) {
+    await loadAnalytics(user, siteId);
   }
 }
 
@@ -40,11 +40,11 @@ process.on('SIGTERM', async () => {
   server.close();
   const siteUsers = (await userTable.findMany({ select: { username: true } })).map((u) => u.username);
   for (const user of siteUsers) {
-    const domains = (await site.findMany({ where: { userUsername: user }, select: { domain: true } })).map(
-      (s) => s.domain,
+    const domains = (await site.findMany({ where: { userUsername: user }, select: { siteId: true } })).map(
+      (s) => s.siteId,
     );
-    for (const domain of domains) {
-      await saveAnalytics(user, domain);
+    for (const siteId of domains) {
+      await saveAnalytics(user, siteId);
     }
   }
   process.exit(0);

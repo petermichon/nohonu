@@ -9,13 +9,13 @@ import type * as TanStackRouter from '@tanstack/react-router';
 const navigate = vi.fn();
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
-  const actual = await importOriginal<TanStackRouter>();
+  const actual = await importOriginal<typeof TanStackRouter>();
   return { ...actual, useNavigate: () => navigate };
 });
 
 const site: Site = {
-  siteId: 'site-1',
-  domain: 'my-site',
+  siteId: 'my-site',
+
   displayName: 'My Site',
   enabled: true,
   hits: 0,
@@ -38,7 +38,7 @@ describe('ExploreSiteCard', () => {
     const user = userEvent.setup();
     renderWithProviders(<ExploreSiteCard site={site} />);
     await user.click(screen.getByText('my-site'));
-    expect(navigate).toHaveBeenCalledWith({ to: '/u/peter/my-site' });
+    expect(navigate).toHaveBeenCalledWith({ to: '/u/peter/sites/my-site' });
   });
 
   it('opens the site URL in a new tab when the preview is clicked', async () => {
@@ -72,6 +72,6 @@ describe('ExploreSiteCard', () => {
     const user = userEvent.setup();
     renderWithProviders(<ExploreSiteCard site={{ ...site, account: undefined }} />);
     await user.click(screen.getByText('my-site'));
-    expect(navigate).toHaveBeenCalledWith({ to: '/sites/my-site' });
+    expect(navigate).toHaveBeenCalledWith({ to: '/u/peter/sites/my-site' });
   });
 });

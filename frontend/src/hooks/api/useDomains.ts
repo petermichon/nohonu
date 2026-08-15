@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Domain } from '../../lib/types.ts';
+import type { ProfileDomain } from '../../lib/types.ts';
 import { useApiFetch } from './useApiFetch.ts';
 
 export function useDomains() {
@@ -11,7 +11,7 @@ export function useDomains() {
     queryFn: async () => {
       const res = await apiFetch('/custom-domains');
       const data = await res.json();
-      return (data.customDomains ?? []) as Domain[];
+      return (data.customDomains ?? []) as ProfileDomain[];
     },
     retry: false,
   });

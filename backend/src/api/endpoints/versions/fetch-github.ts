@@ -11,11 +11,11 @@ export async function fetchGithub(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
 
-  const result = await uploadVersionFromGithub(params.sessionId, params.domain, params.repo, params.ref);
+  const result = await uploadVersionFromGithub(params.sessionId, params.siteId, params.repo, params.ref);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
   const value = result.value;
-  json(res, { domain: params.domain, index: value.index, repo: value.repo, branch: value.branch });
+  json(res, { siteId: params.siteId, index: value.index, repo: value.repo, branch: value.branch });
 }

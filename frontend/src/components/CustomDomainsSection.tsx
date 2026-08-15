@@ -12,13 +12,14 @@ import { host } from '../config.ts';
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 interface CustomDomainsSectionProps {
-  domain: string;
+  username: string;
+  siteId: string;
   isReadOnly?: boolean;
 }
 
-export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomainsSectionProps) {
-  const { customDomains, loading: customDomainsLoading } = useSiteCustomDomains(domain);
-  const { verificationToken } = useVerificationToken(domain);
+export function CustomDomainsSection({ username, siteId, isReadOnly = false }: CustomDomainsSectionProps) {
+  const { customDomains, loading: customDomainsLoading } = useSiteCustomDomains(username, siteId);
+  const { verificationToken } = useVerificationToken(username, siteId);
   const { addCustomDomain } = useAddCustomDomain();
   const { verifyCustomDomain } = useVerifyCustomDomain();
   const { deleteCustomDomain } = useDeleteCustomDomain();
@@ -34,7 +35,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
     if (!value) return;
     setAddingCustomDomain(true);
     try {
-      await addCustomDomain(domain, value);
+      await addCustomDomain(username, siteId, value);
       setNewCustomDomain('');
       showToast('Custom domain added', true);
     } catch (err) {
@@ -47,7 +48,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
   const handleVerifyCustomDomain = async (customDomain: string) => {
     setVerifyingDomain(customDomain);
     try {
-      await verifyCustomDomain(domain, customDomain);
+      await verifyCustomDomain(username, siteId, customDomain);
       showToast('Custom domain verified', true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Verification failed', false);
@@ -59,7 +60,7 @@ export function CustomDomainsSection({ domain, isReadOnly = false }: CustomDomai
   const handleDeleteCustomDomain = async (customDomain: string) => {
     setDeletingDomain(customDomain);
     try {
-      await deleteCustomDomain(domain, customDomain);
+      await deleteCustomDomain(username, siteId, customDomain);
       showToast('Custom domain removed', true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to remove custom domain', false);

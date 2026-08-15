@@ -87,15 +87,15 @@ static file serving stay open without either header.
 | GET    | `/auth`                            | API key status: `{ "secured": bool, "valid": bool }`             |
 | POST   | `/auth/register`                   | Create account: `{ "username", "password" }`                     |
 | POST   | `/auth/login`                      | Log in: `{ "username", "password" }`                             |
-| GET    | `/check-domain?domain=&user=`      | 200 if the user owns the domain, else 404                        |
-| GET    | `/check-subdomain?subdomain=`      | 200 if the subdomain is taken, else 404                          |
-| GET    | `/check-custom-domain?domain=`     | 200 if the custom domain is registered, else 404                 |
-| GET    | `/explore/sites`                   | Public site discovery list                                       |
-| GET    | `/users/:username`                 | Public user profile                                              |
-| GET    | `/users/:username/sites`           | A user's public sites                                            |
-| GET    | `/users/:username/stars`           | Sites starred by a user                                          |
-| GET    | `/users/:username/profile-picture` | Profile picture image                                            |
-| GET    | `/users/:username/:domain`         | Public site info                                                 |
+| GET    | `/check-domain?siteId=&user=`   | 200 if the siteId is taken for the user, else 404              |
+| GET    | `/check-subdomain?subdomain=`    | 200 if the subdomain is taken, else 404                          |
+| GET    | `/check-custom-domain?domain=`   | 200 if the custom domain is registered, else 404                 |
+| GET    | `/explore/sites`                 | Public site discovery list                                       |
+| GET    | `/users/:username`               | Public user profile                                              |
+| GET    | `/users/:username/sites`         | A user's public sites                                            |
+| GET    | `/users/:username/stars`         | Sites starred by a user                                          |
+| GET    | `/users/:username/profile-picture` | Profile picture image                                          |
+| GET    | `/users/:username/sites/:siteId` | Public site info                                                 |
 
 ### Auth (session)
 
@@ -115,33 +115,33 @@ static file serving stay open without either header.
 | Method | Path                                              | Notes                                                                                                                                          |
 | ------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/sites`                                          | Current user's sites                                                                                                                           |
-| POST   | `/sites/:domain`                                  | Create a site. Raw zip body (`Content-Type: application/zip`, optional `?subdomain=`) or JSON `{ "repo", "branch?", "subdomain?" }` for GitHub |
-| GET    | `/sites/:domain`                                  | Site info                                                                                                                                      |
-| DELETE | `/sites/:domain`                                  | Delete site and all its data                                                                                                                   |
-| PATCH  | `/sites/:domain/toggle`                           | Enable/disable                                                                                                                                 |
-| PATCH  | `/sites/:domain/star`                             | `{ "starred": bool }`                                                                                                                          |
-| PATCH  | `/sites/:domain/meta`                             | `{ "subdomain"?, "displayName"? }`                                                                                                             |
-| GET    | `/sites/:domain/download`                         | Download active version as zip                                                                                                                 |
-| GET    | `/sites/:domain/icon`                             | Favicon from the archive                                                                                                                       |
-| GET    | `/sites/:domain/cover`                            | Cover image                                                                                                                                    |
-| POST   | `/sites/:domain/cover`                            | Raw image body                                                                                                                                 |
-| DELETE | `/sites/:domain/cover`                            | Remove cover image                                                                                                                             |
-| GET    | `/sites/:domain/meta`                             | Site metadata (subdomain)                                                                                                                      |
-| GET    | `/sites/:domain/stats?slots=&group=`              | Request count per minute slot                                                                                                                  |
-| GET    | `/sites/:domain/visitors`                         | Unique visitor IPs with counts                                                                                                                 |
-| GET    | `/sites/:domain/uptime?slots=&group=`             | Uptime status per minute slot                                                                                                                  |
-| GET    | `/sites/:domain/repos`                            | Recently used GitHub repos                                                                                                                     |
-| GET    | `/sites/:domain/versions`                         | List versions                                                                                                                                  |
-| POST   | `/sites/:domain/versions`                         | Upload a version (raw zip body)                                                                                                                |
-| POST   | `/sites/:domain/versions/github`                  | Deploy from GitHub: `{ "repo", "branch?" }`                                                                                                    |
-| GET    | `/sites/:domain/versions/:timestamp/download`     | Download a specific version                                                                                                                    |
-| POST   | `/sites/:domain/versions/:timestamp/activate`     | Roll back to a version                                                                                                                         |
-| DELETE | `/sites/:domain/versions/:timestamp`              | Delete a version                                                                                                                               |
-| GET    | `/sites/:domain/custom-domains`                   | List custom domains                                                                                                                            |
-| GET    | `/sites/:domain/custom-domains/token`             | DNS verification token                                                                                                                         |
-| POST   | `/sites/:domain/custom-domains`                   | Add: `{ "customDomain" }`                                                                                                                      |
-| POST   | `/sites/:domain/custom-domains/:subAction/verify` | Verify against DNS                                                                                                                             |
-| DELETE | `/sites/:domain/custom-domains/:subAction`        | Remove a custom domain                                                                                                                         |
+| POST   | `/users/:username/sites/:siteId`                                  | Create a site. Raw zip body (`Content-Type: application/zip`, optional `?subdomain=`) or JSON `{ "repo", "branch?", "subdomain?" }` for GitHub |
+| GET    | `/users/:username/sites/:siteId`                                  | Site info                                                                                                                                      |
+| DELETE | `/users/:username/sites/:siteId`                                  | Delete site and all its data                                                                                                                   |
+| PATCH  | `/users/:username/sites/:siteId/toggle`                           | Enable/disable                                                                                                                                 |
+| PATCH  | `/users/:username/sites/:siteId/star`                             | `{ "starred": bool }`                                                                                                                          |
+| PATCH  | `/users/:username/sites/:siteId/meta`                             | `{ "subdomain"?, "displayName"? }`                                                                                                             |
+| GET    | `/users/:username/sites/:siteId/download`                         | Download active version as zip                                                                                                                 |
+| GET    | `/users/:username/sites/:siteId/icon`                             | Favicon from the archive                                                                                                                       |
+| GET    | `/users/:username/sites/:siteId/cover`                            | Cover image                                                                                                                                    |
+| POST   | `/users/:username/sites/:siteId/cover`                            | Raw image body                                                                                                                                 |
+| DELETE | `/users/:username/sites/:siteId/cover`                            | Remove cover image                                                                                                                             |
+| GET    | `/users/:username/sites/:siteId/meta`                             | Site metadata (subdomain)                                                                                                                      |
+| GET    | `/users/:username/sites/:siteId/stats?slots=&group=`              | Request count per minute slot                                                                                                                  |
+| GET    | `/users/:username/sites/:siteId/visitors`                         | Unique visitor IPs with counts                                                                                                                 |
+| GET    | `/users/:username/sites/:siteId/uptime?slots=&group=`             | Uptime status per minute slot                                                                                                                  |
+| GET    | `/users/:username/sites/:siteId/repos`                            | Recently used GitHub repos                                                                                                                     |
+| GET    | `/users/:username/sites/:siteId/versions`                         | List versions                                                                                                                                  |
+| POST   | `/users/:username/sites/:siteId/versions`                         | Upload a version (raw zip body)                                                                                                                |
+| POST   | `/users/:username/sites/:siteId/versions/github`                  | Deploy from GitHub: `{ "repo", "branch?" }`                                                                                                    |
+| GET    | `/users/:username/sites/:siteId/versions/:timestamp/download`     | Download a specific version                                                                                                                    |
+| POST   | `/users/:username/sites/:siteId/versions/:timestamp/activate`     | Roll back to a version                                                                                                                         |
+| DELETE | `/users/:username/sites/:siteId/versions/:timestamp`              | Delete a version                                                                                                                               |
+| GET    | `/users/:username/sites/:siteId/custom-domains`                   | List custom domains                                                                                                                            |
+| GET    | `/users/:username/sites/:siteId/custom-domains/token`             | DNS verification token                                                                                                                         |
+| POST   | `/users/:username/sites/:siteId/custom-domains`                   | Add: `{ "customDomain" }`                                                                                                                      |
+| POST   | `/users/:username/sites/:siteId/custom-domains/:subAction/verify` | Verify against DNS                                                                                                                             |
+| DELETE | `/users/:username/sites/:siteId/custom-domains/:subAction`        | Remove a custom domain                                                                                                                         |
 
 ### Custom domains (global)
 

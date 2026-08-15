@@ -8,10 +8,10 @@ export default function Deploy() {
   const { refreshSites } = useSites();
   const { username } = useConnection();
 
-  const handleDeploy = (domain: string) => {
+  const handleDeploy = (siteId: string) => {
     refreshSites();
     if (username) {
-      navigate({ to: `/u/${username}/${domain}` });
+      navigate({ to: `/u/${username}/sites/${siteId}` });
     } else {
       navigate({ to: '/' });
     }

@@ -10,13 +10,13 @@ import type * as TanStackRouter from '@tanstack/react-router';
 const navigate = vi.fn();
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
-  const actual = await importOriginal<TanStackRouter>();
+  const actual = await importOriginal<typeof TanStackRouter>();
   return { ...actual, useRouter: () => ({ navigate }) };
 });
 
 const site: Site = {
-  siteId: 'site-1',
-  domain: 'my-site',
+  siteId: 'my-site',
+
   displayName: 'My Site',
   enabled: true,
   hits: 1200,
@@ -46,7 +46,7 @@ describe('HomeSiteCard', () => {
     renderWithProviders(<HomeSiteCard site={site} />);
     await user.click(screen.getByRole('link', { name: 'Open My Site' }));
     expect(navigate).toHaveBeenCalledWith(
-      expect.objectContaining({ params: { username: 'peter', sitename: 'my-site' } })
+      expect.objectContaining({ params: { username: 'peter', siteId: 'my-site' } })
     );
   });
 
@@ -66,7 +66,7 @@ describe('HomeSiteCard', () => {
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining('/sites/my-site/star'),
+        expect.stringContaining('/users/peter/sites/my-site/star'),
         expect.objectContaining({ method: 'PATCH' })
       )
     );

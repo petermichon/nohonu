@@ -2,8 +2,13 @@ import { SLOT_MS } from './types.ts';
 
 const BAR_COUNT = 60; // Fixed number of bars to show
 
-export function getGroupMinutes(): number {
-  // No backend grouping - return raw slots
+const VALID_USERNAME = /^[a-z0-9][a-z0-9_-]{0,28}[a-z0-9]$/;
+
+export function isValidUsername(username: string): boolean {
+  return VALID_USERNAME.test(username);
+}
+
+export function getGroupMinutes(): number {  // No backend grouping - return raw slots
   return 1;
 }
 
@@ -87,7 +92,7 @@ export function tabClass(active: boolean): string {
 }
 
 export function siteUrl(
-  site: { enabled: boolean; domain: string; subdomain?: string; subdomainBase?: string },
+  site: { enabled: boolean; siteId: string; subdomain?: string; subdomainBase?: string },
   protocol: string,
   hostWithPort: string
 ): string {
@@ -95,5 +100,5 @@ export function siteUrl(
   const subdomainBase = site.subdomainBase || hostWithPort;
   return site.subdomain
     ? `${protocol}//${site.subdomain}.${subdomainBase}`
-    : `${protocol}//${site.domain}.${subdomainBase}`;
+    : `${protocol}//${site.siteId}.${subdomainBase}`;
 }

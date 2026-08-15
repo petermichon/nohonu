@@ -12,7 +12,8 @@ const versions: Version[] = [
 
 function renderPanel(overrides: Partial<React.ComponentProps<typeof VersionPanel>> = {}) {
   const props = {
-    domain: 'my-site',
+    username: 'peter',
+    siteId: 'my-site',
     versions,
     versionsLoading: false,
     currentVersion: 2,

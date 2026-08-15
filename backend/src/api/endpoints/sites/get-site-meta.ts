@@ -1,6 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { siteIdFrom } from '../../../shared/express/domain-from.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { getSiteMeta as getSiteMetaUsecase } from '../../../usecases/sites/get-site-meta.ts';
 
@@ -11,7 +11,7 @@ export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<voi
     return;
   }
 
-  const result = await getSiteMetaUsecase(sessionId, domainFrom(req));
+  const result = await getSiteMetaUsecase(sessionId, siteIdFrom(req));
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
@@ -21,5 +21,5 @@ export async function getSiteMeta(req: ExpressReq, res: ExpressRes): Promise<voi
     json(res, { error: 'Site not found' }, 404);
     return;
   }
-  json(res, { domain: domainFrom(req), subdomain: meta.subdomain });
+  json(res, { siteId: siteIdFrom(req), subdomain: meta.subdomain });
 }

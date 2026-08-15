@@ -14,13 +14,13 @@ import type { Result } from '../../shared/errors.ts';
 
 export async function verifyCustomDomain(
   sessionId: string,
-  domain: string,
+  siteId: string,
   customDomain: string,
 ): Promise<Result<{ verified: boolean }>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
@@ -34,20 +34,19 @@ export async function verifyCustomDomain(
     return { ok: false, code: 'not_found', message: 'Custom domain not found' };
   }
 
-  const expectedToken = await generateVerificationToken(domain);
+  const expectedToken = await generateVerificationToken(user, siteId);
   const records = await resolveTxtRecords(`_nohonu.${customDomain}`);
   const isVerified = records.includes(expectedToken);
   entry.verified = isVerified;
 
-  const siteId = await upsertSite(user, domain, data);
-  if (!siteId) {
+  const siteRowId = await upsertSite(user, siteId, data);
+  if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
-  await customDomainTable.deleteMany({ where: { siteId } });
+  await customDomainTable.deleteMany({ where: { siteId: siteRowId } });
   await customDomainTable.createMany({
-    data: data.customDomains.map((c) => ({ domain: c.domain, verified: c.verified, siteId })),
+    data: data.customDomains.map((c) => ({ domain: c.domain, verified: c.verified, siteId: siteRowId })),
   });
 
   return { ok: true, value: { verified: isVerified } };
 }
-

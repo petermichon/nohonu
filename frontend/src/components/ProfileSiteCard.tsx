@@ -11,7 +11,7 @@ interface ProfileSiteCardProps {
 export function ProfileSiteCard({ site }: ProfileSiteCardProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
-  const coverUrl = site.coverImage ? `${apiBase}/sites/${site.domain}/cover` : null;
+  const coverUrl = site.coverImage ? `${apiBase}/users/${site.account}/sites/${site.siteId}/cover` : null;
 
   const badgeClass = !site.enabled
     ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
@@ -19,14 +19,14 @@ export function ProfileSiteCard({ site }: ProfileSiteCardProps) {
 
   return (
     <Link
-      to="/u/$username/$sitename"
-      params={{ username: site.account || '', sitename: site.domain }}
+      to="/u/$username/sites/$siteId"
+      params={{ username: site.account || '', siteId: site.siteId }}
       className="cursor-pointer flex flex-col gap-4"
     >
       {/* Preview area */}
       <div className={`rounded-3xl overflow-hidden relative group ${!site.enabled ? 'opacity-50' : ''}`}>
         {coverUrl ? (
-          <img src={coverUrl} alt={site.domain} className="w-full aspect-4/3 object-cover" />
+          <img src={coverUrl} alt={site.siteId} className="w-full aspect-4/3 object-cover" />
         ) : (
           <div className="w-full aspect-4/3 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
             <Globe className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />
@@ -40,7 +40,7 @@ export function ProfileSiteCard({ site }: ProfileSiteCardProps) {
       {/* Card footer */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 truncate">{site.displayName || site.domain}</h3>
+          <h3 className="font-semibold text-zinc-950 dark:text-zinc-100 truncate">{site.displayName || site.siteId}</h3>
         </div>
         <div className="flex flex-wrap gap-1.5 justify-end">
           <span className={`text-[12px] px-2 py-0.5 rounded-full ${badgeClass}`}>

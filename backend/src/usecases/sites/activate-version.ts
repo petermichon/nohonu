@@ -17,31 +17,31 @@ import * as fs from 'node:fs/promises';
 import type { Result } from '../../shared/errors.ts';
 
 
-export async function activateVersion(sessionId: string, domain: string, index: number): Promise<Result<void>> {
+export async function activateVersion(sessionId: string, siteId: string, index: number): Promise<Result<void>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
+  console.assert(typeof siteId === 'string' && siteId.length > 0, 'siteId must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  const exists = await fileExists(versionPath(user, domain, index));
+  const exists = await fileExists(versionPath(user, siteId, index));
   if (!exists) {
     return { ok: false, code: 'not_found', message: 'Version not found' };
   }
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) {
     return { ok: false, code: 'internal', message: 'Failed to activate version' };
   }
   data.currentIndex = index;
   data.enabled = true;
   data.lastDeployedAt = Date.now();
-  await upsertSite(user, domain, data);
+  await upsertSite(user, siteId, data);
   try {
-    await fs.rm(extractedDir(user, domain), { recursive: true, force: true });
+    await fs.rm(extractedDir(user, siteId), { recursive: true, force: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to delete extracted site for ${user}/${domain}: ${message}`);
+    console.error(`Failed to delete extracted site for ${user}/${siteId}: ${message}`);
   }
-  await site.updateMany({ where: { AND: { userUsername: user, domain } }, data: { extracted: false } });
+  await site.updateMany({ where: { AND: { userUsername: user, siteId } }, data: { extracted: false } });
   return { ok: true, value: undefined };
 }
 

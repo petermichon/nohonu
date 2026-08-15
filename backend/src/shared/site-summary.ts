@@ -1,6 +1,5 @@
 export interface SiteSummary {
   siteId: string;
-  domain: string;
   enabled: boolean;
   hits: number;
   uptime: number | undefined;

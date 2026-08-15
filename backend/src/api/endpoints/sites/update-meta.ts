@@ -11,10 +11,10 @@ export async function updateMeta(req: ExpressReq, res: ExpressRes): Promise<void
     return;
   }
 
-  const result = await updateSiteMeta(params.sessionId, params.domain, params.meta);
+  const result = await updateSiteMeta(params.sessionId, params.siteId, params.meta);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { domain: params.domain, subdomain: params.meta.subdomain, displayName: params.meta.displayName });
+  json(res, { siteId: params.siteId, subdomain: params.meta.subdomain, displayName: params.meta.displayName });
 }

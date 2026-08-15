@@ -14,7 +14,7 @@ export interface SiteShellContext {
   siteLoading: boolean;
   isPublicView: boolean;
   username: string;
-  domain: string;
+  siteId: string;
   siteUrl: string;
   host: string;
   totalHits: number;
@@ -51,9 +51,9 @@ export interface SiteShellContext {
 }
 
 export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTab: SitePageTab } {
-  const { username, sitename } = useParams({ from: '/u/$username/$sitename' });
+  const { username, siteId } = useParams({ from: '/u/$username/sites/$siteId' });
   const section = useParams({
-    from: '/u/$username/$sitename/$section',
+    from: '/u/$username/sites/$siteId/$section',
     select: (p) => p.section,
     shouldThrow: false,
   });
@@ -64,7 +64,7 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
   const { showToast } = useToast();
   const isPublicView = !!username && username !== loggedInUsername;
 
-  const data = useSiteData(sitename, username, isPublicView);
+  const data = useSiteData(siteId, username, isPublicView);
   const { setStatsRange, setUptimeRange } = data;
   const actions = useSiteActions({
     site: data.site,
@@ -91,7 +91,7 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
   const subdomainBase = data.site?.subdomainBase || hostWithPort;
   const siteUrl = data.site?.subdomain
     ? `${protocol}//${data.site.subdomain}.${subdomainBase}`
-    : `${protocol}//${data.site?.domain}.${subdomainBase}`;
+    : `${protocol}//${data.site?.siteId}.${subdomainBase}`;
 
   const totalHits = data.stats.reduce((a, b) => a + b.count, 0);
   const uptimePct = calcUptimePct(data.uptimeData);
@@ -127,7 +127,7 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
     activeTab,
     isPublicView,
     username,
-    domain: sitename,
+    siteId,
     siteUrl,
     host,
     totalHits,

@@ -5,8 +5,8 @@ export function useUpdateSiteConfig() {
   const { apiFetch } = useApiFetch();
   const queryClient = useQueryClient();
 
-  const updateSiteConfig = async (subdomain: string | null) => {
-    const res = await apiFetch(`/sites/meta`, {
+  const updateSiteConfig = async (username: string, siteId: string, subdomain: string | null) => {
+    const res = await apiFetch(`/users/${username}/sites/${siteId}/meta`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subdomain }),

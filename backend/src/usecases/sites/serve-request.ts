@@ -6,15 +6,16 @@ export async function serveRequest(
   host: string,
   path: string,
   ip: string,
+  secFetchMode?: string,
 ): Promise<{ data: Uint8Array; contentType: string } | null> {
   const resolved = await resolveDomainAndServe(host, path);
   if (!resolved) return null;
 
-  const result = await serveSiteFile(resolved.user, resolved.domain, resolved.filePath);
+  const result = await serveSiteFile(resolved.user, resolved.siteId, resolved.filePath);
   if (!result) return null;
 
-  if (result.contentType === 'text/html') {
-    recordHit(resolved.domain, ip);
+  if (result.contentType === 'text/html' && secFetchMode === 'navigate') {
+    recordHit(resolved.user, resolved.siteId, ip);
   }
   return result;
 }

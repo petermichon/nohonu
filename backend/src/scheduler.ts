@@ -5,21 +5,21 @@ import { recordUptime } from './usecases/sites/record-uptime.ts';
 import { saveAnalytics } from './usecases/sites/save-analytics.ts';
 import { cleanupExpiredSessions } from './usecases/auth/cleanup-expired-sessions.ts';
 
-async function checkAndRecord(user: string, domain: string): Promise<void> {
-  const status = await checkSite(user, domain);
-  recordUptime(domain, status.enabled);
+async function checkAndRecord(user: string, siteId: string): Promise<void> {
+  const status = await checkSite(user, siteId);
+  recordUptime(user, siteId, status.enabled);
 }
 
 async function runUptimeChecks(): Promise<void> {
   const siteList = await listAllSites();
-  const checks = siteList.map(({ user, domain }) => checkAndRecord(user, domain));
+  const checks = siteList.map(({ user, siteId }) => checkAndRecord(user, siteId));
   await Promise.all(checks);
 }
 
 async function flushAnalytics(): Promise<void> {
   const siteList = await listAllSites();
-  for (const { user, domain } of siteList) {
-    await saveAnalytics(user, domain);
+  for (const { user, siteId } of siteList) {
+    await saveAnalytics(user, siteId);
   }
 }
 

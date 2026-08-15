@@ -1,5 +1,5 @@
 export type UpdateMetaParams = {
   sessionId: string;
-  domain: string;
+  siteId: string;
   meta: { subdomain?: string; displayName?: string };
 };

@@ -6,28 +6,28 @@ import { SubdomainSection } from './SubdomainSection.tsx';
 
 describe('SubdomainSection', () => {
   it('renders the current subdomain in the input', () => {
-    renderWithProviders(<SubdomainSection subdomain="peter-site" siteLoading={false} />);
+    renderWithProviders(<SubdomainSection username="peter" siteId="my-site" subdomain="peter-site" siteLoading={false} />);
     expect(screen.getByPlaceholderText('subdomain')).toHaveValue('peter-site');
   });
 
   it('shows a skeleton while loading', () => {
-    renderWithProviders(<SubdomainSection subdomain={null} siteLoading />);
+    renderWithProviders(<SubdomainSection username="peter" siteId="my-site" subdomain={null} siteLoading />);
     expect(screen.queryByLabelText(/subdomain/i)).not.toBeInTheDocument();
   });
 
   it('renders the read-only value when isReadOnly', () => {
-    renderWithProviders(<SubdomainSection subdomain="peter-site" siteLoading={false} isReadOnly />);
+    renderWithProviders(<SubdomainSection username="peter" siteId="my-site" subdomain="peter-site" siteLoading={false} isReadOnly />);
     expect(screen.getByText('peter-site')).toBeInTheDocument();
   });
 
   it('disables Save until the subdomain changes', () => {
-    renderWithProviders(<SubdomainSection subdomain="peter-site" siteLoading={false} />);
+    renderWithProviders(<SubdomainSection username="peter" siteId="my-site" subdomain="peter-site" siteLoading={false} />);
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });
 
   it('saves a changed subdomain and shows a confirmation toast', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<SubdomainSection subdomain="peter-site" siteLoading={false} />);
+    renderWithProviders(<SubdomainSection username="peter" siteId="my-site" subdomain="peter-site" siteLoading={false} />);
 
     await user.clear(screen.getByPlaceholderText('subdomain'));
     await user.type(screen.getByPlaceholderText('subdomain'), 'peter-new');
@@ -41,7 +41,7 @@ describe('SubdomainSection', () => {
 
   it('sanitizes the subdomain to lowercase letters, numbers, and dashes', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<SubdomainSection subdomain="peter-site" siteLoading={false} />);
+    renderWithProviders(<SubdomainSection username="peter" siteId="my-site" subdomain="peter-site" siteLoading={false} />);
 
     await user.clear(screen.getByPlaceholderText('subdomain'));
     await user.type(screen.getByPlaceholderText('subdomain'), 'Peter_New!!');

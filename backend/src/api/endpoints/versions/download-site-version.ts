@@ -1,6 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { siteIdFrom } from '../../../shared/express/domain-from.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { indexFrom } from '../../../shared/express/index-from.ts';
 import { downloadVersion } from '../../../usecases/sites/download-version.ts';
@@ -18,7 +18,7 @@ export async function downloadSiteVersion(req: ExpressReq, res: ExpressRes): Pro
     return;
   }
 
-  const result = await downloadVersion(sessionId, domainFrom(req), idx);
+  const result = await downloadVersion(sessionId, siteIdFrom(req), idx);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;

@@ -29,7 +29,7 @@ export interface SiteDataReturn {
   loadVersions: () => Promise<void>;
 }
 
-export function useSiteData(domain: string, username?: string, isPublic?: boolean): SiteDataReturn {
+export function useSiteData(siteId: string, username?: string, isPublic?: boolean): SiteDataReturn {
   const { apiFetch } = useApiFetch();
   const queryClient = useQueryClient();
   const [statsRange, setStatsRange] = useState<TimeRange>(60);
@@ -39,9 +39,9 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
 
   // Site query
   const siteQuery = useQuery({
-    queryKey: ['site', domain, isPublic],
+    queryKey: ['site', siteId, isPublic],
     queryFn: async () => {
-      const url = isPublic && username ? `/users/${username}/${domain}` : `/sites/${domain}`;
+      const url = `/users/${username}/sites/${siteId}`;
       const res = await apiFetch(url);
       if (!res.ok) throw new Error('Site not found');
       const data = await res.json();
@@ -53,11 +53,11 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
 
   // Stats query
   const statsQuery = useQuery({
-    queryKey: ['site-stats', domain, statsRange],
+    queryKey: ['site-stats', siteId, statsRange],
     queryFn: async () => {
       const slotsToFetch = getSlotsForRange(statsRange);
       const group = getGroupMinutes();
-      const res = await apiFetch(`/sites/${domain}/stats?slots=${slotsToFetch}&group=${group}`);
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/stats?slots=${slotsToFetch}&group=${group}`);
       const data = await res.json();
       return (data.stats as Slot[]) ?? [];
     },
@@ -66,9 +66,9 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
 
   // Visitors query
   const visitorsQuery = useQuery({
-    queryKey: ['site-visitors', domain],
+    queryKey: ['site-visitors', siteId],
     queryFn: async () => {
-      const res = await apiFetch(`/sites/${domain}/visitors`);
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/visitors`);
       const data = await res.json();
       return (data.visitors as Visitor[]) ?? [];
     },
@@ -77,9 +77,9 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
 
   // Versions query
   const versionsQuery = useQuery({
-    queryKey: ['site-versions', domain],
+    queryKey: ['site-versions', siteId],
     queryFn: async () => {
-      const res = await apiFetch(`/sites/${domain}/versions`);
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/versions`);
       const data = await res.json();
       return {
         versions: (data.versions as Version[]) ?? [],
@@ -91,11 +91,11 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
 
   // Uptime query
   const uptimeQuery = useQuery({
-    queryKey: ['site-uptime', domain, uptimeRange],
+    queryKey: ['site-uptime', siteId, uptimeRange],
     queryFn: async () => {
       const slotsToFetch = getSlotsForRange(uptimeRange);
       const group = getGroupMinutes();
-      const res = await apiFetch(`/sites/${domain}/uptime?slots=${slotsToFetch}&group=${group}`);
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/uptime?slots=${slotsToFetch}&group=${group}`);
       const data = await res.json();
       return (data.uptime as UptimeSlot[]) ?? [];
     },
@@ -104,9 +104,9 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
 
   // Uptime all query
   const uptimeAllQuery = useQuery({
-    queryKey: ['site-uptime-all', domain],
+    queryKey: ['site-uptime-all', siteId],
     queryFn: async () => {
-      const res = await apiFetch(`/sites/${domain}/uptime?slots=1440`);
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/uptime?slots=1440`);
       const data = await res.json();
       return (data.uptime as UptimeSlot[]) ?? [];
     },
@@ -126,8 +126,8 @@ export function useSiteData(domain: string, username?: string, isPublic?: boolea
   }, [uptimeQuery]);
 
   const loadVersions = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['site-versions', domain] });
-  }, [queryClient, domain]);
+    await queryClient.invalidateQueries({ queryKey: ['site-versions', siteId] });
+  }, [queryClient, siteId]);
 
   const loadVisitors = useCallback(async () => {
     await visitorsQuery.refetch();

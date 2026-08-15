@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Upload, FileArchive, GitBranch, Loader2, AlertCircle, Globe, Check, X } from 'lucide-react';
-import { useCheckDomain } from '../hooks/api/useCheckDomain.ts';
+import { useCheckSiteId } from '../hooks/api/useCheckSiteId.ts';
 import { useCheckSubdomain } from '../hooks/api/useCheckSubdomain.ts';
 import { useCreateSite } from '../hooks/api/useCreateSite.ts';
 import { useDeployGithub } from '../hooks/api/useDeployGithub.ts';
@@ -12,7 +12,7 @@ import { Input } from './Input.tsx';
 type UploadMode = 'file' | 'github';
 
 interface InlineDeployFormProps {
-  onDeploy: (domain: string) => void;
+  onDeploy: (siteId: string) => void;
 }
 
 export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
@@ -22,7 +22,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const { createSite, isPending: uploadPending } = useCreateSite();
   const { deployGithub, isPending: githubPending } = useDeployGithub();
   const [uploadMode, setUploadMode] = useState<UploadMode>('file');
-  const [newDomain, setNewDomain] = useState('');
+  const [newSiteId, setNewSiteId] = useState('');
   const [newSubdomain, setNewSubdomain] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -32,11 +32,11 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { result: subdomainResult, checking: subdomainChecking } = useCheckSubdomain(newSubdomain);
-  const { result: domainResult, checking: domainChecking } = useCheckDomain(newDomain, username ?? '');
+  const { result: domainResult, checking: domainChecking } = useCheckSiteId(newSiteId, username ?? '');
 
   const reset = () => {
     setUploadMode('file');
-    setNewDomain('');
+    setNewSiteId('');
     setNewSubdomain('');
     setSelectedFile(null);
     setIsDragging(false);
@@ -52,13 +52,13 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
     }
     setUploadError(null);
     setSelectedFile(file);
-    if (!newDomain && file.name.length > 4) {
+    if (!newSiteId && file.name.length > 4) {
       const derived = file.name
         .slice(0, -4)
         .toLowerCase()
         .replace(/[^a-z0-9-]/g, '');
       if (derived) {
-        setNewDomain(derived);
+        setNewSiteId(derived);
         setNewSubdomain(username ? `${username}-${derived}` : '');
       }
     }
@@ -72,37 +72,38 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !newDomain || !newSubdomain) {
-      setUploadError(!newDomain ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Select a .zip file');
+    if (!selectedFile || !newSiteId || !newSubdomain) {
+      setUploadError(!newSiteId ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Select a .zip file');
       return;
     }
     setUploadError(null);
     try {
-      await createSite({ file: selectedFile, domain: newDomain, subdomain: newSubdomain });
-      const domain = newDomain;
+      await createSite({ username: username ?? '', file: selectedFile, siteId: newSiteId, subdomain: newSubdomain });
+      const siteId = newSiteId;
       reset();
-      onDeploy(domain);
+      onDeploy(siteId);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed');
     }
   };
 
   const handleFetchGithub = async () => {
-    if (!githubRepo.includes('/') || !newDomain || !newSubdomain) {
-      setUploadError(!newDomain ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Repo format: owner/repo');
+    if (!githubRepo.includes('/') || !newSiteId || !newSubdomain) {
+      setUploadError(!newSiteId ? 'Enter a domain' : !newSubdomain ? 'Enter a subdomain' : 'Repo format: owner/repo');
       return;
     }
     setUploadError(null);
     try {
       await deployGithub({
-        domain: newDomain,
+        username: username ?? '',
+        siteId: newSiteId,
         repo: githubRepo,
         branch: githubBranch || 'main',
         subdomain: newSubdomain,
       });
-      const domain = newDomain;
+      const siteId = newSiteId;
       reset();
-      onDeploy(domain);
+      onDeploy(siteId);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Fetch failed');
     }
@@ -233,13 +234,13 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <Input
               type="text"
-              id="domain"
-              name="domain"
-              value={newDomain}
+              id="siteId"
+              name="siteId"
+              value={newSiteId}
               onChange={(e) => {
-                const domain = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-                setNewDomain(domain);
-                setNewSubdomain(username ? `${username}-${domain}` : '');
+                const siteId = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                setNewSiteId(siteId);
+                setNewSubdomain(username ? `${username}-${siteId}` : '');
               }}
               placeholder="deployment-name"
               className="w-full pl-10 pr-3 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
@@ -247,13 +248,13 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
           </div>
         </div>
         <div className="h-4">
-          {domainResult && domainResult.domain === newDomain && domainResult.taken ? (
+          {domainResult && domainResult.siteId === newSiteId && domainResult.taken ? (
             <span className="text-sm text-red-500 flex items-center gap-1">
-              <X className="w-3.5 h-3.5" /> {newDomain} already taken
+              <X className="w-3.5 h-3.5" /> {newSiteId} already taken
             </span>
-          ) : domainResult && domainResult.domain === newDomain ? (
+          ) : domainResult && domainResult.siteId === newSiteId ? (
             <span className="text-sm text-green-600 flex items-center gap-1">
-              <Check className="w-3.5 h-3.5" /> {newDomain} available
+              <Check className="w-3.5 h-3.5" /> {newSiteId} available
             </span>
           ) : null}
         </div>
@@ -304,7 +305,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
             uploadMode === 'github'
               ? githubPending ||
                 !githubRepo ||
-                !newDomain ||
+                !newSiteId ||
                 !newSubdomain ||
                 domainChecking ||
                 domainResult?.taken ||
@@ -312,7 +313,7 @@ export function InlineDeployForm({ onDeploy }: InlineDeployFormProps) {
                 subdomainResult?.taken
               : uploadPending ||
                 !selectedFile ||
-                !newDomain ||
+                !newSiteId ||
                 !newSubdomain ||
                 domainChecking ||
                 domainResult?.taken ||

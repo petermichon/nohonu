@@ -6,7 +6,7 @@ import type { Star } from '../../lib/types.ts';
 interface StarsSectionProps {
   stars: Star[];
   username: string;
-  onToggleStar: (domain: string, isStarred: boolean) => void;
+  onToggleStar: (siteId: string, isStarred: boolean) => void;
 }
 
 export function StarsSection({ stars, username, onToggleStar }: StarsSectionProps) {
@@ -38,15 +38,15 @@ export function StarsSection({ stars, username, onToggleStar }: StarsSectionProp
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {stars.map((star) => (
           <div
-            key={`${star.user}-${star.domain}`}
+            key={`${star.user}-${star.siteId}`}
             className="relative group bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl p-4"
           >
-            <Link to="/u/$username/$domain" params={{ username: star.user, domain: star.domain }} className="block">
+            <Link to="/u/$username/sites/$siteId" params={{ username: star.user, siteId: star.siteId }} className="block">
               <h3 className="font-medium text-zinc-950 dark:text-zinc-100 truncate">
-                {star.displayName || star.domain}
+                {star.displayName || star.siteId}
               </h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate mt-1">
-                @{star.user}/{star.domain}
+                @{star.user}/{star.siteId}
               </p>
             </Link>
             <div className="flex items-center justify-between mt-2">
@@ -59,7 +59,7 @@ export function StarsSection({ stars, username, onToggleStar }: StarsSectionProp
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    onToggleStar(star.domain, true);
+                    onToggleStar(star.siteId, true);
                   }}
                   className="shrink-0 flex items-center gap-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full px-2 py-1 cursor-pointer transition-colors"
                 >

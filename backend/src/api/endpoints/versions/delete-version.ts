@@ -1,6 +1,6 @@
 import type { Request as ExpressReq, Response as ExpressRes } from 'express';
 import { json } from '../../../shared/express/http.ts';
-import { domainFrom } from '../../../shared/express/domain-from.ts';
+import { siteIdFrom } from '../../../shared/express/domain-from.ts';
 import { sendUsecaseError } from '../../../shared/express/errors.ts';
 import { indexFrom } from '../../../shared/express/index-from.ts';
 import { deleteVersion as deleteVersionUsecase } from '../../../usecases/sites/delete-version.ts';
@@ -18,10 +18,10 @@ export async function deleteVersion(req: ExpressReq, res: ExpressRes): Promise<v
     return;
   }
 
-  const result = await deleteVersionUsecase(sessionId, domainFrom(req), idx);
+  const result = await deleteVersionUsecase(sessionId, siteIdFrom(req), idx);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { domain: domainFrom(req), index: idx });
+  json(res, { siteId: siteIdFrom(req), index: idx });
 }

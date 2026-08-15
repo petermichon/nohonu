@@ -262,29 +262,29 @@ describe('parseApiBase', () => {
 
 describe('siteUrl', () => {
   it('returns empty string when site is disabled', () => {
-    expect(siteUrl({ enabled: false, domain: 'example.com' }, 'https:', 'localhost:8080')).toBe('');
+    expect(siteUrl({ enabled: false, siteId: 'example.com' }, 'https:', 'localhost:8080')).toBe('');
   });
 
   it('builds a subdomain URL using hostWithPort', () => {
-    expect(siteUrl({ enabled: true, domain: 'example.com', subdomain: 'foo' }, 'https:', 'localhost:8080')).toBe(
+    expect(siteUrl({ enabled: true, siteId: 'example.com', subdomain: 'foo' }, 'https:', 'localhost:8080')).toBe(
       'https://foo.localhost:8080'
     );
   });
 
   it('builds a domain URL using hostWithPort', () => {
-    expect(siteUrl({ enabled: true, domain: 'example.com' }, 'https:', 'localhost:8080')).toBe(
+    expect(siteUrl({ enabled: true, siteId: 'example.com' }, 'https:', 'localhost:8080')).toBe(
       'https://example.com.localhost:8080'
     );
   });
 
   it('prefers subdomainBase over hostWithPort', () => {
     expect(
-      siteUrl({ enabled: true, domain: 'example.com', subdomain: 'foo', subdomainBase: 'nohonu.com' }, 'https:', 'x')
+      siteUrl({ enabled: true, siteId: 'example.com', subdomain: 'foo', subdomainBase: 'nohonu.com' }, 'https:', 'x')
     ).toBe('https://foo.nohonu.com');
   });
 
   it('uses protocol as-is', () => {
-    expect(siteUrl({ enabled: true, domain: 'example.com', subdomain: 'foo' }, 'http:', 'localhost:8080')).toBe(
+    expect(siteUrl({ enabled: true, siteId: 'example.com', subdomain: 'foo' }, 'http:', 'localhost:8080')).toBe(
       'http://foo.localhost:8080'
     );
   });

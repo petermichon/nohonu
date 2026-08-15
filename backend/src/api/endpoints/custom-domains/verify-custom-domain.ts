@@ -17,10 +17,10 @@ export async function verifyCustomDomain(req: ExpressReq, res: ExpressRes): Prom
     return;
   }
 
-  const result = await verifyCustomDomainUsecase(sessionId, p(req, 'domain') || '', customDomain);
+  const result = await verifyCustomDomainUsecase(sessionId, p(req, 'siteId') || '', customDomain);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { domain: p(req, 'domain') || '', customDomain, verified: result.value.verified });
+  json(res, { siteId: p(req, 'siteId') || '', customDomain, verified: result.value.verified });
 }

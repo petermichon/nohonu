@@ -30,7 +30,7 @@ export function SiteShell() {
       <SiteHeader
         site={shell.site}
         username={shell.username}
-        sitename={shell.domain}
+        siteId={shell.siteId}
         activeTab={shell.activeTab}
         isPublicView={shell.isPublicView}
       />
@@ -44,7 +44,7 @@ export function SiteShell() {
         onClose={() => shell.setConfirmAction(null)}
         onConfirm={shell.handleConfirm}
         action={shell.confirmAction ?? 'delete'}
-        domain={shell.site?.domain ?? ''}
+        domain={shell.site?.siteId ?? ''}
         loading={shell.actionLoading}
       />
       <ConfirmModal

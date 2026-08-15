@@ -3,6 +3,7 @@ import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { uptime } from '../../memory/uptime.ts';
 import { user as userTable } from '../../db/user.ts';
 import { totalHits } from '../../shared/hits-total.ts';
+import { siteKey } from '../../shared/site-key.ts';
 import { uptimePercentage } from '../../shared/uptime-percentage.ts';
 import { site } from '../../db/site.ts';
 
@@ -15,19 +16,18 @@ export async function listAllSites(username?: string): Promise<PublicSiteSummary
 
   for (const user of users) {
     const [domains, userRecord] = await Promise.all([
-      site.findMany({ where: { userUsername: user }, select: { domain: true } }).then((sites) => sites.map((s) => s.domain)),
+      site.findMany({ where: { userUsername: user }, select: { siteId: true } }).then((sites) => sites.map((s) => s.siteId)),
       userTable.findUnique({ where: { username: user }, select: { profilePicture: true } }),
     ]);
     const accountProfilePicture = userRecord?.profilePicture ?? undefined;
-    for (const domain of domains) {
-      const data = await readSiteMetadata(user, domain);
+    for (const siteId of domains) {
+      const data = await readSiteMetadata(user, siteId);
       allSites.push({
         user,
-        siteId: data?.siteId || domain,
-        domain,
+        siteId,
         enabled: data?.enabled ?? false,
-        hits: totalHits(hits.get(domain)),
-        uptime: uptimePercentage(uptime.get(domain)),
+        hits: totalHits(hits.get(siteKey(user, siteId))),
+        uptime: uptimePercentage(uptime.get(siteKey(user, siteId))),
         account: data?.account,
         accountProfilePicture,
         displayName: data?.displayName,

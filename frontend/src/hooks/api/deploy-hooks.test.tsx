@@ -23,14 +23,14 @@ afterEach(() => {
 describe('deploy/upload hook smoke tests', () => {
   it('uploads a version to the domain versions endpoint', async () => {
     const fetchMock = stubFetch();
-    const { result } = renderHookWithProviders(() => useUploadVersion('my-site'));
+    const { result } = renderHookWithProviders(() => useUploadVersion('peter', 'my-site'));
 
     await act(async () => {
       await result.current.uploadVersion({ file: new File(['zip'], 'v1.zip') });
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('http://api.test/sites/my-site/versions');
+    expect(url).toBe('http://api.test/users/peter/sites/my-site/versions');
     expect(init.method).toBe('POST');
     expect((init.headers as Record<string, string>)['Content-Type']).toBe('application/zip');
     expect(init.body).toBeInstanceOf(File);
@@ -38,14 +38,14 @@ describe('deploy/upload hook smoke tests', () => {
 
   it('fetches a GitHub version with repo and branch', async () => {
     const fetchMock = stubFetch();
-    const { result } = renderHookWithProviders(() => useFetchVersionGithub('my-site'));
+    const { result } = renderHookWithProviders(() => useFetchVersionGithub('peter', 'my-site'));
 
     await act(async () => {
       await result.current.fetchGithub({ repo: 'peter/my-site', branch: 'main' });
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('http://api.test/sites/my-site/versions/github');
+    expect(url).toBe('http://api.test/users/peter/sites/my-site/versions/github');
     expect(init.method).toBe('POST');
     expect(bodyOf([url, init])).toEqual({ repo: 'peter/my-site', branch: 'main' });
   });
@@ -56,14 +56,15 @@ describe('deploy/upload hook smoke tests', () => {
 
     await act(async () => {
       await result.current.createSite({
+        username: 'peter',
         file: new File(['zip'], 'site.zip'),
-        domain: 'my-site',
+        siteId: 'my-site',
         subdomain: 'peter-my-site',
       });
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('http://api.test/sites/my-site?subdomain=peter-my-site');
+    expect(url).toBe('http://api.test/users/peter/sites/my-site?subdomain=peter-my-site');
     expect(init.method).toBe('POST');
     expect(init.body).toBeInstanceOf(File);
   });
@@ -73,18 +74,18 @@ describe('deploy/upload hook smoke tests', () => {
     const { result } = renderHookWithProviders(() => useToggleStar());
 
     await act(async () => {
-      await result.current.toggleStar('my-site', true);
+      await result.current.toggleStar('peter', 'my-site', true);
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('http://api.test/sites/my-site/star');
+    expect(url).toBe('http://api.test/users/peter/sites/my-site/star');
     expect(init.method).toBe('PATCH');
     expect(bodyOf([url, init])).toEqual({ starred: true });
   });
 
   it('surfaces the error message on failure', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: 'boom' }), { status: 400 })));
-    const { result } = renderHookWithProviders(() => useUploadVersion('my-site'));
+    const { result } = renderHookWithProviders(() => useUploadVersion('peter', 'my-site'));
 
     await act(async () => {
       try {

@@ -11,10 +11,10 @@ export async function createSiteRaw(req: ExpressReq, res: ExpressRes): Promise<v
     return;
   }
 
-  const result = await createSite(params.sessionId, params.domain, params.zipData, params.subdomain);
+  const result = await createSite(params.sessionId, params.siteId, params.zipData, params.subdomain);
   if (!result.ok) {
     sendUsecaseError(res, result);
     return;
   }
-  json(res, { success: true, domain: params.domain, index: result.value.index }, 201);
+  json(res, { success: true, siteId: params.siteId, index: result.value.index }, 201);
 }

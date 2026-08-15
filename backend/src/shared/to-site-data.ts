@@ -3,7 +3,6 @@ import type { SiteData } from './paths.ts';
 export type SiteRecord = {
   id: string;
   siteId: string;
-  domain: string;
   userUsername: string;
   nextIndex: number;
   currentIndex: number | null;

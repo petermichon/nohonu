@@ -12,7 +12,7 @@ describe('Site page', () => {
   });
 
   it('renders the site overview for a public site', async () => {
-    const { unmount } = await renderWithRouter('/u/peter/my-site');
+    const { unmount } = await renderWithRouter('/u/peter/sites/my-site');
 
     expect(await screen.findAllByText('my-site')).not.toHaveLength(0);
     expect(screen.getByText('@peter')).toBeInTheDocument();
@@ -25,12 +25,12 @@ describe('Site page', () => {
     const { server } = await import('../test/server.ts');
     const { http, HttpResponse } = await import('msw');
     server.use(
-      http.get('*/users/peter/my-site', () => {
+      http.get('*/users/peter/sites/my-site', () => {
         return new HttpResponse(null, { status: 404 });
       })
     );
 
-    const { unmount } = await renderWithRouter('/u/peter/my-site');
+    const { unmount } = await renderWithRouter('/u/peter/sites/my-site');
     expect(await screen.findByText('Site not found')).toBeInTheDocument();
     unmount();
   });

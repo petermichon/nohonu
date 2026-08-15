@@ -1,1 +1,1 @@
-export type UploadParams = { sessionId: string; domain: string; zipData: Uint8Array };
+export type UploadParams = { sessionId: string; siteId: string; zipData: Uint8Array };

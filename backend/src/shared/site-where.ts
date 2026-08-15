@@ -1,6 +1,6 @@
 export function siteWhere(
   user: string,
-  domain: string,
-): { userUsername_domain: { userUsername: string; domain: string } } {
-  return { userUsername_domain: { userUsername: user, domain } };
+  siteId: string,
+): { userUsername_siteId: { userUsername: string; siteId: string } } {
+  return { userUsername_siteId: { userUsername: user, siteId } };
 }

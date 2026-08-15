@@ -13,23 +13,23 @@ import * as fs from 'node:fs/promises';
 import type { Result } from '../../shared/errors.ts';
 
 
-export async function deleteSiteCover(sessionId: string, domain: string): Promise<Result<void>> {
+export async function deleteSiteCover(sessionId: string, siteId: string): Promise<Result<void>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) {
     return { ok: false, code: 'not_found', message: 'Site not found' };
   }
 
   try {
-    await fs.rm(coverImagePath(user, domain), { force: true });
+    await fs.rm(coverImagePath(user, siteId), { force: true });
   } catch {
     // File might not exist, that's ok
   }
 
   data.coverImage = undefined;
-  const siteRowId = await upsertSite(user, domain, data);
+  const siteRowId = await upsertSite(user, siteId, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

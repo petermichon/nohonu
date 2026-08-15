@@ -49,8 +49,8 @@ async function makeSite(username: string, domain: string): Promise<string> {
   return sessionId;
 }
 
-async function verificationToken(domain: string): Promise<string> {
-  const data = new TextEncoder().encode(domain);
+async function verificationToken(user: string, siteId: string): Promise<string> {
+  const data = new TextEncoder().encode(`${user}-${siteId}`);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -73,7 +73,7 @@ describe('createSite', () => {
 
     const list = await sites.listMySites(sessionId);
     expect(list.ok).toBe(true);
-    if (list.ok) expect(list.value.some((s) => s.domain === 'mysite')).toBe(true);
+    if (list.ok) expect(list.value.some((s) => s.siteId === 'mysite')).toBe(true);
 
     const info = await sites.getSiteInfo(user, 'mysite');
     expect(info?.enabled).toBe(true);
@@ -93,7 +93,7 @@ describe('versions', () => {
     const uploaded = await sites.uploadVersion(sessionId, 'mysite', zip({ 'index.html': '<h1>v2</h1>' }));
     expect(uploaded.ok).toBe(true);
 
-    const list = await sites.listVersions('mysite');
+    const list = await sites.listVersions('bob', 'mysite');
     expect(list.versions.length).toBe(2);
     expect(list.current).toBe(2);
   });
@@ -111,7 +111,7 @@ describe('versions', () => {
 
     const result = await sites.activateVersion(sessionId, 'mysite', 1);
     expect(result.ok).toBe(true);
-    expect((await sites.listVersions('mysite')).current).toBe(1);
+    expect((await sites.listVersions('carol', 'mysite')).current).toBe(1);
   });
 
   it('deletes a version and falls back to the highest remaining', async () => {
@@ -121,7 +121,7 @@ describe('versions', () => {
     const result = await sites.deleteVersion(sessionId, 'mysite', 2);
     expect(result.ok).toBe(true);
 
-    const list = await sites.listVersions('mysite');
+    const list = await sites.listVersions('dave', 'mysite');
     expect(list.versions.map((v) => v.index)).toEqual([1]);
     expect(list.current).toBe(1);
   });
@@ -160,22 +160,22 @@ describe('toggleStar', () => {
     const owner = await username(ownerSession);
     const fanSession = await registerUser('fan');
 
-    const star = await sites.toggleStar(fanSession, 'mysite', true);
+    const star = await sites.toggleStar(fanSession, 'grace', 'mysite', true);
     expect(star.ok).toBe(true);
     if (star.ok) expect(star.value.starCount).toBe(1);
 
     const info = await sites.getSiteInfo(owner, 'mysite');
     const starred = await listStarredSites(await username(fanSession));
-    expect(starred.some((s) => s.domain === 'mysite')).toBe(true);
+    expect(starred.some((s) => s.siteId === 'mysite')).toBe(true);
     expect(info?.siteId).toBeTruthy();
 
-    const unstar = await sites.toggleStar(fanSession, 'mysite', false);
+    const unstar = await sites.toggleStar(fanSession, 'grace', 'mysite', false);
     expect(unstar.ok && unstar.value.starCount).toBe(0);
   });
 
   it('returns not_found for a missing site', async () => {
     const sessionId = await registerUser('fan');
-    const result = await sites.toggleStar(sessionId, 'missing', true);
+    const result = await sites.toggleStar(sessionId, 'nobody', 'missing', true);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.code).toBe('not_found');
   });
@@ -240,7 +240,7 @@ describe('custom domains', () => {
     const sessionId = await makeSite('judy', 'mysite');
     await sites.addCustomDomain(sessionId, 'mysite', 'example.com');
 
-    const token = await verificationToken('mysite');
+    const token = await verificationToken('judy', 'mysite');
     (dns.resolveTxt as Mock).mockResolvedValue([[token]]);
     const ok = await sites.verifyCustomDomain(sessionId, 'mysite', 'example.com');
     expect(ok.ok).toBe(true);
@@ -253,9 +253,9 @@ describe('custom domains', () => {
 
   it('returns a deterministic verification token', async () => {
     const sessionId = await makeSite('judy', 'mysite');
-    const token = await sites.getVerificationToken('mysite');
+    const token = await sites.getVerificationToken('judy', 'mysite');
     expect(token.token).toMatch(/^nohonu-verify-[0-9a-f]{16}$/);
-    expect(token.token).toBe(await verificationToken('mysite'));
+    expect(token.token).toBe(await verificationToken('judy', 'mysite'));
     expect(sessionId).toBeTruthy();
   });
 });
@@ -267,12 +267,12 @@ describe('cover image', () => {
 
     const upload = await sites.uploadSiteCover(sessionId, 'mysite', data);
     expect(upload.ok).toBe(true);
-    const cover = await sites.getSiteCover('mysite');
+    const cover = await sites.getSiteCover('karl', 'mysite');
     expect(Array.from(cover ?? [])).toEqual([9, 8, 7]);
 
     const del = await sites.deleteSiteCover(sessionId, 'mysite');
     expect(del.ok).toBe(true);
-    expect(await sites.getSiteCover('mysite')).toBeNull();
+    expect(await sites.getSiteCover('karl', 'mysite')).toBeNull();
   });
 });
 
@@ -327,13 +327,23 @@ describe('serving', () => {
     const user = await username(sessionId);
     await sites.updateSiteMeta(sessionId, 'mysite', { subdomain: 'my-app' });
 
-    const before = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
-    const served = await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4');
+    const before = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    const served = await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4', 'navigate');
     expect(served).not.toBeNull();
     expect(new TextDecoder().decode(served?.data)).toBe('<h1>hi</h1>');
-    const after = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    const after = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
     expect(after).toBe(before + 1);
     expect(user).toBeTruthy();
+  });
+
+  it('does not record a hit for non-navigate HTML requests', async () => {
+    const sessionId = await makeSite('hugo', 'mysite');
+    await sites.updateSiteMeta(sessionId, 'mysite', { subdomain: 'my-app' });
+
+    const before = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    await sites.serveRequest('my-app.localhost', '/index.html', '1.2.3.4', 'no-cors');
+    const after = sites.getSiteStats('hugo', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(after).toBe(before);
   });
 
   it('returns null when the request cannot be resolved', async () => {
@@ -346,23 +356,23 @@ describe('analytics', () => {
   it('records hits and exposes stats and visitors', async () => {
     await makeSite('nina', 'mysite');
 
-    sites.recordPageHit('mysite', '1.2.3.4');
-    sites.recordPageHit('mysite', '1.2.3.4');
+    sites.recordPageHit('nina', 'mysite', '1.2.3.4');
+    sites.recordPageHit('nina', 'mysite', '1.2.3.4');
 
-    const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    const totalHits = sites.getSiteStats('nina', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
     expect(totalHits).toBe(2);
 
-    const stats = sites.getSiteStats('mysite', 60);
+    const stats = sites.getSiteStats('nina', 'mysite', 60);
     const lastSlot = stats[stats.length - 1];
     expect(lastSlot?.count).toBe(2);
 
-    const visitors = sites.getSiteVisitors('mysite');
+    const visitors = sites.getSiteVisitors('nina', 'mysite');
     expect(visitors).toEqual([{ ip: '1.2.3.4', count: 2, last: expect.any(Number) }]);
   });
 
   it('reports uptime percentage in the site listing', async () => {
     const sessionId = await makeSite('oscar', 'mysite');
-    sites.recordUptime('mysite', true);
+    sites.recordUptime('oscar', 'mysite', true);
 
     const list = await sites.listMySites(sessionId);
     expect(list.ok).toBe(true);
@@ -373,18 +383,18 @@ describe('analytics', () => {
     await makeSite('pat', 'mysite');
 
     for (let i = 0; i < 501; i += 1) {
-      sites.recordPageHit('mysite', `ip-${i}`);
+      sites.recordPageHit('pat', 'mysite', `ip-${i}`);
     }
 
-    const visitors = sites.getSiteVisitors('mysite');
+    const visitors = sites.getSiteVisitors('pat', 'mysite');
     expect(visitors.length).toBeLessThanOrEqual(500);
   });
 
   it('groups uptime slots', async () => {
     await makeSite('ray', 'mysite');
-    sites.recordUptime('mysite', true);
+    sites.recordUptime('ray', 'mysite', true);
 
-    const grouped = sites.getSiteUptime('mysite', 60, 5);
+    const grouped = sites.getSiteUptime('ray', 'mysite', 60, 5);
     expect(grouped[grouped.length - 1]?.up).toBe(true);
     expect(grouped.length).toBeLessThanOrEqual(13);
   });
@@ -392,28 +402,28 @@ describe('analytics', () => {
   it('persists analytics to disk', async () => {
     const sessionId = await makeSite('olivia', 'mysite');
     const user = await username(sessionId);
-    sites.recordPageHit('mysite', '1.2.3.4');
+    sites.recordPageHit('olivia', 'mysite', '1.2.3.4');
     await expect(sites.saveAnalytics(user, 'mysite')).resolves.toBeUndefined();
   });
 
   it('round-trips analytics through persistence', async () => {
     const sessionId = await makeSite('quinn', 'mysite');
     const user = await username(sessionId);
-    sites.recordPageHit('mysite', '1.2.3.4');
-    sites.recordUptime('mysite', true);
+    sites.recordPageHit('quinn', 'mysite', '1.2.3.4');
+    sites.recordUptime('quinn', 'mysite', true);
 
     await sites.saveAnalytics(user, 'mysite');
     sites.resetAnalytics();
 
     await sites.loadAnalytics(user, 'mysite');
 
-    const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    const totalHits = sites.getSiteStats('quinn', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
     expect(totalHits).toBe(1);
 
-    const uptime = sites.getSiteUptime('mysite', 5);
+    const uptime = sites.getSiteUptime('quinn', 'mysite', 5);
     expect(uptime[uptime.length - 1]?.up).toBe(true);
 
-    const visitors = sites.getSiteVisitors('mysite');
+    const visitors = sites.getSiteVisitors('quinn', 'mysite');
     expect(visitors.some((v) => v.ip === '1.2.3.4')).toBe(true);
   });
 });
@@ -431,7 +441,7 @@ describe('check helpers', () => {
 
   it('returns null for the icon when the site has no favicon', async () => {
     const sessionId = await makeSite('oscar', 'mysite');
-    expect(await sites.getSiteIcon('mysite')).toBeNull();
+    expect(await sites.getSiteIcon('oscar', 'mysite')).toBeNull();
   });
 });
 
@@ -494,15 +504,15 @@ describe('deleteSite', () => {
   it('removes the site, its files and analytics', async () => {
     const sessionId = await makeSite('ryan', 'mysite');
     const user = await username(sessionId);
-    sites.recordPageHit('mysite', '1.2.3.4');
+    sites.recordPageHit('ryan', 'mysite', '1.2.3.4');
 
     const deleted = await sites.deleteSite(sessionId, 'mysite');
     expect(deleted.ok).toBe(true);
 
     expect(await sites.checkSite(user, 'mysite')).toEqual({ exists: false, enabled: false });
     const list = await sites.listMySites(sessionId);
-    expect(list.ok && list.value.some((s) => s.domain === 'mysite')).toBe(false);
-    const totalHits = sites.getSiteStats('mysite', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(list.ok && list.value.some((s) => s.siteId === 'mysite')).toBe(false);
+    const totalHits = sites.getSiteStats('ryan', 'mysite', 10080).reduce((sum, p) => sum + p.count, 0);
     expect(totalHits).toBe(0);
     expect(user).toBeTruthy();
   });
@@ -514,11 +524,26 @@ describe('listAllSites', () => {
     await makeSite('u2', 'site2');
 
     const all = await sites.listAllSites();
-    expect(all.map((s) => s.domain).sort()).toEqual(['site1', 'site2']);
+    expect(all.map((s) => s.siteId).sort()).toEqual(['site1', 'site2']);
 
     const filtered = await sites.listAllSites('u1');
-    const site1 = filtered.find((s) => s.domain === 'site1');
+    const site1 = filtered.find((s) => s.siteId === 'site1');
     expect(site1?.isStarred).toBe(false);
+  });
+
+  it('keeps analytics separate for two users with the same siteId', async () => {
+    const first = await makeSite('alice', 'veodee');
+    await makeSite('bob', 'veodee');
+
+    sites.recordPageHit('alice', 'veodee', '1.2.3.4');
+    sites.recordPageHit('alice', 'veodee', '1.2.3.4');
+    sites.recordPageHit('bob', 'veodee', '5.6.7.8');
+
+    const aliceHits = sites.getSiteStats('alice', 'veodee', 10080).reduce((sum, p) => sum + p.count, 0);
+    const bobHits = sites.getSiteStats('bob', 'veodee', 10080).reduce((sum, p) => sum + p.count, 0);
+    expect(aliceHits).toBe(2);
+    expect(bobHits).toBe(1);
+    expect(first).toBeTruthy();
   });
 });
 
@@ -526,7 +551,7 @@ describe('downloadActiveVersion', () => {
   it('downloads the active version zip', async () => {
     const sessionId = await makeSite('sarah', 'mysite');
 
-    const result = await sites.downloadActiveVersion('mysite');
+    const result = await sites.downloadActiveVersion('sarah', 'mysite');
     expect(result?.filename).toBe('mysite.zip');
     expect(result?.data.length).toBeGreaterThan(0);
   });
@@ -535,7 +560,7 @@ describe('downloadActiveVersion', () => {
     const sessionId = await makeSite('sarah', 'mysite');
     await sites.toggleSite(sessionId, 'mysite');
 
-    expect(await sites.downloadActiveVersion('mysite')).toBeNull();
+    expect(await sites.downloadActiveVersion('sarah', 'mysite')).toBeNull();
   });
 });
 
@@ -546,7 +571,7 @@ describe('getSiteMeta and getMySiteInfo', () => {
     expect(meta.ok && meta.value?.subdomain).toBe('tina-mysite');
 
     const info = await sites.getMySiteInfo(sessionId, 'mysite');
-    expect(info.ok && info.value?.siteId).toBe('tina-mysite');
+    expect(info.ok && info.value?.siteId).toBe('mysite');
   });
 
   it('returns null for a missing site', async () => {
@@ -563,7 +588,7 @@ describe('getSiteIcon', () => {
     const created = await sites.createSite(sessionId, 'mysite', body);
     expect(created.ok).toBe(true);
 
-    const icon = await sites.getSiteIcon('mysite');
+    const icon = await sites.getSiteIcon('uma', 'mysite');
     expect(icon?.contentType).toBe('image/x-icon');
     expect(new TextDecoder().decode(icon?.data)).toBe('ico');
   });
@@ -572,14 +597,14 @@ describe('getSiteIcon', () => {
 describe('uptime and grouped stats', () => {
   it('returns uptime slots and grouped stats', async () => {
     await makeSite('victor', 'mysite');
-    sites.recordUptime('mysite', true);
-    sites.recordPageHit('mysite', '1.2.3.4');
+    sites.recordUptime('victor', 'mysite', true);
+    sites.recordPageHit('victor', 'mysite', '1.2.3.4');
 
-    const uptime = sites.getSiteUptime('mysite', 5);
+    const uptime = sites.getSiteUptime('victor', 'mysite', 5);
     expect(uptime[uptime.length - 1]?.up).toBe(true);
-    expect(sites.getSiteUptime('mysite', 5)[0]?.up).toBeUndefined();
+    expect(sites.getSiteUptime('victor', 'mysite', 5)[0]?.up).toBeUndefined();
 
-    const grouped = sites.getSiteStats('mysite', 60, 5);
+    const grouped = sites.getSiteStats('victor', 'mysite', 60, 5);
     expect(grouped.length).toBeLessThanOrEqual(13);
     expect(grouped.reduce((sum, p) => sum + p.count, 0)).toBe(1);
   });
@@ -625,7 +650,7 @@ describe('error paths', () => {
     const sessionId = await registerUser('xavier');
 
     expect(await sites.serveRequest('localhost', '/missing/index.html', '1.2.3.4')).toBeNull();
-    expect(await sites.listVersions('missing')).toEqual({ versions: [], current: null });
+    expect(await sites.listVersions('nobody', 'missing')).toEqual({ versions: [], current: null });
     expect(sessionId).toBeTruthy();
   });
 
@@ -642,7 +667,7 @@ describe('error paths', () => {
     const sessionId = await makeSite('zane', 'mysite');
     await sites.addCustomDomain(sessionId, 'mysite', 'example.com');
 
-    const token = await verificationToken('mysite');
+    const token = await verificationToken('zane', 'mysite');
     (dns.resolveTxt as Mock).mockResolvedValue([[token]]);
     await sites.verifyCustomDomain(sessionId, 'mysite', 'example.com');
 

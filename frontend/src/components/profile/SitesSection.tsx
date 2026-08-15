@@ -8,10 +8,10 @@ interface SitesSectionProps {
   sites: Site[];
   username: string;
   isOwnProfile: boolean;
-  onToggleStar: (domain: string, isStarred: boolean) => void;
+  onToggleStar: (siteId: string, isStarred: boolean) => void;
 }
 
-function DeployLink({ accentColorValues, label }: { accentColorValues: Record<string, string>; label: string }) {
+function DeployLink({ accentColorValues, label }: { accentColorValues: ReturnType<ReturnType<typeof useAccentColor>['getAccentColorValues']>; label: string }) {
   return (
     <Link
       to="/deploy"
@@ -68,11 +68,11 @@ export function SitesSection({ sites, username, isOwnProfile, onToggleStar }: Si
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
                   <Link
-                    to="/u/$username/$sitename"
-                    params={{ username: site.account || '', sitename: site.domain }}
+                    to="/u/$username/sites/$siteId"
+                    params={{ username: site.account || '', siteId: site.siteId }}
                     className="font-medium text-zinc-950 dark:text-zinc-100 truncate hover:underline"
                   >
-                    {site.displayName || site.domain}
+                    {site.displayName || site.siteId}
                   </Link>
                   <span
                     className={`text-[14px] px-2 py-0.5 rounded-full shrink-0 ${
@@ -86,7 +86,7 @@ export function SitesSection({ sites, username, isOwnProfile, onToggleStar }: Si
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      onToggleStar(site.domain, site.isStarred || false);
+                      onToggleStar(site.siteId, site.isStarred || false);
                     }}
                     className="shrink-0 flex items-center gap-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-2 py-1.5 cursor-pointer transition-colors"
                   >
@@ -103,7 +103,7 @@ export function SitesSection({ sites, username, isOwnProfile, onToggleStar }: Si
                   </button>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{site.domain}</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{site.siteId}</p>
                   {site.lastDeployedAt && (
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">
                       {formatRelativeTime(site.lastDeployedAt)}

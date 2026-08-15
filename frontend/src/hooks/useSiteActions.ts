@@ -28,8 +28,8 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
   } | null>(null);
 
   const deleteSiteMutation = useMutation({
-    mutationFn: async (domain: string) => {
-      const res = await apiFetch(`/sites/${domain}`, { method: 'DELETE' });
+    mutationFn: async (siteId: string) => {
+      const res = await apiFetch(`/users/${username}/sites/${siteId}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete site');
@@ -46,8 +46,8 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
   });
 
   const toggleSiteMutation = useMutation({
-    mutationFn: async (domain: string) => {
-      const res = await apiFetch(`/sites/${domain}/toggle`, { method: 'PATCH' });
+    mutationFn: async (siteId: string) => {
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/toggle`, { method: 'PATCH' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to toggle site');
@@ -64,8 +64,8 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
   });
 
   const activateVersionMutation = useMutation({
-    mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
-      const res = await apiFetch(`/sites/${domain}/versions/${timestamp}/activate`, { method: 'POST' });
+    mutationFn: async ({ siteId, timestamp }: { siteId: string; timestamp: number }) => {
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/versions/${timestamp}/activate`, { method: 'POST' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to activate version');
@@ -83,8 +83,8 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
   });
 
   const deleteVersionMutation = useMutation({
-    mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
-      const res = await apiFetch(`/sites/${domain}/versions/${timestamp}`, { method: 'DELETE' });
+    mutationFn: async ({ siteId, timestamp }: { siteId: string; timestamp: number }) => {
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/versions/${timestamp}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete version');
@@ -101,8 +101,8 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
   });
 
   const downloadVersionMutation = useMutation({
-    mutationFn: async ({ domain, timestamp }: { domain: string; timestamp: number }) => {
-      const res = await apiFetch(`/sites/${domain}/versions/${timestamp}/download`);
+    mutationFn: async ({ siteId, timestamp }: { siteId: string; timestamp: number }) => {
+      const res = await apiFetch(`/users/${username}/sites/${siteId}/versions/${timestamp}/download`);
       if (!res.ok) {
         throw new Error('Download failed');
       }
@@ -110,7 +110,7 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${domain}-${timestamp}.zip`;
+      a.download = `${siteId}-${timestamp}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -126,14 +126,14 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
     setActionLoading(true);
 
     if (confirmAction === 'delete') {
-      deleteSiteMutation.mutate(site.domain, {
+      deleteSiteMutation.mutate(site.siteId, {
         onSettled: () => {
           setActionLoading(false);
           setConfirmAction(null);
         },
       });
     } else {
-      toggleSiteMutation.mutate(site.domain, {
+      toggleSiteMutation.mutate(site.siteId, {
         onSettled: () => {
           setActionLoading(false);
           setConfirmAction(null);
@@ -147,14 +147,14 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
     const { timestamp } = versionModal;
     setVersionModal(null);
     setActivating(timestamp);
-    activateVersionMutation.mutate({ domain: site.domain, timestamp }, { onSettled: () => setActivating(null) });
+    activateVersionMutation.mutate({ siteId: site.siteId, timestamp }, { onSettled: () => setActivating(null) });
   };
 
   const handleDeleteVersion = async () => {
     if (!site || !versionModal) return;
     setDeletingVersion(versionModal.timestamp);
     deleteVersionMutation.mutate(
-      { domain: site.domain, timestamp: versionModal.timestamp },
+      { siteId: site.siteId, timestamp: versionModal.timestamp },
       {
         onSettled: () => {
           setDeletingVersion(null);
@@ -166,7 +166,7 @@ export function useSiteActions({ site, username, loadSite, loadVersions }: UseSi
 
   const downloadVersion = (timestamp: number) => {
     if (!site) return;
-    downloadVersionMutation.mutate({ domain: site.domain, timestamp });
+    downloadVersionMutation.mutate({ siteId: site.siteId, timestamp });
   };
 
   return {

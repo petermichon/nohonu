@@ -6,8 +6,8 @@ import { SiteProfileSection } from './SiteProfileSection.tsx';
 import type { Site } from '../lib/types.ts';
 
 const site: Site = {
-  siteId: 'site-1',
-  domain: 'my-site',
+  siteId: 'my-site',
+
   displayName: 'My Site',
   enabled: false,
   hits: 0,
@@ -17,21 +17,21 @@ const site: Site = {
 
 describe('SiteProfileSection', () => {
   it('shows a skeleton while loading', () => {
-    renderWithProviders(<SiteProfileSection site={null} siteLoading />);
+    renderWithProviders(<SiteProfileSection username="peter" site={null} siteLoading />);
     expect(screen.getByRole('heading', { name: 'Profile' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Display Name')).not.toBeInTheDocument();
   });
 
   it('renders the display name and owner/site id', () => {
-    renderWithProviders(<SiteProfileSection site={site} siteLoading={false} />);
+    renderWithProviders(<SiteProfileSection username="peter" site={site} siteLoading={false} />);
     expect(screen.getByLabelText('Display Name')).toHaveValue('My Site');
     expect(screen.getByText('@peter')).toBeInTheDocument();
-    expect(screen.getByText('site-1')).toBeInTheDocument();
+    expect(screen.getByText('my-site')).toBeInTheDocument();
   });
 
   it('disables Save until the display name changes', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<SiteProfileSection site={site} siteLoading={false} />);
+    renderWithProviders(<SiteProfileSection username="peter" site={site} siteLoading={false} />);
 
     const saveButton = screen.getByRole('button', { name: 'Save' });
     expect(saveButton).toBeEnabled();
@@ -43,7 +43,7 @@ describe('SiteProfileSection', () => {
 
   it('saves and shows the Saved status', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<SiteProfileSection site={site} siteLoading={false} />);
+    renderWithProviders(<SiteProfileSection username="peter" site={site} siteLoading={false} />);
 
     await user.clear(screen.getByLabelText('Display Name'));
     await user.type(screen.getByLabelText('Display Name'), 'New Name');
@@ -54,7 +54,7 @@ describe('SiteProfileSection', () => {
 
   it('keeps the input empty after clearing (does not revert to the saved name)', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<SiteProfileSection site={site} siteLoading={false} />);
+    renderWithProviders(<SiteProfileSection username="peter" site={site} siteLoading={false} />);
 
     await user.clear(screen.getByLabelText('Display Name'));
     expect(screen.getByLabelText('Display Name')).toHaveValue('');
@@ -65,12 +65,12 @@ describe('SiteProfileSection', () => {
     const { server } = await import('../test/server.ts');
     const { http, HttpResponse } = await import('msw');
     server.use(
-      http.patch('*/sites/my-site/meta', () => {
+      http.patch('*/users/peter/sites/my-site/meta', () => {
         return HttpResponse.json({ error: 'boom' }, { status: 500 });
       })
     );
 
-    renderWithProviders(<SiteProfileSection site={site} siteLoading={false} />);
+    renderWithProviders(<SiteProfileSection username="peter" site={site} siteLoading={false} />);
     await user.clear(screen.getByLabelText('Display Name'));
     await user.type(screen.getByLabelText('Display Name'), 'New Name');
     await user.click(screen.getByRole('button', { name: 'Save' }));

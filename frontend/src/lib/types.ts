@@ -4,7 +4,6 @@ export const SLOT_MS = 60 * 1000;
 
 export interface Site {
   siteId: string;
-  domain: string;
   displayName?: string;
   enabled: boolean;
   hits: number;
@@ -53,15 +52,21 @@ export type SitePageTab = 'overview' | 'analytics' | 'domains' | 'versions' | 's
 
 export interface Star {
   user: string;
-  domain: string;
+  siteId: string;
   createdAt: string;
   displayName?: string;
   starCount?: number;
 }
 
 export interface Domain {
+  domain: string;
+  verified: boolean;
+}
+
+export interface ProfileDomain {
+  user: string;
+  siteId: string;
   customDomain: string;
-  siteDomain: string;
   verified: boolean;
 }
 

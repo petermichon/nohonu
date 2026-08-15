@@ -1,7 +1,7 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { repoHistory } from '../../db/repo-history.ts';
 import { session } from '../../db/session.ts';
-import { versionsDir, versionPath, domainDir } from '../../shared/paths.ts';
+import { versionsDir, versionPath, siteDir } from '../../shared/paths.ts';
 import { DEFAULT_DATA } from '../../shared/site-data.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
@@ -18,7 +18,7 @@ import type { Result } from '../../shared/errors.ts';
 
 export async function createSite(
   sessionId: string,
-  domain: string,
+  siteId: string,
   zipData: Uint8Array,
   subdomain?: string,
 ): Promise<Result<{ index: number; siteId: string }>> {
@@ -26,16 +26,13 @@ export async function createSite(
   if (!auth.ok) return auth;
   const user = auth.value;
 
-  // Check if domain already exists
-  const existingData = await readSiteMetadata(user, domain);
+  // Check if siteId already exists for this user
+  const existingData = await readSiteMetadata(user, siteId);
   if (existingData) {
-    return { ok: false, code: 'already_exists', message: 'Domain already exists for this user' };
+    return { ok: false, code: 'already_exists', message: 'Site already exists for this user' };
   }
 
-  // Use user-domain as siteId for uniqueness across users
-  const siteId = `${user}-${domain}`;
-
-  // Create initial site data
+  // siteId is the user-chosen name; subdomain defaults to {user}-{siteId}
   const data = { ...DEFAULT_DATA };
   data.siteId = siteId;
   data.account = user;
@@ -44,14 +41,14 @@ export async function createSite(
   data.versions[String(index)] = { source: { type: 'upload' }, createdAt: Date.now() };
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
-  data.subdomain = subdomain || `${user}-${domain}`;
-  data.displayName = domain;
+  data.subdomain = subdomain || `${user}-${siteId}`;
+  data.displayName = siteId;
 
-  await fs.mkdir(domainDir(user, domain), { recursive: true });
-  await fs.mkdir(versionsDir(user, domain), { recursive: true });
-  await fs.writeFile(versionPath(user, domain, index), zipData);
+  await fs.mkdir(siteDir(user, siteId), { recursive: true });
+  await fs.mkdir(versionsDir(user, siteId), { recursive: true });
+  await fs.writeFile(versionPath(user, siteId, index), zipData);
 
-  const siteRowId = await upsertSite(user, domain, data);
+  const siteRowId = await upsertSite(user, siteId, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }
@@ -65,5 +62,3 @@ export async function createSite(
 
   return { ok: true, value: { index, siteId } };
 }
-
-

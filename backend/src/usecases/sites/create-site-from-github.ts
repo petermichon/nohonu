@@ -1,7 +1,7 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
 import { repoHistory as repoHistoryTable } from '../../db/repo-history.ts';
 import { session } from '../../db/session.ts';
-import { versionsDir, versionPath, domainDir, MAX_ZIP_BYTES } from '../../shared/paths.ts';
+import { versionsDir, versionPath, siteDir, MAX_ZIP_BYTES } from '../../shared/paths.ts';
 import { DEFAULT_DATA } from '../../shared/site-data.ts';
 import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
@@ -18,7 +18,7 @@ import type { Result } from '../../shared/errors.ts';
 
 export async function createSiteFromGithub(
   sessionId: string,
-  domain: string,
+  siteId: string,
   repo: string,
   ref: string,
   subdomain?: string,
@@ -27,8 +27,8 @@ export async function createSiteFromGithub(
   if (!auth.ok) return auth;
   const user = auth.value;
 
-  // Check if domain already exists
-  const existingData = await readSiteMetadata(user, domain);
+  // Check if siteId already exists
+  const existingData = await readSiteMetadata(user, siteId);
   if (existingData) {
     return { ok: false, code: 'already_exists', message: 'Domain already exists for this user' };
   }
@@ -57,8 +57,7 @@ export async function createSiteFromGithub(
     return { ok: false, code: 'upstream_failed', message: err instanceof Error ? err.message : 'Failed to fetch from GitHub' };
   }
 
-  // Use user-domain as siteId for uniqueness across users
-  const siteId = `${user}-${domain}`;
+  // siteId is the user-chosen name; subdomain defaults to {user}-{siteId}
 
   // Create initial site data
   const data = { ...DEFAULT_DATA };
@@ -70,14 +69,14 @@ export async function createSiteFromGithub(
   data.versions[String(index)] = { source: { type: 'github', repo, branch: ref }, createdAt: Date.now() };
   data.currentIndex = index;
   data.lastDeployedAt = Date.now();
-  data.subdomain = subdomain || `${user}-${domain}`;
-  data.displayName = domain;
+  data.subdomain = subdomain || `${user}-${siteId}`;
+  data.displayName = siteId;
 
-  await fs.mkdir(domainDir(user, domain), { recursive: true });
-  await fs.mkdir(versionsDir(user, domain), { recursive: true });
-  await fs.writeFile(versionPath(user, domain, index), zipData);
+  await fs.mkdir(siteDir(user, siteId), { recursive: true });
+  await fs.mkdir(versionsDir(user, siteId), { recursive: true });
+  await fs.writeFile(versionPath(user, siteId, index), zipData);
 
-  const siteRowId = await upsertSite(user, domain, data);
+  const siteRowId = await upsertSite(user, siteId, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
   }

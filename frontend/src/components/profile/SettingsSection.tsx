@@ -103,12 +103,12 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   );
 
   const saveDisplayName = async () => {
-    if (!editingDisplayName.trim()) {
+    if (!editingDisplayName?.trim()) {
       showToast('Display name cannot be empty', false);
       return;
     }
     try {
-      await updateDisplayName(editingDisplayName);
+      await updateDisplayName(editingDisplayName.trim());
       setEditingDisplayName(null);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to update display name', false);

@@ -13,7 +13,7 @@ export async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Pr
 
   const result = await createSiteFromGithubUsecase(
     params.sessionId,
-    params.domain,
+    params.siteId,
     params.repo,
     params.ref,
     params.subdomain,
@@ -23,5 +23,5 @@ export async function createSiteFromGithub(req: ExpressReq, res: ExpressRes): Pr
     return;
   }
   const value = result.value;
-  json(res, { domain: params.domain, index: value.index, repo: value.repo, branch: value.branch }, 201);
+  json(res, { siteId: params.siteId, index: value.index, repo: value.repo, branch: value.branch }, 201);
 }

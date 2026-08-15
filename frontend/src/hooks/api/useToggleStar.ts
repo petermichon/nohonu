@@ -5,8 +5,8 @@ export function useToggleStar() {
   const { apiFetch } = useApiFetch();
   const queryClient = useQueryClient();
 
-  const toggleStar = async (domain: string, isStarred: boolean) => {
-    const res = await apiFetch(`/sites/${domain}/star`, {
+  const toggleStar = async (username: string, siteId: string, isStarred: boolean) => {
+    const res = await apiFetch(`/users/${username}/sites/${siteId}/star`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: isStarred }),

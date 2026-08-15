@@ -5,15 +5,15 @@ export function useVerifyCustomDomain() {
   const { apiFetch } = useApiFetch();
   const queryClient = useQueryClient();
 
-  const verifyCustomDomain = async (siteDomain: string, customDomain: string) => {
-    const res = await apiFetch(`/sites/${siteDomain}/custom-domains/${customDomain}/verify`, {
+  const verifyCustomDomain = async (username: string, siteId: string, customDomain: string) => {
+    const res = await apiFetch(`/users/${username}/sites/${siteId}/custom-domains/${customDomain}/verify`, {
       method: 'POST',
     });
     if (!res.ok) {
       const data = await res.json();
       throw new Error(data.message || 'Verification failed');
     }
-    queryClient.invalidateQueries({ queryKey: ['custom-domains', siteDomain] });
+    queryClient.invalidateQueries({ queryKey: ['custom-domains', siteId] });
     queryClient.invalidateQueries({ queryKey: ['custom-domains'] });
   };
 

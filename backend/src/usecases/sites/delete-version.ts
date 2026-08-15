@@ -20,22 +20,22 @@ import * as fs from 'node:fs/promises';
 import type { Result } from '../../shared/errors.ts';
 
 
-export async function deleteVersion(sessionId: string, domain: string, index: number): Promise<Result<void>> {
+export async function deleteVersion(sessionId: string, siteId: string, index: number): Promise<Result<void>> {
   const auth = await requireSession(sessionId);
   if (!auth.ok) return auth;
   const user = auth.value;
-  console.assert(typeof domain === 'string' && domain.length > 0, 'domain must be a non-empty string');
+  console.assert(typeof siteId === 'string' && siteId.length > 0, 'siteId must be a non-empty string');
   console.assert(typeof index === 'number' && !isNaN(index) && index >= 0, 'index must be a valid number');
-  const exists = await fileExists(versionPath(user, domain, index));
+  const exists = await fileExists(versionPath(user, siteId, index));
   if (!exists) {
     return { ok: false, code: 'not_found', message: 'Version not found' };
   }
-  const data = await readSiteMetadata(user, domain);
+  const data = await readSiteMetadata(user, siteId);
   if (!data) {
     return { ok: false, code: 'internal', message: 'Failed to delete version' };
   }
   try {
-    await fs.unlink(versionPath(user, domain, index));
+    await fs.unlink(versionPath(user, siteId, index));
   } catch {
     return { ok: false, code: 'internal', message: 'Failed to delete version' };
   }
@@ -48,7 +48,7 @@ export async function deleteVersion(sessionId: string, domain: string, index: nu
       });
     data.currentIndex = versionIndices.length > 0 ? (versionIndices[0] as number) : null;
   }
-  const siteRowId = await upsertSite(user, domain, data);
+  const siteRowId = await upsertSite(user, siteId, data);
   if (siteRowId) {
     await syncVersions(siteRowId, data.versions);
   }

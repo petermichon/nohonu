@@ -3,19 +3,20 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../test/components.tsx';
 import { DomainsSection } from './DomainsSection.tsx';
-import type { Domain, Site } from '../../lib/types.ts';
+import type { ProfileDomain, Site } from '../../lib/types.ts';
 
 const sites: Site[] = [
-  { siteId: 's1', domain: 'my-site', displayName: 'My Site', enabled: true, hits: 0, uptime: null, account: 'peter' },
+  { siteId: 'my-site', displayName: 'My Site', enabled: true, hits: 0, uptime: null, account: 'peter' },
 ];
 
-const domains: Domain[] = [
-  { customDomain: 'example.com', siteDomain: 'my-site', verified: true },
-  { customDomain: 'pending.com', siteDomain: 'my-site', verified: false },
+const domains: ProfileDomain[] = [
+  { user: 'peter', siteId: 'my-site', customDomain: 'example.com', verified: true },
+  { user: 'peter', siteId: 'my-site', customDomain: 'pending.com', verified: false },
 ];
 
 function renderSection(overrides: Partial<React.ComponentProps<typeof DomainsSection>> = {}) {
   const props = {
+    username: 'peter',
     domains,
     isOwnProfile: true,
     domainsLoading: false,

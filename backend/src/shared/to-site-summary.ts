@@ -2,7 +2,7 @@ import type { SiteData } from './paths.ts';
 import type { SiteSummary } from './site-summary.ts';
 
 export function toSiteSummary(
-  domain: string,
+  siteId: string,
   data: SiteData | undefined,
   user: string,
   accountProfilePicture: string | undefined,
@@ -10,8 +10,7 @@ export function toSiteSummary(
   uptime: number | undefined,
 ): SiteSummary {
   return {
-    siteId: data?.siteId || domain,
-    domain,
+    siteId,
     enabled: data?.enabled ?? false,
     hits,
     uptime,
