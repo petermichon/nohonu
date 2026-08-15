@@ -38,7 +38,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
         onClick={() => {
           if (site.account) {
             router.navigate({
-              to: '/u/$username/$siteId',
+              to: '/u/$username/sites/$siteId',
               params: { username: site.account, siteId: site.siteId },
             });
           }
@@ -50,7 +50,7 @@ export function HomeSiteCard({ site }: HomeSiteCardProps) {
           if (site.account && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
             router.navigate({
-              to: '/u/$username/$siteId',
+              to: '/u/$username/sites/$siteId',
               params: { username: site.account, siteId: site.siteId },
             });
           }

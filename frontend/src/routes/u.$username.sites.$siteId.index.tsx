@@ -34,6 +34,6 @@ function Overview() {
   );
 }
 
-export const Route = createFileRoute('/u/$username/$siteId/')({
+export const Route = createFileRoute('/u/$username/sites/$siteId/')({
   component: Overview,
 });

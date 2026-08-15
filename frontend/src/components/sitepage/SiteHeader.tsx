@@ -36,7 +36,7 @@ export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: 
 
       <nav className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 p-1">
         <Link
-          to="/u/$username/$siteId"
+          to="/u/$username/sites/$siteId"
           params={{ username, siteId }}
           className={tabClass(activeTab === 'overview')}
         >
@@ -44,7 +44,7 @@ export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: 
           Overview
         </Link>
         <Link
-          to="/u/$username/$siteId/$section"
+          to="/u/$username/sites/$siteId/$section"
           params={{ username, siteId, section: 'analytics' }}
           className={tabClass(activeTab === 'analytics')}
         >
@@ -52,7 +52,7 @@ export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: 
           Analytics
         </Link>
         <Link
-          to="/u/$username/$siteId/$section"
+          to="/u/$username/sites/$siteId/$section"
           params={{ username, siteId, section: 'domains' }}
           className={tabClass(activeTab === 'domains')}
         >
@@ -60,7 +60,7 @@ export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: 
           Domains
         </Link>
         <Link
-          to="/u/$username/$siteId/$section"
+          to="/u/$username/sites/$siteId/$section"
           params={{ username, siteId, section: 'versions' }}
           className={tabClass(activeTab === 'versions')}
         >
@@ -69,7 +69,7 @@ export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: 
         </Link>
         {!isPublicView && (
           <Link
-            to="/u/$username/$siteId/$section"
+            to="/u/$username/sites/$siteId/$section"
             params={{ username, siteId, section: 'settings' }}
             className={tabClass(activeTab === 'settings')}
           >

@@ -12,7 +12,7 @@ describe('Site page', () => {
   });
 
   it('renders the site overview for a public site', async () => {
-    const { unmount } = await renderWithRouter('/u/peter/my-site');
+    const { unmount } = await renderWithRouter('/u/peter/sites/my-site');
 
     expect(await screen.findAllByText('my-site')).not.toHaveLength(0);
     expect(screen.getByText('@peter')).toBeInTheDocument();
@@ -30,7 +30,7 @@ describe('Site page', () => {
       })
     );
 
-    const { unmount } = await renderWithRouter('/u/peter/my-site');
+    const { unmount } = await renderWithRouter('/u/peter/sites/my-site');
     expect(await screen.findByText('Site not found')).toBeInTheDocument();
     unmount();
   });

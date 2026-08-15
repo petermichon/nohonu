@@ -41,7 +41,7 @@ export function StarsSection({ stars, username, onToggleStar }: StarsSectionProp
             key={`${star.user}-${star.siteId}`}
             className="relative group bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl p-4"
           >
-            <Link to="/u/$username/$siteId" params={{ username: star.user, siteId: star.siteId }} className="block">
+            <Link to="/u/$username/sites/$siteId" params={{ username: star.user, siteId: star.siteId }} className="block">
               <h3 className="font-medium text-zinc-950 dark:text-zinc-100 truncate">
                 {star.displayName || star.siteId}
               </h3>

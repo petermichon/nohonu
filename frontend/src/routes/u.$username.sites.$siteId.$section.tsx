@@ -15,7 +15,7 @@ const VALID_SECTIONS = ['analytics', 'domains', 'versions', 'settings'];
 const SECTION_MAP = Object.fromEntries(SECTIONS.map((s) => [s.id, s])) as Record<string, (typeof SECTIONS)[number]>;
 
 function SectionNotFound() {
-  const { username, siteId } = useParams({ from: '/u/$username/$siteId/$section' });
+  const { username, siteId } = useParams({ from: '/u/$username/sites/$siteId/$section' });
 
   return (
     <div className="text-center py-24">
@@ -24,7 +24,7 @@ function SectionNotFound() {
       </div>
       <p className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Section not found</p>
       <Link
-        to="/u/$username/$siteId"
+        to="/u/$username/sites/$siteId"
         params={{ username, siteId }}
         className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 mt-2 inline-block"
       >
@@ -35,7 +35,7 @@ function SectionNotFound() {
 }
 
 function SectionPage() {
-  const { section } = useParams({ from: '/u/$username/$siteId/$section' });
+  const { section } = useParams({ from: '/u/$username/sites/$siteId/$section' });
   const ctx = useSiteShellContext();
 
   if (section === 'analytics') {
@@ -126,7 +126,7 @@ function SectionPage() {
   return null;
 }
 
-export const Route = createFileRoute('/u/$username/$siteId/$section')({
+export const Route = createFileRoute('/u/$username/sites/$siteId/$section')({
   beforeLoad: ({ params }) => {
     if (!VALID_SECTIONS.includes(params.section)) {
       throw notFound();

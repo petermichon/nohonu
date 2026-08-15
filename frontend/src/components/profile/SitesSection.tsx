@@ -68,7 +68,7 @@ export function SitesSection({ sites, username, isOwnProfile, onToggleStar }: Si
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
                   <Link
-                    to="/u/$username/$siteId"
+                    to="/u/$username/sites/$siteId"
                     params={{ username: site.account || '', siteId: site.siteId }}
                     className="font-medium text-zinc-950 dark:text-zinc-100 truncate hover:underline"
                   >

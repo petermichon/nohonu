@@ -51,9 +51,9 @@ export interface SiteShellContext {
 }
 
 export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTab: SitePageTab } {
-  const { username, siteId } = useParams({ from: '/u/$username/$siteId' });
+  const { username, siteId } = useParams({ from: '/u/$username/sites/$siteId' });
   const section = useParams({
-    from: '/u/$username/$siteId/$section',
+    from: '/u/$username/sites/$siteId/$section',
     select: (p) => p.section,
     shouldThrow: false,
   });

@@ -19,7 +19,7 @@ export function ProfileSiteCard({ site }: ProfileSiteCardProps) {
 
   return (
     <Link
-      to="/u/$username/$siteId"
+      to="/u/$username/sites/$siteId"
       params={{ username: site.account || '', siteId: site.siteId }}
       className="cursor-pointer flex flex-col gap-4"
     >
