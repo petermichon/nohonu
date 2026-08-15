@@ -20,12 +20,17 @@ export function useUserSites(username: string | undefined) {
       const data = await res.json();
       return (data.sites ?? []) as Site[];
     },
+    retry: false,
   });
 
   return {
     sites: query.data ?? [],
     loading: query.isLoading,
-    error: query.error ? 'connection' : false,
+    error: query.error
+      ? query.error instanceof Error && query.error.message === 'not-found'
+        ? 'not-found'
+        : 'connection'
+      : false,
     refreshUserSites: () => queryClient.invalidateQueries({ queryKey: ['user-sites', username] }),
   };
 }

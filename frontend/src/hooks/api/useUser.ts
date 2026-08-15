@@ -18,11 +18,16 @@ export function useUser(username: string | undefined) {
       const data = await res.json();
       return data.user as { username: string; displayName: string; profilePicture?: string } | null;
     },
+    retry: false,
   });
 
   return {
     user: query.data,
     loading: query.isLoading,
-    error: query.error ? 'connection' : false,
+    error: query.error
+      ? query.error instanceof Error && query.error.message === 'not-found'
+        ? 'not-found'
+        : 'connection'
+      : false,
   };
 }

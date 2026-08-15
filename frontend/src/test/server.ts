@@ -86,8 +86,56 @@ export const handlers = [
   http.patch('*/sites/:domain/star', () => {
     return HttpResponse.json({ success: true });
   }),
+  http.get('*/sites/:domain', () => {
+    return HttpResponse.json({
+      siteId: 'site-1',
+      domain: 'my-site',
+      displayName: 'My Site',
+      enabled: true,
+      hits: 100,
+      uptime: 99.5,
+      account: 'peter',
+    });
+  }),
+  http.get('*/sites/:domain/stats', () => {
+    return HttpResponse.json({ slots: [] });
+  }),
+  http.get('*/sites/:domain/visitors', () => {
+    return HttpResponse.json({ visitors: [] });
+  }),
+  http.get('*/sites/:domain/uptime', () => {
+    return HttpResponse.json({ slots: [] });
+  }),
+  http.get('*/sites/:domain/versions', () => {
+    return HttpResponse.json({
+      versions: [
+        { index: 1, size: 2048, source: { type: 'upload' }, createdAt: 1720000000000 },
+      ],
+      currentVersion: 1,
+    });
+  }),
   http.get('*/users/:username', () => {
     return HttpResponse.json({ user: { username: 'peter', displayName: 'Peter' } });
+  }),
+  http.get('*/users/:username/:domain', () => {
+    return HttpResponse.json({
+      siteId: 'site-1',
+      domain: 'my-site',
+      displayName: 'My Site',
+      enabled: true,
+      hits: 100,
+      uptime: 99.5,
+      account: 'peter',
+    });
+  }),
+  http.get('*/users/:username/sites', () => {
+    return HttpResponse.json({ sites: [] });
+  }),
+  http.get('*/users/:username/stars', () => {
+    return HttpResponse.json({ stars: [] });
+  }),
+  http.get('*/explore/sites', () => {
+    return HttpResponse.json({ sites: [] });
   }),
   http.post('*/sites/:domain/versions', () => {
     return HttpResponse.json({ success: true });
