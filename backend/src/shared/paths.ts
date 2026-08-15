@@ -1,6 +1,7 @@
 import { SITES_DIR } from '../config.ts';
 
 export const VALID_SITE_ID = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+export const VALID_USERNAME = /^[a-z0-9][a-z0-9_-]{0,28}[a-z0-9]$/;
 export const VALID_CUSTOM_DOMAIN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;
 export const MAX_CUSTOM_DOMAIN_LENGTH = 253;
 

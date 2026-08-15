@@ -7,7 +7,7 @@ import { CustomDomainsSection } from './CustomDomainsSection.tsx';
 
 describe('CustomDomainsSection', () => {
   it('renders the custom domain list', async () => {
-    renderWithProviders(<CustomDomainsSection domain="my-site" />);
+    renderWithProviders(<CustomDomainsSection username="peter" siteId="my-site" />);
     expect(await screen.findByText('example.com')).toBeInTheDocument();
     expect(screen.getByText('pending.com')).toBeInTheDocument();
     expect(screen.getByText('Verified')).toBeInTheDocument();
@@ -15,13 +15,13 @@ describe('CustomDomainsSection', () => {
   });
 
   it('disables Add until a domain is typed', () => {
-    renderWithProviders(<CustomDomainsSection domain="my-site" />);
+    renderWithProviders(<CustomDomainsSection username="peter" siteId="my-site" />);
     expect(screen.getByRole('button', { name: /Add/ })).toBeDisabled();
   });
 
   it('adds a custom domain and shows a confirmation', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<CustomDomainsSection domain="my-site" />);
+    renderWithProviders(<CustomDomainsSection username="peter" siteId="my-site" />);
 
     await user.type(screen.getByPlaceholderText('example.com'), 'newdomain.com');
     const addButton = screen.getByRole('button', { name: /Add/ });
@@ -38,13 +38,13 @@ describe('CustomDomainsSection', () => {
         return HttpResponse.json({ customDomains: [] });
       })
     );
-    renderWithProviders(<CustomDomainsSection domain="my-site" />);
+    renderWithProviders(<CustomDomainsSection username="peter" siteId="my-site" />);
     expect(await screen.findByText('DNS Setup Instructions')).toBeInTheDocument();
   });
 
   it('removes a custom domain', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<CustomDomainsSection domain="my-site" />);
+    renderWithProviders(<CustomDomainsSection username="peter" siteId="my-site" />);
 
     await user.click((await screen.findAllByRole('button', { name: 'Remove domain' }))[0]);
     expect(await screen.findByText('Custom domain removed')).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('CustomDomainsSection', () => {
 
   it('verifies an unverified custom domain', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<CustomDomainsSection domain="my-site" />);
+    renderWithProviders(<CustomDomainsSection username="peter" siteId="my-site" />);
 
     await user.click(await screen.findByRole('button', { name: 'Verify domain' }));
     expect(await screen.findByText('Custom domain verified')).toBeInTheDocument();

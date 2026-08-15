@@ -7,7 +7,7 @@ import { register } from '../../../usecases/auth/register.ts';
 export async function authRegister(req: ExpressReq, res: ExpressRes): Promise<void> {
   const params = await extractRegisterParams(req);
   if (!params) {
-    json(res, { error: 'Password and username are required' }, 400);
+    json(res, { error: 'Invalid username or password' }, 400);
     return;
   }
   const result = await register(params.password, params.username, params.userAgent);

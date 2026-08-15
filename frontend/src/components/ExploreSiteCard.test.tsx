@@ -9,7 +9,7 @@ import type * as TanStackRouter from '@tanstack/react-router';
 const navigate = vi.fn();
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
-  const actual = await importOriginal<TanStackRouter>();
+  const actual = await importOriginal<typeof TanStackRouter>();
   return { ...actual, useNavigate: () => navigate };
 });
 

@@ -12,7 +12,13 @@ interface SubdomainSectionProps {
   isReadOnly?: boolean;
 }
 
-export function SubdomainSection({ username, siteId, subdomain, siteLoading, isReadOnly = false }: SubdomainSectionProps) {
+export function SubdomainSection({
+  username,
+  siteId,
+  subdomain,
+  siteLoading,
+  isReadOnly = false,
+}: SubdomainSectionProps) {
   const { updateSiteConfig } = useUpdateSiteConfig();
   const { showToast } = useToast();
   const [editingSubdomain, setEditingSubdomain] = useState(subdomain || '');

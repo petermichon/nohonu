@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useAccentColor, ACCENT_COLORS } from '../providers/AccentColorProvider.tsx';
 import { useTheme } from '../providers/ThemeProvider.tsx';
 import { useSignup } from '../hooks/api/useSignup.ts';
+import { isValidUsername } from '../lib/utils.ts';
 
 function Signup() {
   const { accentColor, getAccentColorValues } = useAccentColor();
@@ -12,6 +13,7 @@ function Signup() {
   const [username, setUsernameState] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particleCount = 250;
 
@@ -163,8 +165,13 @@ function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidUsername(username)) {
+      setValidationError('Username must be 2-30 characters (lowercase letters, numbers, dashes, underscores).');
+      return;
+    }
+    setValidationError(null);
     try {
-      const data = await signup({ username, password });
+      const data = await signup({ username: username.toLowerCase(), password });
       navigate({ to: `/u/${data.user.username}` });
     } catch {
       // Error is rendered from the hook
@@ -187,6 +194,11 @@ function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {validationError && (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
+                {validationError}
+              </div>
+            )}
             {error?.message && (
               <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
                 {error.message}

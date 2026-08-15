@@ -37,4 +37,16 @@ describe('Signup page', () => {
     expect(localStorage.getItem('sessionId')).toBe('sess-abc');
     unmount();
   });
+
+  it('rejects an invalid username before submitting', async () => {
+    const { router, unmount } = await renderWithRouter('/signup');
+
+    await signUpAs('John Doe', 'secret123');
+
+    expect(
+      await screen.findByText(/Username must be 2-30 characters/)
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/signup');
+    unmount();
+  });
 });
