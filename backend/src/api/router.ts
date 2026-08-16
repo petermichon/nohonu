@@ -53,19 +53,16 @@ import { addCustomDomain } from './endpoints/custom-domains/add-custom-domain.ts
 import { verifyCustomDomain } from './endpoints/custom-domains/verify-custom-domain.ts';
 import { deleteCustomDomain } from './endpoints/custom-domains/delete-custom-domain.ts';
 import { requireServerPassword } from './require-server-password.ts';
-import { SUBDOMAIN_BASE } from '../config.ts';
+import { isPublicImageRequest, isSubdomainSiteRequest } from './public-request.ts';
 
 export const router = Router();
 
-// Server-wide password gate at the entry point. Only GET requests fetching a
-// hosted site on a subdomain are open (browser access); everything else
-// requires the server password. Infrastructure gate — removed once real
-// authentication lands.
+// Server-wide password gate at the entry point. Subdomain site-serving GETs and
+// public image assets (profile pictures, covers, icons) are open to browsers;
+// everything else requires the server password. Infrastructure gate — removed
+// once real authentication lands.
 router.use((req: Request, res: Response, next: NextFunction) => {
-  const host = (req.get('Host') ?? '').replace(/:\d+$/, '').toLowerCase();
-  const base = SUBDOMAIN_BASE.replace(/^https?:\/\//, '').replace(/:\d+$/, '').toLowerCase();
-  const isSubdomainSite = req.method === 'GET' && host.length > base.length && host.endsWith(`.${base}`);
-  if (isSubdomainSite) return next();
+  if (isSubdomainSiteRequest(req) || isPublicImageRequest(req)) return next();
   requireServerPassword(req, res, next);
 });
 
