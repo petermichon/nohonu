@@ -73,3 +73,7 @@ docker compose -f deploy/docker-compose.yml up --build -d
 
 See [deploy/README.md](deploy/README.md) for detailed deployment instructions with Caddy reverse proxy setup.
 See [frontend/README.md](frontend/README.md) for frontend development details.
+
+## License
+
+Nohonu is released under the [AGPL-3.0-or-later](LICENSE) license. See [NOTICE](NOTICE) for copyright and contact details.
