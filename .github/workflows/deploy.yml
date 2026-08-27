@@ -28,6 +28,16 @@ jobs:
             cd deploy
             ./backup.sh
             COMMIT_SHA=$(git -C /opt/nohonu rev-parse --short HEAD) docker compose up -d --build
-            sleep 5
             PW=$(sed -n 's/^SERVER_PASSWORD=//p' /opt/nohonu/deploy/.env)
-            curl -fsS -H "X-Server-Password: $PW" http://127.0.0.1:8081/health || exit 1
+            for i in $(seq 1 12); do
+              if curl -fsS -H "X-Server-Password: $PW" http://127.0.0.1:8081/health; then
+                echo "health check OK (attempt $i)"
+                exit 0
+              fi
+              echo "health check attempt $i failed, retrying in 5s..."
+              sleep 5
+            done
+            echo "::error::backend health check failed after retries"
+            echo "===== backend logs ====="
+            docker compose logs --tail=200 backend || true
+            exit 1
