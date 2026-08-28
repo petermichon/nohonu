@@ -61,6 +61,7 @@ export function SettingsMenu() {
           { value: 'outfit', label: 'Outfit' },
           { value: 'mona-sans', label: 'Mona Sans' },
           { value: 'urbanist', label: 'Urbanist' },
+          { value: 'fredoka', label: 'Fredoka' },
         ] as Array<{ value: Font; label: string; divider?: boolean }>
       ).map((opt) => ({
         ...opt,

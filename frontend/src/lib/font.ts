@@ -1,15 +1,17 @@
-export type Font = 'outfit' | 'mona-sans' | 'urbanist';
+export type Font = 'outfit' | 'mona-sans' | 'urbanist' | 'fredoka';
 
 const fontNames: Partial<Record<Font, string>> = {
   outfit: 'Outfit Variable',
   'mona-sans': 'Mona Sans Variable',
   urbanist: 'Urbanist Variable',
+  fredoka: 'Fredoka Variable',
 };
 
 const fontFamilies: Record<Font, string> = {
   outfit: "'Outfit Variable'",
   'mona-sans': "'Mona Sans Variable'",
   urbanist: "'Urbanist Variable'",
+  fredoka: "'Fredoka Variable'",
 };
 
 export const validFonts = Object.keys(fontFamilies) as Font[];
