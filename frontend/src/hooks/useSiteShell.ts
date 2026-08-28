@@ -3,10 +3,9 @@ import { useParams } from '@tanstack/react-router';
 import { useSites } from './api/useSites.ts';
 import { useConnection } from './useConnection.ts';
 import { useToast } from '../providers/ToastContext.tsx';
-import { calcUptimePct } from '../lib/utils.ts';
 import { useSiteData } from './useSiteData.ts';
 import { useSiteActions } from './useSiteActions.ts';
-import { SLOT_MS, type TimeRange, type Site, type Slot, type UptimeSlot, type Version, type SitePageTab } from '../lib/types.ts';
+import { SLOT_MS, type TimeRange, type Site, type Slot, type Version, type SitePageTab } from '../lib/types.ts';
 import { host, hostWithPort, protocol } from '../config.ts';
 
 export interface SiteShellContext {
@@ -18,7 +17,6 @@ export interface SiteShellContext {
   siteUrl: string;
   host: string;
   totalHits: number;
-  uptimePct: number | null;
   now: number;
   globalRange: TimeRange;
   setGlobalRange: (range: TimeRange) => void;
@@ -29,10 +27,6 @@ export interface SiteShellContext {
   stats: Slot[];
   statsLoading: boolean;
   loadStats: () => Promise<void>;
-  uptimeData: UptimeSlot[];
-  uptimeAllData: UptimeSlot[];
-  uptimeLoading: boolean;
-  loadUptime: () => Promise<void>;
   versions: Version[];
   versionsLoading: boolean;
   currentVersion: number | null;
@@ -64,7 +58,7 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
   const isPublicView = !!username && username !== loggedInUsername;
 
   const data = useSiteData(siteId, username, isPublicView);
-  const { setStatsRange, setUptimeRange } = data;
+  const { setStatsRange } = data;
   const actions = useSiteActions({
     site: data.site,
     username,
@@ -84,8 +78,7 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
 
   useEffect(() => {
     setStatsRange(globalRange);
-    setUptimeRange(globalRange);
-  }, [globalRange, setStatsRange, setUptimeRange]);
+  }, [globalRange, setStatsRange]);
 
   const subdomainBase = data.site?.subdomainBase || hostWithPort;
   const siteUrl = data.site?.subdomain
@@ -93,7 +86,6 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
     : `${protocol}//${data.site?.siteId}.${subdomainBase}`;
 
   const totalHits = data.stats.reduce((a, b) => a + b.count, 0);
-  const uptimePct = calcUptimePct(data.uptimeData);
 
   const requestVersionActivate = (index: number) => {
     const v = data.versions.find((vv) => vv.index === index);
@@ -130,7 +122,6 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
     siteUrl,
     host,
     totalHits,
-    uptimePct,
     now,
     globalRange,
     setGlobalRange,
@@ -141,10 +132,6 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
     stats: data.stats,
     statsLoading: data.statsLoading,
     loadStats: data.loadStats,
-    uptimeData: data.uptimeData,
-    uptimeAllData: data.uptimeAllData,
-    uptimeLoading: data.uptimeLoading,
-    loadUptime: data.loadUptime,
     versions: data.versions,
     versionsLoading: data.versionsLoading,
     currentVersion: data.currentVersion,

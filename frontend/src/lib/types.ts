@@ -33,13 +33,7 @@ export interface Slot {
   count: number;
 }
 
-export interface UptimeSlot {
-  slot: number;
-  up: boolean | null;
-}
-
 export type TimeRange = 1 | 30 | 60 | 1440;
-export type UptimeRange = 1 | 30 | 60 | 1440;
 
 export type UserPageTab = 'overview' | 'sites' | 'domains' | 'settings' | 'stars';
 export type SitePageTab = 'overview' | 'analytics' | 'domains' | 'versions' | 'settings';

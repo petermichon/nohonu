@@ -4,7 +4,7 @@ import { useApiFetch } from '../hooks/api/useApiFetch.ts';
 import { usePollData } from '../hooks/usePollData.ts';
 import { SLOT_MS } from '../lib/types.ts';
 import { getGroupMinutes, getSlotsForRange } from '../lib/utils.ts';
-import type { Site, Version, Slot, UptimeSlot, TimeRange, UptimeRange } from '../lib/types.ts';
+import type { Site, Version, Slot, TimeRange } from '../lib/types.ts';
 
 export interface SiteDataReturn {
   site: Site | null;
@@ -14,17 +14,11 @@ export interface SiteDataReturn {
   statsLoading: boolean;
   statsRange: TimeRange;
   setStatsRange: (r: TimeRange) => void;
-  uptimeData: UptimeSlot[];
-  uptimeLoading: boolean;
-  uptimeAllData: UptimeSlot[];
-  uptimeRange: UptimeRange;
-  setUptimeRange: (r: UptimeRange) => void;
   versions: Version[];
   versionsLoading: boolean;
   currentVersion: number | null;
   loadSite: () => Promise<void>;
   loadStats: () => Promise<void>;
-  loadUptime: () => Promise<void>;
   loadVersions: () => Promise<void>;
 }
 
@@ -32,8 +26,6 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
   const { apiFetch } = useApiFetch();
   const queryClient = useQueryClient();
   const [statsRange, setStatsRange] = useState<TimeRange>(60);
-  const [uptimeRange, setUptimeRange] = useState<UptimeRange>(60);
-  const uptimeMountedRef = useRef(false);
   const statsMountedRef = useRef(false);
 
   // Site query
@@ -77,30 +69,6 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
     retry: false,
   });
 
-  // Uptime query
-  const uptimeQuery = useQuery({
-    queryKey: ['site-uptime', siteId, uptimeRange],
-    queryFn: async () => {
-      const slotsToFetch = getSlotsForRange(uptimeRange);
-      const group = getGroupMinutes();
-      const res = await apiFetch(`/users/${username}/sites/${siteId}/uptime?slots=${slotsToFetch}&group=${group}`);
-      const data = await res.json();
-      return (data.uptime as UptimeSlot[]) ?? [];
-    },
-    retry: false,
-  });
-
-  // Uptime all query
-  const uptimeAllQuery = useQuery({
-    queryKey: ['site-uptime-all', siteId],
-    queryFn: async () => {
-      const res = await apiFetch(`/users/${username}/sites/${siteId}/uptime?slots=1440`);
-      const data = await res.json();
-      return (data.uptime as UptimeSlot[]) ?? [];
-    },
-    retry: false,
-  });
-
   const loadSite = useCallback(async () => {
     await siteQuery.refetch();
   }, [siteQuery]);
@@ -109,26 +77,9 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
     await statsQuery.refetch();
   }, [statsQuery]);
 
-  const loadUptime = useCallback(async () => {
-    await uptimeQuery.refetch();
-  }, [uptimeQuery]);
-
   const loadVersions = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['site-versions', siteId] });
   }, [queryClient, siteId]);
-
-  const loadUptimeAll = useCallback(async () => {
-    await uptimeAllQuery.refetch();
-  }, [uptimeAllQuery]);
-
-  // Reload uptime only when range changes (not on initial mount — usePollData handles that)
-  useEffect(() => {
-    if (!uptimeMountedRef.current) {
-      uptimeMountedRef.current = true;
-      return;
-    }
-    loadUptime();
-  }, [loadUptime, uptimeRange]);
 
   // Reload stats immediately when range selector changes (not on initial mount — usePollData handles that)
   useEffect(() => {
@@ -139,12 +90,10 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
     loadStats();
   }, [loadStats, statsRange]);
 
-  // Poll stats and uptime every minute
+  // Poll stats every minute
   usePollData(
     () => {
       loadStats();
-      loadUptime();
-      loadUptimeAll();
     },
     SLOT_MS,
     true
@@ -158,17 +107,11 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
     statsLoading: statsQuery.isLoading,
     statsRange,
     setStatsRange,
-    uptimeData: uptimeQuery.data ?? [],
-    uptimeLoading: uptimeQuery.isLoading,
-    uptimeAllData: uptimeAllQuery.data ?? [],
-    uptimeRange,
-    setUptimeRange,
     versions: versionsQuery.data?.versions ?? [],
     versionsLoading: versionsQuery.isLoading,
     currentVersion: versionsQuery.data?.current ?? null,
     loadSite,
     loadStats,
-    loadUptime,
     loadVersions,
   };
 }

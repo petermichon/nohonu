@@ -1,7 +1,6 @@
 import { createFileRoute, notFound, Link, useParams } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { ActivityChart } from '../components/ActivityChart.tsx';
-import { UptimeChart } from '../components/UptimeChart.tsx';
 import { VersionPanel } from '../components/VersionPanel.tsx';
 import { CustomDomainsSection } from '../components/CustomDomainsSection.tsx';
 import { DangerZoneSection } from '../components/DangerZoneSection.tsx';
@@ -50,18 +49,6 @@ function SectionPage() {
           reloading={ctx.statsLoading}
           range={ctx.globalRange}
           onRangeChange={ctx.setGlobalRange}
-          now={ctx.now}
-        />
-        <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3 mt-8">
-          {SECTION_MAP['uptime'].label}
-        </h2>
-        <UptimeChart
-          uptime={ctx.uptimeData}
-          allUptime={ctx.uptimeAllData}
-          range={ctx.globalRange}
-          onRangeChange={ctx.setGlobalRange}
-          onReload={() => ctx.loadUptime()}
-          reloading={ctx.uptimeLoading}
           now={ctx.now}
         />
       </section>

@@ -46,12 +46,6 @@ export function formatHits(hits: number): string {
   return hits.toLocaleString();
 }
 
-export function calcUptimePct(uptimeData: { up: boolean | null }[]): number | null {
-  const checked = uptimeData.filter((s) => s.up !== null);
-  if (checked.length === 0) return null;
-  return Math.round((checked.filter((s) => s.up).length / checked.length) * 100);
-}
-
 export function getAccentStyle(
   accent: string | null | undefined,
   enabled: boolean
