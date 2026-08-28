@@ -15,6 +15,11 @@
 
 Platform for deploying and discovering static sites.
 
+Nohonu is an open-source platform for deploying and discovering static sites. Sites are hosted on public user
+profiles, so the platform doubles as a community gallery: visitors can browse what others have built and star the
+projects they like. The project is licensed AGPL-3.0 and self-hostable, running on a single VPS with Docker and no
+managed database.
+
 ## Project Structure
 
 ```txt
