@@ -1,10 +1,10 @@
 function Endpoints({ rows }: { rows: { method: string; path: string; desc: string }[] }) {
   return (
-    <table className="w-full text-sm text-left">
+    <table className="w-full text-sm text-left table-fixed">
       <thead>
         <tr className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wider">
           <th className="font-medium pb-2 pr-4 w-16">Method</th>
-          <th className="font-medium pb-2 pr-4">Path</th>
+          <th className="font-medium pb-2 pr-4 w-[32rem]">Path</th>
           <th className="font-medium pb-2">Description</th>
         </tr>
       </thead>
@@ -14,7 +14,7 @@ function Endpoints({ rows }: { rows: { method: string; path: string; desc: strin
             <td className="py-2 pr-4 whitespace-nowrap">
               <span className="text-zinc-950 dark:text-zinc-100 font-semibold">{r.method}</span>
             </td>
-            <td className="py-2 pr-4 whitespace-nowrap">{r.path}</td>
+            <td className="py-2 pr-4 break-words">{r.path}</td>
             <td className="py-2 whitespace-normal text-zinc-500 dark:text-zinc-400 not-mono">{r.desc}</td>
           </tr>
         ))}
