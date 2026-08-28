@@ -16,6 +16,13 @@ export const handlers = [
   http.post('*/auth/logout', () => {
     return HttpResponse.json({ success: true });
   }),
+  http.delete('*/auth/account', async ({ request }) => {
+    const body = (await request.json()) as { password?: string };
+    if (body.password === 'wrong') {
+      return HttpResponse.json({ error: 'Password is incorrect' }, { status: 401 });
+    }
+    return HttpResponse.json({ success: true });
+  }),
   http.get('*/auth/me', () => {
     return HttpResponse.json({ user: { username: 'peter', displayName: 'Peter' } });
   }),

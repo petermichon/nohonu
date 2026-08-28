@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { Key, LogOut, Monitor, User } from 'lucide-react';
+import { Key, LogOut, Monitor, User, Trash2 } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useDeleteProfilePicture } from '../../hooks/api/useDeleteProfilePicture.ts';
+import { useDeleteAccount } from '../../hooks/api/useDeleteAccount.ts';
 import { useDeleteSession } from '../../hooks/api/useDeleteSession.ts';
 import { useSessions } from '../../hooks/api/useSessions.ts';
 import { useUpdateDisplayName } from '../../hooks/api/useUpdateDisplayName.ts';
@@ -25,7 +28,10 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const { showToast } = useToast();
-  const { apiBase, sessionId } = useConnection();
+  const { apiBase, sessionId, disconnect } = useConnection();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { deleteAccount } = useDeleteAccount();
   const { user } = useMe();
   const displayName = user?.displayName ?? '';
   const profilePicture = user?.profilePicture;
@@ -42,6 +48,8 @@ export function SettingsSection({ username }: SettingsSectionProps) {
   const [editingDisplayName, setEditingDisplayName] = useState<string | null>(null);
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -101,6 +109,19 @@ export function SettingsSection({ username }: SettingsSectionProps) {
       newPassword === confirmPassword &&
       !savingPassword
   );
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      await deleteAccount(deletePassword);
+      queryClient.clear();
+      disconnect();
+      navigate({ to: '/' });
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to delete account', false);
+      setDeletingAccount(false);
+    }
+  };
 
   const saveDisplayName = async () => {
     if (!editingDisplayName?.trim()) {
@@ -308,6 +329,43 @@ export function SettingsSection({ username }: SettingsSectionProps) {
                   </div>
                 ))
             )}
+          </div>
+        </div>
+
+        <div className="border-2 p-4 rounded-xl" style={{ borderColor: `rgb(${accentColorValues.rgb})` }}>
+          <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3 flex items-center gap-2">
+            <Trash2 className="w-5 h-5" />
+            Delete Account
+          </h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
+            Permanently deletes your account, all sites, versions, statistics and data. This action cannot be undone.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md">
+            <Input
+              type="password"
+              id="deleteAccountPassword"
+              name="deleteAccountPassword"
+              autoComplete="current-password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Enter your password to confirm"
+              disabled={deletingAccount}
+            />
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              disabled={!deletePassword || deletingAccount}
+              className={`px-4 py-2.5 text-sm font-medium rounded-full cursor-pointer whitespace-nowrap
+                disabled:opacity-50 disabled:cursor-auto ${
+                accentColorValues.textColor === 'light'
+                  ? 'text-white'
+                  : accentColorValues.textColor === 'inverted'
+                    ? 'text-zinc-100 dark:text-zinc-950'
+                    : 'text-zinc-950'
+              } ${accentColorValues.bg}`}
+            >
+              {deletingAccount ? 'Deleting...' : 'Delete permanently'}
+            </button>
           </div>
         </div>
       </div>
