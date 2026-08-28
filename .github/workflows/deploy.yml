@@ -28,9 +28,8 @@ jobs:
             cd deploy
             ./backup.sh
             COMMIT_SHA=$(git -C /opt/nohonu rev-parse --short HEAD) docker compose up -d --build
-            PW=$(sed -n 's/^SERVER_PASSWORD=//p' /opt/nohonu/deploy/.env)
             for i in $(seq 1 12); do
-              if curl -fsS -H "X-Server-Password: $PW" http://127.0.0.1:8081/health; then
+              if curl -fsS http://127.0.0.1:8081/health; then
                 echo "health check OK (attempt $i)"
                 exit 0
               fi

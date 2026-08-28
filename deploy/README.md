@@ -16,7 +16,7 @@ This folder contains the Docker Compose stack for production deployment.
 
 ```bash
 cp .env.example .env
-# Edit .env: set SERVER_PASSWORD and DOMAIN
+# Edit .env: set DOMAIN
 
 docker compose up --build -d
 ```

@@ -59,23 +59,15 @@ This separation enables:
 
 ## Authentication
 
-Two mechanisms, both header-based:
-
-**Sessions** - User authentication. Obtain a session id via `POST /auth/register` or `POST /auth/login`, then send it on
+Header-based sessions. Obtain a session id via `POST /auth/register` or `POST /auth/login`, then send it on
 authenticated requests:
 
 ```txt
 X-Session-Id: <session-id>
 ```
 
-**API key** - When `API_KEY` is set, the management API (auth/session routes, `/sites`, `/custom-domains`) requires:
-
-```txt
-X-Api-Key: your-secret-key
-```
-
-Public endpoints (`/health`, `/auth`, `/auth/register`, `/auth/login`, `/check-*`, `/explore/sites`, `/users/*`) and
-static file serving stay open without either header.
+Public endpoints (`/health`, `/auth/register`, `/auth/login`, `/check-*`, `/explore/sites`, `/users/*`) and
+static file serving stay open without a session header.
 
 ## API
 
@@ -84,7 +76,6 @@ static file serving stay open without either header.
 | Method | Path                               | Notes                                                            |
 | ------ | ---------------------------------- | ---------------------------------------------------------------- |
 | GET    | `/health`                          | Health check, returns `{ "status": "healthy", "uptimeMs": ... }` |
-| GET    | `/auth`                            | API key status: `{ "secured": bool, "valid": bool }`             |
 | POST   | `/auth/register`                   | Create account: `{ "username", "password" }`                     |
 | POST   | `/auth/login`                      | Log in: `{ "username", "password" }`                             |
 | GET    | `/check-domain?siteId=&user=`   | 200 if the siteId is taken for the user, else 404              |

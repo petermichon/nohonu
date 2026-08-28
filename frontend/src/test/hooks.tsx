@@ -15,10 +15,8 @@ export function createQueryClient() {
 
 export const TEST_CONNECTION: ConnectionContextType = {
   apiBase: 'http://api.test',
-  serverPassword: 'pw',
   sessionId: 'sess-123',
   username: 'peter',
-  setServerPassword: () => {},
   setSessionId: () => {},
   setUsername: () => {},
   disconnect: () => {},
