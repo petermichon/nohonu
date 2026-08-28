@@ -17,7 +17,10 @@ describe('Site page', () => {
     expect(await screen.findAllByText('my-site')).not.toHaveLength(0);
     expect(screen.getByText('@peter')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Overview/ })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Versions/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Analytics/ })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Domains/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Versions/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Settings/ })).not.toBeInTheDocument();
     unmount();
   });
 

@@ -51,31 +51,33 @@ export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: 
           <BarChart3 className="w-4 h-4" />
           Analytics
         </Link>
-        <Link
-          to="/u/$username/sites/$siteId/$section"
-          params={{ username, siteId, section: 'domains' }}
-          className={tabClass(activeTab === 'domains')}
-        >
-          <Globe className="w-4 h-4" />
-          Domains
-        </Link>
-        <Link
-          to="/u/$username/sites/$siteId/$section"
-          params={{ username, siteId, section: 'versions' }}
-          className={tabClass(activeTab === 'versions')}
-        >
-          <Layers className="w-4 h-4" />
-          Versions
-        </Link>
         {!isPublicView && (
-          <Link
-            to="/u/$username/sites/$siteId/$section"
-            params={{ username, siteId, section: 'settings' }}
-            className={tabClass(activeTab === 'settings')}
-          >
-            <Settings className="w-4 h-4" />
-            Settings
-          </Link>
+          <>
+            <Link
+              to="/u/$username/sites/$siteId/$section"
+              params={{ username, siteId, section: 'domains' }}
+              className={tabClass(activeTab === 'domains')}
+            >
+              <Globe className="w-4 h-4" />
+              Domains
+            </Link>
+            <Link
+              to="/u/$username/sites/$siteId/$section"
+              params={{ username, siteId, section: 'versions' }}
+              className={tabClass(activeTab === 'versions')}
+            >
+              <Layers className="w-4 h-4" />
+              Versions
+            </Link>
+            <Link
+              to="/u/$username/sites/$siteId/$section"
+              params={{ username, siteId, section: 'settings' }}
+              className={tabClass(activeTab === 'settings')}
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </Link>
+          </>
         )}
       </nav>
     </header>

@@ -55,7 +55,7 @@ function SectionPage() {
     );
   }
 
-  if (section === 'domains') {
+  if (section === 'domains' && !ctx.isPublicView) {
     return (
       <section className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
         <SubdomainSection
@@ -70,7 +70,7 @@ function SectionPage() {
     );
   }
 
-  if (section === 'versions') {
+  if (section === 'versions' && !ctx.isPublicView) {
     return (
       <section className="max-w-7xl mx-auto px-6 py-8">
         <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100 mb-3">
