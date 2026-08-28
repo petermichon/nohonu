@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Modal } from './Modal.tsx';
+import { Field } from './Field.tsx';
 import { Input } from './Input.tsx';
+import { Select } from './Select.tsx';
 import { Button } from './Button.tsx';
 import type { Site } from '../lib/types.ts';
 
@@ -41,10 +43,7 @@ export function AddDomainModal({ isOpen, sites, onClose, onAdd }: AddDomainModal
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add custom domain" size="sm">
       <div className="space-y-4">
-        <div>
-          <label htmlFor="customDomain" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-            Custom domain
-          </label>
+        <Field label="Custom domain" htmlFor="customDomain">
           <Input
             type="text"
             id="customDomain"
@@ -57,18 +56,14 @@ export function AddDomainModal({ isOpen, sites, onClose, onAdd }: AddDomainModal
           {isInvalid && (
             <p className="text-xs text-red-500 dark:text-red-400 mt-1">Enter a valid domain name</p>
           )}
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="siteId" className="text-sm text-zinc-600 dark:text-zinc-400 mb-1.5 block">
-            Site
-          </label>
-          <select
+        <Field label="Site" htmlFor="siteId">
+          <Select
             id="siteId"
             name="siteId"
             value={siteId}
             onChange={(e) => setSiteId(e.target.value)}
-            className="w-full px-4 py-2.5 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-full text-sm text-zinc-950 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
           >
             {sites.length === 0 && <option value="">No sites available</option>}
             {sites.map((site) => (
@@ -76,8 +71,8 @@ export function AddDomainModal({ isOpen, sites, onClose, onAdd }: AddDomainModal
                 {site.displayName || site.siteId}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </Field>
 
         {error && <p className="text-xs text-red-500 dark:text-red-400">{error}</p>}
 
