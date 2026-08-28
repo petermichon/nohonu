@@ -19,7 +19,7 @@ export function SiteHeader({ site, username, siteId, activeTab, isPublicView }: 
           <Layout className="w-8 h-8 text-zinc-600 dark:text-zinc-400" />
         </div>
         <div>
-          <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.siteId}</h1>
+          <h1 className="text-3xl font-semibold text-zinc-950 dark:text-zinc-50 mb-1">{site?.siteId ?? siteId}</h1>
           {username ? (
             <Link
               to="/u/$username"
