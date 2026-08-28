@@ -171,7 +171,7 @@ The test suite also runs `migrate deploy` against a temp database, so tests alwa
 
 ## Running Locally
 
-**Requirements:** Node.js 20+.
+**Requirements:** Node.js 24+.
 
 ```bash
 npm install

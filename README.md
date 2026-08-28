@@ -4,7 +4,7 @@
 ![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-20-5FA04E?logo=nodedotjs&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-24-5FA04E?logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5.1-000000?logo=express)
 ![Prisma](https://img.shields.io/badge/Prisma-7.9-2D3748?logo=prisma)
 ![SQLite](https://img.shields.io/badge/SQLite-libSQL%200.17-003B57?logo=sqlite&logoColor=white)
@@ -55,7 +55,7 @@ nohonu/
 
 ## Local Development
 
-**Requirements:** Node.js 20+, Deno 2.x (optional).
+**Requirements:** Node.js 24+, Deno 2.x (optional).
 
 ```bash
 # Install dependencies (root + backend + frontend)
