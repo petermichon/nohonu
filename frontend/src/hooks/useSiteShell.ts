@@ -6,7 +6,7 @@ import { useToast } from '../providers/ToastContext.tsx';
 import { calcUptimePct } from '../lib/utils.ts';
 import { useSiteData } from './useSiteData.ts';
 import { useSiteActions } from './useSiteActions.ts';
-import { SLOT_MS, type TimeRange, type Site, type Slot, type Visitor, type UptimeSlot, type Version, type SitePageTab } from '../lib/types.ts';
+import { SLOT_MS, type TimeRange, type Site, type Slot, type UptimeSlot, type Version, type SitePageTab } from '../lib/types.ts';
 import { host, hostWithPort, protocol } from '../config.ts';
 
 export interface SiteShellContext {
@@ -28,7 +28,6 @@ export interface SiteShellContext {
   handleConfirm: () => Promise<void>;
   stats: Slot[];
   statsLoading: boolean;
-  visitors: Visitor[];
   loadStats: () => Promise<void>;
   uptimeData: UptimeSlot[];
   uptimeAllData: UptimeSlot[];
@@ -141,7 +140,6 @@ export function useSiteShell(): SiteShellContext & { notFound: boolean; activeTa
     handleConfirm: actions.handleConfirm,
     stats: data.stats,
     statsLoading: data.statsLoading,
-    visitors: data.visitors,
     loadStats: data.loadStats,
     uptimeData: data.uptimeData,
     uptimeAllData: data.uptimeAllData,

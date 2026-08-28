@@ -102,9 +102,6 @@ export const handlers = [
   http.get('*/users/:username/sites/:siteId/stats', () => {
     return HttpResponse.json({ slots: [] });
   }),
-  http.get('*/users/:username/sites/:siteId/visitors', () => {
-    return HttpResponse.json({ visitors: [] });
-  }),
   http.get('*/users/:username/sites/:siteId/uptime', () => {
     return HttpResponse.json({ slots: [] });
   }),

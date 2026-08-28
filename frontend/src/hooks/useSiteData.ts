@@ -4,7 +4,7 @@ import { useApiFetch } from '../hooks/api/useApiFetch.ts';
 import { usePollData } from '../hooks/usePollData.ts';
 import { SLOT_MS } from '../lib/types.ts';
 import { getGroupMinutes, getSlotsForRange } from '../lib/utils.ts';
-import type { Site, Version, Slot, Visitor, UptimeSlot, TimeRange, UptimeRange } from '../lib/types.ts';
+import type { Site, Version, Slot, UptimeSlot, TimeRange, UptimeRange } from '../lib/types.ts';
 
 export interface SiteDataReturn {
   site: Site | null;
@@ -14,7 +14,6 @@ export interface SiteDataReturn {
   statsLoading: boolean;
   statsRange: TimeRange;
   setStatsRange: (r: TimeRange) => void;
-  visitors: Visitor[];
   uptimeData: UptimeSlot[];
   uptimeLoading: boolean;
   uptimeAllData: UptimeSlot[];
@@ -60,17 +59,6 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
       const res = await apiFetch(`/users/${username}/sites/${siteId}/stats?slots=${slotsToFetch}&group=${group}`);
       const data = await res.json();
       return (data.stats as Slot[]) ?? [];
-    },
-    retry: false,
-  });
-
-  // Visitors query
-  const visitorsQuery = useQuery({
-    queryKey: ['site-visitors', siteId],
-    queryFn: async () => {
-      const res = await apiFetch(`/users/${username}/sites/${siteId}/visitors`);
-      const data = await res.json();
-      return (data.visitors as Visitor[]) ?? [];
     },
     retry: false,
   });
@@ -129,10 +117,6 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
     await queryClient.invalidateQueries({ queryKey: ['site-versions', siteId] });
   }, [queryClient, siteId]);
 
-  const loadVisitors = useCallback(async () => {
-    await visitorsQuery.refetch();
-  }, [visitorsQuery]);
-
   const loadUptimeAll = useCallback(async () => {
     await uptimeAllQuery.refetch();
   }, [uptimeAllQuery]);
@@ -155,11 +139,10 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
     loadStats();
   }, [loadStats, statsRange]);
 
-  // Poll stats and visitors every minute
+  // Poll stats and uptime every minute
   usePollData(
     () => {
       loadStats();
-      loadVisitors();
       loadUptime();
       loadUptimeAll();
     },
@@ -175,7 +158,6 @@ export function useSiteData(siteId: string, username?: string, isPublic?: boolea
     statsLoading: statsQuery.isLoading,
     statsRange,
     setStatsRange,
-    visitors: visitorsQuery.data ?? [],
     uptimeData: uptimeQuery.data ?? [],
     uptimeLoading: uptimeQuery.isLoading,
     uptimeAllData: uptimeAllQuery.data ?? [],
