@@ -105,7 +105,9 @@ export function DomainsSection({ username, domains, isOwnProfile, domainsLoading
           </div>
           <h3 className="text-xl font-semibold text-zinc-950 dark:text-zinc-100 mb-2">No custom domains</h3>
           <p className="text-zinc-500 dark:text-zinc-400 mb-6 max-w-sm mx-auto">
-            Connect a custom domain to your site to use your own brand.
+            {isOwnProfile
+              ? 'Connect a custom domain to your site to use your own brand.'
+              : `@${username} hasn't connected any custom domains yet.`}
           </p>
           {isOwnProfile && (
             <button onClick={() => setIsAddModalOpen(true)} className={addButtonClass}>

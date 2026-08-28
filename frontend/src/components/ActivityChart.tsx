@@ -91,7 +91,7 @@ export function ActivityChart({ stats, onReload, reloading, range, onRangeChange
               }
               cursor={false}
             />
-            <Bar dataKey="count" minPointSize={2}>
+            <Bar dataKey="count" minPointSize={2} radius={[4, 4, 4, 4]}>
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}

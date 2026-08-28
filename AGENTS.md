@@ -2,14 +2,18 @@
 
 ## Git workflow
 
-Commit to the nohonu repo using **GitHub Flow**:
+Work in **batches** on a single short-lived branch off `main`:
 
-1. Create a short-lived branch off `main`: `git checkout -b <type>/<description>`
+1. Create a branch off `main`: `git checkout -b <type>/<description>`
    (types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `design`)
-2. Commit and push the branch.
-3. Open a PR with `gh pr create`; CI (`check.yml`) runs lint, typecheck, tests, and build.
-4. Merge to `main` only when CI is green, using **squash merge**.
+2. Commit locally as you go (signed commits). Do **not** push per commit.
+3. When asked to push, push once and open a PR with `gh pr create`; CI
+   (`check.yml`) runs lint, typecheck, tests, and build.
+4. Rebase on `main` before merging if it has moved.
+5. Merge to `main` only when CI is green, using **squash merge**.
 
 Never commit directly to `main`.
 
-The repo is private, so `main` has no branch protection. When it goes public, enable protection on `main`: require a PR, require checks to pass, and require signed commits.
+`main` is branch-protected: it requires a pull request, required checks
+(`check.yml`), and signed commits. There is no required review approval, since
+the project is maintained solo and GitHub does not allow self-approval.
