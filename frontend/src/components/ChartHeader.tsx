@@ -34,7 +34,7 @@ export function ChartHeader({
               onClick={() => onRangeChange(r)}
               className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer ${
                 range === r
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 shadow-sm'
+                  ? 'text-zinc-950 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-400'
               }`}
             >
