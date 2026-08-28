@@ -1,6 +1,13 @@
 # Nohonu
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6)
+![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20-5FA04E?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5.1-000000?logo=express)
+![Prisma](https://img.shields.io/badge/Prisma-7.9-2D3748?logo=prisma)
+![License](https://img.shields.io/badge/License-AGPL--3.0-red)
 
 A static site hosting platform. Upload zip archives, serve them on subdomains.
 
