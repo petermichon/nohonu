@@ -39,7 +39,7 @@ export default function About() {
           <li>Custom domains with DNS-verified ownership</li>
           <li>Built-in analytics — request counts, unique visitors, uptime monitoring</li>
           <li>User profiles with star/unstar, cover images, and public discovery</li>
-          <li>Self-hostable — runs in Docker on a single VPS, no database required</li>
+          <li>Self-hostable — runs in Docker on a single VPS with a local SQLite database</li>
         </ul>
       </section>
 
@@ -47,8 +47,8 @@ export default function About() {
         <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-100 mb-4">Why We Built This</h2>
         <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
           Most hosting platforms are closed source and tie you to a single provider. Nohonu is open source (AGPL-3.0)
-          and self-hostable — you own your infrastructure and your data. No vendor lock-in, no databases to manage, no
-          opaque pricing. Just static sites, served your way.
+          and self-hostable — you own your infrastructure and your data. No vendor lock-in, no database server to
+          manage, no opaque pricing. Just static sites, served your way.
         </p>
       </section>
 
