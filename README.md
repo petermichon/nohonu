@@ -1,17 +1,17 @@
 # Nohonu
 
-![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6)
-![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?logo=vite&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
+![TypeScript](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpetermichon%2Fnohonu%2Fmain%2Ffrontend%2Fpackage.json&query=devDependencies.typescript&label=TypeScript&color=3178C6)
+![React](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpetermichon%2Fnohonu%2Fmain%2Ffrontend%2Fpackage.json&query=dependencies.react&label=React&color=61DAFB&logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpetermichon%2Fnohonu%2Fmain%2Ffrontend%2Fpackage.json&query=devDependencies.vite&label=Vite&color=646CFF&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpetermichon%2Fnohonu%2Fmain%2Ffrontend%2Fpackage.json&query=devDependencies.tailwindcss&label=Tailwind%20CSS&color=06B6D4&logo=tailwindcss&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24-5FA04E?logo=nodedotjs&logoColor=white)
-![Express](https://img.shields.io/badge/Express-5.2-000000?logo=express)
-![Prisma](https://img.shields.io/badge/Prisma-7.10-2D3748?logo=prisma)
-![SQLite](https://img.shields.io/badge/SQLite-libSQL%200.17-003B57?logo=sqlite&logoColor=white)
+![Express](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpetermichon%2Fnohonu%2Fmain%2Fbackend%2Fpackage.json&query=dependencies.express&label=Express&color=000000&logo=express)
+![Prisma](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpetermichon%2Fnohonu%2Fmain%2Fbackend%2Fpackage.json&query=devDependencies.prisma&label=Prisma&color=2D3748&logo=prisma)
+![libSQL](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpetermichon%2Fnohonu%2Fmain%2Fbackend%2Fpackage.json&query=dependencies%5B'%40libsql%2Fclient'%5D&label=libSQL&color=003B57&logo=sqlite&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?logo=githubactions&logoColor=white)
+![CI](https://img.shields.io/github/actions/workflow/status/petermichon/nohonu/check.yml?label=CI&logo=githubactions&logoColor=white)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-red)
-![Website](https://img.shields.io/website?url=https%3A%2F%2Fnohonu.com%2F)
+![Website](https://img.shields.io/website?url=https%3A%2F%2Fnohonu.com%2F&label=nohonu.com&up_message=online&down_message=offline)
 
 A static site hosting platform. Upload zip archives, serve them on subdomains.
 
