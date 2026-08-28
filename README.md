@@ -1,5 +1,7 @@
 # Nohonu
 
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6)
+
 A static site hosting platform. Upload zip archives, serve them on subdomains.
 
 <https://github.com/petermichon/nohonu>
