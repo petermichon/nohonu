@@ -11,7 +11,7 @@
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 ![CI](https://img.shields.io/github/actions/workflow/status/petermichon/nohonu/check.yml?label=CI&logo=githubactions&logoColor=white)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-red)
-![Website](https://img.shields.io/website?url=https%3A%2F%2Fnohonu.com%2F)
+![Website](https://img.shields.io/website?url=https%3A%2F%2Fnohonu.com%2F&label=nohonu.com&up_message=online&down_message=offline)
 
 A static site hosting platform. Upload zip archives, serve them on subdomains.
 
