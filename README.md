@@ -8,6 +8,7 @@
 ![Express](https://img.shields.io/badge/Express-5.1-000000?logo=express)
 ![Prisma](https://img.shields.io/badge/Prisma-7.9-2D3748?logo=prisma)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-red)
+![Website](https://img.shields.io/website?url=https%3A%2F%2Fnohonu.com&logo=vercel&logoColor=white)
 
 A static site hosting platform. Upload zip archives, serve them on subdomains.
 
