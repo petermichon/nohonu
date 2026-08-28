@@ -13,7 +13,10 @@
 ![License](https://img.shields.io/badge/License-AGPL--3.0-red)
 ![Website](https://img.shields.io/website?url=https%3A%2F%2Fnohonu.com%2F&label=nohonu.com&up_message=online&down_message=offline)
 
-Platform for deploying and discovering static sites.
+Nohonu is an open-source platform for deploying and discovering static sites. Sites are hosted on public user
+profiles, so the platform doubles as a community gallery: visitors can browse what others have built and star the
+projects they like. The project is licensed AGPL-3.0 and self-hostable, running on a single VPS with Docker and no
+managed database.
 
 ## Project Structure
 
