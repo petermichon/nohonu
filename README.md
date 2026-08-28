@@ -7,7 +7,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-20-5FA04E?logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5.1-000000?logo=express)
 ![Prisma](https://img.shields.io/badge/Prisma-7.9-2D3748?logo=prisma)
-![SQLite](https://img.shields.io/badge/SQLite-libSQL-003B57?logo=sqlite&logoColor=white)
+![libSQL](https://img.shields.io/badge/libSQL-0.17-003B57?logo=sqlite&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?logo=githubactions&logoColor=white)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-red)
