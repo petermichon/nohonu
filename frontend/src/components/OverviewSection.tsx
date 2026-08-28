@@ -17,7 +17,6 @@ interface OverviewSectionProps {
   siteUrl: string;
   host: string;
   totalHits: number;
-  uptimePct: number | null;
   isReadOnly?: boolean;
 }
 
@@ -30,7 +29,6 @@ export function OverviewSection({
   siteUrl,
   host,
   totalHits,
-  uptimePct,
   isReadOnly = false,
 }: OverviewSectionProps) {
   const { getAccentColorValues } = useAccentColor();
@@ -158,15 +156,6 @@ export function OverviewSection({
                     <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500">
                       <Eye className="w-3 h-3" />
                       {totalHits.toLocaleString()} views
-                    </span>
-                  )}
-                  {uptimePct !== null && (
-                    <span
-                      className={`text-xs font-medium ${
-                        uptimePct < 90 ? 'text-zinc-400 dark:text-zinc-500' : accentColorValues.text
-                      }`}
-                    >
-                      {uptimePct}% uptime
                     </span>
                   )}
                 </div>

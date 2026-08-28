@@ -12,7 +12,6 @@ function Overview() {
     siteUrl,
     host,
     totalHits,
-    uptimePct,
     isPublicView,
   } = useSiteShellContext();
 
@@ -27,7 +26,6 @@ function Overview() {
         siteUrl={siteUrl}
         host={host}
         totalHits={totalHits}
-        uptimePct={uptimePct}
         isReadOnly={isPublicView}
       />
     </section>

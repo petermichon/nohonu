@@ -2,7 +2,6 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   relativeTime,
   formatHits,
-  calcUptimePct,
   getAccentStyle,
   getNextMinuteMs,
   formatRelativeTime,
@@ -75,37 +74,6 @@ describe('formatHits', () => {
     expect(formatHits(0)).toBe('0');
   });
 });
-
-describe('calcUptimePct', () => {
-  it('returns null for empty array', () => {
-    expect(calcUptimePct([])).toBeNull();
-  });
-
-  it('returns null when all slots are null', () => {
-    expect(calcUptimePct([{ up: null }, { up: null }])).toBeNull();
-  });
-
-  it('returns 100 when all checked slots are up', () => {
-    expect(calcUptimePct([{ up: true }, { up: true }, { up: null }])).toBe(100);
-  });
-
-  it('returns 0 when all checked slots are down', () => {
-    expect(calcUptimePct([{ up: false }, { up: false }])).toBe(0);
-  });
-
-  it('rounds 66.67% to 67', () => {
-    expect(calcUptimePct([{ up: true }, { up: true }, { up: false }])).toBe(67);
-  });
-
-  it('handles single up slot', () => {
-    expect(calcUptimePct([{ up: true }])).toBe(100);
-  });
-
-  it('handles single down slot', () => {
-    expect(calcUptimePct([{ up: false }])).toBe(0);
-  });
-});
-
 describe('getAccentStyle', () => {
   it('returns null when not enabled', () => {
     expect(getAccentStyle('#ff0000', false)).toBeNull();
