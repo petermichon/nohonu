@@ -5,9 +5,7 @@
 }
 
 http://localhost:2020 {
-	reverse_proxy backend:8080 {
-		header_up X-Server-Password {env.SERVER_PASSWORD}
-	}
+	reverse_proxy backend:8080
 }
 
 {$DOMAIN:localhost:80} {
