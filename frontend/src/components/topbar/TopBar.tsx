@@ -88,7 +88,7 @@ export function TopBar() {
               </Link>
             </div>
           )}
-          <ProfileMenu />
+          {username && <ProfileMenu />}
         </div>
       </div>
     </header>
