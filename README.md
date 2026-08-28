@@ -18,7 +18,7 @@ nohonu/
 ### Frontend
 
 - **React** 19 - UI framework
-- **TypeScript** - Type safety
+- **TypeScript** 6.0 - Type safety
 - **Vite** - Build tool and dev server
 - **Tailwind CSS** 4 - Utility-first CSS framework
 - **TanStack Router** - Client-side routing
@@ -31,6 +31,7 @@ nohonu/
 
 - **Node.js** - Runtime
 - **Express** 5 - HTTP server
+- **TypeScript** 6.0 - Type safety
 - **Prisma** + libSQL/SQLite - Database
 - **Vitest** - Test suite (usecase layer)
 
