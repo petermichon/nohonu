@@ -162,22 +162,24 @@ export function OverviewSection({
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-2 shrink-0 mt-0.5">
-              <button
-                type="button"
-                onClick={onToggle}
-                disabled={actionLoading || isReadOnly}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 w-24 justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-              >
-                <Power className="w-3.5 h-3.5 shrink-0" />
-                <span className="w-14 text-center">{site.enabled ? 'Disable' : 'Enable'}</span>
-              </button>
-            </div>
+            {!isReadOnly && (
+              <div className="flex flex-col items-end gap-2 shrink-0 mt-0.5">
+                <button
+                  type="button"
+                  onClick={onToggle}
+                  disabled={actionLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer disabled:cursor-auto disabled:opacity-50 w-24 justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                >
+                  <Power className="w-3.5 h-3.5 shrink-0" />
+                  <span className="w-14 text-center">{site.enabled ? 'Disable' : 'Enable'}</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Cover Image Section */}
-          <div>
-            {!isReadOnly && (
+          {!isReadOnly && (
+            <div>
               <input
                 type="file"
                 accept="image/*"
@@ -186,17 +188,15 @@ export function OverviewSection({
                 className="hidden"
                 id="coverUpload"
               />
-            )}
-            {coverUrl ? (
-              <div className="relative group w-full max-w-xs">
-                <label htmlFor="coverUpload" className="block cursor-pointer">
-                  <img
-                    src={coverUrl || undefined}
-                    alt="Site cover"
-                    className="w-full aspect-4/3 object-cover rounded-2xl"
-                  />
-                </label>
-                {!isReadOnly && (
+              {coverUrl ? (
+                <div className="relative group w-full max-w-xs">
+                  <label htmlFor="coverUpload" className="block cursor-pointer">
+                    <img
+                      src={coverUrl || undefined}
+                      alt="Site cover"
+                      className="w-full aspect-4/3 object-cover rounded-2xl"
+                    />
+                  </label>
                   <button
                     type="button"
                     onClick={handleCoverDelete}
@@ -206,20 +206,20 @@ export function OverviewSection({
                   >
                     <X className="w-4 h-4" />
                   </button>
-                )}
-              </div>
-            ) : (
-              <label
-                htmlFor="coverUpload"
-                className="w-full max-w-xs aspect-4/3 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
-              >
-                <ImageIcon className="w-6 h-6 text-zinc-400 dark:text-zinc-500" />
-                <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                  {isReadOnly ? 'No cover image' : uploadingCover ? 'Uploading...' : 'Add a cover image'}
-                </p>
-              </label>
-            )}
-          </div>
+                </div>
+              ) : (
+                <label
+                  htmlFor="coverUpload"
+                  className="w-full max-w-xs aspect-4/3 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+                >
+                  <ImageIcon className="w-6 h-6 text-zinc-400 dark:text-zinc-500" />
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                    {uploadingCover ? 'Uploading...' : 'Add a cover image'}
+                  </p>
+                </label>
+              )}
+            </div>
+          )}
         </div>
       );
     })()
