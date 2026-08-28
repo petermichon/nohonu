@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   changePassword,
   cleanupExpiredSessions,
+  deleteAccount,
   deleteProfilePicture,
   deleteSession,
   getProfilePictureFile,
@@ -14,8 +15,10 @@ import {
   register,
   registerUser,
   resetTestState,
+  sites,
   updateDisplayName,
   uploadProfilePicture,
+  makeStoredZip,
 } from '../../test/setup.ts';
 
 beforeEach(async () => {
@@ -233,5 +236,50 @@ describe('sessions', () => {
     if (!result.ok) {
       expect(result.code).toBe('forbidden');
     }
+  });
+});
+
+describe('deleteAccount', () => {
+  it('deletes the user, invalidates their sessions and removes them from the public profile', async () => {
+    const sessionId = await registerUser('goner');
+    const result = await deleteAccount(sessionId, 'password123');
+    expect(result.ok).toBe(true);
+    expect((await me(sessionId)).error).toBe('Invalid session');
+    expect(await getPublicUser('goner')).toBeNull();
+  });
+
+  it('rejects a wrong password', async () => {
+    const sessionId = await registerUser('wrongPw');
+    const result = await deleteAccount(sessionId, 'not-the-password');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('unauthorized');
+    }
+  });
+
+  it('rejects an invalid session', async () => {
+    const result = await deleteAccount('not-a-session', 'password123');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('unauthorized');
+    }
+  });
+
+  it('removes the user\u2019s stars from other people\u2019s sites', async () => {
+    const ownerSession = await registerUser('starOwner');
+    const deleterSession = await registerUser('starDeleter');
+    const zip = makeStoredZip({ 'index.html': new TextEncoder().encode('x') });
+    const created = await sites.createSite(ownerSession, 'starred-site', zip);
+    expect(created.ok).toBe(true);
+
+    const starred = await sites.toggleStar(deleterSession, 'starOwner', 'starred-site', true);
+    expect(starred.ok && starred.value.starCount).toBe(1);
+
+    const result = await deleteAccount(deleterSession, 'password123');
+    expect(result.ok).toBe(true);
+
+    const thirdSession = await registerUser('thirdUser');
+    const restarred = await sites.toggleStar(thirdSession, 'starOwner', 'starred-site', true);
+    expect(restarred.ok && restarred.value.starCount).toBe(1);
   });
 });

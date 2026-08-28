@@ -24,6 +24,7 @@ export const register = (await import('../usecases/auth/register.ts')).register;
 export const login = (await import('../usecases/auth/login.ts')).login;
 export const logout = (await import('../usecases/auth/logout.ts')).logout;
 export const logoutAll = (await import('../usecases/auth/logout-all.ts')).logoutAll;
+export const deleteAccount = (await import('../usecases/auth/delete-account.ts')).deleteAccount;
 export const me = (await import('../usecases/auth/me.ts')).me;
 export const updateDisplayName = (await import('../usecases/auth/update-display-name.ts')).updateDisplayName;
 export const changePassword = (await import('../usecases/auth/change-password.ts')).changePassword;

@@ -102,4 +102,25 @@ describe('SettingsSection', () => {
     await user.click(revokeButton);
     await screen.findByText('Session revoked');
   });
+
+  it('requires a password before allowing account deletion', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SettingsSection username="peter" />);
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete permanently' });
+    expect(deleteButton).toBeDisabled();
+
+    await user.type(screen.getByPlaceholderText('Enter your password to confirm'), 'secret');
+    expect(deleteButton).toBeEnabled();
+  });
+
+  it('shows an error toast when account deletion fails', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SettingsSection username="peter" />);
+
+    await user.type(screen.getByPlaceholderText('Enter your password to confirm'), 'wrong');
+    await user.click(screen.getByRole('button', { name: 'Delete permanently' }));
+
+    expect(await screen.findByText('Password is incorrect')).toBeInTheDocument();
+  });
 });

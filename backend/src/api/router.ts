@@ -3,6 +3,7 @@ import * as health from './endpoints/health.ts';
 import { authRegister } from './endpoints/auth/auth-register.ts';
 import { authLogin } from './endpoints/auth/auth-login.ts';
 import { authLogout } from './endpoints/auth/auth-logout.ts';
+import { authDeleteAccount } from './endpoints/auth/delete-account.ts';
 import { authMe } from './endpoints/auth/auth-me.ts';
 import { authDisplayName } from './endpoints/auth/auth-display-name.ts';
 import { authChangePassword } from './endpoints/auth/auth-change-password.ts';
@@ -71,6 +72,7 @@ router.get('/users/:username', getUserByUsernameEndpoint);
 // Auth
 router.get('/auth/me', authMe);
 router.post('/auth/logout', authLogout);
+router.delete('/auth/account', authDeleteAccount);
 router.patch('/auth/displayname', authDisplayName);
 router.patch('/auth/password', authChangePassword);
 router.post('/auth/profile-picture', uploadProfilePicture);
