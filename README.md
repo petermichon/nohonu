@@ -6,7 +6,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24-5FA04E?logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5.2-000000?logo=express)
-![Prisma](https://img.shields.io/badge/Prisma-7.9-2D3748?logo=prisma)
+![Prisma](https://img.shields.io/badge/Prisma-7.10-2D3748?logo=prisma)
 ![SQLite](https://img.shields.io/badge/SQLite-libSQL%200.17-003B57?logo=sqlite&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?logo=githubactions&logoColor=white)
