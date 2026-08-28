@@ -21,4 +21,4 @@ cp .env.example .env
 docker compose up --build -d
 ```
 
-See [backend/README.md](../backend/README.md) for the full VPS deployment walkthrough.
+See [backend/README.md](../backend/README.md) for the environment variables and backend details.

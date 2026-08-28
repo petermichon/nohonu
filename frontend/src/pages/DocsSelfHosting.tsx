@@ -9,8 +9,9 @@ export default function DocsSelfHosting() {
       <section className="py-8">
         <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-100 mb-4">Requirements</h2>
         <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Nohonu runs on a single VPS with Docker. No database is required — all state is stored on the filesystem. A
-          machine with 1 GB of RAM and 10 GB of storage is sufficient for most use cases.
+          Nohonu runs on a single VPS with Docker. Data is stored in a local SQLite database and site files on the
+          filesystem, both inside a single Docker volume. A machine with 1 GB of RAM and 10 GB of storage is sufficient
+          for most use cases.
         </p>
       </section>
 

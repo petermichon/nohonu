@@ -34,8 +34,8 @@ export default function DocsApi() {
       </header>
 
       <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed mb-8">
-        All API requests require authentication via session cookie or server password. The base URL is the root of your
-        Nohonu instance.
+        All API requests require authentication via a session id sent in the <code>X-Session-Id</code> header. The base
+        URL is the root of your Nohonu instance.
       </p>
 
       <section className="py-8 space-y-4">
@@ -47,10 +47,12 @@ export default function DocsApi() {
             { method: 'POST', path: '/auth/logout', desc: 'End the current session' },
             { method: 'GET', path: '/auth/me', desc: "Get the authenticated user's profile" },
             { method: 'PATCH', path: '/auth/displayname', desc: 'Update display name' },
+            { method: 'PATCH', path: '/auth/password', desc: 'Change the account password' },
             { method: 'POST', path: '/auth/profile-picture', desc: 'Upload a profile picture' },
             { method: 'DELETE', path: '/auth/profile-picture/delete', desc: 'Remove profile picture' },
             { method: 'GET', path: '/auth/sessions', desc: 'List active sessions' },
             { method: 'DELETE', path: '/auth/sessions/delete', desc: 'Revoke a session' },
+            { method: 'DELETE', path: '/auth/account', desc: 'Permanently delete the account' },
           ]}
         />
       </section>
@@ -61,6 +63,7 @@ export default function DocsApi() {
           rows={[
             { method: 'GET', path: '/sites', desc: 'List all sites for the authenticated user' },
             { method: 'GET', path: '/users/:username/sites/:siteId', desc: 'Get site info and status' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/repos', desc: 'Recently used GitHub repos' },
             { method: 'POST', path: '/users/:username/sites/:siteId', desc: 'Create a site from a zip upload' },
             { method: 'POST', path: '/users/:username/sites/:siteId/github', desc: 'Create a site from a GitHub repo' },
             { method: 'DELETE', path: '/users/:username/sites/:siteId', desc: 'Delete a site' },
@@ -96,10 +99,10 @@ export default function DocsApi() {
             { method: 'POST', path: '/users/:username/sites/:siteId/versions/:ts/activate', desc: 'Activate a specific version' },
             {
               method: 'POST',
-              path: '/users/:username/sites/:siteId/versions/:ts/github',
+              path: '/users/:username/sites/:siteId/versions/github',
               desc: 'Fetch from GitHub and create version',
             },
-            { method: 'GET', path: '/users/:username/sites/:siteId/versions/download', desc: 'Download a specific version as zip' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/versions/:ts/download', desc: 'Download a specific version as zip' },
             { method: 'DELETE', path: '/users/:username/sites/:siteId/versions/:ts', desc: 'Delete a version' },
           ]}
         />
@@ -111,10 +114,12 @@ export default function DocsApi() {
           rows={[
             { method: 'GET', path: '/custom-domains', desc: 'List all custom domains across sites' },
             { method: 'GET', path: '/users/:username/sites/:siteId/custom-domains', desc: 'List domains for a site' },
+            { method: 'GET', path: '/users/:username/sites/:siteId/custom-domains/token', desc: 'DNS verification token' },
             { method: 'POST', path: '/users/:username/sites/:siteId/custom-domains', desc: 'Add a custom domain' },
             { method: 'POST', path: '/users/:username/sites/:siteId/custom-domains/:domain/verify', desc: 'Verify DNS ownership' },
             { method: 'DELETE', path: '/users/:username/sites/:siteId/custom-domains/:domain', desc: 'Remove a custom domain' },
-            { method: 'GET', path: '/check-domain', desc: 'Check if a subdomain is available' },
+            { method: 'GET', path: '/check-domain', desc: 'Check if a site id is available' },
+            { method: 'GET', path: '/check-subdomain', desc: 'Check if a subdomain is available' },
             { method: 'GET', path: '/check-custom-domain', desc: 'Check if a custom domain is available' },
           ]}
         />
@@ -126,8 +131,9 @@ export default function DocsApi() {
           rows={[
             { method: 'GET', path: '/users/:username', desc: 'Get public user profile' },
             { method: 'GET', path: '/users/:username/sites', desc: "List a user's public sites" },
+            { method: 'GET', path: '/users/:username/stars', desc: 'Sites starred by a user' },
             { method: 'GET', path: '/users/:username/profile-picture', desc: 'Get profile picture' },
-            { method: 'GET', path: '/users/:username/:domain', desc: 'Get public site info' },
+            { method: 'GET', path: '/users/:username/sites/:siteId', desc: 'Get public site info' },
           ]}
         />
       </section>
