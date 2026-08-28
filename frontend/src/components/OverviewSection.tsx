@@ -104,7 +104,7 @@ export function OverviewSection({
           </button>
         </div>
       </div>
-      <div className="w-full aspect-[16/9] rounded-2xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+      <div className="max-w-xs aspect-4/3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
     </div>
   ) : site ? (
     (() => {
