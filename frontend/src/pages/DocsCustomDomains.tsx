@@ -9,9 +9,9 @@ export default function DocsCustomDomains() {
       <section className="py-8">
         <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-100 mb-4">Adding a Domain</h2>
         <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Add a custom domain in your site's settings, then create a DNS record to verify ownership. Nohonu supports{' '}
-          <strong className="text-zinc-950 dark:text-zinc-100 font-semibold">CNAME</strong> records for apex domains and{' '}
-          <strong className="text-zinc-950 dark:text-zinc-100 font-semibold">CNAME</strong> for subdomains.
+          Add a custom domain in your site's settings, then create a DNS record to verify ownership. Nohonu verifies
+          ownership with a <code className="text-sm bg-zinc-100 dark:bg-zinc-900 px-1 rounded">_nohonu.&lt;your-domain&gt;</code>{' '}
+          TXT record whose value is the verification token shown in the dashboard.
         </p>
       </section>
 

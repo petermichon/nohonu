@@ -40,13 +40,14 @@ The backend follows a layered architecture:
 ```
 
 - **API Layer** (`src/api/`) - Thin HTTP wrappers. Each endpoint calls exactly one usecase function. Handles request
-  parsing, session/API-key checks, and response formatting. Knows how to map usecase error codes to HTTP statuses.
+  parsing, session checks, and response formatting. Knows how to map usecase error codes to HTTP statuses.
 - **Use Cases Layer** (`src/usecases/`) - The surface API of the app. Each function represents one complete user action
   (e.g. `createSite()`, `toggleStar()`). Usecases own all business logic and session validation; they are called by
   endpoints, the scheduler, and tests. Tests treat usecases as black boxes.
-- **Core Layer** (`src/core/`) - App-specific logic that usecases compose. `src/core/sites/` is split into `paths.ts`
-  (pure path helpers), `db.ts` (database), `fs.ts` (filesystem), and `storage.ts` (operations spanning both).
-  `src/core/analytics/` holds the in-memory metrics with database persistence.
+- **Core Layer** (`src/core/`) - App-specific logic that usecases compose, e.g. `src/core/sites/` (read, serve, and
+  upsert site data) and `src/core/auth/` (session validation).
+- **DB** (`src/db/`) - Data access via the generated Prisma client.
+- **Memory** (`src/memory/`) - In-memory hits/visitors/uptime analytics, persisted to the database by the scheduler.
 - **Shared** (`src/shared/`) - Stateless, environment-free utilities: `zip.ts`, `password.ts`, `errors.ts`
   (`Result<T, E>` + `ErrorCode`), and `express/` helpers.
 - **Config** (`src/config.ts`) - The single place that reads environment variables.
@@ -94,6 +95,7 @@ static file serving stay open without a session header.
 | ------ | ------------------------------ | ---------------------- |
 | GET    | `/auth/me`                     | Current user           |
 | POST   | `/auth/logout`                 | Invalidate the session |
+| DELETE | `/auth/account`                | Permanently delete the account |
 | PATCH  | `/auth/displayname`            | `{ "displayName" }`    |
 | PATCH  | `/auth/password`               | `{ "currentPassword", "newPassword" }` (min 8 chars) |
 | POST   | `/auth/profile-picture`        | Raw image body         |
@@ -106,7 +108,8 @@ static file serving stay open without a session header.
 | Method | Path                                              | Notes                                                                                                                                          |
 | ------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/sites`                                          | Current user's sites                                                                                                                           |
-| POST   | `/users/:username/sites/:siteId`                                  | Create a site. Raw zip body (`Content-Type: application/zip`, optional `?subdomain=`) or JSON `{ "repo", "branch?", "subdomain?" }` for GitHub |
+| POST   | `/users/:username/sites/:siteId`                                  | Create a site from a raw zip body (`Content-Type: application/zip`, optional `?subdomain=`)                                                   |
+| POST   | `/users/:username/sites/:siteId/github`                          | Create a site from a GitHub repo: `{ "repo", "branch?", "subdomain?" }`                                                                       |
 | GET    | `/users/:username/sites/:siteId`                                  | Site info                                                                                                                                      |
 | DELETE | `/users/:username/sites/:siteId`                                  | Delete site and all its data                                                                                                                   |
 | PATCH  | `/users/:username/sites/:siteId/toggle`                           | Enable/disable                                                                                                                                 |
@@ -166,8 +169,8 @@ The test suite also runs `migrate deploy` against a temp database, so tests alwa
 | `PORT`           | `8080`                  | Server port                            |
 | `SITES_DIR`      | `./data`                | Path for site zips and extracted files |
 | `DATABASE_URL`   | `file:./data/nohonu.db` | SQLite database location               |
-| `API_KEY`        | _(none)_                | Secret key for the management API      |
 | `SUBDOMAIN_BASE` | `localhost:8080`        | Base host for subdomain URLs           |
+| `COMMIT_SHA`     | `dev`                   | Commit identifier shown in the health check |
 
 ## Running Locally
 
