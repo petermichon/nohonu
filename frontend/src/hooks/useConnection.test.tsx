@@ -24,16 +24,13 @@ describe('ConnectionProvider', () => {
     const { result } = renderConnection();
     expect(result.current.sessionId).toBe('');
     expect(result.current.username).toBe('');
-    expect(result.current.serverPassword).toBe('');
   });
 
   it('restores values from localStorage on mount', () => {
-    localStorage.setItem('serverPassword', 'pw');
     localStorage.setItem('sessionId', 'sess-1');
     localStorage.setItem('username', 'peter');
 
     const { result } = renderConnection();
-    expect(result.current.serverPassword).toBe('pw');
     expect(result.current.sessionId).toBe('sess-1');
     expect(result.current.username).toBe('peter');
   });
@@ -50,22 +47,11 @@ describe('ConnectionProvider', () => {
     expect(localStorage.getItem('username')).toBe('peter');
   });
 
-  it('persists the server password', () => {
-    const { result } = renderConnection();
-    act(() => {
-      result.current.setServerPassword('secret');
-    });
-
-    expect(result.current.serverPassword).toBe('secret');
-    expect(localStorage.getItem('serverPassword')).toBe('secret');
-  });
-
-  it('clears the session on disconnect but keeps the server password', () => {
+  it('clears the session on disconnect', () => {
     const { result } = renderConnection();
     act(() => {
       result.current.setSessionId('sess-3');
       result.current.setUsername('peter');
-      result.current.setServerPassword('secret');
     });
     act(() => {
       result.current.disconnect();
@@ -73,7 +59,6 @@ describe('ConnectionProvider', () => {
 
     expect(result.current.sessionId).toBe('');
     expect(result.current.username).toBe('');
-    expect(result.current.serverPassword).toBe('secret');
     expect(localStorage.getItem('sessionId')).toBeNull();
   });
 });

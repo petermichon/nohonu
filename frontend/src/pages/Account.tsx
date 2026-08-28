@@ -1,64 +1,8 @@
 import { Server } from 'lucide-react';
 import { useConnection } from '../hooks/useConnection.ts';
-import { useState, useEffect } from 'react';
-import { SaveField } from '../components/SaveField.tsx';
 
 export default function Account() {
-  const { apiBase, serverPassword, setServerPassword } = useConnection();
-  const [key, setKey] = useState(serverPassword);
-  const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'open'>('idle');
-  const [isServerOpen, setIsServerOpen] = useState(false);
-
-  useEffect(() => {
-    const checkServerSecurity = async () => {
-      try {
-        const res = await fetch(`${apiBase}/auth`, {
-          headers: serverPassword ? { 'X-Server-Password': serverPassword } : {},
-        });
-        const data = await res.json().catch(() => ({}));
-        setIsServerOpen(res.ok && !data.secured);
-      } catch {
-        // Ignore errors on initial load
-      }
-    };
-    checkServerSecurity();
-  }, [apiBase, serverPassword]);
-
-  const saveKey = async () => {
-    setKeyStatus('checking');
-    const base = apiBase.replace(/\/$/, '');
-    try {
-      const res = await fetch(`${base}/auth`, {
-        headers: key ? { 'X-Server-Password': key } : {},
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && !data.secured) {
-        setIsServerOpen(true);
-        setServerPassword(key);
-        setKeyStatus('open');
-        setTimeout(() => setKeyStatus('idle'), 1200);
-      } else {
-        setIsServerOpen(false);
-        if (res.ok) {
-          setServerPassword(key);
-          setKeyStatus('valid');
-          setTimeout(() => setKeyStatus('idle'), 800);
-        } else {
-          setKeyStatus('invalid');
-        }
-      }
-    } catch {
-      setKeyStatus('invalid');
-    }
-  };
-
-  const keyStatusMsg: Record<typeof keyStatus, string | null> = {
-    idle: null,
-    checking: null,
-    valid: null,
-    invalid: 'Invalid server password',
-    open: null,
-  };
+  const { apiBase } = useConnection();
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-12">
@@ -71,50 +15,9 @@ export default function Account() {
             <Server className="w-5 h-5" />
             Connection
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4 truncate" title={apiBase}>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate" title={apiBase}>
             Backend: {apiBase}
           </p>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <SaveField
-              label="Server password"
-              htmlFor="serverPassword"
-              type="password"
-              value={key}
-              onChange={(value) => {
-                setKey(value);
-                setKeyStatus('idle');
-              }}
-              placeholder="Leave empty if not set"
-              autoComplete="off"
-              onSave={saveKey}
-              saveDisabled={keyStatus === 'checking'}
-              buttonContent={
-                keyStatus === 'checking'
-                  ? 'Checking…'
-                  : keyStatus === 'valid' || keyStatus === 'open'
-                    ? 'Saved'
-                    : 'Save'
-              }
-              hint={
-                <>
-                  {keyStatusMsg[keyStatus] && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">{keyStatusMsg[keyStatus]}</p>
-                  )}
-                  {isServerOpen && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server has no password — open access</p>
-                  )}
-                  {!isServerOpen && apiBase && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Server requires a password</p>
-                  )}
-                </>
-              }
-            />
-          </form>
         </div>
       </div>
     </section>

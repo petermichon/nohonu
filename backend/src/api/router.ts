@@ -1,7 +1,5 @@
 import { Router } from 'express';
-import type { Request, Response, NextFunction } from 'express';
 import * as health from './endpoints/health.ts';
-import { auth } from './endpoints/auth/auth.ts';
 import { authRegister } from './endpoints/auth/auth-register.ts';
 import { authLogin } from './endpoints/auth/auth-login.ts';
 import { authLogout } from './endpoints/auth/auth-logout.ts';
@@ -52,22 +50,10 @@ import { getVerificationToken } from './endpoints/custom-domains/get-verificatio
 import { addCustomDomain } from './endpoints/custom-domains/add-custom-domain.ts';
 import { verifyCustomDomain } from './endpoints/custom-domains/verify-custom-domain.ts';
 import { deleteCustomDomain } from './endpoints/custom-domains/delete-custom-domain.ts';
-import { requireServerPassword } from './require-server-password.ts';
-import { isPublicImageRequest, isSubdomainSiteRequest } from './public-request.ts';
 
 export const router = Router();
 
-// Server-wide password gate at the entry point. Subdomain site-serving GETs and
-// public image assets (profile pictures, covers, icons) are open to browsers;
-// everything else requires the server password. Infrastructure gate — removed
-// once real authentication lands.
-router.use((req: Request, res: Response, next: NextFunction) => {
-  if (isSubdomainSiteRequest(req) || isPublicImageRequest(req)) return next();
-  requireServerPassword(req, res, next);
-});
-
 router.get('/health', health.health);
-router.get('/auth', auth);
 router.get('/check-custom-domain', checkCustomDomain);
 
 // Auth

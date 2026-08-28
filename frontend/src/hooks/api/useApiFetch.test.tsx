@@ -16,7 +16,7 @@ describe('useApiFetch', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('http://api.test/health');
   });
 
-  it('sends the server password, session, and username headers', async () => {
+  it('sends the session and username headers', async () => {
     const fetchMock = mockFetch({ ok: true });
     const { result } = renderHookWithProviders(() => useApiFetch());
 
@@ -24,7 +24,6 @@ describe('useApiFetch', () => {
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     const headers = init.headers as Record<string, string>;
-    expect(headers['X-Server-Password']).toBe(TEST_CONNECTION.serverPassword);
     expect(headers['X-Session-Id']).toBe(TEST_CONNECTION.sessionId);
     expect(headers['X-Username']).toBe(TEST_CONNECTION.username);
   });
@@ -32,14 +31,13 @@ describe('useApiFetch', () => {
   it('omits empty headers', async () => {
     const fetchMock = mockFetch({ ok: true });
     const { result } = renderHookWithProviders(() => useApiFetch(), {
-      connection: { ...TEST_CONNECTION, serverPassword: '', sessionId: '', username: '' },
+      connection: { ...TEST_CONNECTION, sessionId: '', username: '' },
     });
 
     await result.current.apiFetch('/health');
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     const headers = init.headers as Record<string, string>;
-    expect(headers['X-Server-Password']).toBeUndefined();
     expect(headers['X-Session-Id']).toBeUndefined();
     expect(headers['X-Username']).toBeUndefined();
   });

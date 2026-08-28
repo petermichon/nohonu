@@ -9,7 +9,6 @@ const TEST_DB = path.join(TEMP_BASE, 'test.db');
 
 process.env['SITES_DIR'] = SITES_TEST_DIR;
 process.env['DATABASE_URL'] = `file:${TEST_DB}`;
-process.env['SERVER_PASSWORD'] = 'test-api-key';
 await fs.mkdir(SITES_TEST_DIR, { recursive: true });
 
 // Push schema to the test database before any app module reads env vars.
@@ -37,7 +36,6 @@ export const listSessions = (await import('../usecases/auth/list-sessions.ts')).
 export const deleteSession = (await import('../usecases/auth/delete-session.ts')).deleteSession;
 export const cleanupExpiredSessions = (await import('../usecases/auth/cleanup-expired-sessions.ts'))
   .cleanupExpiredSessions;
-export const checkAuth = (await import('../usecases/server-password/check-auth.ts')).checkAuth;
 
 export const sites = {
   ...(await import('../usecases/sites/activate-version.ts')),

@@ -10,7 +10,6 @@ services:
       - '443:443'
     environment:
       DOMAIN: ${DOMAIN:-localhost}
-      SERVER_PASSWORD: ${SERVER_PASSWORD:-}
       WILDCARD_TLS: ${WILDCARD_TLS:-internal}
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
@@ -31,7 +30,6 @@ services:
       PORT: '8080'
       SITES_DIR: /data
       DATABASE_URL: file:/data/nohonu.db
-      SERVER_PASSWORD: ${SERVER_PASSWORD:-}
       SUBDOMAIN_BASE: ${SUBDOMAIN_BASE:-}
       COMMIT_SHA: ${COMMIT_SHA:-dev}
     volumes:

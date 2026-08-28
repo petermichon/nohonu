@@ -6,19 +6,16 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
 
 const DEFAULT: Connection = {
   apiBase: API_BASE,
-  serverPassword: '',
   sessionId: '',
   username: '',
 };
 
 function load(): Connection {
   try {
-    const serverPassword = localStorage.getItem('serverPassword');
     const sessionId = localStorage.getItem('sessionId');
     const username = localStorage.getItem('username');
     return {
       apiBase: API_BASE,
-      serverPassword: serverPassword ?? DEFAULT.serverPassword,
       sessionId: sessionId ?? DEFAULT.sessionId,
       username: username ?? DEFAULT.username,
     };
@@ -30,11 +27,6 @@ function load(): Connection {
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [connection, setConnectionState] = useState<Connection>(load);
-
-  const setServerPassword = (key: string) => {
-    localStorage.setItem('serverPassword', key);
-    setConnectionState((prev) => ({ ...prev, serverPassword: key }));
-  };
 
   const setSessionId = (sessionId: string) => {
     localStorage.setItem('sessionId', sessionId);
@@ -58,7 +50,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
 
   const value: ConnectionContextType = {
     ...connection,
-    setServerPassword,
     setSessionId,
     setUsername,
     disconnect,

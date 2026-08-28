@@ -150,12 +150,6 @@ export const handlers = [
   http.delete('*/users/:username/sites/:siteId/custom-domains/:customDomain', () => {
     return HttpResponse.json({ success: true });
   }),
-  http.get('*/auth', ({ request }) => {
-    if (request.headers.get('X-Server-Password') === 'wrong') {
-      return new HttpResponse(null, { status: 401 });
-    }
-    return HttpResponse.json({ secured: true });
-  }),
 ];
 
 export const server = setupServer(...handlers);

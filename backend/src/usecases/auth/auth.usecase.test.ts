@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
-  checkAuth,
   changePassword,
   cleanupExpiredSessions,
   deleteProfilePicture,
@@ -21,20 +20,6 @@ import {
 
 beforeEach(async () => {
   await resetTestState();
-});
-
-describe('checkAuth', () => {
-  it('accepts the configured server password', () => {
-    expect(checkAuth('test-api-key')).toEqual({ secured: true, valid: true });
-  });
-
-  it('rejects a wrong server password', () => {
-    expect(checkAuth('wrong-key')).toEqual({ secured: true, valid: false });
-  });
-
-  it('rejects a missing server password', () => {
-    expect(checkAuth(null)).toEqual({ secured: true, valid: false });
-  });
 });
 
 describe('register', () => {
