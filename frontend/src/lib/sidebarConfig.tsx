@@ -1,5 +1,5 @@
 import { type ComponentType } from 'react';
-import { Server, ChevronRight, User, Key, FileText, Scale, Shield, Info } from 'lucide-react';
+import { ChevronRight, FileText, Scale, Shield, Info } from 'lucide-react';
 import { type SectionConfig } from './sectionsConfig.ts';
 
 // Shared numbered-icon factory — replaces 3 local `numIcon` copies + 11 inline closures
@@ -154,17 +154,6 @@ export const SIDEBAR_ROUTES: SidebarRouteConfig[] = [
       { to: '/legal/terms-of-service', label: 'Terms of Service', icon: Scale, rightIcon: ChevronRight },
       { to: '/legal/copyright-policy', label: 'Copyright Policy', icon: Shield, rightIcon: ChevronRight },
       { to: '/legal/legal-notice', label: 'Legal Notice', icon: Info, rightIcon: ChevronRight },
-    ],
-  },
-  {
-    path: '/account',
-    backTo: '/',
-    backLabel: 'Home',
-    currentLabel: 'Account',
-    sections: [
-      { id: 'profile', label: 'Profile', icon: User },
-      { id: 'security', label: 'Security', icon: Key },
-      { id: 'connection', label: 'Connection', icon: Server },
     ],
   },
   {
