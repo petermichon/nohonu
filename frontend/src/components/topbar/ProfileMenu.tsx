@@ -38,7 +38,7 @@ export function ProfileMenu() {
         { route: '/u/$username/domains', label: 'Domains', icon: Globe, divider: true },
         { route: '/u/$username/settings', label: 'Settings', icon: Settings, divider: false },
       ]
-    : [{ route: '/account', label: 'Settings', icon: Settings, divider: false }];
+    : [];
 
   const hasProfilePicture = !!profilePicture && !!username;
 
