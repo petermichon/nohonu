@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
-import { Eye, Globe } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { relativeTime } from '../lib/utils.ts';
 import { useAccentColor } from '../providers/AccentColorProvider.tsx';
 import { ChartHeader, formatChartTime, ChartFooter } from './ChartHeader.tsx';
-import type { Slot, Visitor, TimeRange } from '../lib/types.ts';
+import type { Slot, TimeRange } from '../lib/types.ts';
 
 interface ActivityChartProps {
   stats: Slot[];
-  visitors: Visitor[];
   onReload: () => void;
   reloading: boolean;
   range: TimeRange;
@@ -16,11 +14,10 @@ interface ActivityChartProps {
   now: number;
 }
 
-export function ActivityChart({ stats, visitors, onReload, reloading, range, onRangeChange, now }: ActivityChartProps) {
+export function ActivityChart({ stats, onReload, reloading, range, onRangeChange, now }: ActivityChartProps) {
   const { getAccentColorValues } = useAccentColor();
   const accentColorValues = getAccentColorValues();
   const total = stats.reduce((a, b) => a + b.count, 0);
-  const sortedVisitors = [...visitors].sort((a, b) => b.last - a.last);
 
   const chartData = useMemo(() => {
     const BAR_COUNT = 60;
@@ -106,33 +103,6 @@ export function ActivityChart({ stats, visitors, onReload, reloading, range, onR
         </ResponsiveContainer>
       </div>
       <ChartFooter range={range} />
-
-      <div className="mt-4 border-t border-zinc-100 dark:border-zinc-800 pt-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Globe className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
-          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Visitors</span>
-        </div>
-        <div className="h-24 overflow-y-auto space-y-1">
-          {sortedVisitors.length > 0 ? (
-            sortedVisitors.map((v) => (
-              <div key={v.ip} className="flex items-center justify-between">
-                <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300">{v.ip}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{relativeTime(v.last)}</span>
-                  <span className="flex items-center gap-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    <Eye className="w-3 h-3" />
-                    {v.count}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <span className="text-xs text-zinc-400 dark:text-zinc-500">No visitors yet</span>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

@@ -46,7 +46,6 @@ function SectionPage() {
         </h2>
         <ActivityChart
           stats={ctx.stats}
-          visitors={ctx.visitors}
           onReload={() => ctx.loadStats()}
           reloading={ctx.statsLoading}
           range={ctx.globalRange}

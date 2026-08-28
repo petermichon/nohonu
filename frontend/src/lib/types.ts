@@ -33,12 +33,6 @@ export interface Slot {
   count: number;
 }
 
-export interface Visitor {
-  ip: string;
-  count: number;
-  last: number;
-}
-
 export interface UptimeSlot {
   slot: number;
   up: boolean | null;

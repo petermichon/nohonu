@@ -37,7 +37,7 @@ export default function About() {
           <li>Instant deploys from zip archives or GitHub repositories</li>
           <li>Full version history with one-click rollback and download</li>
           <li>Custom domains with DNS-verified ownership</li>
-          <li>Built-in analytics — request counts, unique visitors, uptime monitoring</li>
+          <li>Built-in analytics — request counts and uptime monitoring</li>
           <li>User profiles with star/unstar, cover images, and public discovery</li>
           <li>Self-hostable — runs in Docker on a single VPS with a local SQLite database</li>
         </ul>
