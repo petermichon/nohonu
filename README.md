@@ -15,8 +15,6 @@
 
 A static site hosting platform. Upload zip archives, serve them on subdomains.
 
-<https://github.com/petermichon/nohonu>
-
 ## Project Structure
 
 ```txt
