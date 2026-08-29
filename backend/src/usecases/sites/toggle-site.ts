@@ -1,11 +1,8 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
+import { invalidateExtractedSite } from '../../core/sites/invalidate-extracted-site.ts';
 import { session } from '../../db/session.ts';
-import { extractedDir } from '../../shared/paths.ts';
-import { site } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
-
-import * as fs from 'node:fs/promises';
 
 import type { Result } from '../../shared/errors.ts';
 
@@ -26,13 +23,7 @@ export async function toggleSite(sessionId: string, siteId: string): Promise<Res
   }
 
   if (!data.enabled) {
-    try {
-      await fs.rm(extractedDir(user, siteId), { recursive: true, force: true });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`Failed to delete extracted site for ${user}/${siteId}: ${message}`);
-    }
-    await site.updateMany({ where: { AND: { userUsername: user, siteId } }, data: { extracted: false } });
+    await invalidateExtractedSite(user, siteId);
   }
 
   const result = { enabled: data.enabled };

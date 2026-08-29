@@ -1,8 +1,7 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
+import { invalidateExtractedSite } from '../../core/sites/invalidate-extracted-site.ts';
 import { repoHistory as repoHistoryTable } from '../../db/repo-history.ts';
-import { session } from '../../db/session.ts';
 import { versionsDir, versionPath, MAX_ZIP_BYTES } from '../../shared/paths.ts';
-import { site } from '../../db/site.ts';
 import { syncVersions } from '../../core/sites/sync-versions.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
@@ -69,6 +68,7 @@ export async function uploadVersionFromGithub(
 
   await fs.mkdir(versionsDir(user, siteId), { recursive: true });
   await fs.writeFile(versionPath(user, siteId, index), zipData);
+  await invalidateExtractedSite(user, siteId);
   const siteRowId = await upsertSite(user, siteId, data);
   if (!siteRowId) {
     return { ok: false, code: 'internal', message: 'Failed to save site' };
