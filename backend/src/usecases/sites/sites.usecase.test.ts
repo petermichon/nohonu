@@ -286,6 +286,20 @@ describe('serving', () => {
     expect(served?.contentType).toBe('text/html');
   });
 
+  it('serves the newly uploaded version after it is already extracted', async () => {
+    const sessionId = await makeSite('lisa', 'mysite');
+
+    const first = await sites.serveRequest('localhost', '/mysite/index.html', '1.2.3.4');
+    expect(new TextDecoder().decode(first?.data)).toBe('<h1>hi</h1>');
+
+    const uploaded = await sites.uploadVersion(sessionId, 'mysite', zip({ 'index.html': '<h1>v2</h1>' }));
+    expect(uploaded.ok).toBe(true);
+
+    const second = await sites.serveRequest('localhost', '/mysite/index.html', '1.2.3.4');
+    expect(second).not.toBeNull();
+    expect(new TextDecoder().decode(second?.data)).toBe('<h1>v2</h1>');
+  });
+
   it('returns null for a disabled site', async () => {
     const sessionId = await makeSite('lisa', 'mysite');
     await sites.toggleSite(sessionId, 'mysite');

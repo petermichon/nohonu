@@ -1,21 +1,12 @@
 import { readSiteMetadata } from '../../core/sites/read-site-metadata.ts';
+import { invalidateExtractedSite } from '../../core/sites/invalidate-extracted-site.ts';
 import { session } from '../../db/session.ts';
-import { extractedDir, versionPath } from '../../shared/paths.ts';
+import { versionPath } from '../../shared/paths.ts';
 import { fileExists } from '../../shared/node/file-exists.ts';
-import { site } from '../../db/site.ts';
 import { upsertSite } from '../../core/sites/upsert-site.ts';
 import { requireSession } from '../../core/auth/require-session.ts';
 
-import * as fs from 'node:fs/promises';
-
-
-
-
-
-
-
 import type { Result } from '../../shared/errors.ts';
-
 
 export async function activateVersion(sessionId: string, siteId: string, index: number): Promise<Result<void>> {
   const auth = await requireSession(sessionId);
@@ -35,13 +26,7 @@ export async function activateVersion(sessionId: string, siteId: string, index: 
   data.enabled = true;
   data.lastDeployedAt = Date.now();
   await upsertSite(user, siteId, data);
-  try {
-    await fs.rm(extractedDir(user, siteId), { recursive: true, force: true });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Failed to delete extracted site for ${user}/${siteId}: ${message}`);
-  }
-  await site.updateMany({ where: { AND: { userUsername: user, siteId } }, data: { extracted: false } });
+  await invalidateExtractedSite(user, siteId);
   return { ok: true, value: undefined };
 }
 
