@@ -1,0 +1,72 @@
+# nohonu — public deployment behind the shared "edge" reverse proxy.
+#
+# The edge terminates TLS and maps nohonu.com, *.nohonu.com and custom domains
+# to these services; which tenant a name belongs to is decided by the backend
+# from the Host header. Nothing here publishes ports.
+#
+#   docker compose -f deploy/compose.yaml --profile deploy pull
+#   docker compose -f deploy/compose.yaml --profile deploy up -d
+name: nohonu
+
+services:
+  web:
+    image: ghcr.io/petermichon/nohonu-web:${NOHONU_TAG:-latest}
+    networks:
+      edge:
+        aliases:
+          - nohonu-web
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "freshdock.enable=true"
+      - "freshdock.mode=live"
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/petermichon/nohonu-backend:${NOHONU_TAG:-latest}
+    environment:
+      PORT: "8080"
+      SITES_DIR: /data/sites
+      DATABASE_URL: file:/data/nohonu.db
+      SUBDOMAIN_BASE: nohonu.com
+      COMMIT_SHA: ${COMMIT_SHA:-unknown}
+    volumes:
+      - nohonu_data:/data
+    networks:
+      edge:
+        aliases:
+          - nohonu-backend
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O /dev/null http://127.0.0.1:8080/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    labels:
+      - "freshdock.enable=true"
+      - "freshdock.mode=live"
+    restart: unless-stopped
+
+  freshdock:
+    image: ghcr.io/turbootzz/freshdock:latest
+    profiles: ["deploy"]
+    command: ["run"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "freshdock.mode=off"
+    restart: unless-stopped
+
+networks:
+  edge:
+    external: true
+    name: edge
+
+volumes:
+  nohonu_data:
